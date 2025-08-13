@@ -2,164 +2,18 @@
     'use strict';
 
     window.svg_loaders = [
-        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g><circle cx="12" cy="3" r="1" fill="currentColor"><animate id="spinner_7Z73" begin="0;spinner_tKsu.end-0.5s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="16.50" cy="4.21" r="1" fill="currentColor"><animate id="spinner_Wd87" begin="spinner_7Z73.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="7.50" cy="4.21" r="1" fill="currentColor"><animate id="spinner_tKsu" begin="spinner_9Qlc.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="19.79" cy="7.50" r="1" fill="currentColor"><animate id="spinner_lMMO" begin="spinner_Wd87.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="4.21" cy="7.50" r="1" fill="currentColor"><animate id="spinner_9Qlc" begin="spinner_Khxv.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="21.00" cy="12.00" r="1" fill="currentColor"><animate id="spinner_5L9t" begin="spinner_lMMO.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="3.00" cy="12.00" r=" industry-standard software, which ensures compatibility with Lampa's rendering requirements.
-
-```javascript
-(function () {
-    'use strict';
-
-    Lampa.Lang.add({
-        loader_select: {
-            ru: 'Выбор анимации загрузки',
-            en: 'Select loading animation',
-            uk: 'Вибір анімації завантаження'
-        }
-    });
-
-    function chunkArray(arr, size) {
-        var result = [];
-        for (var i = 0; i < arr.length; i += size) {
-            result.push(arr.slice(i, i + size));
-        }
-        return result;
-    }
-
-    function createLoaderHtml(loader, index) {
-        return '<div class="loader_square selector" tabindex="0" data-index="' + index + '" style="background-image: url(\'' + loader + '\');"></div>';
-    }
-
-    Lampa.Template.add('loader_modal', '<div class="loader_modal_root"><div class="loader_grid">{loader_content}</div></div>');
-
-    function createLoaderModal() {
-        var style = document.createElement('style');
-        style.id = 'loadermodal';
-        style.textContent = '.loader_grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
-                            '.loader_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer; }' +
-                            '.loader_square.focus { border: 2px solid #fff; transform: scale(1.1); }';
-        document.head.appendChild(style);
-        console.log('Модальне вікно анімацій створено, кількість анімацій: ' + window.svg_loaders.length);
-    }
-
-    function initLoaderPicker() {
-        console.log('Ініціалізація loader picker');
-        try {
-            Lampa.SettingsApi.addParam({
-                component: 'loader_plugin',
-                param: {
-                    name: 'select_loader',
-                    type: 'button'
-                },
-                field: {
-                    name: Lampa.Lang.translate('loader_select'),
-                    description: '<div style="width: 2em; height: 2em; background-image: url(\'' + Lampa.Storage.get('loader_selected', window.svg_loaders[0]) + '\'); background-size: contain; background-repeat: no-repeat; background-position: center; display: inline-block; border: 1px solid #fff;"></div>'
-                },
-                onRender: function (item) {
-                    var loader = Lampa.Storage.get('loader_selected', window.svg_loaders[0]);
-                    item.find('.settings-param__descr div').css('background-image', 'url(\'' + loader + '\')');
-                    console.log('Рендеринг кнопки вибору анімації, поточна анімація: ' + loader);
-                },
-                onChange: function () {
-                    createLoaderModal();
-                    var groupedLoaders = chunkArray(window.svg_loaders, 6);
-                    var loader_content = groupedLoaders.map(function (group) {
-                        var groupContent = group.map(function (loader, idx) {
-                            return createLoaderHtml(loader, window.svg_loaders.indexOf(loader));
-                        }).join('');
-                        return '<div class="loader_grid">' + groupContent + '</div>';
-                    }).join('');
-                    var loader_templates = Lampa.Template.get('loader_modal', {
-                        loader_content: loader_content
-                    });
-                    try {
-                        Lampa.Modal.open({
-                            title: '',
-                            size: 'medium',
-                            align: 'center',
-                            html: loader_templates,
-                            onBack: function () {
-                                Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                            },
-                            onSelect: function (a) {
-                                Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                                if (a.length > 0 && a[0] instanceof HTMLElement) {
-                                    var index = parseInt(a[0].getAttribute('data-index'), 10);
-                                    if (index >= 0 && index < window.svg_loaders.length) {
-                                        var selectedLoader = window.svg_loaders[index];
-                                        Lampa.Storage.set('loader_selected', selectedLoader);
-                                        console.log('Вибрано анімацію: ' + selectedLoader);
-                                        var settingsItem = Lampa.Settings.content().find('.settings-param[data-name="select_loader"] .settings-param__descr div');
-                                        if (settingsItem.length) {
-                                            settingsItem.css('background-image', 'url(\'' + selectedLoader + '\')');
-                                        }
-                                        var event = new Event('loader-change');
-                                        document.dispatchEvent(event);
-                                    } else {
-                                        console.error('Невірний індекс анімації: ' + index);
-                                    }
-                                } else {
-                                    console.error('Невірний елемент вибору:', a);
-                                }
-                            }
-                        });
-                        console.log('Модальне вікно анімацій відкрито, відображено ' + window.svg_loaders.length + ' анімацій');
-                    } catch (e) {
-                        console.error('Помилка відкриття модального вікна анімацій: ' + e.message);
-                    }
-                }
-            });
-            console.log('Кнопка вибору анімації додана до loader_plugin');
-        } catch (e) {
-            console.error('Помилка додавання кнопки вибору анімації: ' + e.message);
-        }
-
-        var savedLoader = Lampa.Storage.get('loader_selected', window.svg_loaders[0]);
-        console.log('Застосовано збережену анімацію: ' + savedLoader);
-    }
-
-    function delayedInit() {
-        if (window.appready) {
-            console.log('Lampa готова, ініціалізація loader picker');
-            initLoaderPicker();
-        } else {
-            var attempts = 0;
-            var maxAttempts = 10;
-            var interval = setInterval(function () {
-                attempts++;
-                if (window.appready || attempts >= maxAttempts) {
-                    clearInterval(interval);
-                    if (window.appready) {
-                        console.log('Lampa готова після затримки, ініціалізація loader picker');
-                        initLoaderPicker();
-                    } else {
-                        console.error('Lampa не готова після ' + maxAttempts + ' спроб');
-                    }
-                }
-            }, 500);
-        }
-    }
-
-    if (window.appready) {
-        console.log('Lampa готова, виклик delayedInit');
-        delayedInit();
-    } else {
-        Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'ready') {
-                console.log('Lampa готова, виклик delayedInit');
-                delayedInit();
-            }
-        });
-    }
-
-    Lampa.Listener.follow('settings_component', function (event) {
-        if (event.type === 'open') {
-            console.log('Меню налаштувань відкрито');
-            var savedLoader = Lampa.Storage.get('loader_selected', window.svg_loaders[0]);
-            var settingsItem = Lampa.Settings.content().find('.settings-param[data-name="select_loader"] .settings-param__descr div');
-            if (settingsItem.length) {
-                settingsItem.css('background-image', 'url(\'' + savedLoader + '\')');
-            }
-        }
-    });
-})();
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g><circle cx="12" cy="3" r="1" fill="currentColor"><animate id="spinner_7Z73" begin="0;spinner_tKsu.end-0.5s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="16.50" cy="4.21" r="1" fill="currentColor"><animate id="spinner_Wd87" begin="spinner_7Z73.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="7.50" cy="4.21" r="1" fill="currentColor"><animate id="spinner_tKsu" begin="spinner_9Qlc.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="19.79" cy="7.50" r="1" fill="currentColor"><animate id="spinner_lMMO" begin="spinner_Wd87.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="4.21" cy="7.50" r="1" fill="currentColor"><animate id="spinner_9Qlc" begin="spinner_Khxv.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="21.00" cy="12.00" r="1" fill="currentColor"><animate id="spinner_5L9t" begin="spinner_lMMO.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="3.00" cy="12.00" r="1" fill="currentColor"><animate id="spinner_Khxv" begin="spinner_ld6P.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="19.79" cy="16.50" r="1" fill="currentColor"><animate id="spinner_BfTD" begin="spinner_5L9t.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="4.21" cy="16.50" r="1" fill="currentColor"><animate id="spinner_ld6P" begin="spinner_XyBs.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="16.50" cy="19.79" r="1" fill="currentColor"><animate id="spinner_7gAK" begin="spinner_BfTD.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="7.50" cy="19.79" r="1" fill="currentColor"><animate id="spinner_XyBs" begin="spinner_HiSl.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><circle cx="12" cy="21" r="1" fill="currentColor"><animate id="spinner_HiSl" begin="spinner_7gAK.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"/></circle><animateTransform attributeName="transform" type="rotate" dur="6s" values="360 12 12;0 12 12" repeatCount="indefinite"/></g></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" fill="currentColor" opacity=".25"/><path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z" fill="currentColor"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></path></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z" fill="currentColor"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></path></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="4" cy="12" r="3" fill="currentColor"><animate id="spinner_qFRN" begin="0;spinner_OcgL.end+0.25s" attributeName="cy" calcMode="spline" dur="0.6s" values="12;6;12" keySplines=".33,.66,.66,1;.33,0,.66,.33"/></circle><circle cx="12" cy="12" r="3" fill="currentColor"><animate begin="spinner_qFRN.begin+0.1s" attributeName="cy" calcMode="spline" dur="0.6s" values="12;6;12" keySplines=".33,.66,.66,1;.33,0,.66,.33"/></circle><circle cx="20" cy="12" r="3" fill="currentColor"><animate id="spinner_OcgL" begin="spinner_qFRN.begin+0.2s" attributeName="cy" calcMode="spline" dur="0.6s" values="12;6;12" keySplines=".33,.66,.66,1;.33,0,.66,.33"/></circle></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="4" cy="12" r="0" fill="currentColor"><animate begin="0;spinner_z0Or.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="0;3" fill="freeze"/><animate begin="spinner_OLMs.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="4;12" fill="freeze"/><animate begin="spinner_UHR2.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="12;20" fill="freeze"/><animate id="spinner_lo66" begin="spinner_Aguh.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="3;0" fill="freeze"/><animate id="spinner_z0Or" begin="spinner_lo66.end" attributeName="cx" dur="0.001s" values="20;4" fill="freeze"/></circle><circle cx="4" cy="12" r="3" fill="currentColor"><animate begin="0;spinner_z0Or.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="4;12" fill="freeze"/><animate begin="spinner_OLMs.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="12;20" fill="freeze"/><animate id="spinner_JsnR" begin="spinner_UHR2.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="3;0" fill="freeze"/><animate id="spinner_Aguh" begin="spinner_JsnR.end" attributeName="cx" dur="0.001s" values="20;4" fill="freeze"/><animate begin="spinner_Aguh.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="0;3" fill="freeze"/></circle><circle cx="12" cy="12" r="3" fill="currentColor"><animate begin="0;spinner_z0Or.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="12;20" fill="freeze"/><animate id="spinner_hSjk" begin="spinner_OLMs.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="3;0" fill="freeze"/><animate id="spinner_UHR2" begin="spinner_hSjk.end" attributeName="cx" dur="0.001s" values="20;4" fill="freeze"/><animate begin="spinner_UHR2.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="0;3" fill="freeze"/><animate begin="spinner_Aguh.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="4;12" fill="freeze"/></circle><circle cx="20" cy="12" r="3" fill="currentColor"><animate id="spinner_4v5M" begin="0;spinner_z0Or.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="3;0" fill="freeze"/><animate id="spinner_OLMs" begin="spinner_4v5M.end" attributeName="cx" dur="0.001s" values="20;4" fill="freeze"/><animate begin="spinner_OLMs.end" attributeName="r" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="0;3" fill="freeze"/><animate begin="spinner_UHR2.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="4;12" fill="freeze"/><animate begin="spinner_Aguh.end" attributeName="cx" calcMode="spline" dur="0.5s" keySplines=".36,.6,.31,1" values="12;20" fill="freeze"/></circle></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g><circle cx="3" cy="12" r="2" fill="currentColor"/><circle cx="21" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="21" r="2" fill="currentColor"/><circle cx="12" cy="3" r="2" fill="currentColor"/><circle cx="5.64" cy="5.64" r="2" fill="currentColor"/><circle cx="18.36" cy="18.36" r="2" fill="currentColor"/><circle cx="5.64" cy="18.36" r="2" fill="currentColor"/><circle cx="18.36" cy="5.64" r="2" fill="currentColor"/><animateTransform attributeName="transform" type="rotate" dur="1.5s" values="0 12 12;360 12 12" repeatCount="indefinite"/></g></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 55 80" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1 0 0 -1 0 80)"><rect width="10" height="20" rx="3" fill="currentColor"><animate attributeName="height" begin="0s" dur="4.3s" values="20;45;57;80;64;32;66;45;64;23;66;13;64;56;34;34;2;23;76;79;20" calcMode="linear" repeatCount="indefinite"/></rect><rect x="15" width="10" height="80" rx="3" fill="currentColor"><animate attributeName="height" begin="0s" dur="2s" values="80;55;33;5;75;23;73;33;12;14;60;80" calcMode="linear" repeatCount="indefinite"/></rect><rect x="30" width="10" height="50" rx="3" fill="currentColor"><animate attributeName="height" begin="0s" dur="1.4s" values="50;34;78;23;56;23;34;76;80;54;21;50" calcMode="linear" repeatCount="indefinite"/></rect><rect x="45" width="10" height="30" rx="3" fill="currentColor"><animate attributeName="height" begin="0s" dur="2s" values="30;45;13;80;56;72;45;76;34;23;67;30" calcMode="linear" repeatCount="indefinite"/></rect></g></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="4" width="6" height="14" fill="currentColor" opacity="1"><animate id="spinner_aqiq" begin="0;spinner_xVBj.end-0.25s" attributeName="y" dur="0.75s" values="1;5" fill="freeze"/><animate begin="0;spinner_xVBj.end-0.25s" attributeName="height" dur="0.75s" values="22;14" fill="freeze"/><animate begin="0;spinner_xVBj.end-0.25s" attributeName="opacity" dur="0.75s" values="1;.2" fill="freeze"/></rect><rect x="9" y="4" width="6" height="14" fill="currentColor" opacity=".4"><animate begin="spinner_aqiq.begin+0.15s" attributeName="y" dur="0.75s" values="1;5" fill="freeze"/><animate begin="spinner_aqiq.begin+0.15s" attributeName="height" dur="0.75s" values="22;14" fill="freeze"/><animate begin="spinner_aqiq.begin+0.15s" attributeName="opacity" dur="0.75s" values="1;.2" fill="freeze"/></rect><rect x="17" y="4" width="6" height="14" fill="currentColor" opacity=".3"><animate id="spinner_xVBj" begin="spinner_aqiq.begin+0.3s" attributeName="y" dur="0.75s" values="1;5" fill="freeze"/><animate begin="spinner_aqiq.begin+0.3s" attributeName="height" dur="0.75s" values="22;14" fill="freeze"/><animate begin="spinner_aqiq.begin+0.3s" attributeName="opacity" dur="0.75s" values="1;.2" fill="freeze"/></rect></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="6" width="2.8" height="12" fill="currentColor"><animate begin="spinner_Diec.begin+0.4s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/><animate begin="spinner_Diec.begin+0.4s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/></rect><rect x="5.8" y="6" width="2.8" height="12" fill="currentColor"><animate begin="spinner_Diec.begin+0.2s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/><animate begin="spinner_Diec.begin+0.2s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/></rect><rect x="10.6" y="6" width="2.8" height="12" fill="currentColor"><animate id="spinner_Diec" begin="0;spinner_dm8s.end-0.1s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/><animate begin="0;spinner_dm8s.end-0.1s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/></rect><rect x="15.4" y="6" width="2.8" height="12" fill="currentColor"><animate begin="spinner_Diec.begin+0.2s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/><animate begin="spinner_Diec.begin+0.2s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/></rect><rect x="20.2" y="6" width="2.8" height="12" fill="currentColor"><animate id="spinner_dm8s" begin="spinner_Diec.begin+0.4s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/><animate begin="spinner_Diec.begin+0.4s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".14,.73,.34,1;.65,.26,.82,.45"/></rect></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="6" width="2.8" height="12" fill="currentColor"><animate id="spinner_CcmT" begin="0;spinner_IzZB.end-0.1s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/><animate begin="0;spinner_IzZB.end-0.1s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/></rect><rect x="5.8" y="6" width="2.8" height="12" fill="currentColor"><animate begin="spinner_CcmT.begin+0.1s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/><animate begin="spinner_CcmT.begin+0.1s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/></rect><rect x="10.6" y="6" width="2.8" height="12" fill="currentColor"><animate begin="spinner_CcmT.begin+0.2s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/><animate begin="spinner_CcmT.begin+0.2s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/></rect><rect x="15.4" y="6" width="2.8" height="12" fill="currentColor"><animate begin="spinner_CcmT.begin+0.3s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/><animate begin="spinner_CcmT.begin+0.3s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/></rect><rect x="20.2" y="6" width="2.8" height="12" fill="currentColor"><animate id="spinner_IzZB" begin="spinner_CcmT.begin+0.4s" attributeName="y" calcMode="spline" dur="0.6s" values="6;1;6" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/><animate begin="spinner_CcmT.begin+0.4s" attributeName="height" calcMode="spline" dur="0.6s" values="12;22;12" keySplines=".36,.61,.3,.98;.36,.61,.3,.98"/></rect></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 135 140" xmlns="http://www.w3.org/2000/svg"><rect y="10" width="15" height="120" rx="6" fill="currentColor"><animate attributeName="height" begin="0.5s" dur="1s" values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear" repeatCount="indefinite"/><animate attributeName="y" begin="0.5s" dur="1s" values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear" repeatCount="indefinite"/></rect><rect x="30" y="10" width="15" height="120" rx="6" fill="currentColor"><animate attributeName="height" begin="0.25s" dur="1s" values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear" repeatCount="indefinite"/><animate attributeName="y" begin="0.25s" dur="1s" values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear" repeatCount="indefinite"/></rect><rect x="60" width="15" height="140" rx="6" fill="currentColor"><animate attributeName="height" begin="0s" dur="1s" values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear" repeatCount="indefinite"/><animate attributeName="y" begin="0s" dur="1s" values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear" repeatCount="indefinite"/></rect><rect x="90" y="10" width="15" height="120" rx="6" fill="currentColor"><animate attributeName="height" begin="0.25s" dur="1s" values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear" repeatCount="indefinite"/><animate attributeName="y" begin="0.25s" dur="1s" values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear" repeatCount="indefinite"/></rect><rect x="120" y="10" width="15" height="120" rx="6" fill="currentColor"><animate attributeName="height" begin="0.5s" dur="1s" values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear" repeatCount="indefinite"/><animate attributeName="y" begin="0.5s" dur="1s" values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear" repeatCount="indefinite"/></rect></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="1.5" rx="1" width="9" height="9" fill="currentColor"><animate id="spinner_M16P" begin="0;spinner_wNI2.end+0.15s" attributeName="x" dur="0.6s" values="1.5;.5;1.5" keyTimes="0;.2;1"/><animate begin="0;spinner_wNI2.end+0.15s" attributeName="y" dur="0.6s" values="1.5;.5;1.5" keyTimes="0;.2;1"/><animate begin="0;spinner_wNI2.end+0.15s" attributeName="width" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/><animate begin="0;spinner_wNI2.end+0.15s" attributeName="height" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/></rect><rect x="13.5" y="1.5" rx="1" width="9" height="9" fill="currentColor"><animate begin="spinner_M16P.begin+0.15s" attributeName="x" dur="0.6s" values="13.5;12.5;13.5" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.15s" attributeName="y" dur="0.6s" values="1.5;.5;1.5" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.15s" attributeName="width" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.15s" attributeName="height" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/></rect><rect x="13.5" y="13.5" rx="1" width="9" height="9" fill="currentColor"><animate begin="spinner_M16P.begin+0.3s" attributeName="x" dur="0.6s" values="13.5;12.5;13.5" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.3s" attributeName="y" dur="0.6s" values="13.5;12.5;13.5" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.3s" attributeName="width" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.3s" attributeName="height" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/></rect><rect x="1.5" y="13.5" rx="1" width="9" height="9" fill="currentColor"><animate id="spinner_wNI2" begin="spinner_M16P.begin+0.45s" attributeName="x" dur="0.6s" values="1.5;.5;1.5" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.45s" attributeName="y" dur="0.6s" values="13.5;12.5;13.5" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.45s" attributeName="width" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/><animate begin="spinner_M16P.begin+0.45s" attributeName="height" dur="0.6s" values="9;11;9" keyTimes="0;.2;1"/></rect></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" rx="1" width="10" height="10" fill="currentColor"><animate id="spinner_c7A9" begin="0;spinner_23zP.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_Acnw" begin="spinner_ZmWi.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_iIcm" begin="spinner_zfQN.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_WX4U" begin="spinner_rRAc.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="1" y="13" rx="1" width="10" height="10" fill="currentColor"><animate id="spinner_YLx7" begin="spinner_c7A9.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_vwnJ" begin="spinner_Acnw.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_KQuy" begin="spinner_iIcm.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_arKy" begin="spinner_WX4U.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/></rect><rect x="13" y="13" rx="1" width="10" height="10" fill="currentColor"><animate id="spinner_ZmWi" begin="spinner_YLx7.end" attributeName="x" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_zfQN" begin="spinner_vwnJ.end" attributeName="y" dur="0.2s" values="13;1" fill="freeze"/><animate id="spinner_rRAc" begin="spinner_KQuy.end" attributeName="x" dur="0.2s" values="1;13" fill="freeze"/><animate id="spinner_23zP" begin="spinner_arKy.end" attributeName="y" dur="0.2s" values="1;13" fill="freeze"/></rect></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 140 64" xmlns="http://www.w3.org/2000/svg"><path d="M30.262 57.02L7.195 40.723c-5.84-3.976-7.56-12.06-3.842-18.063 3.715-6 11.467-7.65 17.306-3.68l4.52 3.76 2.6-5.274c3.717-6.002 11.47-7.65 17.305-3.68 5.84 3.97 7.56 12.054 3.842 18.062L34.49 56.118c-.897 1.512-2.793 1.915-4.228.9z" fill="currentColor" fill-opacity=".5"><animate attributeName="fill-opacity" begin="0s" dur="1.4s" values="0.5;1;0.5" calcMode="linear" repeatCount="indefinite"/></path><path d="M105.512 56.12l-14.44-24.272c-3.716-6.008-1.996-14.093 3.843-18.062 5.835-3.97 13.588-2.322 17.306 3.68l2.6 5.274 4.52-3.76c5.84-3.97 13.592-2.32 17.307 3.68 3.718 6.003 1.998 14.088-3.842 18.064L109.74 57.02c-1.434 1.014-3.33.61-4.228-.9z" fill="currentColor" fill-opacity=".5"><animate attributeName="fill-opacity" begin="0.7s" dur="1.4s" values="0.5;1;0.5" calcMode="linear" repeatCount="indefinite"/></path><path d="M67.408 57.834l-23.01-24.98c-5.864-6.15-5.864-16.108 0-22.248 5.86-6.14 15.37-6.14 21.234 0L70 16.168l4.368-5.562c5.863-6.14 15.375-6.14 21.235 0 5.863 6.14 5.863 16.098 0 22.247l-23.007 24.98c-1.43 1.556-3.757 1.556-5.188 0z" fill="currentColor"/></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 2400 2400" xmlns="http://www.w3.org/2000/svg"><g stroke-width="200" stroke-linecap="round" stroke="currentColor" fill="none" id="spinner"><line x1="1200" y1="600" x2="1200" y2="100"/><line opacity="0.5" x1="1200" y1="2300" x2="1200" y2="1800"/><line opacity="0.917" x1="900" y1="680.4" x2="650" y2="247.4"/><line opacity="0.417" x1="1750" y1="2152.6" x2="1500" y2="1719.6"/><line opacity="0.833" x1="680.4" y1="900" x2="247.4" y2="650"/><line opacity="0.333" x1="2152.6" y1="1750" x2="1719.6" y2="1500"/><line opacity="0.75" x1="600" y1="1200" x2="100" y2="1200"/><line opacity="0.25" x1="2300" y1="1200" x2="1800" y2="1200"/><line opacity="0.667" x1="680.4" y1="1500" x2="247.4" y2="1750"/><line opacity="0.167" x1="2152.6" y1="650" x2="1719.6" y2="900"/><line opacity="0.583" x1="900" y1="1719.6" x2="650" y2="2152.6"/><line opacity="0.083" x1="1750" y1="247.4" x2="1500" y2="680.4"/><animateTransform attributeName="transform" attributeType="XML" type="rotate" keyTimes="0;0.08333;0.16667;0.25;0.33333;0.41667;0.5;0.58333;0.66667;0.75;0.83333;0.91667" values="0 1199 1199;30 1199 1199;60 1199 1199;90 1199 1199;120 1199 1199;150 1199 1199;180 1199 1199;210 1199 1199;240 1199
