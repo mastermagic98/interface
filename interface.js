@@ -13,20 +13,22 @@
     // Список модулів
     var modules = [
         'https://mastermagic98.github.io/interface/color.js',
-        'https://mastermagic98.github.io/interface/aloader.js'
+        'https://mastermagic98.github.io/interface/aloader.js',
+        'https://mastermagic98.github.io/interface/animations.js',
+        'https://mastermagic98.github.io/interface/translate_tv.js',
+        'https://mastermagic98.github.io/interface/bigbuttons.js',
+        'https://mastermagic98.github.io/interface/incardtemplate.js',
+        'https://mastermagic98.github.io/interface/forall.js',
+        'https://mastermagic98.github.io/interface/fix_lang.js'
     ];
 
-    // Додайте інші модулі за потреби:
-    // 'https://mastermagic98.github.io/interface/animations.js'
-    // 'https://mastermagic98.github.io/interface/translate_tv.js'
-    // 'https://mastermagic98.github.io/interface/bigbuttons.js'
-    // 'https://mastermagic98.github.io/interface/incardtemplate.js'
-    // 'https://mastermagic98.github.io/interface/forall.js'
-    // 'https://mastermagic98.github.io/interface/fix_lang.js'
-
-    // Підключаємо модулі
+    // Підключаємо модулі з обробкою помилок
     modules.forEach(function (url) {
-        Lampa.Utils.putScriptAsync([url], function () {});
+        Lampa.Utils.putScriptAsync([url], function () {
+            console.log('Модуль завантажено: ' + url);
+        }, function () {
+            console.error('Помилка завантаження модуля: ' + url);
+        });
     });
 
     // Ініціалізація плагіну
