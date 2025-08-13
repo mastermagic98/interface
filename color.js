@@ -22,34 +22,35 @@
 
     function initColorPicker() {
         console.log('Ініціалізація color.js');
-        if (!Lampa.Settings.component('accent_color_plugin')) {
-            console.error('Компонент accent_color_plugin не знайдено');
-            return;
+        try {
+            Lampa.SettingsApi.addParam({
+                component: 'accent_color_plugin',
+                param: {
+                    name: 'accent_color_hue',
+                    type: 'range',
+                    min: 0,
+                    max: 360,
+                    step: 1,
+                    default: 136 // Відповідає #5daa68
+                },
+                field: {
+                    name: Lampa.Lang.translate('accent_color'),
+                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('accent_color_selected', '#5daa68') + '; display: inline-block; border: 1px solid #fff;"></div>'
+                },
+                onChange: function (value) {
+                    console.log('Обрано відтінок: ' + value);
+                    applyAccentColor(value);
+                },
+                onRender: function (item) {
+                    var color = Lampa.Storage.get('accent_color_selected', '#5daa68');
+                    item.find('.settings-param__descr div').css('background-color', color);
+                    console.log('Рендеринг повзунка кольору, поточний колір: ' + color);
+                }
+            });
+            console.log('Повзунок кольору додано до accent_color_plugin');
+        } catch (e) {
+            console.error('Помилка додавання повзунка кольору: ' + e.message);
         }
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'accent_color_hue',
-                type: 'range',
-                min: 0,
-                max: 360,
-                step: 1,
-                default: 136 // Відповідає #5daa68
-            },
-            field: {
-                name: Lampa.Lang.translate('accent_color'),
-                description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('accent_color_selected', '#5daa68') + '; display: inline-block; border: 1px solid #fff;"></div>'
-            },
-            onChange: function (value) {
-                console.log('Обрано відтінок: ' + value);
-                applyAccentColor(value);
-            },
-            onRender: function (item) {
-                var color = Lampa.Storage.get('accent_color_selected', '#5daa68');
-                item.find('.settings-param__descr div').css('background-color', color);
-                console.log('Рендеринг повзунка кольору, поточний колір: ' + color);
-            }
-        });
 
         var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
         document.documentElement.style.setProperty('--main-color', savedColor);
@@ -57,9 +58,9 @@
         Lampa.Settings.update();
     }
 
-    // Затримка ініціалізації
+    // Затримка ініціалізації для забезпечення готовності Lampa
     function delayedInit() {
-        if (window.appready && Lampa.Settings.component('accent_color_plugin')) {
+        if (window.appready) {
             console.log('Lampa готова, ініціалізація color.js');
             initColorPicker();
         } else {
@@ -67,13 +68,13 @@
             var maxAttempts = 10;
             var interval = setInterval(function () {
                 attempts++;
-                if (Lampa.Settings.component('accent_color_plugin') || attempts >= maxAttempts) {
+                if (window.appready || attempts >= maxAttempts) {
                     clearInterval(interval);
-                    if (Lampa.Settings.component('accent_color_plugin')) {
-                        console.log('Компонент знайдено, ініціалізація color.js');
+                    if (window.appready) {
+                        console.log('Lampa готова після затримки, ініціалізація color.js');
                         initColorPicker();
                     } else {
-                        console.error('Не вдалося знайти компонент accent_color_plugin після ' + maxAttempts + ' спроб');
+                        console.error('Lampa не готова після ' + maxAttempts + ' спроб');
                     }
                 }
             }, 500);
@@ -81,10 +82,12 @@
     }
 
     if (window.appready) {
+        console.log('Lampa готова, виклик delayedInit');
         delayedInit();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
+                console.log('Lampa готова, виклик delayedInit');
                 delayedInit();
             }
         });
