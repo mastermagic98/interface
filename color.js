@@ -30,10 +30,8 @@
         var event = new Event('style-change');
         document.documentElement.dispatchEvent(event);
         console.log('Колір змінено на: ' + color);
-        // Видалено Lampa.Settings.update()
+        Lampa.Settings.update();
     }
-
-    Lampa.Template.add('color_modal', '<div class="color_modal_root"><div class="color_grid">{color_content}</div></div>');
 
     function createColorModal() {
         var style = document.createElement('style');
@@ -42,7 +40,7 @@
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
                             '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }';
         document.head.appendChild(style);
-        console.log('Модальне вікно кольорів створено, кількість кольорів: ' + colors.length);
+        console.log('Стилі для модального вікна кольорів створено');
     }
 
     function createColorHtml(color) {
@@ -82,15 +80,13 @@
                         var groupContent = group.map(createColorHtml).join('');
                         return '<div class="color_row">' + groupContent + '</div>';
                     }).join('');
-                    var color_templates = Lampa.Template.get('color_modal', {
-                        color_content: color_content
-                    });
+                    var modalHtml = '<div class="color_modal_root">' + color_content + '</div>';
                     try {
                         Lampa.Modal.open({
-                            title: '',
+                            title: Lampa.Lang.translate('accent_color'),
                             size: 'medium',
                             align: 'center',
-                            html: color_templates,
+                            html: modalHtml,
                             onBack: function () {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
@@ -103,16 +99,11 @@
                                     if (color) {
                                         applyAccentColor(color);
                                         console.log('Вибрано колір: ' + color);
-                                        // Оновлення опису в налаштуваннях
-                                        var settingsItem = Lampa.Settings.content().find('.settings-param[data-name="select_accent_color"] .settings-param__descr div');
-                                        if (settingsItem.length) {
-                                            settingsItem.css('background-color', color);
-                                        }
                                     } else {
-                                        console.error('Колір не визначено для елемента:', a[0]);
+                                        console.error('Колір не визначено для елемента');
                                     }
                                 } else {
-                                    console.error('Невірний елемент вибору:', a);
+                                    console.error('Некоректний вибір елемента');
                                 }
                             }
                         });
@@ -130,6 +121,7 @@
         var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
         document.documentElement.style.setProperty('--main-color', savedColor);
         console.log('Застосовано збережений колір: ' + savedColor);
+        Lampa.Settings.update();
     }
 
     function delayedInit() {
@@ -168,12 +160,8 @@
 
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
-            console.log('Меню налаштувань відкрито');
-            var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
-            var settingsItem = Lampa.Settings.content().find('.settings-param[data-name="select_accent_color"] .settings-param__descr div');
-            if (settingsItem.length) {
-                settingsItem.css('background-color', savedColor);
-            }
+            console.log('Меню налаштувань відкрито, оновлення UI');
+            Lampa.Settings.update();
         }
     });
 })();
