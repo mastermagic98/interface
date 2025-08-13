@@ -100,16 +100,16 @@
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
-        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: 1fr; gap: 20px; justify-items: center; width: 100%; height: 80px; padding: 10px; }' +
-                            '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }' +
-                            '.ani_svg img { max-width: 100%; max-height: 100%; object-fit: contain; }' +
+        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
+                            '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 80px; }' +
+                            '.ani_svg img { max-width: 100%; max-height: 80px; object-fit: contain; }' +
                             '.ani_svg.focus { background-color: #353535; border: 1px solid #9e9e9e; }';
         document.head.appendChild(style);
-        console.log('Модальне вікно анімацій створено');
+        console.log('Модальне вікно анімацій створено, кількість SVG: ' + svg_links.length);
     }
 
     function createSvgHtml(src) {
-        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:100%; max-height:100%;"></div>';
+        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:100%; max-height:80px;"></div>';
     }
 
     function chunkArray(arr, size) {
@@ -131,7 +131,7 @@
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { position: absolute; top: 0; width: 100%; height: 100%; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; z-index: 9999; background-size: contain; }';
+        var newStyle = '.activity__loader_prv { position: absolute; top: 0; width: 100%; height: 100%; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; z-index: 9999; background-size: contain; max-height: 80px; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -141,85 +141,105 @@
     }
 
     function aniLoad() {
-        var icon_plugin = '<svg height="32" viewBox="0 0 24 26" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"/></svg>';
-        Lampa.SettingsApi.addComponent({
-            component: 'ani_load_menu',
-            name: Lampa.Lang.translate('params_ani_name'),
-            icon: icon_plugin
-        });
-        console.log('Компонент ani_load_menu додано');
+        var icon_plugin = '<svg height="24" viewBox="0 0 24 26" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"/></svg>';
+        try {
+            Lampa.SettingsApi.addComponent({
+                component: 'ani_load_menu',
+                name: Lampa.Lang.translate('params_ani_name'),
+                icon: icon_plugin
+            });
+            console.log('Компонент ani_load_menu додано');
+        } catch (e) {
+            console.error('Помилка додавання ani_load_menu: ' + e.message);
+        }
 
-        Lampa.SettingsApi.addParam({
-            component: 'ani_load_menu',
-            param: {
-                name: 'ani_active',
-                type: 'trigger',
-                default: false
-            },
-            field: {
-                name: Lampa.Lang.translate('params_ani_on')
-            },
-            onChange: function (item) {
-                if (item === 'true') {
-                    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                        insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+        try {
+            Lampa.SettingsApi.addParam({
+                component: 'ani_load_menu',
+                param: {
+                    name: 'ani_active',
+                    type: 'trigger',
+                    default: false
+                },
+                field: {
+                    name: Lampa.Lang.translate('params_ani_on')
+                },
+                onChange: function (item) {
+                    if (item === 'true') {
+                        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                            insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+                        }
+                    } else {
+                        remove_activity_loader();
                     }
-                } else {
-                    remove_activity_loader();
                 }
-            }
-        });
+            });
+            console.log('Параметр ani_active додано');
+        } catch (e) {
+            console.error('Помилка додавання ani_active: ' + e.message);
+        }
 
-        Lampa.SettingsApi.addParam({
-            component: 'ani_load_menu',
-            param: {
-                name: 'select_ani_mation',
-                type: 'button'
-            },
-            field: {
-                name: Lampa.Lang.translate('params_ani_select'),
-                description: '<div class="activity__loader_prv"></div>'
-            },
-            onRender: function (item) {
-                insert_activity_loader_prv(Lampa.Storage.get('ani_load', svg_links[0]));
-            },
-            onChange: function () {
-                create_ani_modal();
-                var groupedSvgLinks = chunkArray(svg_links, 5);
-                var svg_content = groupedSvgLinks.map(function (group) {
-                    var groupContent = group.map(createSvgHtml).join('');
-                    return '<div class="ani_row">' + groupContent + '</div>';
-                }).join('');
-                var ani_templates = Lampa.Template.get('ani_modal', {
-                    ani_svg_content: svg_content
-                });
-                Lampa.Modal.open({
-                    title: '',
-                    size: 'medium',
-                    align: 'center',
-                    html: ani_templates,
-                    onBack: function () {
-                        Lampa.Modal.close();
-                        Lampa.Controller.toggle('settings_component');
-                    },
-                    onSelect: function (a) {
-                        Lampa.Modal.close();
-                        Lampa.Controller.toggle('settings_component');
-                        if (a.length > 0 && a[0] instanceof HTMLElement) {
-                            var imgElement = a[0].querySelector('img');
-                            if (imgElement) {
-                                var srcValue = imgElement.getAttribute('src');
-                                Lampa.Storage.set('ani_load', srcValue);
-                                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                                    insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
-                                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+        try {
+            Lampa.SettingsApi.addParam({
+                component: 'ani_load_menu',
+                param: {
+                    name: 'select_ani_mation',
+                    type: 'button'
+                },
+                field: {
+                    name: Lampa.Lang.translate('params_ani_select'),
+                    description: '<div class="activity__loader_prv"></div>'
+                },
+                onRender: function (item) {
+                    insert_activity_loader_prv(Lampa.Storage.get('ani_load', svg_links[0]));
+                },
+                onChange: function () {
+                    create_ani_modal();
+                    var groupedSvgLinks = chunkArray(svg_links, 5);
+                    var svg_content = groupedSvgLinks.map(function (group) {
+                        var groupContent = group.map(createSvgHtml).join('');
+                        return '<div class="ani_row">' + groupContent + '</div>';
+                    }).join('');
+                    var ani_templates = Lampa.Template.get('ani_modal', {
+                        ani_svg_content: svg_content
+                    });
+                    try {
+                        Lampa.Modal.open({
+                            title: '',
+                            size: 'medium',
+                            align: 'center',
+                            html: ani_templates,
+                            onBack: function () {
+                                Lampa.Modal.close();
+                                Lampa.Controller.toggle('settings_component');
+                            },
+                            onSelect: function (a) {
+                                Lampa.Modal.close();
+                                Lampa.Controller.toggle('settings_component');
+                                if (a.length > 0 && a[0] instanceof HTMLElement) {
+                                    var imgElement = a[0].querySelector('img');
+                                    if (imgElement) {
+                                        var srcValue = imgElement.getAttribute('src');
+                                        Lampa.Storage.set('ani_load', srcValue);
+                                        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                                            insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+                                            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                                        }
+                                        console.log('Вибрано анімацію: ' + srcValue);
+                                    }
                                 }
                             }
-                        }
+                        });
+                        console.log('Модальне вікно відкрито, відображено ' + svg_links.length + ' анімацій');
+                    } catch (e) {
+                        console.error('Помилка відкриття модального вікна: ' + e.message);
                     }
-                });
-            }
-        });
+                }
+            });
+            console.log('Параметр select_ani_mation додано');
+        } catch (e) {
+            console.error('Помилка додавання select_ani_mation: ' + e.message);
+        }
 
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
@@ -234,11 +254,13 @@
     }
 
     if (window.appready) {
+        console.log('Lampa готова, виклик aniLoad');
         aniLoad();
         byTheme();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
+                console.log('Lampa готова, виклик aniLoad');
                 aniLoad();
                 byTheme();
             }
