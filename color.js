@@ -57,7 +57,6 @@
 
     function initColorPicker() {
         console.log('Ініціалізація color.js');
-        // Додавання шаблону settings
         Lampa.Template.add('settings', '<div class="settings"></div>');
         try {
             Lampa.SettingsApi.addParam({
@@ -82,7 +81,7 @@
                         var groupContent = group.map(createColorHtml).join('');
                         return '<div class="color_row">' + groupContent + '</div>';
                     }).join('');
-                    var modalHtml = '<div class="color_modal_root">' + color_content + '</div>';
+                    var modalHtml = $('<div class="color_modal_root">' + color_content + '</div>'); // Перетворюємо в jQuery-об’єкт
                     try {
                         Lampa.Modal.open({
                             title: Lampa.Lang.translate('accent_color'),
@@ -92,10 +91,12 @@
                             onBack: function () {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
+                                Lampa.Controller.enable('content'); // Повернення фокусу
                             },
                             onSelect: function (a) {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
+                                Lampa.Controller.enable('content'); // Повернення фокусу
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
                                     var color = a[0].style.backgroundColor;
                                     if (color) {
