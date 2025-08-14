@@ -114,39 +114,24 @@
         var filterValue = 'brightness(0) invert(1) !important'; // Примусово #ffffff
         console.log('insert_activity_loader: URL: ' + url + ', filter: ' + filterValue);
         var newStyle = '.activity__loader { display: none !important; }' +
-                       '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 50vw !important; height: 50vw !important; max-width: 300px !important; max-height: 300px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
+                       '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
-        var existingLoaders = document.querySelectorAll('.activity__loader');
-        if (existingLoaders.length > 1) {
-            for (var i = 1; i < existingLoaders.length; i++) {
-                existingLoaders[i].remove();
-                console.log('Видалено зайвий елемент .activity__loader');
+        var element = document.querySelector('.activity__loader');
+        if (!element) {
+            console.warn('Елемент .activity__loader не знайдено в DOM');
+        } else {
+            console.log('Знайдено елемент .activity__loader');
+            element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+            if (Lampa.Storage.get('ani_active')) {
+                element.classList.add('active');
+                element.style.display = 'block';
+                setTimeout(function () {
+                    element.classList.remove('active');
+                    element.style.display = 'none';
+                    console.log('Резервне приховування .activity__loader через 5 секунд');
+                }, 5000);
             }
         }
-        if (!document.querySelector('.activity__loader')) {
-            var loader = document.createElement('div');
-            loader.className = 'activity__loader';
-            document.body.appendChild(loader);
-            console.log('Елемент .activity__loader створено');
-        }
-        setTimeout(function () {
-            var element = document.querySelector('.activity__loader');
-            if (!element) {
-                console.warn('Елемент .activity__loader не знайдено в DOM');
-            } else {
-                console.log('Знайдено елемент .activity__loader');
-                element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-                if (Lampa.Storage.get('ani_active')) {
-                    element.classList.add('active');
-                    element.style.display = 'block';
-                    setTimeout(function () {
-                        element.classList.remove('active');
-                        element.style.display = 'none';
-                        console.log('Резервне приховування .activity__loader через 5 секунд');
-                    }, 5000);
-                }
-            }
-        }, 0);
         console.log('Завантажувач встановлено: ' + url);
     }
 
@@ -245,12 +230,12 @@
                             onBack: function () {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu'); // Повернення фокусу до меню
+                                Lampa.Controller.enable('menu');
                             },
                             onSelect: function (a) {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu'); // Повернення фокусу до меню
+                                Lampa.Controller.enable('menu');
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
                                     var imgElement = a[0].querySelector('img');
                                     if (imgElement) {
@@ -306,16 +291,25 @@
                 element.classList.add('active');
                 element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
                 element.style.display = 'block';
-                setTimeout(function () {
-                    if (element) {
-                        element.classList.remove('active');
-                        element.style.display = 'none';
-                        console.log('Резервне приховування .activity__loader через 5 секунд');
-                    }
-                }, 5000);
             } else if (event.status === 'ready' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
+                console.log('Приховування .activity__loader через подію ready');
+            }
+        });
+
+        // Альтернативний слухач для подій activity
+        Lampa.Listener.follow('activity', function (event) {
+            console.log('Слухач activity викликано, тип: ' + event.type + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
+            var element = document.querySelector('.activity__loader');
+            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
+                element.classList.add('active');
+                element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
+                element.style.display = 'block';
+            } else if (event.type === 'loaded' && element) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+                console.log('Приховування .activity__loader через подію loaded');
             }
         });
 
@@ -354,7 +348,7 @@
     }
 
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e) {
+        if (e.name === 'accent_color_selected') {
             byTheme();
         }
     });
