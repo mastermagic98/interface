@@ -115,8 +115,7 @@
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 24px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }' +
-                       '.settings-folder__name { display: inline-block; vertical-align: middle; }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 24px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -172,8 +171,7 @@
                     type: 'button'
                 },
                 field: {
-                    name: Lampa.Lang.translate('params_ani_select'),
-                    description: '<div class="settings-folder selector"><div class="settings-folder__icon"><div class="activity__loader_prv"></div></div><div class="settings-folder__name">' + Lampa.Lang.translate('params_ani_select') + '</div></div>'
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders ? window.svg_loaders[0] : ''));
