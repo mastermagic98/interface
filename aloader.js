@@ -20,7 +20,7 @@
     });
 
     function hexToCssFilter(hexColor, calibrate) {
-        if (!hexColor) return 'brightness(0) invert(1) !important'; // Колір #ffffff за замовчуванням
+        if (!hexColor || hexColor === 'none') return 'brightness(0) invert(1) !important'; // Колір #ffffff за замовчуванням
         var hex = hexColor.replace('#', '');
         if (hex.length !== 6) return 'brightness(0) invert(1) !important';
         var r = parseInt(hex.substring(0, 2), 16) / 255;
@@ -76,7 +76,9 @@
         hueRotate = Math.max(0, Math.min(360, hueRotate));
         saturateValue = Math.max(0, Math.min(20, saturateValue));
         brightnessValue = Math.max(0, Math.min(2, brightnessValue));
-        return 'brightness(' + brightnessValue.toFixed(2) + ') sepia(' + sepia + ') hue-rotate(' + Math.round(hueRotate) + 'deg) saturate(' + saturateValue.toFixed(2) + ') !important';
+        var filter = 'brightness(' + brightnessValue.toFixed(2) + ') sepia(' + sepia + ') hue-rotate(' + Math.round(hueRotate) + 'deg) saturate(' + saturateValue.toFixed(2) + ') !important';
+        console.log('hexToCssFilter: вхідний колір: ' + hexColor + ', результат: ' + filter);
+        return filter;
     }
 
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_grid">{ani_svg_content}</div></div>');
@@ -108,6 +110,7 @@
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var filterValue = filter ? hexToCssFilter(filter, true) : 'brightness(0) invert(1) !important';
+        console.log('insert_activity_loader: URL: ' + url + ', filter: ' + filterValue);
         var newStyle = '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 50vw !important; height: 50vw !important; max-width: 300px !important; max-height: 300px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         // Перевірка та створення одного .activity__loader
@@ -123,12 +126,6 @@
             loader.className = 'activity__loader';
             document.body.appendChild(loader);
             console.log('Елемент .activity__loader створено');
-        }
-        // Видалення .modal-loading
-        var modalLoaders = document.querySelectorAll('.modal-loading');
-        for (var i = 0; i < modalLoaders.length; i++) {
-            modalLoaders[i].remove();
-            console.log('Видалено елемент .modal-loading');
         }
         // Примусове оновлення елемента
         setTimeout(function () {
@@ -166,7 +163,7 @@
     function aniLoad() {
         var icon_plugin = '<svg height="24" viewBox="0 0 24 26" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"/></svg>';
 
-        // Додавання шаблону settings, якщо відсутній
+        // Додавання шаблону settings
         Lampa.Template.add('settings', '<div class="settings"></div>');
 
         try {
@@ -296,15 +293,15 @@
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
 
-        // Альтернативний слухач для подій Activity
-        Lampa.Activity.listener.follow('load', function (event) {
+        // Слухач для подій Activity.toggle
+        Lampa.Activity.listener.follow('toggle', function (event) {
             console.log('Слухач Activity викликано, подія: ' + event.status + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
             var element = document.querySelector('.activity__loader');
-            if (event.status === 'load' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
+            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
                 element.classList.add('active');
                 element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
                 element.style.display = 'block';
-            } else if (event.status === 'ready' && element) {
+            } else if (event.status === 'disabled' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
             }
@@ -314,6 +311,7 @@
     function byTheme() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
             var main_color = getComputedStyle(document.documentElement).getPropertyValue('--main-color') || '#ffffff';
+            console.log('byTheme: Застосовано колір: ' + main_color);
             insert_activity_loader(Lampa.Storage.get('ani_load'), main_color);
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
