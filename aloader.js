@@ -111,6 +111,13 @@
         var newStyle = '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); width: 48px; height: 48px; filter: ' + filterValue + '; }' +
                        '.modal-loading.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); width: 48px; height: 48px; filter: ' + filterValue + '; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
+        // Примусове оновлення елементів
+        setTimeout(function () {
+            var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+            }
+        }, 0);
         console.log('Завантажувач встановлено: ' + url);
     }
 
@@ -217,10 +224,12 @@
                                             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
                                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                                             // Примусове оновлення елементів
-                                            var elements = document.querySelectorAll('.activity__loader, .modal-loading');
-                                            for (var i = 0; i < elements.length; i++) {
-                                                elements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-                                            }
+                                            setTimeout(function () {
+                                                var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+                                                for (var i = 0; i < elements.length; i++) {
+                                                    elements[i].style.backgroundImage = 'url(\'' + srcValue.replace(/'/g, "\\'") + '\')';
+                                                }
+                                            }, 0);
                                         }
                                         console.log('Вибрано анімацію: ' + srcValue);
                                     } else {
