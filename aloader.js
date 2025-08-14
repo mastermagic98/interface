@@ -109,9 +109,11 @@
     function insert_activity_loader(url, filter) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var filterValue = filter ? hexToCssFilter(filter, true) : 'brightness(0) invert(1) !important';
+        // Примусово встановлюємо білий колір (#ffffff)
+        var filterValue = 'brightness(0) invert(1) !important';
         console.log('insert_activity_loader: URL: ' + url + ', filter: ' + filterValue);
-        var newStyle = '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 50vw !important; height: 50vw !important; max-width: 300px !important; max-height: 300px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
+        var newStyle = '.activity__loader { display: none !important; }' +
+                       '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 50vw !important; height: 50vw !important; max-width: 300px !important; max-height: 300px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         // Перевірка та створення одного .activity__loader
         var existingLoaders = document.querySelectorAll('.activity__loader');
@@ -191,7 +193,7 @@
                 onChange: function (item) {
                     if (item === 'true') {
                         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                            insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+                            insert_activity_loader(Lampa.Storage.get('ani_load'), '#ffffff');
                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                         }
                     } else {
@@ -250,7 +252,7 @@
                                         var srcValue = imgElement.getAttribute('src');
                                         Lampa.Storage.set('ani_load', srcValue);
                                         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                                            insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+                                            insert_activity_loader(Lampa.Storage.get('ani_load'), '#ffffff');
                                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                                             // Примусово активувати завантажувач для тестування
                                             setTimeout(function () {
@@ -289,18 +291,26 @@
         }
 
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-            insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+            insert_activity_loader(Lampa.Storage.get('ani_load'), '#ffffff');
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
 
-        // Слухач для подій Activity.toggle
-        Lampa.Activity.listener.follow('toggle', function (event) {
-            console.log('Слухач Activity викликано, подія: ' + event.status + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
+        // Слухач для подій activity
+        Lampa.Listener.follow('activity', function (event) {
+            console.log('Слухач activity викликано, подія: ' + event.status + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
             var element = document.querySelector('.activity__loader');
             if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
                 element.classList.add('active');
                 element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
                 element.style.display = 'block';
+                // Резервне приховування через 5 секунд
+                setTimeout(function () {
+                    if (element) {
+                        element.classList.remove('active');
+                        element.style.display = 'none';
+                        console.log('Резервне приховування .activity__loader через 5 секунд');
+                    }
+                }, 5000);
             } else if (event.status === 'disabled' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
@@ -312,7 +322,7 @@
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
             var main_color = getComputedStyle(document.documentElement).getPropertyValue('--main-color') || '#ffffff';
             console.log('byTheme: Застосовано колір: ' + main_color);
-            insert_activity_loader(Lampa.Storage.get('ani_load'), main_color);
+            insert_activity_loader(Lampa.Storage.get('ani_load'), '#ffffff'); // Примусово #ffffff
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
     }
