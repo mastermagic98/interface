@@ -298,11 +298,11 @@
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
 
-        // Слухач для подій activity
-        Lampa.Listener.follow('activity', function (event) {
-            console.log('Слухач activity викликано, тип: ' + event.type + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
+        // Слухач для подій Activity.push
+        Lampa.Activity.listener.follow('push', function (event) {
+            console.log('Слухач Activity.push викликано, подія: ' + event.status + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
             var element = document.querySelector('.activity__loader');
-            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
+            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
                 element.classList.add('active');
                 element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
                 element.style.display = 'block';
@@ -313,11 +313,21 @@
                         console.log('Резервне приховування .activity__loader через 5 секунд');
                     }
                 }, 5000);
-            } else if (event.type === 'loaded' && element) {
+            } else if (event.status === 'ready' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
             }
         });
+
+        // Резервне приховування для всіх сторінок
+        setInterval(function () {
+            var element = document.querySelector('.activity__loader');
+            if (element && element.classList.contains('active')) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+                console.log('Резервне приховування .activity__loader через інтервал');
+            }
+        }, 5000);
     }
 
     function byTheme() {
