@@ -108,22 +108,23 @@
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var filterValue = filter ? hexToCssFilter(filter, true) : 'brightness(0) invert(1)'; // #ffffff за замовчуванням
-        var newStyle = '.activity__loader { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(3); -webkit-transform: scale(3); filter: ' + filterValue + '; }' +
-                       '.modal-loading { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(3); -webkit-transform: scale(3); filter: ' + filterValue + '; }';
+        var newStyle = '.activity__loader { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(1.5); -webkit-transform: scale(1.5); filter: ' + filterValue + '; width: 48px; height: 48px; background-size: contain; }' +
+                       '.modal-loading { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(1.5); -webkit-transform: scale(1.5); filter: ' + filterValue + '; width: 48px; height: 48px; background-size: contain; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         console.log('Завантажувач встановлено: ' + url);
     }
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        // Стилі синхронізовано з кодом за посиланням: розмір 23x24, білий колір, SVG як фон
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 68.4333px; height: 68.4333px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; box-sizing: border-box; color: rgb(255, 255, 255); cursor: pointer; font-family: "SegoeUI", sans-serif; font-size: 34.2165px; line-height: 34.2167px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; user-select: none; filter: brightness(0) invert(1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
     function remove_activity_loader() {
         var styleElement = document.getElementById('aniload-id');
         if (styleElement) styleElement.remove();
+        var prvStyleElement = document.getElementById('aniload-id-prv');
+        if (prvStyleElement) prvStyleElement.remove();
     }
 
     function aniLoad() {
@@ -159,7 +160,6 @@
                         }
                     } else {
                         remove_activity_loader();
-                        $('#aniload-id-prv').remove();
                     }
                 }
             });
@@ -176,7 +176,7 @@
                     type: 'button'
                 },
                 field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 68.4333px; height: 68.4333px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders ? window.svg_loaders[0] : ''));
