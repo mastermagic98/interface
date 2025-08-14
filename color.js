@@ -10,31 +10,40 @@
     });
 
     var colors = [
-        'hsl(0, 60%, 50%)',   // Червоний
-        'hsl(30, 60%, 50%)',  // Помаранчевий
-        'hsl(60, 60%, 50%)',  // Жовтий
-        'hsl(120, 60%, 50%)', // Зелений
-        'hsl(180, 60%, 50%)', // Бірюзовий
-        'hsl(240, 60%, 50%)', // Синій
-        'hsl(270, 60%, 50%)', // Фіолетовий
-        'hsl(300, 60%, 50%)', // Рожевий
-        'hsl(330, 60%, 50%)', // Малиновий
-        'hsl(15, 60%, 50%)',  // Кораловий
-        'hsl(90, 60%, 50%)',  // Лаймовий
-        'hsl(210, 60%, 50%)'  // Блакитний
+        '#ff4d4d', // Червоний
+        '#ff8c00', // Помаранчевий
+        '#ffd700', // Жовтий
+        '#00cc00', // Зелений
+        '#00cccc', // Бірюзовий
+        '#4169e1', // Синій
+        '#9933ff', // Фіолетовий
+        '#ff66cc', // Рожевий
+        '#cc0066', // Малиновий
+        '#ff4040', // Кораловий
+        '#99ff33', // Лаймовий
+        '#3399ff'  // Блакитний
     ];
 
+    function rgbToHex(rgb) {
+        var matches = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!matches) return rgb;
+        function hex(n) {
+            return ('0' + parseInt(n).toString(16)).slice(-2);
+        }
+        return '#' + hex(matches[1]) + hex(matches[2]) + hex(matches[3]);
+    }
+
     function applyAccentColor(color) {
-        document.documentElement.style.setProperty('--main-color', color);
-        Lampa.Storage.set('accent_color_selected', color);
+        var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
+        document.documentElement.style.setProperty('--main-color', hexColor);
+        Lampa.Storage.set('accent_color_selected', hexColor);
         var event = new Event('style-change');
         document.documentElement.dispatchEvent(event);
-        console.log('Колір змінено на: ' + color);
+        console.log('Колір змінено на: ' + hexColor);
         Lampa.Settings.update();
-        // Оновлення UI для відображення нового кольору
         var descr = $('.settings-param__descr div');
         if (descr.length) {
-            descr.css('background-color', color);
+            descr.css('background-color', hexColor);
         }
     }
 
