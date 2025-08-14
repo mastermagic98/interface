@@ -108,15 +108,15 @@
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var filterValue = filter ? hexToCssFilter(filter, true) : 'brightness(0) invert(1)'; // #ffffff за замовчуванням
-        var newStyle = '.activity__loader { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; color: rgb(255, 255, 255); display: block; font-family: "SegoeUI", sans-serif; font-size: 34.2165px; line-height: 34.2167px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); user-select: none; width: 48px; height: 48px; filter: ' + filterValue + '; }' +
-                       '.modal-loading { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; color: rgb(255, 255, 255); display: block; font-family: "SegoeUI", sans-serif; font-size: 34.2165px; line-height: 34.2167px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); user-select: none; width: 48px; height: 48px; filter: ' + filterValue + '; }';
+        var newStyle = '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; color: rgb(255, 255, 255); display: block; font-family: "SegoeUI", sans-serif; font-size: 34.2165px; line-height: 34.2167px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); user-select: none; width: 48px; height: 48px; filter: ' + filterValue + '; }' +
+                       '.modal-loading.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; color: rgb(255, 255, 255); display: block; font-family: "SegoeUI", sans-serif; font-size: 34.2165px; line-height: 34.2167px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); user-select: none; width: 48px; height: 48px; filter: ' + filterValue + '; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         console.log('Завантажувач встановлено: ' + url);
     }
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 68.4333px; height: 68.4333px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; box-sizing: border-box; color: rgb(255, 255, 255); cursor: pointer; font-family: "SegoeUI", sans-serif; font-size: 34.2165px; line-height: 34.2167px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; user-select: none; filter: brightness(0) invert(1); }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -176,7 +176,7 @@
                     type: 'button'
                 },
                 field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 68.4333px; height: 68.4333px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders ? window.svg_loaders[0] : ''));
@@ -237,6 +237,23 @@
             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
+
+        // Додаємо слухач для подій завантаження
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type === 'loading') {
+                if (event.status === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                    var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+                    for (var i = 0; i < elements.length; i++) {
+                        elements[i].classList.add('active');
+                    }
+                } else if (event.status === 'end') {
+                    var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+                    for (var i = 0; i < elements.length; i++) {
+                        elements[i].classList.remove('active');
+                    }
+                }
+            }
+        });
     }
 
     function byTheme() {
