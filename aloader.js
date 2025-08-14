@@ -115,7 +115,8 @@
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 20px; height: 20px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 24px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }' +
+                       '.settings-folder__name { display: inline-block; vertical-align: middle; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -172,7 +173,7 @@
                 },
                 field: {
                     name: Lampa.Lang.translate('params_ani_select'),
-                    description: '<div class="activity__loader_prv"></div>'
+                    description: '<div class="settings-folder selector"><div class="settings-folder__icon"><div class="activity__loader_prv"></div></div><div class="settings-folder__name">' + Lampa.Lang.translate('params_ani_select') + '</div></div>'
                 },
                 onRender: function (item) {
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders ? window.svg_loaders[0] : ''));
