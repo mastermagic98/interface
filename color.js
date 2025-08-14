@@ -35,20 +35,15 @@
 
     function applyAccentColor(color) {
         var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
+        console.log('applyAccentColor: Застосовується колір: ' + hexColor);
         document.documentElement.style.setProperty('--main-color', hexColor);
         Lampa.Storage.set('accent_color_selected', hexColor);
-        var event = new Event('style-change');
-        document.documentElement.dispatchEvent(event);
-        console.log('Колір змінено на: ' + hexColor);
-        Lampa.Settings.update();
         var descr = $('.settings-param__descr div');
         if (descr.length) {
             descr.css('background-color', hexColor);
         }
-        // Виклик byTheme для оновлення завантажувача
-        if (typeof window.byTheme === 'function') {
-            window.byTheme();
-        }
+        Lampa.Settings.render();
+        console.log('Колір змінено на: ' + hexColor);
     }
 
     function createColorModal() {
@@ -143,7 +138,7 @@
         var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
         document.documentElement.style.setProperty('--main-color', savedColor);
         console.log('Застосовано збережений колір: ' + savedColor);
-        Lampa.Settings.update();
+        Lampa.Settings.render();
     }
 
     function delayedInit() {
@@ -183,7 +178,7 @@
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
             console.log('Меню налаштувань відкрито, оновлення UI');
-            Lampa.Settings.update();
+            Lampa.Settings.render();
         }
     });
 
