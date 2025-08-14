@@ -84,16 +84,16 @@
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
-        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
-                            '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 80px; }' +
-                            '.ani_svg img { max-width: 100%; max-height: 80px; object-fit: contain; filter: brightness(0) invert(1); }' +
+        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 48px; gap: 10px; justify-items: center; width: 100%; padding: 10px; }' +
+                            '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; }' +
+                            '.ani_svg img { max-width: 40px; max-height: 40px; object-fit: contain; filter: brightness(0) invert(1); }' +
                             '.ani_svg.focus { background-color: #353535; border: 1px solid #9e9e9e; }';
         document.head.appendChild(style);
         console.log('Модальне вікно анімацій створено, кількість SVG: ' + (window.svg_loaders ? window.svg_loaders.length : 0));
     }
 
     function createSvgHtml(src) {
-        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:100%; max-height:80px;"></div>';
+        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:40px; max-height:40px;"></div>';
     }
 
     function chunkArray(arr, size) {
@@ -217,10 +217,12 @@
                                             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
                                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                                             // Примусове оновлення елементів
-                                            var elements = document.querySelectorAll('.activity__loader, .modal-loading');
-                                            for (var i = 0; i < elements.length; i++) {
-                                                elements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-                                            }
+                                            setTimeout(function () {
+                                                var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+                                                for (var i = 0; i < elements.length; i++) {
+                                                    elements[i].style.backgroundImage = 'url(\'' + srcValue.replace(/'/g, "\\'") + '\')';
+                                                }
+                                            }, 0);
                                         }
                                         console.log('Вибрано анімацію: ' + srcValue);
                                     } else {
