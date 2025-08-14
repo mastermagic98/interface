@@ -20,9 +20,9 @@
     });
 
     function hexToCssFilter(hexColor, calibrate) {
-        if (!hexColor) return 'none';
+        if (!hexColor) return 'brightness(0) invert(1)'; // Колір #ffffff за замовчуванням
         var hex = hexColor.replace('#', '');
-        if (hex.length !== 6) return 'none';
+        if (hex.length !== 6) return 'brightness(0) invert(1)';
         var r = parseInt(hex.substring(0, 2), 16) / 255;
         var g = parseInt(hex.substring(2, 4), 16) / 255;
         var b = parseInt(hex.substring(4, 6), 16) / 255;
@@ -107,15 +107,16 @@
     function insert_activity_loader(url, filter) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var newStyle = '.activity__loader { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(3); -webkit-transform: scale(3); filter: ' + hexToCssFilter(filter) + '; }' +
-                       '.modal-loading { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(3); -webkit-transform: scale(3); filter: ' + hexToCssFilter(filter) + '; }';
+        var filterValue = filter ? hexToCssFilter(filter, true) : 'brightness(0) invert(1)'; // #ffffff за замовчуванням
+        var newStyle = '.activity__loader { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(3); -webkit-transform: scale(3); filter: ' + filterValue + '; }' +
+                       '.modal-loading { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; transform: scale(3); -webkit-transform: scale(3); filter: ' + filterValue + '; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         console.log('Завантажувач встановлено: ' + url);
     }
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        // Стилі синхронізовано з іконкою компонента: розмір 23x24, білий колір, SVG як фон
+        // Стилі синхронізовано з кодом за посиланням: розмір 23x24, білий колір, SVG як фон
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
@@ -126,7 +127,6 @@
     }
 
     function aniLoad() {
-        // Іконка компонента (та сама, що використовується в заголовку "Анімація завантажувача")
         var icon_plugin = '<svg height="24" viewBox="0 0 24 26" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"/></svg>';
 
         try {
@@ -155,9 +155,11 @@
                     if (item === 'true') {
                         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+                            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                         }
                     } else {
                         remove_activity_loader();
+                        $('#aniload-id-prv').remove();
                     }
                 }
             });
@@ -174,11 +176,9 @@
                     type: 'button'
                 },
                 field: {
-                    // Використовуємо ту саму структуру, що й для іконки компонента
                     name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
-                    // Вставляємо вибраний SVG як фон для іконки, як у компоненті
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders ? window.svg_loaders[0] : ''));
                 },
                 onChange: function () {
@@ -241,7 +241,7 @@
 
     function byTheme() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-            var main_color = getComputedStyle(document.documentElement).getPropertyValue('--main-color');
+            var main_color = getComputedStyle(document.documentElement).getPropertyValue('--main-color') || '#ffffff';
             insert_activity_loader(Lampa.Storage.get('ani_load'), main_color);
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
