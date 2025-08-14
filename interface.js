@@ -13,12 +13,10 @@
         'https://mastermagic98.github.io/interface/color.js',
         'https://mastermagic98.github.io/interface/aloader.js',
         'https://mastermagic98.github.io/interface/loaders.js',
-        //'https://mastermagic98.github.io/interface/animations.js',
-        //'https://mastermagic98.github.io/interface/translate_tv.js',
-        //'https://mastermagic98.github.io/interface/bigbuttons.js',
-        //'https://mastermagic98.github.io/interface/incardtemplate.js',
-        //'https://mastermagic98.github.io/interface/forall.js',
-        //'https://mastermagic98.github.io/interface/fix_lang.js'
+        'https://mastermagic98.github.io/interface/animations.js',
+        'https://mastermagic98.github.io/interface/translate_tv.js',
+        'https://mastermagic98.github.io/interface/incardtemplate.js',
+        'https://mastermagic98.github.io/interface/fix_lang.js'
     ];
 
     modules.forEach(function (url) {
@@ -32,6 +30,7 @@
     function startPlugin() {
         console.log('Ініціалізація плагіну accent_color_plugin');
         Lampa.Template.add('settings', '<div class="settings"></div>');
+        Lampa.Template.add('settings_', '<div class="settings"></div>');
         try {
             Lampa.SettingsApi.addComponent({
                 component: 'accent_color_plugin',
