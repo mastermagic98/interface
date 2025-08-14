@@ -125,11 +125,6 @@
             if (Lampa.Storage.get('ani_active')) {
                 element.classList.add('active');
                 element.style.display = 'block';
-                setTimeout(function () {
-                    element.classList.remove('active');
-                    element.style.display = 'none';
-                    console.log('Резервне приховування .activity__loader через 5 секунд');
-                }, 5000);
             }
         }
         console.log('Завантажувач встановлено: ' + url);
@@ -298,7 +293,7 @@
             }
         });
 
-        // Альтернативний слухач для подій activity
+        // Слухач для подій activity
         Lampa.Listener.follow('activity', function (event) {
             console.log('Слухач activity викликано, тип: ' + event.type + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
             var element = document.querySelector('.activity__loader');
@@ -310,6 +305,18 @@
                 element.classList.remove('active');
                 element.style.display = 'none';
                 console.log('Приховування .activity__loader через подію loaded');
+            }
+        });
+
+        // Слухач для події back
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type === 'back') {
+                var element = document.querySelector('.activity__loader');
+                if (element) {
+                    element.classList.remove('active');
+                    element.style.display = 'none';
+                    console.log('Приховування .activity__loader через подію back');
+                }
             }
         });
 
@@ -349,7 +356,11 @@
 
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'accent_color_selected') {
+            console.log('Lampa.Storage.change: accent_color_selected змінено на ' + e.value);
             byTheme();
         }
     });
+
+    // Експортувати byTheme для використання іншими скриптами
+    window.byTheme = byTheme;
 })();
