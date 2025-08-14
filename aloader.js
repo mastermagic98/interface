@@ -115,7 +115,7 @@
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 24px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -194,7 +194,7 @@
                         Lampa.Modal.open({
                             title: '',
                             size: 'medium',
-                            align: 'center',
+                            align: 'left',
                             html: ani_templates,
                             onBack: function () {
                                 Lampa.Modal.close();
