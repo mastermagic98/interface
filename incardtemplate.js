@@ -9,6 +9,9 @@
         }
     });
 
+    Lampa.Template.add('settings', '<div class="settings"></div>');
+    Lampa.Template.add('settings_', '<div class="settings"></div>');
+
     function incardtemplate() {
         var incardtemplate = Lampa.Storage.get('maxsm_themes_incardtemplate', 'true') === 'true';
         if (incardtemplate) {
@@ -78,33 +81,49 @@
                 '</div>' +
                 '</div>' +
                 '</div>');
+            // Додати обробку фокусу для кнопок
+            setTimeout(function () {
+                $('.full-start__button.selector').on('hover:enter', function () {
+                    Lampa.Controller.enable('content');
+                }).on('hover:leave', function () {
+                    Lampa.Controller.enable('menu');
+                });
+            }, 0);
         }
     }
 
     function initIncardTemplate() {
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'maxsm_themes_incardtemplate',
-                type: 'trigger',
-                default: true
-            },
-            field: {
-                name: Lampa.Lang.translate('maxsm_themes_incardtemplate'),
-                description: ''
-            },
-            onChange: function () {
-                window.location.reload();
-            }
-        });
+        try {
+            Lampa.SettingsApi.addParam({
+                component: 'accent_color_plugin',
+                param: {
+                    name: 'maxsm_themes_incardtemplate',
+                    type: 'trigger',
+                    default: true
+                },
+                field: {
+                    name: Lampa.Lang.translate('maxsm_themes_incardtemplate'),
+                    description: ''
+                },
+                onChange: function () {
+                    window.location.reload();
+                    Lampa.Controller.enable('menu'); // Повернення фокусу до меню
+                }
+            });
+            console.log('Параметр maxsm_themes_incardtemplate додано');
+        } catch (e) {
+            console.error('Помилка додавання maxsm_themes_incardtemplate: ' + e.message);
+        }
         incardtemplate();
     }
 
     if (window.appready) {
+        console.log('Lampa готова, ініціалізація incardtemplate.js');
         initIncardTemplate();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
+                console.log('Lampa готова, ініціалізація incardtemplate.js');
                 initIncardTemplate();
             }
         });
