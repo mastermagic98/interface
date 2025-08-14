@@ -57,6 +57,8 @@
 
     function initColorPicker() {
         console.log('Ініціалізація color.js');
+        // Додавання шаблону settings
+        Lampa.Template.add('settings', '<div class="settings"></div>');
         try {
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
