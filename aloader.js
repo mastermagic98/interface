@@ -19,16 +19,6 @@
         }
     });
 
-    // Масив із назвами для іконок
-    var loaderNames = [
-        '12 Dots Scale Rotate', '180 Ring With Bg', '270 Ring', '6 Dots Rotate', '8 Dots Rotate',
-        'Loader 6', 'Loader 7', 'Loader 8', 'Loader 9', 'Loader 10',
-        'Loader 11', 'Loader 12', 'Loader 13', 'Loader 14', 'Loader 15',
-        'Loader 16', 'Loader 17', 'Loader 18', 'Loader 19', 'Loader 20',
-        'Loader 21', 'Loader 22', 'Loader 23', 'Loader 24'
-        
-    ];
-
     function hexToCssFilter(hexColor, calibrate) {
         if (!hexColor) return 'none';
         var hex = hexColor.replace('#', '');
@@ -94,17 +84,16 @@
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
-        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 100px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
-                            '.ani_svg { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100px; }' +
-                            '.ani_svg img { max-width: 100%; max-height: 80px; object-fit: contain; }' +
-                            '.ani_svg_name { font-size: 12px; color: #fff; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }' +
+        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
+                            '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 80px; }' +
+                            '.ani_svg img { max-width: 100%; max-height: 80px; object-fit: contain; filter: brightness(0) invert(1); }' +
                             '.ani_svg.focus { background-color: #353535; border: 1px solid #9e9e9e; }';
         document.head.appendChild(style);
         console.log('Модальне вікно анімацій створено, кількість SVG: ' + (window.svg_loaders ? window.svg_loaders.length : 0));
     }
 
-    function createSvgHtml(src, name, index) {
-        return '<div class="ani_svg selector" tabindex="0" data-index="' + index + '"><img src="' + src + '" style="visibility:visible; max-width:100%; max-height:80px;"><div class="ani_svg_name">' + name + '</div></div>';
+    function createSvgHtml(src) {
+        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:100%; max-height:80px;"></div>';
     }
 
     function chunkArray(arr, size) {
@@ -126,7 +115,7 @@
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { position: absolute; top: 0; width: 100%; height: 100%; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; z-index: 9999; background-size: contain; max-height: 80px; }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 20px; height: 20px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -195,11 +184,8 @@
                     }
                     create_ani_modal();
                     var groupedSvgLinks = chunkArray(window.svg_loaders, 6);
-                    var svg_content = groupedSvgLinks.map(function (group, groupIndex) {
-                        var groupContent = group.map(function (svg, index) {
-                            var loaderIndex = groupIndex * 6 + index;
-                            return createSvgHtml(svg, loaderNames[loaderIndex], loaderIndex);
-                        }).join('');
+                    var svg_content = groupedSvgLinks.map(function (group) {
+                        var groupContent = group.map(createSvgHtml).join('');
                         return '<div class="ani_row">' + groupContent + '</div>';
                     }).join('');
                     var ani_templates = Lampa.Template.get('ani_modal', {
@@ -222,14 +208,12 @@
                                     var imgElement = a[0].querySelector('img');
                                     if (imgElement) {
                                         var srcValue = imgElement.getAttribute('src');
-                                        var index = a[0].getAttribute('data-index');
                                         Lampa.Storage.set('ani_load', srcValue);
-                                        Lampa.Storage.set('loader_svg', parseInt(index));
                                         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                                             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
                                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                                         }
-                                        console.log('Вибрано анімацію: ' + srcValue + ', індекс: ' + index);
+                                        console.log('Вибрано анімацію: ' + srcValue);
                                     }
                                 }
                             }
