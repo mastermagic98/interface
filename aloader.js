@@ -111,6 +111,17 @@
         var newStyle = '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); width: 48px; height: 48px; filter: ' + filterValue + '; }' +
                        '.modal-loading.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0); background-image: url(\'' + escapedUrl + '\'); background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: auto; box-sizing: border-box; display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.5); -webkit-transform: translate(-50%, -50%) scale(1.5); width: 48px; height: 48px; filter: ' + filterValue + '; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
+        // Примусове оновлення елементів
+        setTimeout(function () {
+            var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+            if (elements.length === 0) {
+                console.warn('Елементи .activity__loader або .modal-loading не знайдено в DOM');
+            }
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+                elements[i].style.display = 'block'; // Забезпечити видимість
+            }
+        }, 0);
         console.log('Завантажувач встановлено: ' + url);
     }
 
@@ -216,13 +227,6 @@
                                         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                                             insert_activity_loader(Lampa.Storage.get('ani_load'), getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
                                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                            // Примусове оновлення елементів
-                                            setTimeout(function () {
-                                                var elements = document.querySelectorAll('.activity__loader, .modal-loading');
-                                                for (var i = 0; i < elements.length; i++) {
-                                                    elements[i].style.backgroundImage = 'url(\'' + srcValue.replace(/'/g, "\\'") + '\')';
-                                                }
-                                            }, 0);
                                         }
                                         console.log('Вибрано анімацію: ' + srcValue);
                                     } else {
@@ -252,13 +256,17 @@
         // Слухач для подій завантаження
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'loading') {
+                console.log('Подія loading, статус: ' + event.status + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
                 if (event.status === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                     var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+                    console.log('Знайдено елементів .activity__loader, .modal-loading: ' + elements.length);
                     for (var i = 0; i < elements.length; i++) {
                         elements[i].classList.add('active');
+                        elements[i].style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
                     }
                 } else if (event.status === 'end') {
                     var elements = document.querySelectorAll('.activity__loader, .modal-loading');
+                    console.log('Знайдено елементів .activity__loader, .modal-loading: ' + elements.length);
                     for (var i = 0; i < elements.length; i++) {
                         elements[i].classList.remove('active');
                     }
