@@ -45,6 +45,10 @@
         if (descr.length) {
             descr.css('background-color', hexColor);
         }
+        // Виклик byTheme для оновлення завантажувача
+        if (typeof window.byTheme === 'function') {
+            window.byTheme();
+        }
     }
 
     function createColorModal() {
@@ -106,12 +110,12 @@
                             onBack: function () {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu'); // Повернення фокусу до меню
+                                Lampa.Controller.enable('menu');
                             },
                             onSelect: function (a) {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu'); // Повернення фокусу до меню
+                                Lampa.Controller.enable('menu');
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
                                     var color = a[0].style.backgroundColor;
                                     if (color) {
@@ -182,4 +186,7 @@
             Lampa.Settings.update();
         }
     });
+
+    // Експортувати applyAccentColor для використання в інших скриптах
+    window.applyAccentColor = applyAccentColor;
 })();
