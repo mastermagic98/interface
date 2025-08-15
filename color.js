@@ -94,8 +94,8 @@
         style.id = 'colormodal';
         style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #fff; --transparent-white: rgba(255,255,255,0.2); }' +
                             'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
-                            '.menu__ico { color: var(--text-color); }' +
-                            '.card__title { background: transparent !important; color: var(--text-color); }' +
+                            '.menu__ico { color: var(--text-color) !important; -webkit-filter: none !important; filter: none !important; }' +
+                            '.card.focus .card__title, .card:hover .card__title { background: transparent !important; color: var(--text-color) !important; }' +
                             '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
                             '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
