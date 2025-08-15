@@ -19,6 +19,9 @@
         }
     });
 
+    // Додаємо шаблон ani_modal
+    Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_grid">{ani_svg_content}</div></div>');
+
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
@@ -56,6 +59,7 @@
         if (element) {
             element.classList.remove('active');
             element.style.display = 'none';
+            console.log('remove_activity_loader: Лоадер прихований');
         }
     }
 
@@ -141,6 +145,11 @@
                         console.error('SVG завантажувачі не знайдено');
                         return;
                     }
+                    // Перевіряємо наявність шаблону
+                    if (!Lampa.Template.get('ani_modal')) {
+                        console.error('Шаблон ani_modal не знайдено, додаємо повторно');
+                        Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_grid">{ani_svg_content}</div></div>');
+                    }
                     create_ani_modal();
                     var groupedSvgLinks = chunkArray(window.svg_loaders, 6);
                     var svg_content = groupedSvgLinks.map(function (group) {
@@ -207,25 +216,28 @@
             console.error('Помилка додавання select_ani_mation: ' + e.message);
         }
 
-        // Ініціалізація MutationObserver
-        var observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                mutation.addedNodes.forEach(function (node) {
-                    if (node.nodeType === 1 && node.matches('.activity__loader')) {
-                        console.log('📌 [MutationObserver] Loader вставлено в DOM');
-                        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                            setCustomLoader(Lampa.Storage.get('ani_load'));
+        // Ініціалізація MutationObserver із затримкою
+        setTimeout(function () {
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    mutation.addedNodes.forEach(function (node) {
+                        if (node.nodeType === 1 && node.matches('.activity__loader')) {
+                            console.log('📌 [MutationObserver] Loader вставлено в DOM');
+                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                                setCustomLoader(Lampa.Storage.get('ani_load'));
+                            }
                         }
-                    }
-                });
-                mutation.removedNodes.forEach(function (node) {
-                    if (node.nodeType === 1 && node.matches('.activity__loader')) {
-                        console.log('✅ [MutationObserver] Loader видалено з DOM');
-                    }
+                    });
+                    mutation.removedNodes.forEach(function (node) {
+                        if (node.nodeType === 1 && node.matches('.activity__loader')) {
+                            console.log('✅ [MutationObserver] Loader видалено з DOM');
+                        }
+                    });
                 });
             });
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
+            observer.observe(document.body, { childList: true, subtree: true });
+            console.log('MutationObserver ініціалізовано');
+        }, 1000);
 
         // Слухачі подій Lampa
         Lampa.Listener.follow('full', function (e) {
@@ -272,6 +284,7 @@
         });
 
         Lampa.Listener.follow('app', function (event) {
+            console.log('📌 [Lampa.Listener] app викликано, тип: ' + event.type);
             if (event.type === 'back') {
                 var element = document.querySelector('.activity__loader');
                 if (element) {
@@ -290,7 +303,7 @@
                 element.style.display = 'none';
                 console.log('✅ [Interval] Резервне приховування .activity__loader через інтервал');
             }
-        }, 5000);
+        }, 3000);
 
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
             setCustomLoader(Lampa.Storage.get('ani_load'));
