@@ -10,18 +10,9 @@
     });
 
     var colors = [
-        '#ff4d4d', // Червоний
-        '#ff8c00', // Помаранчевий
-        '#ffd700', // Жовтий
-        '#00cc00', // Зелений
-        '#00cccc', // Бірюзовий
-        '#4169e1', // Синій
-        '#9933ff', // Фіолетовий
-        '#ff66cc', // Рожевий
-        '#cc0066', // Малиновий
-        '#ff4040', // Кораловий
-        '#99ff33', // Лаймовий
-        '#3399ff'  // Блакитний
+        '#ff4d4d', '#ff8c00', '#ffd700', '#00cc00', '#00cccc',
+        '#4169e1', '#9933ff', '#ff66cc', '#cc0066', '#ff4040',
+        '#99ff33', '#3399ff'
     ];
 
     function rgbToHex(rgb) {
@@ -141,36 +132,14 @@
         Lampa.Settings.render();
     }
 
-    function delayedInit() {
-        if (window.appready) {
-            console.log('Lampa готова, ініціалізація color.js');
-            initColorPicker();
-        } else {
-            var attempts = 0;
-            var maxAttempts = 10;
-            var interval = setInterval(function () {
-                attempts++;
-                if (window.appready || attempts >= maxAttempts) {
-                    clearInterval(interval);
-                    if (window.appready) {
-                        console.log('Lampa готова після затримки, ініціалізація color.js');
-                        initColorPicker();
-                    } else {
-                        console.error('Lampa не готова після ' + maxAttempts + ' спроб');
-                    }
-                }
-            }, 500);
-        }
-    }
-
     if (window.appready) {
-        console.log('Lampa готова, виклик delayedInit');
-        delayedInit();
+        console.log('Lampa готова, виклик initColorPicker');
+        initColorPicker();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
-                console.log('Lampa готова, виклик delayedInit');
-                delayedInit();
+                console.log('Lampa готова, виклик initColorPicker');
+                initColorPicker();
             }
         });
     }
@@ -182,6 +151,5 @@
         }
     });
 
-    // Експортувати applyAccentColor для використання в інших скриптах
     window.applyAccentColor = applyAccentColor;
 })();
