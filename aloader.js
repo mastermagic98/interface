@@ -278,7 +278,7 @@
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
 
-        // Слухач для подій Activity.push
+        // Слухач для подій Activity.push (тільки active і ready)
         Lampa.Activity.listener.follow('push', function (event) {
             console.log('Слухач Activity.push викликано, подія: ' + event.status + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
             var element = document.querySelector('.activity__loader');
@@ -286,37 +286,11 @@
                 element.classList.add('active');
                 element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
                 element.style.display = 'block';
+                console.log('Показ .activity__loader через подію active');
             } else if (event.status === 'ready' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
                 console.log('Приховування .activity__loader через подію ready');
-            }
-        });
-
-        // Слухач для подій activity
-        Lampa.Listener.follow('activity', function (event) {
-            console.log('Слухач activity викликано, тип: ' + event.type + ', ani_load: ' + Lampa.Storage.get('ani_load') + ', ani_active: ' + Lampa.Storage.get('ani_active'));
-            var element = document.querySelector('.activity__loader');
-            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
-                element.classList.add('active');
-                element.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load').replace(/'/g, "\\'") + '\')';
-                element.style.display = 'block';
-            } else if (event.type === 'loaded' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-                console.log('Приховування .activity__loader через подію loaded');
-            }
-        });
-
-        // Слухач для події back
-        Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'back') {
-                var element = document.querySelector('.activity__loader');
-                if (element) {
-                    element.classList.remove('active');
-                    element.style.display = 'none';
-                    console.log('Приховування .activity__loader через подію back');
-                }
             }
         });
 
