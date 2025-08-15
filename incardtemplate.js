@@ -81,7 +81,6 @@
                 '</div>' +
                 '</div>' +
                 '</div>');
-            // Додати обробку фокусу для кнопок
             setTimeout(function () {
                 $('.full-start__button.selector').on('hover:enter', function () {
                     Lampa.Controller.enable('content');
