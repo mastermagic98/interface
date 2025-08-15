@@ -15,16 +15,18 @@
     });
 
     var colors = {
-        '#c22222': 'Червоний',
-        '#4caf50': 'Зелений',
-        '#6a1b9a': 'Фіолетовий',
-        '#ffeb3b': 'Жовтий',
-        '#4d7cff': 'Синій',
-        '#a64dff': 'Пурпурний',
-        '#ff9f4d': 'Помаранчевий',
+        '#6a11cb': 'Фіолетово-синій',
         '#3da18d': 'М’ятний',
-        '#ff69b4': 'Рожевий',
-        '#26a69a': 'Бірюзовий'
+        '#7e7ed9': 'Глибока аврора',
+        '#7ed0f9': 'Кришталево-блакитний',
+        '#f4a261': 'Янтарний',
+        '#f6a5b0': 'Оксамитова сакура',
+        '#d32f2f': 'Яскраво-червоний',
+        '#388e3c': 'Смарагдовий',
+        '#7b1fa2': 'Темно-пурпурний',
+        '#fbc02d': 'Сонячний',
+        '#0288d1': 'Лазурний',
+        '#ec407a': 'Малиновий'
     };
 
     function rgbToHex(rgb) {
@@ -52,7 +54,7 @@
     function createColorModal() {
         var style = document.createElement('style');
         style.id = 'colormodal';
-        style.textContent = '.color_row { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
+        style.textContent = '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
                             '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
                             '.selector.focus, .button--category { background-color: var(--main-color) !important; }' +
@@ -127,7 +129,7 @@
                 onChange: function () {
                     createColorModal();
                     var colorKeys = Object.keys(colors);
-                    var groupedColors = chunkArray(colorKeys, 5);
+                    var groupedColors = chunkArray(colorKeys, 6);
                     var color_content = groupedColors.map(function (group) {
                         var groupContent = group.map(function (color) {
                             return createColorHtml(color, colors[color]);
