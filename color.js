@@ -26,15 +26,15 @@
 
     function applyAccentColor(color) {
         var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
-        console.log('applyAccentColor: Застосовується колір: ' + hexColor);
         document.documentElement.style.setProperty('--main-color', hexColor);
         Lampa.Storage.set('accent_color_selected', hexColor);
         var descr = $('.settings-param__descr div');
         if (descr.length) {
             descr.css('background-color', hexColor);
         }
-        Lampa.Settings.render();
-        console.log('Колір змінено на: ' + hexColor);
+        setTimeout(function () {
+            Lampa.Settings.render();
+        }, 0);
     }
 
     function createColorModal() {
@@ -42,9 +42,10 @@
         style.id = 'colormodal';
         style.textContent = '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
-                            '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }';
+                            '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
+                            '.selector.focus, .button--category { background-color: var(--main-color) !important; }' +
+                            '.settings-param__name, .settings-folder__name { color: var(--main-color) !important; }';
         document.head.appendChild(style);
-        console.log('Стилі для модального вікна кольорів створено');
     }
 
     function createColorHtml(color) {
@@ -60,10 +61,13 @@
     }
 
     function initColorPicker() {
-        console.log('Ініціалізація color.js');
         Lampa.Template.add('settings', '<div class="settings"></div>');
         Lampa.Template.add('settings_', '<div class="settings"></div>');
         try {
+            Lampa.SettingsApi.addComponent({
+                component: 'accent_color_plugin',
+                name: Lampa.Lang.translate('accent_color')
+            });
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: {
@@ -76,8 +80,11 @@
                 },
                 onRender: function (item) {
                     var color = Lampa.Storage.get('accent_color_selected', '#5daa68');
-                    item.find('.settings-param__descr div').css('background-color', color);
-                    console.log('Рендеринг кнопки вибору кольору, поточний колір: ' + color);
+                    document.documentElement.style.setProperty('--main-color', color);
+                    var descr = item.find('.settings-param__descr div');
+                    if (descr.length) {
+                        descr.css('background-color', color);
+                    }
                 },
                 onChange: function () {
                     createColorModal();
@@ -103,42 +110,25 @@
                                 Lampa.Controller.toggle('settings_component');
                                 Lampa.Controller.enable('menu');
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
-                                    var color = a[0].style.backgroundColor;
-                                    if (color) {
-                                        applyAccentColor(color);
-                                        console.log('Вибрано колір: ' + color);
-                                    } else {
-                                        console.error('Колір не визначено для елемента');
-                                    }
-                                } else {
-                                    console.error('Некоректний вибір елемента');
+                                    var color = a[0].style.backgroundColor || Lampa.Storage.get('accent_color_selected', '#5daa68');
+                                    applyAccentColor(color);
                                 }
                             }
                         });
-                        console.log('Модальне вікно кольорів відкрито, відображено ' + colors.length + ' кольорів');
-                    } catch (e) {
-                        console.error('Помилка відкриття модального вікна кольорів: ' + e.message);
-                    }
+                    } catch (e) {}
                 }
             });
-            console.log('Кнопка вибору кольору додана до accent_color_plugin');
-        } catch (e) {
-            console.error('Помилка додавання кнопки вибору кольору: ' + e.message);
-        }
+        } catch (e) {}
 
         var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
         document.documentElement.style.setProperty('--main-color', savedColor);
-        console.log('Застосовано збережений колір: ' + savedColor);
-        Lampa.Settings.render();
     }
 
     if (window.appready) {
-        console.log('Lampa готова, виклик initColorPicker');
         initColorPicker();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
-                console.log('Lampa готова, виклик initColorPicker');
                 initColorPicker();
             }
         });
@@ -146,7 +136,8 @@
 
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
-            console.log('Меню налаштувань відкрито, оновлення UI');
+            var color = Lampa.Storage.get('accent_color_selected', '#5daa68');
+            document.documentElement.style.setProperty('--main-color', color);
             Lampa.Settings.render();
         }
     });
