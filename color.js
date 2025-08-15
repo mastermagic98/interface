@@ -11,10 +11,20 @@
             ru: 'Включить',
             en: 'Enable',
             uk: 'Увімкнути'
+        },
+        background_color: {
+            ru: 'Выбор цвета фона',
+            en: 'Select background color',
+            uk: 'Вибір кольору фону'
+        },
+        background_color_on: {
+            ru: 'Включить',
+            en: 'Enable',
+            uk: 'Увімкнути'
         }
     });
 
-    var colors = {
+    var accentColors = {
         '#6a11cb': 'Фіолетово-синій',
         '#3da18d': 'М’ятний',
         '#7e7ed9': 'Глибока аврора',
@@ -27,6 +37,21 @@
         '#fbc02d': 'Сонячний',
         '#0288d1': 'Лазурний',
         '#ec407a': 'Малиновий'
+    };
+
+    var backgroundColors = {
+        '#000000': 'Чорний',
+        '#1d1f20': 'Темно-сірий',
+        '#0a1b2a': 'Темно-синій',
+        '#081822': 'Глибокий синій',
+        '#1a102b': 'Темно-фіолетовий',
+        '#1f0e04': 'Темно-коричневий',
+        '#4b0e2b': 'Темно-рожевий',
+        '#121212': 'Майже чорний',
+        '#1c2526': 'Темно-зелений',
+        '#2a1c3a': 'Темно-пурпурний',
+        '#0d1a2f': 'Темно-блакитний',
+        '#2f1c1c': 'Темно-червоний'
     };
 
     function rgbToHex(rgb) {
@@ -42,7 +67,20 @@
         var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
         document.documentElement.style.setProperty('--main-color', hexColor);
         Lampa.Storage.set('accent_color_selected', hexColor);
-        var descr = $('.settings-param__descr div');
+        var descr = $('.settings-param[data-name="select_accent_color"] .settings-param__descr div');
+        if (descr.length) {
+            descr.css('background-color', hexColor);
+        }
+        setTimeout(function () {
+            Lampa.Settings.render();
+        }, 0);
+    }
+
+    function applyBackgroundColor(color) {
+        var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
+        document.documentElement.style.setProperty('--background-color', hexColor);
+        Lampa.Storage.set('background_color_selected', hexColor);
+        var descr = $('.settings-param[data-name="select_background_color"] .settings-param__descr div');
         if (descr.length) {
             descr.css('background-color', hexColor);
         }
@@ -54,11 +92,24 @@
     function createColorModal() {
         var style = document.createElement('style');
         style.id = 'colormodal';
-        style.textContent = '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
+        style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #fff; --transparent-white: rgba(255,255,255,0.2); }' +
+                            'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
+                            '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
                             '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
                             '.selector.focus, .button--category { background-color: var(--main-color) !important; }' +
-                            '.settings-param__name, .settings-folder__name { color: var(--main-color) !important; }';
+                            '.settings-param__name, .settings-folder__name { color: var(--main-color) !important; }' +
+                            '.console__tab.focus, .menu__item.focus, .menu__item.traverse, .menu__item.hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action.hover, .player-panel .button.focus, .search-source.active { background: var(--main-color); color: #fff; }' +
+                            '.navigation-tabs__button.focus, .time-line > div, .player-panel__position, .player-panel__position > div:after { background-color: var(--main-color); color: #fff; }' +
+                            '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; color: #fff !important; }' +
+                            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .torrent-serial__progress, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item.hover { background: var(--main-color); color: #fff; }' +
+                            '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color); }' +
+                            '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before { border-color: var(--main-color) !important; }' +
+                            '.card-more.focus .card-more__box::after, .explorer-card__head-img.focus::after { border: 0.3em solid var(--main-color); }' +
+                            '.iptv-playlist-item.focus::after, .iptv-playlist-item.hover::after, .ad-bot.focus .ad-bot__content::after, .ad-bot.hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card.hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after { border-color: var(--main-color); }' +
+                            '.broadcast__scan > div, .broadcast__device.focus { background-color: var(--main-color); color: #fff; }' +
+                            '.card:hover .card__img, .card.focus .card__img { border-color: var(--main-color); }' +
+                            '.noty, .radio-player.focus { background: var(--main-color); color: #fff; }';
         document.head.appendChild(style);
     }
 
@@ -110,7 +161,7 @@
                     type: 'button'
                 },
                 field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>' + Lampa.Lang.translate('accent_color'),
+                    name: Lampa.Lang.translate('accent_color'),
                     description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('accent_color_selected', '#5daa68') + '; display: inline-block; border: 1px solid #fff;"></div>'
                 },
                 onRender: function (item) {
@@ -128,11 +179,11 @@
                 },
                 onChange: function () {
                     createColorModal();
-                    var colorKeys = Object.keys(colors);
+                    var colorKeys = Object.keys(accentColors);
                     var groupedColors = chunkArray(colorKeys, 6);
                     var color_content = groupedColors.map(function (group) {
                         var groupContent = group.map(function (color) {
-                            return createColorHtml(color, colors[color]);
+                            return createColorHtml(color, accentColors[color]);
                         }).join('');
                         return '<div class="color_row">' + groupContent + '</div>';
                     }).join('');
@@ -161,16 +212,103 @@
                     } catch (e) {}
                 }
             });
+
+            Lampa.SettingsApi.addParam({
+                component: 'accent_color_plugin',
+                param: {
+                    name: 'background_color_active',
+                    type: 'trigger',
+                    default: false
+                },
+                field: {
+                    name: Lampa.Lang.translate('background_color_on')
+                },
+                onChange: function (item) {
+                    var selectItem = $('.settings-param[data-name="select_background_color"]');
+                    if (selectItem.length) {
+                        selectItem.css('display', item === 'true' ? 'block' : 'none');
+                    }
+                    Lampa.Settings.render();
+                }
+            });
+
+            Lampa.SettingsApi.addParam({
+                component: 'accent_color_plugin',
+                param: {
+                    name: 'select_background_color',
+                    type: 'button'
+                },
+                field: {
+                    name: Lampa.Lang.translate('background_color'),
+                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('background_color_selected', '#1d1f20') + '; display: inline-block; border: 1px solid #fff;"></div>'
+                },
+                onRender: function (item) {
+                    if (!Lampa.Storage.get('background_color_active')) {
+                        item.css('display', 'none');
+                    } else {
+                        item.css('display', 'block');
+                    }
+                    var color = Lampa.Storage.get('background_color_selected', '#1d1f20');
+                    document.documentElement.style.setProperty('--background-color', color);
+                    var descr = item.find('.settings-param__descr div');
+                    if (descr.length) {
+                        descr.css('background-color', color);
+                    }
+                },
+                onChange: function () {
+                    createColorModal();
+                    var colorKeys = Object.keys(backgroundColors);
+                    var groupedColors = chunkArray(colorKeys, 6);
+                    var color_content = groupedColors.map(function (group) {
+                        var groupContent = group.map(function (color) {
+                            return createColorHtml(color, backgroundColors[color]);
+                        }).join('');
+                        return '<div class="color_row">' + groupContent + '</div>';
+                    }).join('');
+                    var modalHtml = $('<div class="color_modal_root">' + color_content + '</div>');
+                    try {
+                        Lampa.Modal.open({
+                            title: Lampa.Lang.translate('background_color'),
+                            size: 'medium',
+                            align: 'center',
+                            html: modalHtml,
+                            onBack: function () {
+                                Lampa.Modal.close();
+                                Lampa.Controller.toggle('settings_component');
+                                Lampa.Controller.enable('menu');
+                            },
+                            onSelect: function (a) {
+                                Lampa.Modal.close();
+                                Lampa.Controller.toggle('settings_component');
+                                Lampa.Controller.enable('menu');
+                                if (a.length > 0 && a[0] instanceof HTMLElement) {
+                                    var color = a[0].style.backgroundColor || Lampa.Storage.get('background_color_selected', '#1d1f20');
+                                    applyBackgroundColor(color);
+                                }
+                            }
+                        });
+                    } catch (e) {}
+                }
+            });
         } catch (e) {}
 
-        var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
-        document.documentElement.style.setProperty('--main-color', savedColor);
+        var savedAccentColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
+        var savedBackgroundColor = Lampa.Storage.get('background_color_selected', '#1d1f20');
+        document.documentElement.style.setProperty('--main-color', savedAccentColor);
+        document.documentElement.style.setProperty('--background-color', savedBackgroundColor);
 
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'accent_color_active') {
                 var selectItem = $('.settings-param[data-name="select_accent_color"]');
                 if (selectItem.length) {
                     selectItem.css('display', Lampa.Storage.get('accent_color_active') ? 'block' : 'none');
+                }
+                Lampa.Settings.render();
+            }
+            if (e.name === 'background_color_active') {
+                var selectItem = $('.settings-param[data-name="select_background_color"]');
+                if (selectItem.length) {
+                    selectItem.css('display', Lampa.Storage.get('background_color_active') ? 'block' : 'none');
                 }
                 Lampa.Settings.render();
             }
@@ -189,11 +327,14 @@
 
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
-            var color = Lampa.Storage.get('accent_color_selected', '#5daa68');
-            document.documentElement.style.setProperty('--main-color', color);
+            var accentColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
+            var backgroundColor = Lampa.Storage.get('background_color_selected', '#1d1f20');
+            document.documentElement.style.setProperty('--main-color', accentColor);
+            document.documentElement.style.setProperty('--background-color', backgroundColor);
             Lampa.Settings.render();
         }
     });
 
     window.applyAccentColor = applyAccentColor;
+    window.applyBackgroundColor = applyBackgroundColor;
 })();
