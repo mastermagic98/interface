@@ -109,6 +109,7 @@
                     } else {
                         remove_activity_loader();
                     }
+                    Lampa.Settings.render(); // Оновлення UI для показу/приховування select_ani_mation
                 }
             });
         } catch (e) {}
@@ -121,10 +122,16 @@
                     type: 'button'
                 },
                 field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><svg fill="#D3030300" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"></path></svg></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
-                    insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders && window.svg_loaders.length > 0 ? window.svg_loaders[0] : ''));
+                    // Приховуємо опцію, якщо ani_active = false
+                    if (!Lampa.Storage.get('ani_active')) {
+                        item.css('display', 'none');
+                    } else {
+                        item.css('display', 'block');
+                        insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders && window.svg_loaders.length > 0 ? window.svg_loaders[0] : ''));
+                    }
                 },
                 onChange: function () {
                     if (!window.svg_loaders || window.svg_loaders.length === 0) return;
@@ -183,6 +190,17 @@
                 }
             });
         } catch (e) {}
+
+        // Оновлення видимості select_ani_mation при зміні ani_active
+        Lampa.Storage.listener.follow('change', function (e) {
+            if (e.name === 'ani_active') {
+                var selectItem = $('.settings-param[data-name="select_ani_mation"]');
+                if (selectItem.length) {
+                    selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                }
+                Lampa.Settings.render();
+            }
+        });
 
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
