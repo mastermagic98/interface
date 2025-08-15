@@ -79,7 +79,7 @@
     }
 
     function aniLoad() {
-        var icon_plugin = '<svg height="24" viewBox="0 0 24 26" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"/></svg>';
+        var icon_plugin = '<svg fill="hsl(228, 97%, 42%)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"></path></svg>';
 
         try {
             Lampa.SettingsApi.addComponent({
@@ -109,7 +109,7 @@
                     } else {
                         remove_activity_loader();
                     }
-                    Lampa.Settings.render(); // Оновлення UI для показу/приховування select_ani_mation
+                    Lampa.Settings.render();
                 }
             });
         } catch (e) {}
@@ -122,15 +122,16 @@
                     type: 'button'
                 },
                 field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><svg fill="#D3030300" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"></path></svg></div>' + Lampa.Lang.translate('params_ani_select')
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div><svg fill="#D3030300" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"></path></svg></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
-                    // Приховуємо опцію, якщо ani_active = false
                     if (!Lampa.Storage.get('ani_active')) {
                         item.css('display', 'none');
                     } else {
                         item.css('display', 'block');
-                        insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders && window.svg_loaders.length > 0 ? window.svg_loaders[0] : ''));
+                        setTimeout(function () {
+                            insert_activity_loader_prv(Lampa.Storage.get('ani_load', window.svg_loaders && window.svg_loaders.length > 0 ? window.svg_loaders[0] : ''));
+                        }, 0);
                     }
                 },
                 onChange: function () {
@@ -191,12 +192,14 @@
             });
         } catch (e) {}
 
-        // Оновлення видимості select_ani_mation при зміні ani_active
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'ani_active') {
                 var selectItem = $('.settings-param[data-name="select_ani_mation"]');
                 if (selectItem.length) {
                     selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                    if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load')) {
+                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                    }
                 }
                 Lampa.Settings.render();
             }
