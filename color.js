@@ -70,7 +70,7 @@
     };
 
     var iconColors = {
-        'white': '#fff',
+        'white': '#ddd', // Змінено з #fff на #ddd
         'black': '#000'
     };
 
@@ -110,9 +110,14 @@
     }
 
     function applyIconColor(color) {
-        var hexColor = iconColors[color] || '#fff';
+        var hexColor = iconColors[color] || '#ddd'; // За замовчуванням #ddd
         document.documentElement.style.setProperty('--icon-color', hexColor);
         Lampa.Storage.set('icon_color_selected', color);
+        // Примусове оновлення стилів
+        var style = document.getElementById('colormodal');
+        if (style) {
+            style.textContent = style.textContent.replace(/--icon-color: #[0-9a-fA-F]{3,6}/, `--icon-color: ${hexColor}`);
+        }
         setTimeout(function () {
             Lampa.Settings.render();
         }, 0);
@@ -128,7 +133,7 @@
                 --background-color: #1d1f20;
                 --text-color: #ddd;
                 --transparent-white: rgba(255,255,255,0.2);
-                --icon-color: ${iconColors[iconColor] || '#fff'};
+                --icon-color: ${iconColors[iconColor] || '#ddd'};
             }
             html, body, .extensions {
                 background: var(--background-color);
@@ -523,7 +528,7 @@
         var savedIconColor = Lampa.Storage.get('icon_color_selected', 'white');
         document.documentElement.style.setProperty('--main-color', savedAccentColor);
         document.documentElement.style.setProperty('--background-color', savedBackgroundColor);
-        document.documentElement.style.setProperty('--icon-color', iconColors[savedIconColor] || '#fff');
+        document.documentElement.style.setProperty('--icon-color', iconColors[savedIconColor] || '#ddd');
 
         // Оновлення стилів після зміни теми
         Lampa.Storage.listener.follow('change', function (e) {
@@ -640,7 +645,7 @@
             var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
             document.documentElement.style.setProperty('--main-color', accentColor);
             document.documentElement.style.setProperty('--background-color', backgroundColor);
-            document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#fff');
+            document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
             Lampa.Settings.render();
         }
     });
