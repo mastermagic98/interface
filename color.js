@@ -95,13 +95,13 @@
         style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #ddd; --transparent-white: rgba(255,255,255,0.2); }' +
                             'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
                             '.menu__item { color: #ddd !important; }' +
-                            // Стиль для всіх іконок, крім "Налаштування"
+                            // Стиль для всіх іконок, крім "Налаштування": задаємо колір #ddd, прибираємо обведення
                             '.menu__ico:not([class*="settings"]), .menu__ico:not([class*="settings"]) svg, .menu__ico:not([class*="settings"]) path, .menu__ico:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                             '.menu__ico.focus:not([class*="settings"]), .menu__ico.focus:not([class*="settings"]) svg, .menu__ico.focus:not([class*="settings"]) path, .menu__ico.focus:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
-                            // Стиль для іконки "Налаштування"
+                            // Стиль для іконки "Налаштування": лише прозорий фон, без color, stroke чи stroke-width
                             '.menu__ico[class*="settings"], .menu__ico[class*="settings"] svg, .menu__ico[class*="settings"] path, .menu__ico[class*="settings"] g { background: transparent !important; }' +
                             '.menu__ico.focus[class*="settings"], .menu__ico.focus[class*="settings"] svg, .menu__ico.focus[class*="settings"] path, .menu__ico.focus[class*="settings"] g { background: transparent !important; }' +
-                            // Стиль для іконки особи
+                            // Стиль для іконки особи: прибираємо псевдоелементи та обведення, зберігаємо колір #ddd
                             '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
                             '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke: none !important; stroke-width: 0 !important; color: #ddd !important; }' +
                             '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
@@ -331,10 +331,13 @@
                     var style = document.createElement('style');
                     style.id = 'colormodal-override';
                     style.textContent = '.menu__item { color: #ddd !important; }' +
+                                        // Стиль для всіх іконок, крім "Налаштування": задаємо колір #ddd, прибираємо обведення
                                         '.menu__ico:not([class*="settings"]), .menu__ico:not([class*="settings"]) svg, .menu__ico:not([class*="settings"]) path, .menu__ico:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                                         '.menu__ico.focus:not([class*="settings"]), .menu__ico.focus:not([class*="settings"]) svg, .menu__ico.focus:not([class*="settings"]) path, .menu__ico.focus:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                                        // Стиль для іконки "Налаштування": лише прозорий фон
                                         '.menu__ico[class*="settings"], .menu__ico[class*="settings"] svg, .menu__ico[class*="settings"] path, .menu__ico[class*="settings"] g { background: transparent !important; }' +
                                         '.menu__ico.focus[class*="settings"], .menu__ico.focus[class*="settings"] svg, .menu__ico.focus[class*="settings"] path, .menu__ico.focus[class*="settings"] g { background: transparent !important; }' +
+                                        // Стиль для іконки особи: прибираємо псевдоелементи та обведення, зберігаємо колір #ddd
                                         '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
                                         '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke: none !important; stroke-width: 0 !important; color: #ddd !important; }' +
                                         '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
