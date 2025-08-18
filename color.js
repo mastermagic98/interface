@@ -92,31 +92,32 @@
     function createColorModal() {
         var style = document.createElement('style');
         style.id = 'colormodal';
-        style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #fff; --transparent-white: rgba(255,255,255,0.2); }' +
+        style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #ddd; --transparent-white: rgba(255,255,255,0.2); }' +
                             'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
-                            '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #000 !important; fill: #000 !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                            '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #000 !important; fill: #000 !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
+                            '.menu__item { color: #ddd !important; }' +
+                            '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                            '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                             '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
-                            '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #000 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                            '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: var(--text-color) !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
-                            '.menu__item.focus { background: var(--main-color) !important; transform: translateX(-0.2em); }' +
+                            '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #ddd !important; }' +
+                            '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
+                            '.menu__item.focus { background: var(--main-color) !important; color: #ddd !important; transform: translateX(-0.2em); }' +
                             '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }' +
                             '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
-                            '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
+                            '.color_square.focus { border: 2px solid #ddd; transform: scale(1.1); }' +
                             '.selector.focus:not(.card__title):not(.card):not(.color_square):not(.menu__ico), .button--category { background-color: var(--main-color) !important; }' +
                             '.settings-param__name, .settings-folder__name { color: var(--text-color); }' +
                             '.console__tab.focus, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action.hover, .player-panel .button.focus, .search-source.active { background: var(--main-color) !important; color: var(--text-color) !important; }' +
-                            '.navigation-tabs__button.focus, .time-line > div, .player-panel__position, .player-panel__position > div:after { background-color: var(--main-color); color: #fff; }' +
-                            '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; color: #fff !important; }' +
-                            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .torrent-serial__progress, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item.hover { background: var(--main-color); color: #fff; }' +
+                            '.navigation-tabs__button.focus, .time-line > div, .player-panel__position, .player-panel__position > div:after { background-color: var(--main-color); color: #ddd; }' +
+                            '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; color: #ddd !important; }' +
+                            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .torrent-serial__progress, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item.hover { background: var(--main-color); color: #ddd; }' +
                             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color); }' +
                             '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before { border-color: var(--main-color) !important; }' +
                             '.card-more.focus .card-more__box::after, .explorer-card__head-img.focus::after { border: 0.3em solid var(--main-color); }' +
                             '.iptv-playlist-item.focus::after, .iptv-playlist-item.hover::after, .ad-bot.focus .ad-bot__content::after, .ad-bot.hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card.hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after { border-color: var(--main-color); }' +
-                            '.broadcast__scan > div, .broadcast__device.focus { background-color: var(--main-color); color: #fff; }' +
+                            '.broadcast__scan > div, .broadcast__device.focus { background-color: var(--main-color); color: #ddd; }' +
                             '.card:hover .card__img, .card.focus .card__img { border-color: var(--main-color); }' +
-                            '.noty, .radio-player.focus { background: var(--main-color); color: #fff; }';
+                            '.noty, .radio-player.focus { background: var(--main-color); color: #ddd; }';
         document.head.appendChild(style);
     }
 
@@ -169,7 +170,7 @@
                 },
                 field: {
                     name: Lampa.Lang.translate('accent_color'),
-                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('accent_color_selected', '#5daa68') + '; display: inline-block; border: 1px solid #fff;"></div>'
+                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('accent_color_selected', '#5daa68') + '; display: inline-block; border: 1px solid #ddd;"></div>'
                 },
                 onRender: function (item) {
                     if (!Lampa.Storage.get('accent_color_active')) {
@@ -247,7 +248,7 @@
                 },
                 field: {
                     name: Lampa.Lang.translate('background_color'),
-                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('background_color_selected', '#1d1f20') + '; display: inline-block; border: 1px solid #fff;"></div>'
+                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('background_color_selected', '#1d1f20') + '; display: inline-block; border: 1px solid #ddd;"></div>'
                 },
                 onRender: function (item) {
                     if (!Lampa.Storage.get('background_color_active')) {
@@ -324,12 +325,13 @@
                 setTimeout(function () {
                     var style = document.createElement('style');
                     style.id = 'colormodal-override';
-                    style.textContent = '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #000 !important; fill: #000 !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                                        '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #000 !important; fill: #000 !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
+                    style.textContent = '.menu__item { color: #ddd !important; }' +
+                                        '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                                        '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                                         '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
-                                        '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #000 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                                        '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: var(--text-color) !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
-                                        '.menu__item.focus { background: var(--main-color) !important; transform: translateX(-0.2em); }' +
+                                        '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #ddd !important; }' +
+                                        '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
+                                        '.menu__item.focus { background: var(--main-color) !important; color: #ddd !important; transform: translateX(-0.2em); }' +
                                         '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }';
                     document.head.appendChild(style);
                 }, 0);
