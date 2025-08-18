@@ -95,11 +95,11 @@
         style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #fff; --transparent-white: rgba(255,255,255,0.2); }' +
                             'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
                             '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { color: var(--text-color) !important; fill: var(--text-color) !important; stroke: var(--text-color) !important; -webkit-filter: none !important; filter: none !important; }' +
-                            '.card.focus .card__title, .card:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }' +
+                            '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }' +
                             '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
                             '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
-                            '.selector.focus:not(.card__title), .button--category { background-color: var(--main-color) !important; }' +
+                            '.selector.focus:not(.card__title):not(.card), .button--category { background-color: var(--main-color) !important; }' +
                             '.settings-param__name, .settings-folder__name { color: var(--text-color); }' +
                             '.console__tab.focus, .menu__item.focus, .menu__item.traverse, .menu__item.hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action.hover, .player-panel .button.focus, .search-source.active { background: var(--main-color); color: #fff; }' +
                             '.navigation-tabs__button.focus, .time-line > div, .player-panel__position, .player-panel__position > div:after { background-color: var(--main-color); color: #fff; }' +
@@ -320,7 +320,7 @@
                     var style = document.createElement('style');
                     style.id = 'colormodal-override';
                     style.textContent = '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { color: var(--text-color) !important; fill: var(--text-color) !important; stroke: var(--text-color) !important; -webkit-filter: none !important; filter: none !important; }' +
-                                        '.card.focus .card__title, .card:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }';
+                                        '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }';
                     document.head.appendChild(style);
                 }, 0);
             }
