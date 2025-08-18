@@ -98,14 +98,15 @@
                             '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #000 !important; fill: #000 !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
                             '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
                             '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #000 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                            '.menu__item.focus, .menu__item.traverse, .menu__item.hover { background: var(--main-color) !important; color: var(--text-color) !important; padding: 0.9em 1.5em !important; border-radius: 1em !important; }' +
+                            '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: var(--text-color) !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
+                            '.menu__item.focus { background: var(--main-color) !important; transform: translateX(-0.2em); }' +
                             '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }' +
                             '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
                             '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
                             '.selector.focus:not(.card__title):not(.card):not(.color_square):not(.menu__ico), .button--category { background-color: var(--main-color) !important; }' +
                             '.settings-param__name, .settings-folder__name { color: var(--text-color); }' +
-                            '.console__tab.focus, .menu__item.focus, .menu__item.traverse, .menu__item.hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action.hover, .player-panel .button.focus, .search-source.active { background: var(--main-color) !important; color: var(--text-color) !important; }' +
+                            '.console__tab.focus, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action.hover, .player-panel .button.focus, .search-source.active { background: var(--main-color) !important; color: var(--text-color) !important; }' +
                             '.navigation-tabs__button.focus, .time-line > div, .player-panel__position, .player-panel__position > div:after { background-color: var(--main-color); color: #fff; }' +
                             '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; color: #fff !important; }' +
                             '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .torrent-serial__progress, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item.hover { background: var(--main-color); color: #fff; }' +
@@ -319,7 +320,7 @@
                 }
                 Lampa.Settings.render();
             }
-            if (e.name === 'selectedTheme') {
+            if (e.name === 'selectedTheme' || e.name === 'theme_select') {
                 setTimeout(function () {
                     var style = document.createElement('style');
                     style.id = 'colormodal-override';
@@ -327,7 +328,8 @@
                                         '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #000 !important; fill: #000 !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
                                         '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
                                         '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #000 !important; -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                                        '.menu__item.focus, .menu__item.traverse, .menu__item.hover { background: var(--main-color) !important; color: var(--text-color) !important; padding: 0.9em 1.5em !important; border-radius: 1em !important; }' +
+                                        '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: var(--text-color) !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
+                                        '.menu__item.focus { background: var(--main-color) !important; transform: translateX(-0.2em); }' +
                                         '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }';
                     document.head.appendChild(style);
                 }, 0);
