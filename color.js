@@ -95,10 +95,10 @@
         style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #ddd; --transparent-white: rgba(255,255,255,0.2); }' +
                             'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
                             '.menu__item { color: #ddd !important; }' +
-                            '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
-                            '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                            '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                            '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                             '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
-                            '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #ddd !important; }' +
+                            '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke: none !important; stroke-width: 0 !important; color: #ddd !important; }' +
                             '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
                             '.menu__item.focus { background: var(--main-color) !important; color: #ddd !important; transform: translateX(-0.2em); }' +
                             '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }' +
@@ -326,10 +326,10 @@
                     var style = document.createElement('style');
                     style.id = 'colormodal-override';
                     style.textContent = '.menu__item { color: #ddd !important; }' +
-                                        '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
-                                        '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #ddd !important; fill: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                                        '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
+                                        '.menu__ico.focus, .menu__ico.focus svg, .menu__ico.focus path, .menu__ico.focus g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                                         '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
-                                        '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke-width: 0 !important; stroke: none !important; fill: #ddd !important; }' +
+                                        '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke: none !important; stroke-width: 0 !important; color: #ddd !important; }' +
                                         '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
                                         '.menu__item.focus { background: var(--main-color) !important; color: #ddd !important; transform: translateX(-0.2em); }' +
                                         '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }';
