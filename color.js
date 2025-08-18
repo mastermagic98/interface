@@ -99,8 +99,8 @@
                             '.menu__ico:not([class*="settings"]), .menu__ico:not([class*="settings"]) svg, .menu__ico:not([class*="settings"]) path, .menu__ico:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                             '.menu__ico.focus:not([class*="settings"]), .menu__ico.focus:not([class*="settings"]) svg, .menu__ico.focus:not([class*="settings"]) path, .menu__ico.focus:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                             // Стиль для іконки "Налаштування"
-                            '.menu__ico[class*="settings"], .menu__ico[class*="settings"] svg, .menu__ico[class*="settings"] path, .menu__ico[class*="settings"] g { background: transparent !important; color: #ddd !important; }' +
-                            '.menu__ico.focus[class*="settings"], .menu__ico.focus[class*="settings"] svg, .menu__ico.focus[class*="settings"] path, .menu__ico.focus[class*="settings"] g { background: transparent !important; color: #ddd !important; }' +
+                            '.menu__ico[class*="settings"], .menu__ico[class*="settings"] svg, .menu__ico[class*="settings"] path, .menu__ico[class*="settings"] g { background: transparent !important; }' +
+                            '.menu__ico.focus[class*="settings"], .menu__ico.focus[class*="settings"] svg, .menu__ico.focus[class*="settings"] path, .menu__ico.focus[class*="settings"] g { background: transparent !important; }' +
                             // Стиль для іконки особи
                             '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
                             '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke: none !important; stroke-width: 0 !important; color: #ddd !important; }' +
@@ -333,8 +333,8 @@
                     style.textContent = '.menu__item { color: #ddd !important; }' +
                                         '.menu__ico:not([class*="settings"]), .menu__ico:not([class*="settings"]) svg, .menu__ico:not([class*="settings"]) path, .menu__ico:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
                                         '.menu__ico.focus:not([class*="settings"]), .menu__ico.focus:not([class*="settings"]) svg, .menu__ico.focus:not([class*="settings"]) path, .menu__ico.focus:not([class*="settings"]) g { background: transparent !important; color: #ddd !important; stroke: none !important; stroke-width: 0 !important; }' +
-                                        '.menu__ico[class*="settings"], .menu__ico[class*="settings"] svg, .menu__ico[class*="settings"] path, .menu__ico[class*="settings"] g { background: transparent !important; color: #ddd !important; }' +
-                                        '.menu__ico.focus[class*="settings"], .menu__ico.focus[class*="settings"] svg, .menu__ico.focus[class*="settings"] path, .menu__ico.focus[class*="settings"] g { background: transparent !important; color: #ddd !important; }' +
+                                        '.menu__ico[class*="settings"], .menu__ico[class*="settings"] svg, .menu__ico[class*="settings"] path, .menu__ico[class*="settings"] g { background: transparent !important; }' +
+                                        '.menu__ico.focus[class*="settings"], .menu__ico.focus[class*="settings"] svg, .menu__ico.focus[class*="settings"] path, .menu__ico.focus[class*="settings"] g { background: transparent !important; }' +
                                         '.menu__ico--person::before, .menu__ico--person::after { content: none !important; }' +
                                         '.menu__ico--person svg, .menu__ico--person path, .menu__ico--person g { stroke: none !important; stroke-width: 0 !important; color: #ddd !important; }' +
                                         '.menu__item, .menu__item.traverse, .menu__item.hover { background: transparent !important; color: #ddd !important; padding: 0.9em 1.5em !important; border-radius: 0 1em 1em 0 !important; }' +
