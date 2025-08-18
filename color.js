@@ -6,117 +6,45 @@
             ru: 'Выбор цвета акцента',
             en: 'Select accent color',
             uk: 'Вибір кольору акценту'
-        },
-        accent_color_on: {
-            ru: 'Включить',
-            en: 'Enable',
-            uk: 'Увімкнути'
-        },
-        background_color: {
-            ru: 'Выбор цвета фона',
-            en: 'Select background color',
-            uk: 'Вибір кольору фону'
-        },
-        background_color_on: {
-            ru: 'Включить',
-            en: 'Enable',
-            uk: 'Увімкнути'
         }
     });
 
-    var accentColors = {
-        '#6a11cb': 'Фіолетово-синій',
-        '#3da18d': 'М’ятний',
-        '#7e7ed9': 'Глибока аврора',
-        '#7ed0f9': 'Кришталево-блакитний',
-        '#f4a261': 'Янтарний',
-        '#f6a5b0': 'Оксамитова сакура',
-        '#d32f2f': 'Яскраво-червоний',
-        '#388e3c': 'Смарагдовий',
-        '#7b1fa2': 'Темно-пурпурний',
-        '#fbc02d': 'Сонячний',
-        '#0288d1': 'Лазурний',
-        '#ec407a': 'Малиновий'
-    };
-
-    var backgroundColors = {
-        '#000000': 'Чорний',
-        '#1d1f20': 'Темно-сірий',
-        '#0a1b2a': 'Темно-синій',
-        '#081822': 'Глибокий синій',
-        '#1a102b': 'Темно-фіолетовий',
-        '#1f0e04': 'Темно-коричневий',
-        '#4b0e2b': 'Темно-рожевий',
-        '#121212': 'Майже чорний',
-        '#1c2526': 'Темно-зелений',
-        '#2a1c3a': 'Темно-пурпурний',
-        '#0d1a2f': 'Темно-блакитний',
-        '#2f1c1c': 'Темно-червоний'
-    };
-
-    function rgbToHex(rgb) {
-        var matches = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-        if (!matches) return rgb;
-        function hex(n) {
-            return ('0' + parseInt(n).toString(16)).slice(-2);
-        }
-        return '#' + hex(matches[1]) + hex(matches[2]) + hex(matches[3]);
-    }
+    var colors = [
+        'hsl(0, 60%, 50%)',   // Червоний
+        'hsl(30, 60%, 50%)',  // Помаранчевий
+        'hsl(60, 60%, 50%)',  // Жовтий
+        'hsl(120, 60%, 50%)', // Зелений
+        'hsl(180, 60%, 50%)', // Бірюзовий
+        'hsl(240, 60%, 50%)', // Синій
+        'hsl(270, 60%, 50%)', // Фіолетовий
+        'hsl(300, 60%, 50%)', // Рожевий
+        'hsl(330, 60%, 50%)', // Малиновий
+        'hsl(15, 60%, 50%)',  // Кораловий
+        'hsl(90, 60%, 50%)',  // Лаймовий
+        'hsl(210, 60%, 50%)'  // Блакитний
+    ];
 
     function applyAccentColor(color) {
-        var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
-        document.documentElement.style.setProperty('--main-color', hexColor);
-        Lampa.Storage.set('accent_color_selected', hexColor);
-        var descr = $('.settings-param[data-name="select_accent_color"] .settings-param__descr div');
-        if (descr.length) {
-            descr.css('background-color', hexColor);
-        }
-        setTimeout(function () {
-            Lampa.Settings.render();
-        }, 0);
-    }
-
-    function applyBackgroundColor(color) {
-        var hexColor = color.includes('rgb') ? rgbToHex(color) : color;
-        document.documentElement.style.setProperty('--background-color', hexColor);
-        Lampa.Storage.set('background_color_selected', hexColor);
-        var descr = $('.settings-param[data-name="select_background_color"] .settings-param__descr div');
-        if (descr.length) {
-            descr.css('background-color', hexColor);
-        }
-        setTimeout(function () {
-            Lampa.Settings.render();
-        }, 0);
+        document.documentElement.style.setProperty('--main-color', color);
+        Lampa.Storage.set('accent_color_selected', color);
+        var event = new Event('style-change');
+        document.documentElement.dispatchEvent(event);
+        console.log('Колір змінено на: ' + color);
+        Lampa.Settings.update();
     }
 
     function createColorModal() {
         var style = document.createElement('style');
         style.id = 'colormodal';
-        style.textContent = ':root { --main-color: #5daa68; --background-color: #1d1f20; --text-color: #fff; --transparent-white: rgba(255,255,255,0.2); }' +
-                            'html, body, .extensions { background: var(--background-color); color: var(--text-color); }' +
-                            '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { color: var(--text-color) !important; fill: var(--text-color) !important; stroke: var(--text-color) !important; -webkit-filter: none !important; filter: none !important; }' +
-                            '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }' +
-                            '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
+        style.textContent = '.color_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 80px; gap: 15px; justify-items: center; width: 100%; padding: 10px; }' +
                             '.color_square { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 8px; cursor: pointer; }' +
-                            '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }' +
-                            '.selector.focus:not(.card__title):not(.card):not(.color_square), .button--category { background-color: var(--main-color) !important; }' +
-                            '.settings-param__name, .settings-folder__name { color: var(--text-color); }' +
-                            '.console__tab.focus, .menu__item.focus, .menu__item.traverse, .menu__item.hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action.hover, .player-panel .button.focus, .search-source.active { background: var(--main-color); color: #fff; }' +
-                            '.navigation-tabs__button.focus, .time-line > div, .player-panel__position, .player-panel__position > div:after { background-color: var(--main-color); color: #fff; }' +
-                            '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; color: #fff !important; }' +
-                            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .torrent-serial__progress, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item.hover { background: var(--main-color); color: #fff; }' +
-                            '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color); }' +
-                            '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before { border-color: var(--main-color) !important; }' +
-                            '.card-more.focus .card-more__box::after, .explorer-card__head-img.focus::after { border: 0.3em solid var(--main-color); }' +
-                            '.iptv-playlist-item.focus::after, .iptv-playlist-item.hover::after, .ad-bot.focus .ad-bot__content::after, .ad-bot.hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card.hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after { border-color: var(--main-color); }' +
-                            '.broadcast__scan > div, .broadcast__device.focus { background-color: var(--main-color); color: #fff; }' +
-                            '.card:hover .card__img, .card.focus .card__img { border-color: var(--main-color); }' +
-                            '.noty, .radio-player.focus { background: var(--main-color); color: #fff; }';
+                            '.color_square.focus { border: 2px solid #fff; transform: scale(1.1); }';
         document.head.appendChild(style);
+        console.log('Стилі для модального вікна кольорів створено');
     }
 
-    function createColorHtml(color, name) {
-        return '<div class="color_square selector" tabindex="0" style="background-color: ' + color + ';" title="' + name + '"></div>';
+    function createColorHtml(color) {
+        return '<div class="color_square selector" tabindex="0" style="background-color: ' + color + ';"></div>';
     }
 
     function chunkArray(arr, size) {
@@ -128,34 +56,8 @@
     }
 
     function initColorPicker() {
-        Lampa.Template.add('settings', '<div class="settings"></div>');
-        Lampa.Template.add('settings_', '<div class="settings"></div>');
+        console.log('Ініціалізація color.js');
         try {
-            Lampa.SettingsApi.addComponent({
-                component: 'accent_color_plugin',
-                name: Lampa.Lang.translate('accent_color'),
-                icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
-            });
-
-            Lampa.SettingsApi.addParam({
-                component: 'accent_color_plugin',
-                param: {
-                    name: 'accent_color_active',
-                    type: 'trigger',
-                    default: false
-                },
-                field: {
-                    name: Lampa.Lang.translate('accent_color_on')
-                },
-                onChange: function (item) {
-                    var selectItem = $('.settings-param[data-name="select_accent_color"]');
-                    if (selectItem.length) {
-                        selectItem.css('display', item === 'true' ? 'block' : 'none');
-                    }
-                    Lampa.Settings.render();
-                }
-            });
-
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: {
@@ -167,29 +69,18 @@
                     description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('accent_color_selected', '#5daa68') + '; display: inline-block; border: 1px solid #fff;"></div>'
                 },
                 onRender: function (item) {
-                    if (!Lampa.Storage.get('accent_color_active')) {
-                        item.css('display', 'none');
-                    } else {
-                        item.css('display', 'block');
-                    }
                     var color = Lampa.Storage.get('accent_color_selected', '#5daa68');
-                    document.documentElement.style.setProperty('--main-color', color);
-                    var descr = item.find('.settings-param__descr div');
-                    if (descr.length) {
-                        descr.css('background-color', color);
-                    }
+                    item.find('.settings-param__descr div').css('background-color', color);
+                    console.log('Рендеринг кнопки вибору кольору, поточний колір: ' + color);
                 },
                 onChange: function () {
                     createColorModal();
-                    var colorKeys = Object.keys(accentColors);
-                    var groupedColors = chunkArray(colorKeys, 6);
+                    var groupedColors = chunkArray(colors, 6);
                     var color_content = groupedColors.map(function (group) {
-                        var groupContent = group.map(function (color) {
-                            return createColorHtml(color, accentColors[color]);
-                        }).join('');
+                        var groupContent = group.map(createColorHtml).join('');
                         return '<div class="color_row">' + groupContent + '</div>';
                     }).join('');
-                    var modalHtml = $('<div class="color_modal_root">' + color_content + '</div>');
+                    var modalHtml = '<div class="color_modal_root">' + color_content + '</div>';
                     try {
                         Lampa.Modal.open({
                             title: Lampa.Lang.translate('accent_color'),
@@ -199,154 +90,78 @@
                             onBack: function () {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
                             },
                             onSelect: function (a) {
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
-                                    var color = a[0].style.backgroundColor || Lampa.Storage.get('accent_color_selected', '#5daa68');
-                                    applyAccentColor(color);
+                                    var color = a[0].style.backgroundColor;
+                                    if (color) {
+                                        applyAccentColor(color);
+                                        console.log('Вибрано колір: ' + color);
+                                    } else {
+                                        console.error('Колір не визначено для елемента');
+                                    }
+                                } else {
+                                    console.error('Некоректний вибір елемента');
                                 }
                             }
                         });
-                    } catch (e) {}
-                }
-            });
-
-            Lampa.SettingsApi.addParam({
-                component: 'accent_color_plugin',
-                param: {
-                    name: 'background_color_active',
-                    type: 'trigger',
-                    default: false
-                },
-                field: {
-                    name: Lampa.Lang.translate('background_color_on')
-                },
-                onChange: function (item) {
-                    var selectItem = $('.settings-param[data-name="select_background_color"]');
-                    if (selectItem.length) {
-                        selectItem.css('display', item === 'true' ? 'block' : 'none');
+                        console.log('Модальне вікно кольорів відкрито, відображено ' + colors.length + ' кольорів');
+                    } catch (e) {
+                        console.error('Помилка відкриття модального вікна кольорів: ' + e.message);
                     }
-                    Lampa.Settings.render();
                 }
             });
+            console.log('Кнопка вибору кольору додана до accent_color_plugin');
+        } catch (e) {
+            console.error('Помилка додавання кнопки вибору кольору: ' + e.message);
+        }
 
-            Lampa.SettingsApi.addParam({
-                component: 'accent_color_plugin',
-                param: {
-                    name: 'select_background_color',
-                    type: 'button'
-                },
-                field: {
-                    name: Lampa.Lang.translate('background_color'),
-                    description: '<div style="width: 2em; height: 2em; background-color: ' + Lampa.Storage.get('background_color_selected', '#1d1f20') + '; display: inline-block; border: 1px solid #fff;"></div>'
-                },
-                onRender: function (item) {
-                    if (!Lampa.Storage.get('background_color_active')) {
-                        item.css('display', 'none');
+        var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
+        document.documentElement.style.setProperty('--main-color', savedColor);
+        console.log('Застосовано збережений колір: ' + savedColor);
+        Lampa.Settings.update();
+    }
+
+    function delayedInit() {
+        if (window.appready) {
+            console.log('Lampa готова, ініціалізація color.js');
+            initColorPicker();
+        } else {
+            var attempts = 0;
+            var maxAttempts = 10;
+            var interval = setInterval(function () {
+                attempts++;
+                if (window.appready || attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    if (window.appready) {
+                        console.log('Lampa готова після затримки, ініціалізація color.js');
+                        initColorPicker();
                     } else {
-                        item.css('display', 'block');
+                        console.error('Lampa не готова після ' + maxAttempts + ' спроб');
                     }
-                    var color = Lampa.Storage.get('background_color_selected', '#1d1f20');
-                    document.documentElement.style.setProperty('--background-color', color);
-                    var descr = item.find('.settings-param__descr div');
-                    if (descr.length) {
-                        descr.css('background-color', color);
-                    }
-                },
-                onChange: function () {
-                    createColorModal();
-                    var colorKeys = Object.keys(backgroundColors);
-                    var groupedColors = chunkArray(colorKeys, 6);
-                    var color_content = groupedColors.map(function (group) {
-                        var groupContent = group.map(function (color) {
-                            return createColorHtml(color, backgroundColors[color]);
-                        }).join('');
-                        return '<div class="color_row">' + groupContent + '</div>';
-                    }).join('');
-                    var modalHtml = $('<div class="color_modal_root">' + color_content + '</div>');
-                    try {
-                        Lampa.Modal.open({
-                            title: Lampa.Lang.translate('background_color'),
-                            size: 'medium',
-                            align: 'center',
-                            html: modalHtml,
-                            onBack: function () {
-                                Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
-                            },
-                            onSelect: function (a) {
-                                Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
-                                if (a.length > 0 && a[0] instanceof HTMLElement) {
-                                    var color = a[0].style.backgroundColor || Lampa.Storage.get('background_color_selected', '#1d1f20');
-                                    applyBackgroundColor(color);
-                                }
-                            }
-                        });
-                    } catch (e) {}
                 }
-            });
-        } catch (e) {}
-
-        var savedAccentColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
-        var savedBackgroundColor = Lampa.Storage.get('background_color_selected', '#1d1f20');
-        document.documentElement.style.setProperty('--main-color', savedAccentColor);
-        document.documentElement.style.setProperty('--background-color', savedBackgroundColor);
-
-        // Оновлення стилів після зміни теми
-        Lampa.Storage.listener.follow('change', function (e) {
-            if (e.name === 'accent_color_active') {
-                var selectItem = $('.settings-param[data-name="select_accent_color"]');
-                if (selectItem.length) {
-                    selectItem.css('display', Lampa.Storage.get('accent_color_active') ? 'block' : 'none');
-                }
-                Lampa.Settings.render();
-            }
-            if (e.name === 'background_color_active') {
-                var selectItem = $('.settings-param[data-name="select_background_color"]');
-                if (selectItem.length) {
-                    selectItem.css('display', Lampa.Storage.get('background_color_active') ? 'block' : 'none');
-                }
-                Lampa.Settings.render();
-            }
-            if (e.name === 'selectedTheme') {
-                setTimeout(function () {
-                    var style = document.createElement('style');
-                    style.id = 'colormodal-override';
-                    style.textContent = '.menu__ico, .menu__ico svg, .menu__ico path, .menu__ico g { color: var(--text-color) !important; fill: var(--text-color) !important; stroke: var(--text-color) !important; -webkit-filter: none !important; filter: none !important; }' +
-                                        '.card.selector.focus .card__title, .card.selector:hover .card__title, .card .card__title { background: transparent !important; color: var(--text-color) !important; }';
-                    document.head.appendChild(style);
-                }, 0);
-            }
-        });
+            }, 500);
+        }
     }
 
     if (window.appready) {
-        initColorPicker();
+        console.log('Lampa готова, виклик delayedInit');
+        delayedInit();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
-                initColorPicker();
+                console.log('Lampa готова, виклик delayedInit');
+                delayedInit();
             }
         });
     }
 
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
-            var accentColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
-            var backgroundColor = Lampa.Storage.get('background_color_selected', '#1d1f20');
-            document.documentElement.style.setProperty('--main-color', accentColor);
-            document.documentElement.style.setProperty('--background-color', backgroundColor);
-            Lampa.Settings.render();
+            console.log('Меню налаштувань відкрито, оновлення UI');
+            Lampa.Settings.update();
         }
     });
-
-    window.applyAccentColor = applyAccentColor;
-    window.applyBackgroundColor = applyBackgroundColor;
 })();
