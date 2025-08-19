@@ -92,16 +92,25 @@
             if (svg) {
                 var paths = svg.querySelectorAll('path, g, circle');
                 paths.forEach(function (element) {
-                    element.setAttribute('fill', 'currentColor');
-                    element.style.fill = hexColor;
                     if (icon.closest('li[data-action="settings"]')) {
+                        // Для іконки "Налаштування": використовуємо stroke
+                        element.setAttribute('fill', 'none');
+                        element.style.fill = 'none';
                         element.setAttribute('stroke', 'currentColor');
                         element.style.stroke = hexColor;
-                        element.style.fill = 'none';
-                    } else {
+                    } else if (icon.classList.contains('menu__ico--person')) {
+                        // Для іконки особи: використовуємо fill
+                        element.setAttribute('fill', 'currentColor');
+                        element.style.fill = hexColor;
                         element.setAttribute('stroke', 'none');
                         element.style.stroke = 'none';
                         element.style.strokeWidth = '0';
+                    } else {
+                        // Для інших іконок ("Релізи", "Фільтр", "Історія", "Розклад", "Торренти", "Консоль"): використовуємо stroke
+                        element.setAttribute('fill', 'none');
+                        element.style.fill = 'none';
+                        element.setAttribute('stroke', 'currentColor');
+                        element.style.stroke = hexColor;
                     }
                 });
                 svg.style.color = hexColor;
@@ -162,16 +171,16 @@
                     background: var(--background-color);
                     color: var(--text-color);
                 }
-                /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо fill */
+                /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": використовуємо stroke */
                 .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
                 .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
                 .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
                 .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                     background: transparent !important;
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
-                    stroke: none !important;
-                    stroke-width: 0 !important;
+                    fill: none !important;
+                    stroke: var(--icon-color) !important;
+                    stroke-width: 1.5 !important;
                 }
                 .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
                 .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
@@ -179,9 +188,9 @@
                 .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                     background: transparent !important;
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
-                    stroke: none !important;
-                    stroke-width: 0 !important;
+                    fill: none !important;
+                    stroke: var(--icon-color) !important;
+                    stroke-width: 1.5 !important;
                 }
                 /* Стиль для іконки "Налаштування": використовуємо stroke */
                 li[data-action="settings"] .menu__ico,
@@ -191,6 +200,7 @@
                     color: var(--icon-color) !important;
                     fill: none !important;
                     stroke: var(--icon-color) !important;
+                    stroke-width: 1.5 !important;
                 }
                 li[data-action="settings"] .menu__ico.focus,
                 li[data-action="settings"] .menu__ico.focus svg,
@@ -199,8 +209,9 @@
                     color: var(--icon-color) !important;
                     fill: none !important;
                     stroke: var(--icon-color) !important;
+                    stroke-width: 1.5 !important;
                 }
-                /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо fill */
+                /* Стиль для іконки особи: використовуємо fill */
                 .menu__ico--person::before,
                 .menu__ico--person::after {
                     content: none !important;
@@ -234,7 +245,9 @@
                 .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
                 .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
+                    fill: none !important;
+                    stroke: var(--icon-color) !important;
+                    stroke-width: 1.5 !important;
                 }
                 .card.selector:hover .card__title,
                 .card .card__title {
@@ -375,16 +388,16 @@
                 background: var(--background-color);
                 color: var(--text-color);
             }
-            /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо fill */
+            /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": використовуємо stroke */
             .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
             .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
             .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
             .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                 background: transparent !important;
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
-                stroke: none !important;
-                stroke-width: 0 !important;
+                fill: none !important;
+                stroke: var(--icon-color) !important;
+                stroke-width: 1.5 !important;
             }
             .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
             .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
@@ -392,9 +405,9 @@
             .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                 background: transparent !important;
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
-                stroke: none !important;
-                stroke-width: 0 !important;
+                fill: none !important;
+                stroke: var(--icon-color) !important;
+                stroke-width: 1.5 !important;
             }
             /* Стиль для іконки "Налаштування": використовуємо stroke */
             li[data-action="settings"] .menu__ico,
@@ -404,6 +417,7 @@
                 color: var(--icon-color) !important;
                 fill: none !important;
                 stroke: var(--icon-color) !important;
+                stroke-width: 1.5 !important;
             }
             li[data-action="settings"] .menu__ico.focus,
             li[data-action="settings"] .menu__ico.focus svg,
@@ -412,8 +426,9 @@
                 color: var(--icon-color) !important;
                 fill: none !important;
                 stroke: var(--icon-color) !important;
+                stroke-width: 1.5 !important;
             }
-            /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо fill */
+            /* Стиль для іконки особи: використовуємо fill */
             .menu__ico--person::before,
             .menu__ico--person::after {
                 content: none !important;
@@ -447,7 +462,9 @@
             .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
             .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
+                fill: none !important;
+                stroke: var(--icon-color) !important;
+                stroke-width: 1.5 !important;
             }
             .card.selector:hover .card__title,
             .card .card__title {
@@ -851,16 +868,16 @@
                 var style = document.createElement('style');
                 style.id = 'colormodal-override';
                 style.textContent = `
-                    /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо fill */
+                    /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": використовуємо stroke */
                     .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
                     .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
                     .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
                     .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                         background: transparent !important;
                         color: var(--icon-color) !important;
-                        fill: var(--icon-color) !important;
-                        stroke: none !important;
-                        stroke-width: 0 !important;
+                        fill: none !important;
+                        stroke: var(--icon-color) !important;
+                        stroke-width: 1.5 !important;
                     }
                     .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
                     .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
@@ -868,9 +885,9 @@
                     .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                         background: transparent !important;
                         color: var(--icon-color) !important;
-                        fill: var(--icon-color) !important;
-                        stroke: none !important;
-                        stroke-width: 0 !important;
+                        fill: none !important;
+                        stroke: var(--icon-color) !important;
+                        stroke-width: 1.5 !important;
                     }
                     /* Стиль для іконки "Налаштування": використовуємо stroke */
                     li[data-action="settings"] .menu__ico,
@@ -880,6 +897,7 @@
                         color: var(--icon-color) !important;
                         fill: none !important;
                         stroke: var(--icon-color) !important;
+                        stroke-width: 1.5 !important;
                     }
                     li[data-action="settings"] .menu__ico.focus,
                     li[data-action="settings"] .menu__ico.focus svg,
@@ -888,8 +906,9 @@
                         color: var(--icon-color) !important;
                         fill: none !important;
                         stroke: var(--icon-color) !important;
+                        stroke-width: 1.5 !important;
                     }
-                    /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо fill */
+                    /* Стиль для іконки особи: використовуємо fill */
                     .menu__ico--person::before,
                     .menu__ico--person::after {
                         content: none !important;
@@ -923,7 +942,9 @@
                     .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
                     .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
                         color: var(--icon-color) !important;
-                        fill: var(--icon-color) !important;
+                        fill: none !important;
+                        stroke: var(--icon-color) !important;
+                        stroke-width: 1.5 !important;
                     }
                     .card.selector:hover .card__title,
                     .card .card__title {
