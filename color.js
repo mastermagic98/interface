@@ -95,28 +95,11 @@
                     element.style.opacity = '1';
                     element.setAttribute('fill-opacity', '1');
                     element.setAttribute('stroke-opacity', '1');
-                    if (icon.closest('li[data-action="settings"]')) {
-                        // Для іконки "Налаштування": використовуємо stroke
-                        element.setAttribute('fill', 'none');
-                        element.style.fill = 'none';
-                        element.setAttribute('stroke', 'currentColor');
-                        element.style.stroke = hexColor;
-                        element.style.strokeWidth = '1.5';
-                    } else if (icon.classList.contains('menu__ico--person')) {
-                        // Для іконки особи: використовуємо fill
-                        element.setAttribute('fill', 'currentColor');
-                        element.style.fill = hexColor;
-                        element.setAttribute('stroke', 'none');
-                        element.style.stroke = 'none';
-                        element.style.strokeWidth = '0';
-                    } else {
-                        // Для інших іконок ("Релізи", "Фільтр", "Історія", "Розклад", "Торренти", "Консоль"): використовуємо stroke
-                        element.setAttribute('fill', 'none');
-                        element.style.fill = 'none';
-                        element.setAttribute('stroke', 'currentColor');
-                        element.style.stroke = hexColor;
-                        element.style.strokeWidth = '1.5';
-                    }
+                    element.setAttribute('fill', 'currentColor');
+                    element.style.fill = hexColor;
+                    element.setAttribute('stroke', 'none');
+                    element.style.stroke = 'none';
+                    element.style.strokeWidth = '0';
                 });
                 svg.style.color = hexColor;
                 svg.style.opacity = '1';
@@ -176,68 +159,19 @@
                     background: var(--background-color);
                     color: var(--text-color);
                 }
-                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                    background: transparent !important;
-                    color: var(--icon-color) !important;
-                    fill: none !important;
-                    stroke: var(--icon-color) !important;
-                    stroke-width: 1.5 !important;
-                    fill-opacity: 1 !important;
-                    stroke-opacity: 1 !important;
-                    opacity: 1 !important;
-                }
-                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                    background: transparent !important;
-                    color: var(--icon-color) !important;
-                    fill: none !important;
-                    stroke: var(--icon-color) !important;
-                    stroke-width: 1.5 !important;
-                    fill-opacity: 1 !important;
-                    stroke-opacity: 1 !important;
-                    opacity: 1 !important;
-                }
-                li[data-action="settings"] .menu__ico,
-                li[data-action="settings"] .menu__ico svg,
-                li[data-action="settings"] .menu__ico path,
-                li[data-action="settings"] .menu__ico circle {
-                    color: var(--icon-color) !important;
-                    fill: none !important;
-                    stroke: var(--icon-color) !important;
-                    stroke-width: 1.5 !important;
-                    fill-opacity: 1 !important;
-                    stroke-opacity: 1 !important;
-                    opacity: 1 !important;
-                }
-                li[data-action="settings"] .menu__ico.focus,
-                li[data-action="settings"] .menu__ico.focus svg,
-                li[data-action="settings"] .menu__ico.focus path,
-                li[data-action="settings"] .menu__ico.focus circle {
-                    color: var(--icon-color) !important;
-                    fill: none !important;
-                    stroke: var(--icon-color) !important;
-                    stroke-width: 1.5 !important;
-                    fill-opacity: 1 !important;
-                    stroke-opacity: 1 !important;
-                    opacity: 1 !important;
-                }
-                .menu__ico--person::before,
-                .menu__ico--person::after {
-                    content: none !important;
-                }
+                .menu__ico,
+                .menu__ico svg,
+                .menu__ico path,
+                .menu__ico g,
+                .menu__ico circle,
                 .menu__ico--person,
                 .menu__ico--person svg,
                 .menu__ico--person path,
                 .menu__ico--person g,
-                .menu__ico--person.focus,
-                .menu__ico--person.focus svg,
-                .menu__ico--person.focus path,
-                .menu__ico--person.focus g {
+                li[data-action="settings"] .menu__ico,
+                li[data-action="settings"] .menu__ico svg,
+                li[data-action="settings"] .menu__ico path,
+                li[data-action="settings"] .menu__ico circle {
                     background: transparent !important;
                     color: var(--icon-color) !important;
                     fill: var(--icon-color) !important;
@@ -246,6 +180,32 @@
                     fill-opacity: 1 !important;
                     stroke-opacity: 1 !important;
                     opacity: 1 !important;
+                }
+                .menu__ico.focus,
+                .menu__ico.focus svg,
+                .menu__ico.focus path,
+                .menu__ico.focus g,
+                .menu__ico.focus circle,
+                .menu__ico--person.focus,
+                .menu__ico--person.focus svg,
+                .menu__ico--person.focus path,
+                .menu__ico--person.focus g,
+                li[data-action="settings"] .menu__ico.focus,
+                li[data-action="settings"] .menu__ico.focus svg,
+                li[data-action="settings"] .menu__ico.focus path,
+                li[data-action="settings"] .menu__ico.focus circle {
+                    background: transparent !important;
+                    color: var(--icon-color) !important;
+                    fill: var(--icon-color) !important;
+                    stroke: none !important;
+                    stroke-width: 0 !important;
+                    fill-opacity: 1 !important;
+                    stroke-opacity: 1 !important;
+                    opacity: 1 !important;
+                }
+                .menu__ico--person::before,
+                .menu__ico--person::after {
+                    content: none !important;
                 }
                 .menu__item,
                 .menu__item.traverse,
@@ -261,16 +221,6 @@
                     color: var(--text-color) !important;
                 }
                 .card.selector.focus .card__title,
-                .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
-                .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
-                    color: var(--icon-color) !important;
-                    fill: none !important;
-                    stroke: var(--icon-color) !important;
-                    stroke-width: 1.5 !important;
-                    fill-opacity: 1 !important;
-                    stroke-opacity: 1 !important;
-                    opacity: 1 !important;
-                }
                 .card.selector:hover .card__title,
                 .card .card__title {
                     background: transparent !important;
@@ -410,68 +360,19 @@
                 background: var(--background-color);
                 color: var(--text-color);
             }
-            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                background: transparent !important;
-                color: var(--icon-color) !important;
-                fill: none !important;
-                stroke: var(--icon-color) !important;
-                stroke-width: 1.5 !important;
-                fill-opacity: 1 !important;
-                stroke-opacity: 1 !important;
-                opacity: 1 !important;
-            }
-            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                background: transparent !important;
-                color: var(--icon-color) !important;
-                fill: none !important;
-                stroke: var(--icon-color) !important;
-                stroke-width: 1.5 !important;
-                fill-opacity: 1 !important;
-                stroke-opacity: 1 !important;
-                opacity: 1 !important;
-            }
-            li[data-action="settings"] .menu__ico,
-            li[data-action="settings"] .menu__ico svg,
-            li[data-action="settings"] .menu__ico path,
-            li[data-action="settings"] .menu__ico circle {
-                color: var(--icon-color) !important;
-                fill: none !important;
-                stroke: var(--icon-color) !important;
-                stroke-width: 1.5 !important;
-                fill-opacity: 1 !important;
-                stroke-opacity: 1 !important;
-                opacity: 1 !important;
-            }
-            li[data-action="settings"] .menu__ico.focus,
-            li[data-action="settings"] .menu__ico.focus svg,
-            li[data-action="settings"] .menu__ico.focus path,
-            li[data-action="settings"] .menu__ico.focus circle {
-                color: var(--icon-color) !important;
-                fill: none !important;
-                stroke: var(--icon-color) !important;
-                stroke-width: 1.5 !important;
-                fill-opacity: 1 !important;
-                stroke-opacity: 1 !important;
-                opacity: 1 !important;
-            }
-            .menu__ico--person::before,
-            .menu__ico--person::after {
-                content: none !important;
-            }
+            .menu__ico,
+            .menu__ico svg,
+            .menu__ico path,
+            .menu__ico g,
+            .menu__ico circle,
             .menu__ico--person,
             .menu__ico--person svg,
             .menu__ico--person path,
             .menu__ico--person g,
-            .menu__ico--person.focus,
-            .menu__ico--person.focus svg,
-            .menu__ico--person.focus path,
-            .menu__ico--person.focus g {
+            li[data-action="settings"] .menu__ico,
+            li[data-action="settings"] .menu__ico svg,
+            li[data-action="settings"] .menu__ico path,
+            li[data-action="settings"] .menu__ico circle {
                 background: transparent !important;
                 color: var(--icon-color) !important;
                 fill: var(--icon-color) !important;
@@ -480,6 +381,32 @@
                 fill-opacity: 1 !important;
                 stroke-opacity: 1 !important;
                 opacity: 1 !important;
+            }
+            .menu__ico.focus,
+            .menu__ico.focus svg,
+            .menu__ico.focus path,
+            .menu__ico.focus g,
+            .menu__ico.focus circle,
+            .menu__ico--person.focus,
+            .menu__ico--person.focus svg,
+            .menu__ico--person.focus path,
+            .menu__ico--person.focus g,
+            li[data-action="settings"] .menu__ico.focus,
+            li[data-action="settings"] .menu__ico.focus svg,
+            li[data-action="settings"] .menu__ico.focus path,
+            li[data-action="settings"] .menu__ico.focus circle {
+                background: transparent !important;
+                color: var(--icon-color) !important;
+                fill: var(--icon-color) !important;
+                stroke: none !important;
+                stroke-width: 0 !important;
+                fill-opacity: 1 !important;
+                stroke-opacity: 1 !important;
+                opacity: 1 !important;
+            }
+            .menu__ico--person::before,
+            .menu__ico--person::after {
+                content: none !important;
             }
             .menu__item,
             .menu__item.traverse,
@@ -495,16 +422,6 @@
                 color: var(--text-color) !important;
             }
             .card.selector.focus .card__title,
-            .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
-            .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
-                color: var(--icon-color) !important;
-                fill: none !important;
-                stroke: var(--icon-color) !important;
-                stroke-width: 1.5 !important;
-                fill-opacity: 1 !important;
-                stroke-opacity: 1 !important;
-                opacity: 1 !important;
-            }
             .card.selector:hover .card__title,
             .card .card__title {
                 background: transparent !important;
@@ -901,68 +818,19 @@
                 var style = document.createElement('style');
                 style.id = 'colormodal-override';
                 style.textContent = `
-                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                        background: transparent !important;
-                        color: var(--icon-color) !important;
-                        fill: none !important;
-                        stroke: var(--icon-color) !important;
-                        stroke-width: 1.5 !important;
-                        fill-opacity: 1 !important;
-                        stroke-opacity: 1 !important;
-                        opacity: 1 !important;
-                    }
-                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                        background: transparent !important;
-                        color: var(--icon-color) !important;
-                        fill: none !important;
-                        stroke: var(--icon-color) !important;
-                        stroke-width: 1.5 !important;
-                        fill-opacity: 1 !important;
-                        stroke-opacity: 1 !important;
-                        opacity: 1 !important;
-                    }
-                    li[data-action="settings"] .menu__ico,
-                    li[data-action="settings"] .menu__ico svg,
-                    li[data-action="settings"] .menu__ico path,
-                    li[data-action="settings"] .menu__ico circle {
-                        color: var(--icon-color) !important;
-                        fill: none !important;
-                        stroke: var(--icon-color) !important;
-                        stroke-width: 1.5 !important;
-                        fill-opacity: 1 !important;
-                        stroke-opacity: 1 !important;
-                        opacity: 1 !important;
-                    }
-                    li[data-action="settings"] .menu__ico.focus,
-                    li[data-action="settings"] .menu__ico.focus svg,
-                    li[data-action="settings"] .menu__ico.focus path,
-                    li[data-action="settings"] .menu__ico.focus circle {
-                        color: var(--icon-color) !important;
-                        fill: none !important;
-                        stroke: var(--icon-color) !important;
-                        stroke-width: 1.5 !important;
-                        fill-opacity: 1 !important;
-                        stroke-opacity: 1 !important;
-                        opacity: 1 !important;
-                    }
-                    .menu__ico--person::before,
-                    .menu__ico--person::after {
-                        content: none !important;
-                    }
+                    .menu__ico,
+                    .menu__ico svg,
+                    .menu__ico path,
+                    .menu__ico g,
+                    .menu__ico circle,
                     .menu__ico--person,
                     .menu__ico--person svg,
                     .menu__ico--person path,
                     .menu__ico--person g,
-                    .menu__ico--person.focus,
-                    .menu__ico--person.focus svg,
-                    .menu__ico--person.focus path,
-                    .menu__ico--person.focus g {
+                    li[data-action="settings"] .menu__ico,
+                    li[data-action="settings"] .menu__ico svg,
+                    li[data-action="settings"] .menu__ico path,
+                    li[data-action="settings"] .menu__ico circle {
                         background: transparent !important;
                         color: var(--icon-color) !important;
                         fill: var(--icon-color) !important;
@@ -971,6 +839,32 @@
                         fill-opacity: 1 !important;
                         stroke-opacity: 1 !important;
                         opacity: 1 !important;
+                    }
+                    .menu__ico.focus,
+                    .menu__ico.focus svg,
+                    .menu__ico.focus path,
+                    .menu__ico.focus g,
+                    .menu__ico.focus circle,
+                    .menu__ico--person.focus,
+                    .menu__ico--person.focus svg,
+                    .menu__ico--person.focus path,
+                    .menu__ico--person.focus g,
+                    li[data-action="settings"] .menu__ico.focus,
+                    li[data-action="settings"] .menu__ico.focus svg,
+                    li[data-action="settings"] .menu__ico.focus path,
+                    li[data-action="settings"] .menu__ico.focus circle {
+                        background: transparent !important;
+                        color: var(--icon-color) !important;
+                        fill: var(--icon-color) !important;
+                        stroke: none !important;
+                        stroke-width: 0 !important;
+                        fill-opacity: 1 !important;
+                        stroke-opacity: 1 !important;
+                        opacity: 1 !important;
+                    }
+                    .menu__ico--person::before,
+                    .menu__ico--person::after {
+                        content: none !important;
                     }
                     .menu__item,
                     .menu__item.traverse,
@@ -986,16 +880,6 @@
                         color: var(--text-color) !important;
                     }
                     .card.selector.focus .card__title,
-                    .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
-                    .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
-                        color: var(--icon-color) !important;
-                        fill: none !important;
-                        stroke: var(--icon-color) !important;
-                        stroke-width: 1.5 !important;
-                        fill-opacity: 1 !important;
-                        stroke-opacity: 1 !important;
-                        opacity: 1 !important;
-                    }
                     .card.selector:hover .card__title,
                     .card .card__title {
                         background: transparent !important;
