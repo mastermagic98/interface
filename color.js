@@ -91,6 +91,9 @@
         if (descr.length) {
             descr.css('background-color', hexColor);
         }
+        // Перезастосовуємо --icon-color, щоб уникнути перекриття
+        var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+        document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
         setTimeout(function () {
             Lampa.Settings.render();
         }, 0);
@@ -104,6 +107,9 @@
         if (descr.length) {
             descr.css('background-color', hexColor);
         }
+        // Перезастосовуємо --icon-color, щоб уникнути перекриття
+        var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+        document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
         setTimeout(function () {
             Lampa.Settings.render();
         }, 0);
@@ -113,7 +119,6 @@
         var hexColor = iconColors[color] || '#ddd';
         document.documentElement.style.setProperty('--icon-color', hexColor);
         document.documentElement.style.setProperty('--menu-color', hexColor);
-        // Оновлення стилів через CSS, без примусового JavaScript
         var style = document.getElementById('colormodal');
         if (style) {
             style.textContent = `
@@ -197,6 +202,10 @@
                     transform: translateX(-0.2em);
                 }
                 .card.selector.focus .card__title,
+                .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
+                .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
+                    color: var(--icon-color) !important;
+                }
                 .card.selector:hover .card__title,
                 .card .card__title {
                     background: transparent !important;
@@ -409,6 +418,10 @@
                 transform: translateX(-0.2em);
             }
             .card.selector.focus .card__title,
+            .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
+            .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
+                color: var(--icon-color) !important;
+            }
             .card.selector:hover .card__title,
             .card .card__title {
                 background: transparent !important;
@@ -570,6 +583,9 @@
                     if (selectItem.length) {
                         selectItem.css('display', item === 'true' ? 'block' : 'none');
                     }
+                    // Перезастосовуємо --icon-color при зміні акцентного кольору
+                    var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+                    document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
                     Lampa.Settings.render();
                 }
             });
@@ -596,6 +612,9 @@
                     if (descr.length) {
                         descr.css('background-color', color);
                     }
+                    // Перезастосовуємо --icon-color при рендері
+                    var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+                    document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
                 },
                 onChange: function () {
                     createColorModal();
@@ -648,6 +667,9 @@
                     if (selectItem.length) {
                         selectItem.css('display', item === 'true' ? 'block' : 'none');
                     }
+                    // Перезастосовуємо --icon-color при зміні фонового кольору
+                    var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+                    document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
                     Lampa.Settings.render();
                 }
             });
@@ -674,6 +696,9 @@
                     if (descr.length) {
                         descr.css('background-color', color);
                     }
+                    // Перезастосовуємо --icon-color при рендері
+                    var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+                    document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
                 },
                 onChange: function () {
                     createColorModal();
@@ -726,6 +751,7 @@
                     name: Lampa.Lang.translate('icon_color')
                 },
                 onChange: function (value) {
+                    Lampa.Storage.set('icon_color_selected', value);
                     applyIconColor(value);
                 }
             });
@@ -739,110 +765,6 @@
         document.documentElement.style.setProperty('--background-color', savedBackgroundColor);
         document.documentElement.style.setProperty('--icon-color', iconColors[savedIconColor] || '#ddd');
         document.documentElement.style.setProperty('--menu-color', iconColors[savedIconColor] || '#ddd');
-
-        // Оновлення стилів після зміни теми
-        Lampa.Storage.listener.follow('change', function (e) {
-            if (e.name === 'accent_color_active') {
-                var selectItem = $('.settings-param[data-name="select_accent_color"]');
-                if (selectItem.length) {
-                    selectItem.css('display', Lampa.Storage.get('accent_color_active') ? 'block' : 'none');
-                }
-                Lampa.Settings.render();
-            }
-            if (e.name === 'background_color_active') {
-                var selectItem = $('.settings-param[data-name="select_background_color"]');
-                if (selectItem.length) {
-                    selectItem.css('display', Lampa.Storage.get('background_color_active') ? 'block' : 'none');
-                }
-                Lampa.Settings.render();
-            }
-            if (e.name === 'icon_color') {
-                applyIconColor(e.value);
-            }
-            if (e.name === 'selectedTheme' || e.name === 'theme_select') {
-                setTimeout(function () {
-                    var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
-                    var style = document.createElement('style');
-                    style.id = 'colormodal-override';
-                    style.textContent = `
-                        .menu__item {
-                            color: var(--menu-color) !important;
-                        }
-                        /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо лише color */
-                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                            background: transparent !important;
-                            color: var(--icon-color) !important;
-                            stroke: none !important;
-                            stroke-width: 0 !important;
-                        }
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
-                            background: transparent !important;
-                            color: var(--icon-color) !important;
-                            stroke: none !important;
-                            stroke-width: 0 !important;
-                        }
-                        /* Стиль для іконки "Налаштування": використовуємо stroke */
-                        li[data-action="settings"] .menu__ico,
-                        li[data-action="settings"] .menu__ico svg,
-                        li[data-action="settings"] .menu__ico path,
-                        li[data-action="settings"] .menu__ico circle {
-                            color: var(--icon-color) !important;
-                            stroke: var(--icon-color) !important;
-                        }
-                        li[data-action="settings"] .menu__ico.focus,
-                        li[data-action="settings"] .menu__ico.focus svg,
-                        li[data-action="settings"] .menu__ico.focus path,
-                        li[data-action="settings"] .menu__ico.focus circle {
-                            color: var(--icon-color) !important;
-                            stroke: var(--icon-color) !important;
-                        }
-                        /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо лише color */
-                        .menu__ico--person::before,
-                        .menu__ico--person::after {
-                            content: none !important;
-                        }
-                        .menu__ico--person,
-                        .menu__ico--person svg,
-                        .menu__ico--person path,
-                        .menu__ico--person g,
-                        .menu__ico--person.focus,
-                        .menu__ico--person.focus svg,
-                        .menu__ico--person.focus path,
-                        .menu__ico--person.focus g {
-                            stroke: none !important;
-                            stroke-width: 0 !important;
-                            color: var(--icon-color) !important;
-                        }
-                        .menu__item,
-                        .menu__item.traverse,
-                        .menu__item.hover {
-                            background: transparent !important;
-                            color: var(--menu-color) !important;
-                            padding: 0.9em 1.5em !important;
-                            border-radius: 0 1em 1em 0 !important;
-                        }
-                        .menu__item.focus {
-                            background: var(--main-color) !important;
-                            color: var(--menu-color) !important;
-                            transform: translateX(-0.2em);
-                        }
-                        .card.selector.focus .card__title,
-                        .card.selector:hover .card__title,
-                        .card .card__title {
-                            background: transparent !important;
-                            color: var(--text-color) !important;
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }, 0);
-            }
-        });
     }
 
     if (window.appready) {
@@ -865,6 +787,120 @@
             document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
             document.documentElement.style.setProperty('--menu-color', iconColors[iconColor] || '#ddd');
             Lampa.Settings.render();
+        }
+    });
+
+    Lampa.Listener.follow('change', function (e) {
+        if (e.name === 'accent_color_active') {
+            var selectItem = $('.settings-param[data-name="select_accent_color"]');
+            if (selectItem.length) {
+                selectItem.css('display', Lampa.Storage.get('accent_color_active') ? 'block' : 'none');
+            }
+            // Перезастосовуємо --icon-color при зміні акцентного кольору
+            var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+            document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
+            Lampa.Settings.render();
+        }
+        if (e.name === 'background_color_active') {
+            var selectItem = $('.settings-param[data-name="select_background_color"]');
+            if (selectItem.length) {
+                selectItem.css('display', Lampa.Storage.get('background_color_active') ? 'block' : 'none');
+            }
+            // Перезастосовуємо --icon-color при зміні фонового кольору
+            var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+            document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
+            Lampa.Settings.render();
+        }
+        if (e.name === 'icon_color') {
+            applyIconColor(e.value);
+        }
+        if (e.name === 'selectedTheme' || e.name === 'theme_select') {
+            setTimeout(function () {
+                var iconColor = Lampa.Storage.get('icon_color_selected', 'white');
+                document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
+                var style = document.createElement('style');
+                style.id = 'colormodal-override';
+                style.textContent = `
+                    .menu__item {
+                        color: var(--menu-color) !important;
+                    }
+                    /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо лише color */
+                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+                    .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
+                        background: transparent !important;
+                        color: var(--icon-color) !important;
+                        stroke: none !important;
+                        stroke-width: 0 !important;
+                    }
+                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+                    .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
+                        background: transparent !important;
+                        color: var(--icon-color) !important;
+                        stroke: none !important;
+                        stroke-width: 0 !important;
+                    }
+                    /* Стиль для іконки "Налаштування": використовуємо stroke */
+                    li[data-action="settings"] .menu__ico,
+                    li[data-action="settings"] .menu__ico svg,
+                    li[data-action="settings"] .menu__ico path,
+                    li[data-action="settings"] .menu__ico circle {
+                        color: var(--icon-color) !important;
+                        stroke: var(--icon-color) !important;
+                    }
+                    li[data-action="settings"] .menu__ico.focus,
+                    li[data-action="settings"] .menu__ico.focus svg,
+                    li[data-action="settings"] .menu__ico.focus path,
+                    li[data-action="settings"] .menu__ico.focus circle {
+                        color: var(--icon-color) !important;
+                        stroke: var(--icon-color) !important;
+                    }
+                    /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо лише color */
+                    .menu__ico--person::before,
+                    .menu__ico--person::after {
+                        content: none !important;
+                    }
+                    .menu__ico--person,
+                    .menu__ico--person svg,
+                    .menu__ico--person path,
+                    .menu__ico--person g,
+                    .menu__ico--person.focus,
+                    .menu__ico--person.focus svg,
+                    .menu__ico--person.focus path,
+                    .menu__ico--person.focus g {
+                        stroke: none !important;
+                        stroke-width: 0 !important;
+                        color: var(--icon-color) !important;
+                    }
+                    .menu__item,
+                    .menu__item.traverse,
+                    .menu__item.hover {
+                        background: transparent !important;
+                        color: var(--menu-color) !important;
+                        padding: 0.9em 1.5em !important;
+                        border-radius: 0 1em 1em 0 !important;
+                    }
+                    .menu__item.focus {
+                        background: var(--main-color) !important;
+                        color: var(--menu-color) !important;
+                        transform: translateX(-0.2em);
+                    }
+                    .card.selector.focus .card__title,
+                    .menu__ico svg path:not(.menu__ico--person path):not([data-action="settings"] .menu__ico path),
+                    .menu__ico svg g:not(.menu__ico--person g):not([data-action="settings"] .menu__ico g) {
+                        color: var(--icon-color) !important;
+                    }
+                    .card.selector:hover .card__title,
+                    .card .card__title {
+                        background: transparent !important;
+                        color: var(--text-color) !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }, 0);
         }
     });
 
