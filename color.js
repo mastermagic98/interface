@@ -23,9 +23,9 @@
             uk: 'Увімкнути'
         },
         icon_color: {
-            ru: 'Цвет иконок',
-            en: 'Icon color',
-            uk: 'Колір іконок'
+            ru: 'Цвет иконок и текста меню',
+            en: 'Menu icons and text color',
+            uk: 'Колір іконок і тексту меню'
         },
         icon_color_white: {
             ru: 'Белый',
@@ -112,8 +112,9 @@
     function applyIconColor(color) {
         var hexColor = iconColors[color] || '#ddd';
         document.documentElement.style.setProperty('--icon-color', hexColor);
+        document.documentElement.style.setProperty('--menu-color', hexColor); // Нова змінна для тексту меню
         Lampa.Storage.set('icon_color_selected', color);
-        // Примусове оновлення стилів для всіх іконок, включаючи стан фокусу
+        // Примусове оновлення стилів для всіх іконок і тексту меню
         var style = document.getElementById('colormodal');
         if (style) {
             style.textContent = `
@@ -123,13 +124,14 @@
                     --text-color: #ddd;
                     --transparent-white: rgba(255,255,255,0.2);
                     --icon-color: ${hexColor};
+                    --menu-color: ${hexColor};
                 }
                 html, body, .extensions {
                     background: var(--background-color);
                     color: var(--text-color);
                 }
                 .menu__item {
-                    color: #ddd !important;
+                    color: var(--menu-color) !important;
                 }
                 /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
                 .menu__ico:not([data-action="settings"] .menu__ico),
@@ -182,13 +184,13 @@
                 .menu__item.traverse,
                 .menu__item.hover {
                     background: transparent !important;
-                    color: #ddd !important;
+                    color: var(--menu-color) !important;
                     padding: 0.9em 1.5em !important;
                     border-radius: 0 1em 1em 0 !important;
                 }
                 .menu__item.focus {
                     background: var(--main-color) !important;
-                    color: #ddd !important;
+                    color: var(--menu-color) !important;
                     transform: translateX(-0.2em);
                 }
                 .card.selector.focus .card__title,
@@ -244,12 +246,12 @@
                 .player-panel__position,
                 .player-panel__position > div:after {
                     background-color: var(--main-color);
-                    color: #ddd;
+                    color: var(--menu-color);
                 }
                 .iptv-menu__list-item.focus,
                 .iptv-program__timeline > div {
                     background-color: var(--main-color) !important;
-                    color: #ddd !important;
+                    color: var(--menu-color) !important;
                 }
                 .radio-item.focus,
                 .lang__selector-item.focus,
@@ -266,7 +268,7 @@
                 .selectbox-item.focus,
                 .selectbox-item.hover {
                     background: var(--main-color);
-                    color: #ddd;
+                    color: var(--menu-color);
                 }
                 .online.focus {
                     box-shadow: 0 0 0 0.2em var(--main-color);
@@ -301,7 +303,7 @@
                 .broadcast__scan > div,
                 .broadcast__device.focus {
                     background-color: var(--main-color);
-                    color: #ddd;
+                    color: var(--menu-color);
                 }
                 .card:hover .card__img,
                 .card.focus .card__img {
@@ -310,7 +312,7 @@
                 .noty,
                 .radio-player.focus {
                     background: var(--main-color);
-                    color: #ddd;
+                    color: var(--menu-color);
                 }
             `;
         }
@@ -330,13 +332,14 @@
                 --text-color: #ddd;
                 --transparent-white: rgba(255,255,255,0.2);
                 --icon-color: ${iconColors[iconColor] || '#ddd'};
+                --menu-color: ${iconColors[iconColor] || '#ddd'};
             }
             html, body, .extensions {
                 background: var(--background-color);
                 color: var(--text-color);
             }
             .menu__item {
-                color: #ddd !important;
+                color: var(--menu-color) !important;
             }
             /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
             .menu__ico:not([data-action="settings"] .menu__ico),
@@ -389,13 +392,13 @@
             .menu__item.traverse,
             .menu__item.hover {
                 background: transparent !important;
-                color: #ddd !important;
+                color: var(--menu-color) !important;
                 padding: 0.9em 1.5em !important;
                 border-radius: 0 1em 1em 0 !important;
             }
             .menu__item.focus {
                 background: var(--main-color) !important;
-                color: #ddd !important;
+                color: var(--menu-color) !important;
                 transform: translateX(-0.2em);
             }
             .card.selector.focus .card__title,
@@ -451,12 +454,12 @@
             .player-panel__position,
             .player-panel__position > div:after {
                 background-color: var(--main-color);
-                color: #ddd;
+                color: var(--menu-color);
             }
             .iptv-menu__list-item.focus,
             .iptv-program__timeline > div {
                 background-color: var(--main-color) !important;
-                color: #ddd !important;
+                color: var(--menu-color) !important;
             }
             .radio-item.focus,
             .lang__selector-item.focus,
@@ -473,7 +476,7 @@
             .selectbox-item.focus,
             .selectbox-item.hover {
                 background: var(--main-color);
-                color: #ddd;
+                color: var(--menu-color);
             }
             .online.focus {
                 box-shadow: 0 0 0 0.2em var(--main-color);
@@ -508,7 +511,7 @@
             .broadcast__scan > div,
             .broadcast__device.focus {
                 background-color: var(--main-color);
-                color: #ddd;
+                color: var(--menu-color);
             }
             .card:hover .card__img,
             .card.focus .card__img {
@@ -517,7 +520,7 @@
             .noty,
             .radio-player.focus {
                 background: var(--main-color);
-                color: #ddd;
+                color: var(--menu-color);
             }
         `;
         document.head.appendChild(style);
@@ -728,6 +731,7 @@
         document.documentElement.style.setProperty('--main-color', savedAccentColor);
         document.documentElement.style.setProperty('--background-color', savedBackgroundColor);
         document.documentElement.style.setProperty('--icon-color', iconColors[savedIconColor] || '#ddd');
+        document.documentElement.style.setProperty('--menu-color', iconColors[savedIconColor] || '#ddd');
 
         // Оновлення стилів після зміни теми
         Lampa.Storage.listener.follow('change', function (e) {
@@ -755,7 +759,7 @@
                     style.id = 'colormodal-override';
                     style.textContent = `
                         .menu__item {
-                            color: #ddd !important;
+                            color: var(--menu-color) !important;
                         }
                         /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
                         .menu__ico:not([data-action="settings"] .menu__ico),
@@ -808,13 +812,13 @@
                         .menu__item.traverse,
                         .menu__item.hover {
                             background: transparent !important;
-                            color: #ddd !important;
+                            color: var(--menu-color) !important;
                             padding: 0.9em 1.5em !important;
                             border-radius: 0 1em 1em 0 !important;
                         }
                         .menu__item.focus {
                             background: var(--main-color) !important;
-                            color: #ddd !important;
+                            color: var(--menu-color) !important;
                             transform: translateX(-0.2em);
                         }
                         .card.selector.focus .card__title,
@@ -848,6 +852,7 @@
             document.documentElement.style.setProperty('--main-color', accentColor);
             document.documentElement.style.setProperty('--background-color', backgroundColor);
             document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
+            document.documentElement.style.setProperty('--menu-color', iconColors[iconColor] || '#ddd');
             Lampa.Settings.render();
         }
     });
