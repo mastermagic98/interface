@@ -113,7 +113,7 @@
         var hexColor = iconColors[color] || '#ddd';
         document.documentElement.style.setProperty('--icon-color', hexColor);
         document.documentElement.style.setProperty('--menu-color', hexColor);
-        // Примусове оновлення стилів для всіх іконок і тексту меню
+        // Оновлення стилів через CSS, без примусового JavaScript
         var style = document.getElementById('colormodal');
         if (style) {
             style.textContent = `
@@ -132,34 +132,31 @@
                 .menu__item {
                     color: var(--menu-color) !important;
                 }
-                /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
-                .menu__ico:not([data-action="settings"] .menu__ico),
-                .menu__ico:not([data-action="settings"] .menu__ico) svg,
-                .menu__ico:not([data-action="settings"] .menu__ico) path,
-                .menu__ico:not([data-action="settings"] .menu__ico) g {
+                /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо лише color */
+                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+                .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                     background: transparent !important;
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
                     stroke: none !important;
                     stroke-width: 0 !important;
                 }
-                .menu__ico.focus:not([data-action="settings"] .menu__ico),
-                .menu__ico.focus:not([data-action="settings"] .menu__ico) svg,
-                .menu__ico.focus:not([data-action="settings"] .menu__ico) path,
-                .menu__ico.focus:not([data-action="settings"] .menu__ico) g {
+                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+                .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                     background: transparent !important;
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
                     stroke: none !important;
                     stroke-width: 0 !important;
                 }
-                /* Стиль для іконки "Налаштування": лише колір із --icon-color */
+                /* Стиль для іконки "Налаштування": використовуємо stroke */
                 li[data-action="settings"] .menu__ico,
                 li[data-action="settings"] .menu__ico svg,
                 li[data-action="settings"] .menu__ico path,
                 li[data-action="settings"] .menu__ico circle {
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
                     stroke: var(--icon-color) !important;
                 }
                 li[data-action="settings"] .menu__ico.focus,
@@ -167,24 +164,24 @@
                 li[data-action="settings"] .menu__ico.focus path,
                 li[data-action="settings"] .menu__ico.focus circle {
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
                     stroke: var(--icon-color) !important;
                 }
-                /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо колір із --icon-color */
+                /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо лише color */
                 .menu__ico--person::before,
                 .menu__ico--person::after {
                     content: none !important;
                 }
+                .menu__ico--person,
                 .menu__ico--person svg,
                 .menu__ico--person path,
                 .menu__ico--person g,
+                .menu__ico--person.focus,
                 .menu__ico--person.focus svg,
                 .menu__ico--person.focus path,
                 .menu__ico--person.focus g {
                     stroke: none !important;
                     stroke-width: 0 !important;
                     color: var(--icon-color) !important;
-                    fill: var(--icon-color) !important;
                 }
                 .menu__item,
                 .menu__item.traverse,
@@ -322,20 +319,6 @@
                 }
             `;
         }
-        // Примусове оновлення SVG-іконок
-        var icons = document.querySelectorAll('.menu__ico, .menu__ico--person, li[data-action="settings"] .menu__ico');
-        icons.forEach(function(icon) {
-            var svg = icon.querySelector('svg');
-            if (svg) {
-                svg.style.fill = hexColor;
-                svg.style.color = hexColor;
-                var paths = svg.querySelectorAll('path, g, circle');
-                paths.forEach(function(path) {
-                    path.style.fill = hexColor;
-                    path.style.stroke = icon.classList.contains('menu__ico--person') ? 'none' : hexColor;
-                });
-            }
-        });
         setTimeout(function () {
             Lampa.Settings.render();
         }, 0);
@@ -361,34 +344,31 @@
             .menu__item {
                 color: var(--menu-color) !important;
             }
-            /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
-            .menu__ico:not([data-action="settings"] .menu__ico),
-            .menu__ico:not([data-action="settings"] .menu__ico) svg,
-            .menu__ico:not([data-action="settings"] .menu__ico) path,
-            .menu__ico:not([data-action="settings"] .menu__ico) g {
+            /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо лише color */
+            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+            .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                 background: transparent !important;
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
                 stroke: none !important;
                 stroke-width: 0 !important;
             }
-            .menu__ico.focus:not([data-action="settings"] .menu__ico),
-            .menu__ico.focus:not([data-action="settings"] .menu__ico) svg,
-            .menu__ico.focus:not([data-action="settings"] .menu__ico) path,
-            .menu__ico.focus:not([data-action="settings"] .menu__ico) g {
+            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+            .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                 background: transparent !important;
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
                 stroke: none !important;
                 stroke-width: 0 !important;
             }
-            /* Стиль для іконки "Налаштування": лише колір із --icon-color */
+            /* Стиль для іконки "Налаштування": використовуємо stroke */
             li[data-action="settings"] .menu__ico,
             li[data-action="settings"] .menu__ico svg,
             li[data-action="settings"] .menu__ico path,
             li[data-action="settings"] .menu__ico circle {
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
                 stroke: var(--icon-color) !important;
             }
             li[data-action="settings"] .menu__ico.focus,
@@ -396,24 +376,24 @@
             li[data-action="settings"] .menu__ico.focus path,
             li[data-action="settings"] .menu__ico.focus circle {
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
                 stroke: var(--icon-color) !important;
             }
-            /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо колір із --icon-color */
+            /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо лише color */
             .menu__ico--person::before,
             .menu__ico--person::after {
                 content: none !important;
             }
+            .menu__ico--person,
             .menu__ico--person svg,
             .menu__ico--person path,
             .menu__ico--person g,
+            .menu__ico--person.focus,
             .menu__ico--person.focus svg,
             .menu__ico--person.focus path,
             .menu__ico--person.focus g {
                 stroke: none !important;
                 stroke-width: 0 !important;
                 color: var(--icon-color) !important;
-                fill: var(--icon-color) !important;
             }
             .menu__item,
             .menu__item.traverse,
@@ -551,20 +531,6 @@
             }
         `;
         document.head.appendChild(style);
-        // Примусове оновлення SVG-іконок
-        var icons = document.querySelectorAll('.menu__ico, .menu__ico--person, li[data-action="settings"] .menu__ico');
-        icons.forEach(function(icon) {
-            var svg = icon.querySelector('svg');
-            if (svg) {
-                svg.style.fill = iconColors[iconColor] || '#ddd';
-                svg.style.color = iconColors[iconColor] || '#ddd';
-                var paths = svg.querySelectorAll('path, g, circle');
-                paths.forEach(function(path) {
-                    path.style.fill = iconColors[iconColor] || '#ddd';
-                    path.style.stroke = icon.classList.contains('menu__ico--person') ? 'none' : (iconColors[iconColor] || '#ddd');
-                });
-            }
-        });
     }
 
     function createColorHtml(color, name) {
@@ -774,21 +740,6 @@
         document.documentElement.style.setProperty('--icon-color', iconColors[savedIconColor] || '#ddd');
         document.documentElement.style.setProperty('--menu-color', iconColors[savedIconColor] || '#ddd');
 
-        // Примусове оновлення SVG-іконок при ініціалізації
-        var icons = document.querySelectorAll('.menu__ico, .menu__ico--person, li[data-action="settings"] .menu__ico');
-        icons.forEach(function(icon) {
-            var svg = icon.querySelector('svg');
-            if (svg) {
-                svg.style.fill = iconColors[savedIconColor] || '#ddd';
-                svg.style.color = iconColors[savedIconColor] || '#ddd';
-                var paths = svg.querySelectorAll('path, g, circle');
-                paths.forEach(function(path) {
-                    path.style.fill = iconColors[savedIconColor] || '#ddd';
-                    path.style.stroke = icon.classList.contains('menu__ico--person') ? 'none' : (iconColors[savedIconColor] || '#ddd');
-                });
-            }
-        });
-
         // Оновлення стилів після зміни теми
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'accent_color_active') {
@@ -817,34 +768,31 @@
                         .menu__item {
                             color: var(--menu-color) !important;
                         }
-                        /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
-                        .menu__ico:not([data-action="settings"] .menu__ico),
-                        .menu__ico:not([data-action="settings"] .menu__ico) svg,
-                        .menu__ico:not([data-action="settings"] .menu__ico) path,
-                        .menu__ico:not([data-action="settings"] .menu__ico) g {
+                        /* Стиль для всіх іконок, крім "Налаштування" і ".menu__ico--person": задаємо лише color */
+                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+                        .menu__ico:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                             background: transparent !important;
                             color: var(--icon-color) !important;
-                            fill: var(--icon-color) !important;
                             stroke: none !important;
                             stroke-width: 0 !important;
                         }
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico),
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico) svg,
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico) path,
-                        .menu__ico.focus:not([data-action="settings"] .menu__ico) g {
+                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person),
+                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) svg,
+                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) path,
+                        .menu__ico.focus:not([data-action="settings"] .menu__ico):not(.menu__ico--person) g {
                             background: transparent !important;
                             color: var(--icon-color) !important;
-                            fill: var(--icon-color) !important;
                             stroke: none !important;
                             stroke-width: 0 !important;
                         }
-                        /* Стиль для іконки "Налаштування": лише колір із --icon-color */
+                        /* Стиль для іконки "Налаштування": використовуємо stroke */
                         li[data-action="settings"] .menu__ico,
                         li[data-action="settings"] .menu__ico svg,
                         li[data-action="settings"] .menu__ico path,
                         li[data-action="settings"] .menu__ico circle {
                             color: var(--icon-color) !important;
-                            fill: var(--icon-color) !important;
                             stroke: var(--icon-color) !important;
                         }
                         li[data-action="settings"] .menu__ico.focus,
@@ -852,24 +800,24 @@
                         li[data-action="settings"] .menu__ico.focus path,
                         li[data-action="settings"] .menu__ico.focus circle {
                             color: var(--icon-color) !important;
-                            fill: var(--icon-color) !important;
                             stroke: var(--icon-color) !important;
                         }
-                        /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо колір із --icon-color */
+                        /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо лише color */
                         .menu__ico--person::before,
                         .menu__ico--person::after {
                             content: none !important;
                         }
+                        .menu__ico--person,
                         .menu__ico--person svg,
                         .menu__ico--person path,
                         .menu__ico--person g,
+                        .menu__ico--person.focus,
                         .menu__ico--person.focus svg,
                         .menu__ico--person.focus path,
                         .menu__ico--person.focus g {
                             stroke: none !important;
                             stroke-width: 0 !important;
                             color: var(--icon-color) !important;
-                            fill: var(--icon-color) !important;
                         }
                         .menu__item,
                         .menu__item.traverse,
@@ -892,20 +840,6 @@
                         }
                     `;
                     document.head.appendChild(style);
-                    // Примусове оновлення SVG-іконок при зміні теми
-                    var icons = document.querySelectorAll('.menu__ico, .menu__ico--person, li[data-action="settings"] .menu__ico');
-                    icons.forEach(function(icon) {
-                        var svg = icon.querySelector('svg');
-                        if (svg) {
-                            svg.style.fill = iconColors[iconColor] || '#ddd';
-                            svg.style.color = iconColors[iconColor] || '#ddd';
-                            var paths = svg.querySelectorAll('path, g, circle');
-                            paths.forEach(function(path) {
-                                path.style.fill = iconColors[iconColor] || '#ddd';
-                                path.style.stroke = icon.classList.contains('menu__ico--person') ? 'none' : (iconColors[iconColor] || '#ddd');
-                            });
-                        }
-                    });
                 }, 0);
             }
         });
@@ -930,20 +864,6 @@
             document.documentElement.style.setProperty('--background-color', backgroundColor);
             document.documentElement.style.setProperty('--icon-color', iconColors[iconColor] || '#ddd');
             document.documentElement.style.setProperty('--menu-color', iconColors[iconColor] || '#ddd');
-            // Примусове оновлення SVG-іконок при відкритті налаштувань
-            var icons = document.querySelectorAll('.menu__ico, .menu__ico--person, li[data-action="settings"] .menu__ico');
-            icons.forEach(function(icon) {
-                var svg = icon.querySelector('svg');
-                if (svg) {
-                    svg.style.fill = iconColors[iconColor] || '#ddd';
-                    svg.style.color = iconColors[iconColor] || '#ddd';
-                    var paths = svg.querySelectorAll('path, g, circle');
-                    paths.forEach(function(path) {
-                        path.style.fill = iconColors[iconColor] || '#ddd';
-                        path.style.stroke = icon.classList.contains('menu__ico--person') ? 'none' : (iconColors[iconColor] || '#ddd');
-                    });
-                }
-            });
             Lampa.Settings.render();
         }
     });
