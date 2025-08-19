@@ -70,7 +70,7 @@
     };
 
     var iconColors = {
-        'white': '#ddd', // Змінено з #fff на #ddd
+        'white': '#ddd',
         'black': '#000'
     };
 
@@ -110,13 +110,209 @@
     }
 
     function applyIconColor(color) {
-        var hexColor = iconColors[color] || '#ddd'; // За замовчуванням #ddd
+        var hexColor = iconColors[color] || '#ddd';
         document.documentElement.style.setProperty('--icon-color', hexColor);
         Lampa.Storage.set('icon_color_selected', color);
-        // Примусове оновлення стилів
+        // Примусове оновлення стилів для всіх іконок, включаючи стан фокусу
         var style = document.getElementById('colormodal');
         if (style) {
-            style.textContent = style.textContent.replace(/--icon-color: #[0-9a-fA-F]{3,6}/, `--icon-color: ${hexColor}`);
+            style.textContent = `
+                :root {
+                    --main-color: #5daa68;
+                    --background-color: #1d1f20;
+                    --text-color: #ddd;
+                    --transparent-white: rgba(255,255,255,0.2);
+                    --icon-color: ${hexColor};
+                }
+                html, body, .extensions {
+                    background: var(--background-color);
+                    color: var(--text-color);
+                }
+                .menu__item {
+                    color: #ddd !important;
+                }
+                /* Стиль для всіх іконок, крім "Налаштування": задаємо колір із --icon-color, прибираємо обведення */
+                .menu__ico:not([data-action="settings"] .menu__ico),
+                .menu__ico:not([data-action="settings"] .menu__ico) svg,
+                .menu__ico:not([data-action="settings"] .menu__ico) path,
+                .menu__ico:not([data-action="settings"] .menu__ico) g {
+                    background: transparent !important;
+                    color: var(--icon-color) !important;
+                    stroke: none !important;
+                    stroke-width: 0 !important;
+                }
+                .menu__ico.focus:not([data-action="settings"] .menu__ico),
+                .menu__ico.focus:not([data-action="settings"] .menu__ico) svg,
+                .menu__ico.focus:not([data-action="settings"] .menu__ico) path,
+                .menu__ico.focus:not([data-action="settings"] .menu__ico) g {
+                    background: transparent !important;
+                    color: var(--icon-color) !important;
+                    stroke: none !important;
+                    stroke-width: 0 !important;
+                }
+                /* Стиль для іконки "Налаштування": лише колір із --icon-color */
+                li[data-action="settings"] .menu__ico,
+                li[data-action="settings"] .menu__ico svg,
+                li[data-action="settings"] .menu__ico path,
+                li[data-action="settings"] .menu__ico circle {
+                    color: var(--icon-color) !important;
+                }
+                li[data-action="settings"] .menu__ico.focus,
+                li[data-action="settings"] .menu__ico.focus svg,
+                li[data-action="settings"] .menu__ico.focus path,
+                li[data-action="settings"] .menu__ico.focus circle {
+                    color: var(--icon-color) !important;
+                }
+                /* Стиль для іконки особи: прибираємо псевдоелементи, задаємо колір із --icon-color */
+                .menu__ico--person::before,
+                .menu__ico--person::after {
+                    content: none !important;
+                }
+                .menu__ico--person svg,
+                .menu__ico--person path,
+                .menu__ico--person g,
+                .menu__ico--person.focus svg,
+                .menu__ico--person.focus path,
+                .menu__ico--person.focus g {
+                    stroke: none !important;
+                    stroke-width: 0 !important;
+                    color: var(--icon-color) !important;
+                }
+                .menu__item,
+                .menu__item.traverse,
+                .menu__item.hover {
+                    background: transparent !important;
+                    color: #ddd !important;
+                    padding: 0.9em 1.5em !important;
+                    border-radius: 0 1em 1em 0 !important;
+                }
+                .menu__item.focus {
+                    background: var(--main-color) !important;
+                    color: #ddd !important;
+                    transform: translateX(-0.2em);
+                }
+                .card.selector.focus .card__title,
+                .card.selector:hover .card__title,
+                .card .card__title {
+                    background: transparent !important;
+                    color: var(--text-color) !important;
+                }
+                .color_row {
+                    display: grid;
+                    grid-template-columns: repeat(6, 1fr);
+                    grid-auto-rows: 80px;
+                    gap: 15px;
+                    justify-items: center;
+                    width: 100%;
+                    padding: 10px;
+                }
+                .color_square {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                }
+                .color_square.focus {
+                    border: 2px solid #ddd;
+                    transform: scale(1.1);
+                }
+                .selector.focus:not(.card__title):not(.card):not(.color_square):not(.menu__ico),
+                .button--category {
+                    background-color: var(--main-color) !important;
+                }
+                .settings-param__name,
+                .settings-folder__name {
+                    color: var(--text-color);
+                }
+                .console__tab.focus,
+                .full-person.focus,
+                .full-start__button.focus,
+                .full-descr__tag.focus,
+                .simple-button.focus,
+                .head__action.focus,
+                .head__action.hover,
+                .player-panel .button.focus,
+                .search-source.active {
+                    background: var(--main-color) !important;
+                    color: var(--text-color) !important;
+                }
+                .navigation-tabs__button.focus,
+                .time-line > div,
+                .player-panel__position,
+                .player-panel__position > div:after {
+                    background-color: var(--main-color);
+                    color: #ddd;
+                }
+                .iptv-menu__list-item.focus,
+                .iptv-program__timeline > div {
+                    background-color: var(--main-color) !important;
+                    color: #ddd !important;
+                }
+                .radio-item.focus,
+                .lang__selector-item.focus,
+                .simple-keyboard .hg-button.focus,
+                .modal__button.focus,
+                .search-history-key.focus,
+                .simple-keyboard-mic.focus,
+                .torrent-serial__progress,
+                .full-review-add.focus,
+                .full-review.focus,
+                .tag-count.focus,
+                .settings-folder.focus,
+                .settings-param.focus,
+                .selectbox-item.focus,
+                .selectbox-item.hover {
+                    background: var(--main-color);
+                    color: #ddd;
+                }
+                .online.focus {
+                    box-shadow: 0 0 0 0.2em var(--main-color);
+                }
+                .online_modss.focus::after,
+                .online-prestige.focus::after,
+                .radio-item.focus .radio-item__imgbox:after,
+                .iptv-channel.focus::before,
+                .iptv-channel.last--focus::before {
+                    border-color: var(--main-color) !important;
+                }
+                .card-more.focus .card-more__box::after,
+                .explorer-card__head-img.focus::after {
+                    border: 0.3em solid var(--main-color);
+                }
+                .iptv-playlist-item.focus::after,
+                .iptv-playlist-item.hover::after,
+                .ad-bot.focus .ad-bot__content::after,
+                .ad-bot.hover .ad-bot__content::after,
+                .card-episode.focus .full-episode::after,
+                .register.focus::after,
+                .season-episode.focus::after,
+                .full-episode.focus::after,
+                .full-review-add.focus::after,
+                .card.focus .card__view::after,
+                .card.hover .card__view::after,
+                .extensions__item.focus:after,
+                .torrent-item.focus::after,
+                .extensions__block-add.focus:after {
+                    border-color: var(--main-color);
+                }
+                .broadcast__scan > div,
+                .broadcast__device.focus {
+                    background-color: var(--main-color);
+                    color: #ddd;
+                }
+                .card:hover .card__img,
+                .card.focus .card__img {
+                    border-color: var(--main-color);
+                }
+                .noty,
+                .radio-player.focus {
+                    background: var(--main-color);
+                    color: #ddd;
+                }
+            `;
         }
         setTimeout(function () {
             Lampa.Settings.render();
@@ -181,7 +377,10 @@
             }
             .menu__ico--person svg,
             .menu__ico--person path,
-            .menu__ico--person g {
+            .menu__ico--person g,
+            .menu__ico--person.focus svg,
+            .menu__ico--person.focus path,
+            .menu__ico--person.focus g {
                 stroke: none !important;
                 stroke-width: 0 !important;
                 color: var(--icon-color) !important;
@@ -597,7 +796,10 @@
                         }
                         .menu__ico--person svg,
                         .menu__ico--person path,
-                        .menu__ico--person g {
+                        .menu__ico--person g,
+                        .menu__ico--person.focus svg,
+                        .menu__ico--person.focus path,
+                        .menu__ico--person.focus g {
                             stroke: none !important;
                             stroke-width: 0 !important;
                             color: var(--icon-color) !important;
