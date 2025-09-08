@@ -176,6 +176,11 @@
                 if (aniActive === 'true') {
                     elements[i].classList.remove('hide');
                     console.log('select_ani_mation shown (hide class removed)');
+                    // Оновлюємо прев’ю, якщо є ani_load
+                    if (Lampa.Storage.get('ani_load')) {
+                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                        console.log('insert_activity_loader_prv called in updateAniVisibility');
+                    }
                 } else {
                     elements[i].classList.add('hide');
                     console.log('select_ani_mation hidden (hide class added)');
@@ -191,6 +196,11 @@
                         if (aniActive === 'true') {
                             retryElements[j].classList.remove('hide');
                             console.log('select_ani_mation retry shown (hide class removed)');
+                            // Оновлюємо прев’ю, якщо є ani_load
+                            if (Lampa.Storage.get('ani_load')) {
+                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                                console.log('insert_activity_loader_prv called in retry');
+                            }
                         } else {
                             retryElements[j].classList.add('hide');
                             console.log('select_ani_mation retry hidden (hide class added)');
@@ -199,7 +209,7 @@
                 } else {
                     console.log('select_ani_mation still not found after retry');
                 }
-            }, 1000);
+            }, 2000);
         }
         // Оновлюємо меню налаштувань
         if (Lampa.Settings && Lampa.Settings.render) {
@@ -218,6 +228,11 @@
             for (var i = 0; i < elements.length; i++) {
                 elements[i].classList.remove('hide');
                 console.log('forceShowAniSelect: select_ani_mation shown (hide class removed)');
+                // Оновлюємо прев’ю, якщо є ani_load
+                if (Lampa.Storage.get('ani_load')) {
+                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                    console.log('insert_activity_loader_prv called in forceShowAniSelect');
+                }
             }
         } else {
             console.log('forceShowAniSelect: select_ani_mation not found');
@@ -233,11 +248,16 @@
                 for (var j = 0; j < retryElements.length; j++) {
                     retryElements[j].classList.remove('hide');
                     console.log('forceShowAniSelect retry: select_ani_mation shown (hide class removed)');
+                    // Оновлюємо прев’ю, якщо є ani_load
+                    if (Lampa.Storage.get('ani_load')) {
+                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                        console.log('insert_activity_loader_prv called in forceShowAniSelect retry');
+                    }
                 }
             } else {
                 console.log('forceShowAniSelect retry: select_ani_mation not found');
             }
-        }, 1000);
+        }, 2000);
     };
 
     // Експортуємо функцію для дебагу
@@ -286,13 +306,7 @@
                     // Оновлюємо видимість параметра
                     setTimeout(function() {
                         updateAniVisibility();
-                    }, 500);
-                },
-                onRender: function (item) {
-                    if (item) {
-                        item.classList.remove('hide');
-                        console.log('ani_active onRender, hide class removed');
-                    }
+                    }, 1000);
                 }
             });
             console.log('Parameter ani_active added');
@@ -315,23 +329,6 @@
                 field: {
                     name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select'),
                     description: Lampa.Lang.translate('params_ani_select')
-                },
-                onRender: function (item) {
-                    if (item) {
-                        var aniActive = Lampa.Storage.get('ani_active', 'false');
-                        if (aniActive === 'true') {
-                            item.classList.remove('hide');
-                            console.log('select_ani_mation onRender, hide class removed');
-                        } else {
-                            item.classList.add('hide');
-                            console.log('select_ani_mation onRender, hide class added');
-                        }
-                        setTimeout(function () {
-                            if (Lampa.Storage.get('ani_load')) {
-                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                            }
-                        }, 0);
-                    }
                 },
                 onChange: function () {
                     // Перевіряємо наявність списку SVG-завантажувачів
@@ -421,7 +418,7 @@
         setTimeout(function() {
             updateAniVisibility();
             console.log('Initial updateAniVisibility called');
-        }, 1000);
+        }, 2000);
     }
 
     // Слухаємо зміни параметра ani_active та color_plugin_main_color
@@ -430,10 +427,7 @@
             console.log('Storage change: ani_active =', Lampa.Storage.get('ani_active', 'false'));
             setTimeout(function() {
                 updateAniVisibility();
-                if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
-                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                }
-            }, 500);
+            }, 1000);
         }
         // Оновлюємо стилі при зміні кольору виділення
         if (e.name === 'color_plugin_main_color') {
@@ -453,7 +447,7 @@
             updateAniVisibility();
             setTimeout(function() {
                 updateAniVisibility();
-            }, 500);
+            }, 1000);
         }
     });
 
@@ -463,7 +457,7 @@
             console.log('App event:', e.type);
             setTimeout(function() {
                 updateAniVisibility();
-            }, 500);
+            }, 1000);
         }
     });
 
