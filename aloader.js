@@ -162,15 +162,15 @@
 
     // Функція для оновлення видимості параметра select_ani_mation
     function updateAniVisibility() {
-        var selectItem = document.querySelector('.settings-param[data-name="select_ani_mation"]');
-        if (selectItem) {
+        var selectItem = $('.settings-param[data-name="select_ani_mation"]');
+        if (selectItem.length) {
             if (Lampa.Storage.get('ani_active', 'false') === 'true') {
-                selectItem.style.display = 'block';
+                selectItem.css('display', 'block');
                 if (Lampa.Storage.get('ani_load')) {
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 }
             } else {
-                selectItem.style.display = 'none';
+                selectItem.css('display', 'none');
             }
         }
     }
@@ -237,14 +237,21 @@
                     description: Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
-                    // Приховуємо або показуємо опцію залежно від ani_active
-                    if (Lampa.Storage.get('ani_active', 'false') === 'true') {
-                        item.style.display = 'block';
-                        if (Lampa.Storage.get('ani_load')) {
-                            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                    // Лог для дебагу
+                    console.log('onRender called, item type:', typeof item, item);
+                    // Використовуємо jQuery для сумісності
+                    var $item = $(item);
+                    if ($item.length) {
+                        if (Lampa.Storage.get('ani_active', 'false') === 'true') {
+                            $item.css('display', 'block');
+                            if (Lampa.Storage.get('ani_load')) {
+                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                            }
+                        } else {
+                            $item.css('display', 'none');
                         }
                     } else {
-                        item.style.display = 'none';
+                        console.log('onRender: select_ani_mation item not found as jQuery object');
                     }
                 },
                 onChange: function () {
