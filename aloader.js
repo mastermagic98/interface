@@ -1,6 +1,7 @@
 (function () {
     'use strict';
 
+    // Додаємо переклади для плагіна
     Lampa.Lang.add({
         params_ani_on: {
             ru: 'Включить',
@@ -19,12 +20,15 @@
         }
     });
 
+    // Додаємо шаблон для модального вікна вибору анімації
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_grid">{ani_svg_content}</div></div>');
 
+    // Функція для встановлення кастомного завантажувача
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var filterValue = 'brightness(0) invert(1) !important';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#353535');
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         var newStyle = '.activity__loader { display: none !important; }' +
                        '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
@@ -38,12 +42,16 @@
         }
     }
 
+    // Функція для вставки стилів для попереднього перегляду
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: brightness(0) invert(1); }';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#353535');
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
+    // Функція для видалення стилів завантажувача
     function remove_activity_loader() {
         var styleElement = document.getElementById('aniload-id');
         if (styleElement) styleElement.remove();
@@ -56,20 +64,36 @@
         }
     }
 
+    // Функція для створення стилів модального вікна
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
-        style.textContent = '.ani_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 48px; gap: 10px; justify-items: center; width: 100%; padding: 10px; }' +
-                            '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; }' +
-                            '.ani_svg img { max-width: 40px; max-height: 40px; object-fit: contain; filter: brightness(0) invert(1); }' +
-                            '.ani_svg.focus { background-color: #353535; border: 1px solid #9e9e9e; }';
+        style.textContent = '.ani_modal_root { padding: 1em; }' +
+                            '.ani_grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }' +
+                            '.ani_row { display: contents; }' +
+                            '.ani_svg { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; }' +
+                            '.ani_svg img { max-width: 40px; max-height: 40px; object-fit: contain; }' +
+                            '.ani_svg.focus, .ani_svg:hover { background-color: #353535; border: 1px solid #9e9e9e; }';
         document.head.appendChild(style);
     }
 
+    // Функція для створення HTML для SVG-іконки
     function createSvgHtml(src) {
-        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:40px; max-height:40px;"></div>';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#353535');
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        return '<div class="ani_svg selector" tabindex="0"><img src="' + src + '" style="visibility:visible; max-width:40px; max-height:40px; filter:' + filterValue + ';"></div>';
     }
 
+    // Функція для конвертації HEX у RGB
+    function hexToRgb(hex) {
+        var cleanHex = hex.replace('#', '');
+        var r = parseInt(cleanHex.substring(0, 2), 16);
+        var g = parseInt(cleanHex.substring(2, 4), 16);
+        var b = parseInt(cleanHex.substring(4, 6), 16);
+        return { r: r, g: g, b: b };
+    }
+
+    // Функція для розбиття масиву на частини
     function chunkArray(arr, size) {
         var result = [];
         for (var i = 0; i < arr.length; i += size) {
@@ -78,10 +102,12 @@
         return result;
     }
 
+    // Основна функція ініціалізації плагіна
     function aniLoad() {
         var icon_plugin = '<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/><path d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"></path></svg>';
 
         try {
+            // Додаємо компонент до меню налаштувань
             Lampa.SettingsApi.addComponent({
                 component: 'ani_load_menu',
                 name: Lampa.Lang.translate('params_ani_name'),
@@ -90,6 +116,7 @@
         } catch (e) {}
 
         try {
+            // Додаємо параметр увімкнення/вимкнення анімації
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
                 param: {
@@ -115,6 +142,7 @@
         } catch (e) {}
 
         try {
+            // Додаємо параметр вибору анімації
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
                 param: {
@@ -150,9 +178,9 @@
                     });
                     try {
                         Lampa.Modal.open({
-                            title: '',
-                            size: 'medium',
-                            align: 'left',
+                            title: Lampa.Lang.translate('params_ani_select'),
+                            size: 'large',
+                            align: 'center',
                             html: $(ani_templates),
                             onBack: function () {
                                 Lampa.Modal.close();
@@ -160,9 +188,6 @@
                                 Lampa.Controller.enable('menu');
                             },
                             onSelect: function (a) {
-                                Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
                                     var imgElement = a[0].querySelector('img');
                                     if (imgElement) {
@@ -183,6 +208,12 @@
                                                 }
                                             }, 0);
                                         }
+                                        Lampa.Modal.close();
+                                        Lampa.Controller.toggle('settings_component');
+                                        Lampa.Controller.enable('menu');
+                                        if (Lampa.Settings && Lampa.Settings.render) {
+                                            Lampa.Settings.render();
+                                        }
                                     }
                                 }
                             }
@@ -192,6 +223,7 @@
             });
         } catch (e) {}
 
+        // Слухач зміни параметра ani_active для оновлення видимості кнопки вибору анімації
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'ani_active') {
                 var selectItem = $('.settings-param[data-name="select_ani_mation"]');
@@ -205,6 +237,17 @@
             }
         });
 
+        // Слухач зміни кольору з color.js
+        Lampa.Storage.listener.follow('change', function (e) {
+            if (e.name === 'color_plugin_main_color') {
+                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                }
+            }
+        });
+
+        // Спостерігач за додаванням/видаленням елемента .activity__loader
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
@@ -225,6 +268,7 @@
             observer.observe(document.body, { childList: true, subtree: true });
         }, 1000);
 
+        // Слухач подій full для керування завантажувачем
         Lampa.Listener.follow('full', function (e) {
             var element = document.querySelector('.activity__loader');
             if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
@@ -237,6 +281,7 @@
             }
         });
 
+        // Слухач подій activity для керування завантажувачем
         Lampa.Listener.follow('activity', function (event) {
             var element = document.querySelector('.activity__loader');
             if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
@@ -249,6 +294,7 @@
             }
         });
 
+        // Слухач подій push для керування завантажувачем
         Lampa.Activity.listener.follow('push', function (event) {
             var element = document.querySelector('.activity__loader');
             if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && element) {
@@ -261,6 +307,7 @@
             }
         });
 
+        // Слухач події back для приховування завантажувача
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'back') {
                 var element = document.querySelector('.activity__loader');
@@ -271,6 +318,7 @@
             }
         });
 
+        // Інтервал для приховування активного завантажувача
         setInterval(function () {
             var element = document.querySelector('.activity__loader');
             if (element && element.classList.contains('active')) {
@@ -279,12 +327,14 @@
             }
         }, 500);
 
+        // Застосовуємо збережений завантажувач, якщо він активний
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
     }
 
+    // Функція для застосування налаштувань за темою
     function byTheme() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
             setCustomLoader(Lampa.Storage.get('ani_load'));
@@ -292,6 +342,7 @@
         }
     }
 
+    // Запускаємо плагін після готовності програми
     if (window.appready) {
         aniLoad();
         byTheme();
@@ -304,11 +355,13 @@
         });
     }
 
+    // Слухач зміни акцентного кольору для оновлення теми
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'accent_color_selected') {
             byTheme();
         }
     });
 
+    // Експортуємо функцію byTheme
     window.byTheme = byTheme;
 })();
