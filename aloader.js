@@ -47,7 +47,9 @@
         $('#aniload-id-prv').remove();
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ddd');
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }';
+        var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
+                       '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -68,11 +70,13 @@
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ddd');
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }' +
                             '.ani_row { display: contents; }' +
                             '.ani_svg { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; }' +
-                            '.ani_svg img { max-width: 40px; max-height: 40px; object-fit: contain; }' +
+                            '.ani_svg img { max-width: 40px; max-height: 40px; object-fit: contain; filter: ' + filterValue + '; }' +
                             '.ani_svg.focus, .ani_svg:hover { background-color: #353535; border: 1px solid #9e9e9e; }';
         document.head.appendChild(style);
     }
@@ -244,6 +248,22 @@
                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                }
+                // Оновлюємо стилі модального вікна при зміні кольору
+                if (document.getElementById('aniload')) {
+                    create_ani_modal();
+                    var modal = document.querySelector('.ani_modal_root');
+                    if (modal) {
+                        var groupedSvgLinks = chunkArray(window.svg_loaders, 6);
+                        var svg_content = groupedSvgLinks.map(function (group) {
+                            var groupContent = group.map(createSvgHtml).join('');
+                            return '<div class="ani_row">' + groupContent + '</div>';
+                        }).join('');
+                        var ani_templates = Lampa.Template.get('ani_modal', {
+                            ani_svg_content: svg_content
+                        });
+                        modal.innerHTML = $(ani_templates).find('.ani_modal_root').html();
+                    }
                 }
             }
         });
