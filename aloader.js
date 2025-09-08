@@ -153,20 +153,46 @@
 
     // Функція для оновлення видимості параметрів
     function updateParamsVisibility(body) {
-        // Логуємо виклик для дебагу
         console.log('updateParamsVisibility called, ani_active:', Lampa.Storage.get('ani_active', 'false'));
         var selector = '.settings-param[data-name="select_ani_mation"]';
         var elements = body ? body.find(selector) : $(selector);
+        var displayValue = Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none';
         if (elements.length) {
-            var displayValue = Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none';
             elements.each(function(index, element) {
                 $(element).css('display', displayValue);
                 console.log('select_ani_mation display set to:', displayValue);
             });
         } else {
-            console.log('select_ani_mation element not found');
+            console.log('select_ani_mation element not found, retrying...');
+            // Спробуємо альтернативний селектор
+            var altElements = $('.settings-param__name').filter(function() {
+                return $(this).text().indexOf(Lampa.Lang.translate('params_ani_select')) !== -1;
+            }).closest('.settings-param');
+            if (altElements.length) {
+                altElements.each(function(index, element) {
+                    $(element).css('display', displayValue);
+                    console.log('select_ani_mation (alt selector) display set to:', displayValue);
+                });
+            } else {
+                console.log('Alternative selector failed');
+            }
+            // Спробуємо ще раз через затримку
+            setTimeout(function() {
+                var retryElements = $(selector);
+                if (retryElements.length) {
+                    retryElements.each(function(index, element) {
+                        $(element).css('display', displayValue);
+                        console.log('select_ani_mation retry display set to:', displayValue);
+                    });
+                } else {
+                    console.log('select_ani_mation still not found after retry');
+                }
+            }, 500);
         }
     }
+
+    // Експортуємо функцію для дебагу
+    window.updateParamsVisibility = updateParamsVisibility;
 
     // Функція для ініціалізації плагіна
     function aniLoad() {
@@ -180,8 +206,9 @@
                 name: Lampa.Lang.translate('params_ani_name'),
                 icon: icon_plugin
             });
+            console.log('Component ani_load_menu added');
         } catch (e) {
-            console.log('Error adding component:', e);
+            console.log('Error adding component ani_load_menu:', e);
         }
 
         // Додаємо параметр для увімкнення/вимкнення плагіна
@@ -210,14 +237,21 @@
                     updateParamsVisibility();
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
+                        console.log('Settings rendered after ani_active change');
                     }
                 },
                 onRender: function (item) {
                     if (item && typeof item.css === 'function') {
                         item.css('display', 'block');
+                        console.log('ani_active onRender, display: block');
                     }
                 }
             });
+            console.log('Parameter ani_active added');
+            if (Lampa.Settings && Lampa.Settings.render) {
+                Lampa.Settings.render();
+                console.log('Settings rendered after ani_active added');
+            }
         } catch (e) {
             console.log('Error adding ani_active param:', e);
         }
@@ -310,136 +344,155 @@
                                 Lampa.Controller.enable('menu');
                                 if (Lampa.Settings && Lampa.Settings.render) {
                                     Lampa.Settings.render();
+                                    console.log('Settings rendered after modal close');
                                 }
                             }
                         });
+                        console.log('Modal opened');
                     } catch (e) {
                         console.log('Error opening modal:', e);
                     }
                 }
             });
+            console.log('Parameter select_ani_mation added');
+            if (Lampa.Settings && Lampa.Settings.render) {
+                Lampa.Settings.render();
+                console.log('Settings rendered after select_ani_mation added');
+            }
         } catch (e) {
             console.log('Error adding select_ani_mation param:', e);
         }
 
         // Оновлюємо видимість параметрів після ініціалізації
-        updateParamsVisibility();
+        setTimeout(function() {
+            updateParamsVisibility();
+            console.log('Initial updateParamsVisibility called');
+        }, 500);
+    }
 
-        // Слухаємо зміни параметра ani_active та color_plugin_main_color
-        Lampa.Storage.listener.follow('change', function (e) {
-            if (e.name === 'ani_active') {
-                console.log('Storage change: ani_active =', Lampa.Storage.get('ani_active', 'false'));
-                updateParamsVisibility();
-                if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
-                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                }
-                if (Lampa.Settings && Lampa.Settings.render) {
-                    Lampa.Settings.render();
-                }
+    // Слухаємо зміни параметра ani_active та color_plugin_main_color
+    Lampa.Storage.listener.follow('change', function (e) {
+        if (e.name === 'ani_active') {
+            console.log('Storage change: ani_active =', Lampa.Storage.get('ani_active', 'false'));
+            updateParamsVisibility();
+            if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
+                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
             }
-            // Оновлюємо стилі при зміні кольору виділення
-            if (e.name === 'color_plugin_main_color') {
-                console.log('Storage change: color_plugin_main_color =', Lampa.Storage.get('color_plugin_main_color'));
-                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                    create_ani_modal();
-                }
+            if (Lampa.Settings && Lampa.Settings.render) {
+                Lampa.Settings.render();
+                console.log('Settings rendered after ani_active storage change');
             }
-        });
+        }
+        // Оновлюємо стилі при зміні кольору виділення
+        if (e.name === 'color_plugin_main_color') {
+            console.log('Storage change: color_plugin_main_color =', Lampa.Storage.get('color_plugin_main_color'));
+            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
+                setCustomLoader(Lampa.Storage.get('ani_load'));
+                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                create_ani_modal();
+            }
+        }
+    });
 
-        // Слухаємо відкриття меню налаштувань для оновлення видимості
-        Lampa.Settings.listener.follow('open', function (e) {
-            if (e.name === 'ani_load_menu') {
-                console.log('Settings open: ani_load_menu');
-                updateParamsVisibility(e.body);
-            }
-        });
+    // Слухаємо відкриття меню налаштувань для оновлення видимості
+    Lampa.Settings.listener.follow('open', function (e) {
+        if (e.name === 'ani_load_menu') {
+            console.log('Settings open: ani_load_menu');
+            updateParamsVisibility(e.body);
+        }
+    });
 
-        // Додатковий слухач для події settings
-        Lampa.Listener.follow('settings', function (e) {
-            if (e.type === 'open' && e.component === 'ani_load_menu') {
-                console.log('Listener settings open: ani_load_menu');
-                updateParamsVisibility();
-            }
-        });
+    // Додатковий слухач для події settings
+    Lampa.Listener.follow('settings', function (e) {
+        if (e.type === 'open' && e.component === 'ani_load_menu') {
+            console.log('Listener settings open: ani_load_menu');
+            updateParamsVisibility();
+        }
+    });
 
-        // Слухаємо мутації для елемента .activity__loader
-        setTimeout(function () {
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    mutation.addedNodes.forEach(function (node) {
-                        if (node.nodeType === 1 && node.matches('.activity__loader')) {
-                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
-                                setCustomLoader(Lampa.Storage.get('ani_load'));
-                            }
+    // Резервний слухач для події app
+    Lampa.Listener.follow('app', function (e) {
+        if (e.type === 'ready' || e.type === 'show_settings') {
+            console.log('App event:', e.type);
+            updateParamsVisibility();
+        }
+    });
+
+    // Слухаємо мутації для елемента .activity__loader
+    setTimeout(function () {
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1 && node.matches('.activity__loader')) {
+                        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
+                            setCustomLoader(Lampa.Storage.get('ani_load'));
                         }
-                    });
-                    mutation.removedNodes.forEach(function (node) {
-                        if (node.nodeType === 1 && node.matches('.activity__loader')) {
-                            remove_activity_loader();
-                        }
-                    });
+                    }
+                });
+                mutation.removedNodes.forEach(function (node) {
+                    if (node.nodeType === 1 && node.matches('.activity__loader')) {
+                        remove_activity_loader();
+                    }
                 });
             });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }, 1000);
-
-        // Слухаємо події full для керування завантажувачем
-        Lampa.Listener.follow('full', function (e) {
-            var element = document.querySelector('.activity__loader');
-            if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true' && element) {
-                setCustomLoader(Lampa.Storage.get('ani_load'));
-                element.classList.add('active');
-                element.style.display = 'block';
-            } else if (e.type === 'complete' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-            }
         });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }, 1000);
 
-        // Слухаємо події activity для керування завантажувачем
-        Lampa.Listener.follow('activity', function (event) {
-            var element = document.querySelector('.activity__loader');
-            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true' && element) {
-                setCustomLoader(Lampa.Storage.get('ani_load'));
-                element.classList.add('active');
-                element.style.display = 'block';
-            } else if (event.type === 'loaded' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-            }
-        });
-
-        // Слухаємо події push для керування завантажувачем
-        Lampa.Activity.listener.follow('push', function (event) {
-            var element = document.querySelector('.activity__loader');
-            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true' && element) {
-                setCustomLoader(Lampa.Storage.get('ani_load'));
-                element.classList.add('active');
-                element.style.display = 'block';
-            } else if (event.status === 'ready' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-            }
-        });
-
-        // Слухаємо подію back для приховування завантажувача
-        Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'back') {
-                var element = document.querySelector('.activity__loader');
-                if (element) {
-                    element.classList.remove('active');
-                    element.style.display = 'none';
-                }
-            }
-        });
-
-        // Застосовуємо завантажувач при ініціалізації, якщо активовано
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
+    // Слухаємо події full для керування завантажувачем
+    Lampa.Listener.follow('full', function (e) {
+        var element = document.querySelector('.activity__loader');
+        if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true' && element) {
             setCustomLoader(Lampa.Storage.get('ani_load'));
-            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+            element.classList.add('active');
+            element.style.display = 'block';
+        } else if (e.type === 'complete' && element) {
+            element.classList.remove('active');
+            element.style.display = 'none';
         }
+    });
+
+    // Слухаємо події activity для керування завантажувачем
+    Lampa.Listener.follow('activity', function (event) {
+        var element = document.querySelector('.activity__loader');
+        if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true' && element) {
+            setCustomLoader(Lampa.Storage.get('ani_load'));
+            element.classList.add('active');
+            element.style.display = 'block';
+        } else if (event.type === 'loaded' && element) {
+            element.classList.remove('active');
+            element.style.display = 'none';
+        }
+    });
+
+    // Слухаємо події push для керування завантажувачем
+    Lampa.Activity.listener.follow('push', function (event) {
+        var element = document.querySelector('.activity__loader');
+        if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true' && element) {
+            setCustomLoader(Lampa.Storage.get('ani_load'));
+            element.classList.add('active');
+            element.style.display = 'block';
+        } else if (event.status === 'ready' && element) {
+            element.classList.remove('active');
+            element.style.display = 'none';
+        }
+    });
+
+    // Слухаємо подію back для приховування завантажувача
+    Lampa.Listener.follow('app', function (event) {
+        if (event.type === 'back') {
+            var element = document.querySelector('.activity__loader');
+            if (element) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+            }
+        }
+    });
+
+    // Застосовуємо завантажувач при ініціалізації, якщо активовано
+    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
+        setCustomLoader(Lampa.Storage.get('ani_load'));
+        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
     }
 
     // Функція для оновлення завантажувача при зміні теми
