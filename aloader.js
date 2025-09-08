@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для назв і параметрів
+    // Додаємо переклади для назв і параме
     Lampa.Lang.add({
         params_ani_on: {
             ru: 'Включить',
@@ -48,6 +48,40 @@
         }
     }
 
+    // Функція для примусового додавання параметра до DOM
+    function forceAddSelectAniMation() {
+        var component = document.querySelector('.settings--component-ani_load_menu');
+        if (!component) {
+            console.log('settings--component-ani_load_menu not found, cannot add select_ani_mation');
+            return;
+        }
+        var existing = document.querySelector('.settings-param[data-name="select_ani_mation"]');
+        if (!existing) {
+            console.log('Adding select_ani_mation to DOM');
+            var paramElement = document.createElement('div');
+            paramElement.className = 'settings-param selector settings-param--button';
+            paramElement.setAttribute('data-name', 'select_ani_mation');
+            paramElement.setAttribute('data-static', 'true');
+            paramElement.setAttribute('data-type', 'button');
+            paramElement.innerHTML = '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select');
+            component.appendChild(paramElement);
+            console.log('select_ani_mation added to DOM');
+            if (Lampa.Storage.get('ani_active', 'false') === 'true') {
+                paramElement.classList.remove('hide');
+                paramElement.style.display = 'block';
+                console.log('select_ani_mation shown after adding to DOM');
+            }
+            if (Lampa.Storage.get('ani_load')) {
+                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                console.log('insert_activity_loader_prv called after adding select_ani_mation');
+            }
+            if (Lampa.Settings && Lampa.Settings.render) {
+                Lampa.Settings.render();
+                console.log('Settings rendered after adding select_ani_mation');
+            }
+        }
+    }
+
     // Функція для застосування кастомного завантажувача
     function setCustomLoader(url) {
         // Видаляємо попередні стилі
@@ -63,7 +97,7 @@
                            'background-attachment: scroll; ' +
                            'background-clip: border-box; ' +
                            'background-color: rgba(0, 0, 0, 0) !important; ' +
-                           'background-image: url(\'' + escapedUrl + '\') !important; ' +
+                           'background-image: url(\'' + escapedUrl + '\') !important; -webkit-mask-image: url(\'' + escapedUrl + '\') !important; ' +
                            'background-origin: padding-box; ' +
                            'background-position-x: 50%; ' +
                            'background-position-y: 50%; ' +
@@ -199,6 +233,7 @@
             console.log('settings-param[' + i + '] display:', getComputedStyle(allParams[i]).display);
         }
         checkElementVisibility(selector);
+        checkElementVisibility('.settings--component-ani_load_menu');
         if (elements.length) {
             for (var i = 0; i < elements.length; i++) {
                 console.log('Before update: select_ani_mation[' + i + '] classList:', elements[i].classList.toString());
@@ -229,89 +264,51 @@
             });
         } else {
             console.log('select_ani_mation element not found');
-            // Спробуємо ще раз через затримку
-            setTimeout(function() {
-                var retryElements = document.querySelectorAll(selector);
-                console.log('Retry: Total settings-param elements:', document.querySelectorAll('.settings-param').length);
-                for (var i = 0; i < document.querySelectorAll('.settings-param').length; i++) {
-                    console.log('Retry: settings-param[' + i + '] data-name:', document.querySelectorAll('.settings-param')[i].getAttribute('data-name'));
-                    console.log('Retry: settings-param[' + i + '] classList:', document.querySelectorAll('.settings-param')[i].classList.toString());
-                    console.log('Retry: settings-param[' + i + '] display:', getComputedStyle(document.querySelectorAll('.settings-param')[i]).display);
-                }
-                checkElementVisibility(selector);
-                if (retryElements.length) {
-                    for (var j = 0; j < retryElements.length; j++) {
-                        console.log('Retry: Before update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
-                        console.log('Retry: Before update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
-                        if (aniActive === 'true') {
-                            retryElements[j].classList.remove('hide');
-                            retryElements[j].style.display = 'block';
-                            console.log('select_ani_mation retry shown (hide class removed, display set to block)');
-                            if (Lampa.Storage.get('ani_load')) {
-                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                console.log('insert_activity_loader_prv called in retry');
-                            }
-                        } else {
-                            retryElements[j].classList.add('hide');
-                            retryElements[j].style.display = 'none';
-                            console.log('select_ani_mation retry hidden (hide class added, display set to none)');
-                        }
-                        console.log('Retry: After update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
-                        console.log('Retry: After update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
-                    }
-                    requestAnimationFrame(function() {
-                        if (Lampa.Settings && Lampa.Settings.render) {
-                            Lampa.Settings.render();
-                            console.log('Settings rendered after retry');
-                        }
-                        checkElementVisibility(selector);
-                    });
-                } else {
-                    console.log('select_ani_mation still not found after first retry');
-                    // Додаткова спроба через 10000 мс
-                    setTimeout(function() {
-                        var finalRetryElements = document.querySelectorAll(selector);
-                        console.log('Final retry: Total settings-param elements:', document.querySelectorAll('.settings-param').length);
-                        for (var i = 0; i < document.querySelectorAll('.settings-param').length; i++) {
-                            console.log('Final retry: settings-param[' + i + '] data-name:', document.querySelectorAll('.settings-param')[i].getAttribute('data-name'));
-                            console.log('Final retry: settings-param[' + i + '] classList:', document.querySelectorAll('.settings-param')[i].classList.toString());
-                            console.log('Final retry: settings-param[' + i + '] display:', getComputedStyle(document.querySelectorAll('.settings-param')[i]).display);
-                        }
-                        checkElementVisibility(selector);
-                        if (finalRetryElements.length) {
-                            for (var j = 0; j < finalRetryElements.length; j++) {
-                                console.log('Final retry: Before update: select_ani_mation[' + j + '] classList:', finalRetryElements[j].classList.toString());
-                                console.log('Final retry: Before update: select_ani_mation[' + j + '] display:', getComputedStyle(finalRetryElements[j]).display);
-                                if (aniActive === 'true') {
-                                    finalRetryElements[j].classList.remove('hide');
-                                    finalRetryElements[j].style.display = 'block';
-                                    console.log('select_ani_mation final retry shown (hide class removed, display set to block)');
-                                    if (Lampa.Storage.get('ani_load')) {
-                                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                        console.log('insert_activity_loader_prv called in final retry');
-                                    }
-                                } else {
-                                    finalRetryElements[j].classList.add('hide');
-                                    finalRetryElements[j].style.display = 'none';
-                                    console.log('select_ani_mation final retry hidden (hide class added, display set to none)');
-                                }
-                                console.log('Final retry: After update: select_ani_mation[' + j + '] classList:', finalRetryElements[j].classList.toString());
-                                console.log('Final retry: After update: select_ani_mation[' + j + '] display:', getComputedStyle(finalRetryElements[j]).display);
-                            }
-                            requestAnimationFrame(function() {
-                                if (Lampa.Settings && Lampa.Settings.render) {
-                                    Lampa.Settings.render();
-                                    console.log('Settings rendered after final retry');
-                                }
-                                checkElementVisibility(selector);
-                            });
-                        } else {
-                            console.log('select_ani_mation still not found after final retry');
-                        }
-                    }, 10000);
-                }
-            }, 5000);
+            forceAddSelectAniMation();
         }
+        // Періодична перевірка через setInterval
+        var intervalId = setInterval(function() {
+            var retryElements = document.querySelectorAll(selector);
+            console.log('Interval check: Total settings-param elements:', document.querySelectorAll('.settings-param').length);
+            for (var i = 0; i < document.querySelectorAll('.settings-param').length; i++) {
+                console.log('Interval check: settings-param[' + i + '] data-name:', document.querySelectorAll('.settings-param')[i].getAttribute('data-name'));
+                console.log('Interval check: settings-param[' + i + '] classList:', document.querySelectorAll('.settings-param')[i].classList.toString());
+                console.log('Interval check: settings-param[' + i + '] display:', getComputedStyle(document.querySelectorAll('.settings-param')[i]).display);
+            }
+            checkElementVisibility(selector);
+            if (retryElements.length) {
+                for (var j = 0; j < retryElements.length; j++) {
+                    console.log('Interval check: Before update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
+                    console.log('Interval check: Before update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
+                    if (aniActive === 'true') {
+                        retryElements[j].classList.remove('hide');
+                        retryElements[j].style.display = 'block';
+                        console.log('select_ani_mation interval check shown (hide class removed, display set to block)');
+                        if (Lampa.Storage.get('ani_load')) {
+                            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                            console.log('insert_activity_loader_prv called in interval check');
+                        }
+                    } else {
+                        retryElements[j].classList.add('hide');
+                        retryElements[j].style.display = 'none';
+                        console.log('select_ani_mation interval check hidden (hide class added, display set to none)');
+                    }
+                    console.log('Interval check: After update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
+                    console.log('Interval check: After update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
+                }
+                requestAnimationFrame(function() {
+                    if (Lampa.Settings && Lampa.Settings.render) {
+                        Lampa.Settings.render();
+                        console.log('Settings rendered after interval check');
+                    }
+                    checkElementVisibility(selector);
+                });
+                clearInterval(intervalId); // Зупиняємо інтервал після успішного оновлення
+            } else {
+                console.log('select_ani_mation still not found in interval check');
+                forceAddSelectAniMation();
+            }
+        }, 5000);
         // Оновлюємо меню налаштувань
         requestAnimationFrame(function() {
             if (Lampa.Settings && Lampa.Settings.render) {
@@ -340,6 +337,7 @@
                     Lampa.Settings.render();
                     console.log('Settings rendered after re-adding ani_load_menu');
                 }
+                checkElementVisibility('.settings--component-ani_load_menu');
             } catch (e) {
                 console.log('Error re-adding component ani_load_menu:', e);
             }
@@ -353,6 +351,7 @@
             console.log('forceShowAniSelect: settings-param[' + i + '] display:', getComputedStyle(document.querySelectorAll('.settings-param')[i]).display);
         }
         checkElementVisibility(selector);
+        checkElementVisibility('.settings--component-ani_load_menu');
         if (elements.length) {
             for (var i = 0; i < elements.length; i++) {
                 console.log('forceShowAniSelect: Before update: select_ani_mation[' + i + '] classList:', elements[i].classList.toString());
@@ -377,6 +376,7 @@
             });
         } else {
             console.log('forceShowAniSelect: select_ani_mation not found');
+            forceAddSelectAniMation();
         }
         requestAnimationFrame(function() {
             if (Lampa.Settings && Lampa.Settings.render) {
@@ -385,40 +385,42 @@
             }
             checkElementVisibility(selector);
         });
-        // Повторна спроба через затримку
-        setTimeout(function() {
+        // Періодична перевірка через setInterval
+        var intervalId = setInterval(function() {
             var retryElements = document.querySelectorAll(selector);
-            console.log('forceShowAniSelect retry: Total settings-param elements:', document.querySelectorAll('.settings-param').length);
+            console.log('forceShowAniSelect interval check: Total settings-param elements:', document.querySelectorAll('.settings-param').length);
             for (var i = 0; i < document.querySelectorAll('.settings-param').length; i++) {
-                console.log('forceShowAniSelect retry: settings-param[' + i + '] data-name:', document.querySelectorAll('.settings-param')[i].getAttribute('data-name'));
-                console.log('forceShowAniSelect retry: settings-param[' + i + '] classList:', document.querySelectorAll('.settings-param')[i].classList.toString());
-                console.log('forceShowAniSelect retry: settings-param[' + i + '] display:', getComputedStyle(document.querySelectorAll('.settings-param')[i]).display);
+                console.log('forceShowAniSelect interval check: settings-param[' + i + '] data-name:', document.querySelectorAll('.settings-param')[i].getAttribute('data-name'));
+                console.log('forceShowAniSelect interval check: settings-param[' + i + '] classList:', document.querySelectorAll('.settings-param')[i].classList.toString());
+                console.log('forceShowAniSelect interval check: settings-param[' + i + '] display:', getComputedStyle(document.querySelectorAll('.settings-param')[i]).display);
             }
             checkElementVisibility(selector);
             if (retryElements.length) {
                 for (var j = 0; j < retryElements.length; j++) {
-                    console.log('forceShowAniSelect retry: Before update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
-                    console.log('forceShowAniSelect retry: Before update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
+                    console.log('forceShowAniSelect interval check: Before update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
+                    console.log('forceShowAniSelect interval check: Before update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
                     retryElements[j].classList.remove('hide');
                     retryElements[j].style.display = 'block';
-                    console.log('forceShowAniSelect retry: select_ani_mation[' + j + '] shown (hide class removed, display set to block)');
-                    console.log('forceShowAniSelect retry: After update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
-                    console.log('forceShowAniSelect retry: After update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
+                    console.log('forceShowAniSelect interval check: select_ani_mation[' + j + '] shown (hide class removed, display set to block)');
+                    console.log('forceShowAniSelect interval check: After update: select_ani_mation[' + j + '] classList:', retryElements[j].classList.toString());
+                    console.log('forceShowAniSelect interval check: After update: select_ani_mation[' + j + '] display:', getComputedStyle(retryElements[j]).display);
                     if (Lampa.Storage.get('ani_load')) {
                         insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                        console.log('insert_activity_loader_prv called in forceShowAniSelect retry');
+                        console.log('insert_activity_loader_prv called in forceShowAniSelect interval check');
                     }
                 }
                 requestAnimationFrame(function() {
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
-                        console.log('Settings rendered after retry in forceShowAniSelect');
+                        console.log('Settings rendered after interval check in forceShowAniSelect');
                     }
                     checkElementVisibility(selector);
                     updateAniVisibility();
                 });
+                clearInterval(intervalId); // Зупиняємо інтервал після успішного оновлення
             } else {
-                console.log('forceShowAniSelect retry: select_ani_mation not found');
+                console.log('forceShowAniSelect interval check: select_ani_mation not found');
+                forceAddSelectAniMation();
             }
         }, 5000);
     };
@@ -474,6 +476,7 @@
                     // Оновлюємо видимість параметра
                     setTimeout(function() {
                         updateAniVisibility();
+                        checkElementVisibility('.settings-param[data-name="select_ani_mation"]');
                     }, 3000);
                 }
             });
@@ -598,6 +601,7 @@
             console.log('Storage change: ani_active =', Lampa.Storage.get('ani_active', 'false'));
             setTimeout(function() {
                 updateAniVisibility();
+                checkElementVisibility('.settings-param[data-name="select_ani_mation"]');
             }, 3000);
         }
         // Оновлюємо стилі при зміні кольору виділення
@@ -651,6 +655,12 @@
                     console.log('Class changed on:', mutation.target);
                     console.log('New classList:', mutation.target.classList.toString());
                     console.log('New display:', getComputedStyle(mutation.target).display);
+                    // Примусово знімаємо клас hide, якщо він додається
+                    if (mutation.target.matches('.settings-param[data-name="select_ani_mation"]') && Lampa.Storage.get('ani_active', 'false') === 'true') {
+                        mutation.target.classList.remove('hide');
+                        mutation.target.style.display = 'block';
+                        console.log('MutationObserver: select_ani_mation shown (hide class removed, display set to block)');
+                    }
                 }
             });
         });
@@ -661,8 +671,8 @@
         }
         var component = document.querySelector('.settings--component-ani_load_menu');
         if (component) {
-            observer.observe(component, { attributes: true });
-            console.log('Observing class changes on settings--component-ani_load_menu');
+            observer.observe(component, { attributes: true, subtree: true });
+            console.log('Observing class changes on settings--component-ani_load_menu and subtree');
         }
     }, 3000);
 
