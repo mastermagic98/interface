@@ -151,28 +151,23 @@
         return result;
     }
 
-    // Функція для оновлення видимості параметрів
-    function updateParamsVisibility(body) {
-        console.log('updateParamsVisibility called, ani_active:', Lampa.Storage.get('ani_active', 'false'));
-        var selector = '.settings-param[data-name="select_ani_mation"]';
-        var elements = body ? body.find(selector) : $(selector);
+    // Функція для оновлення видимості параметра select_ani_mation
+    function updateAniVisibility() {
         var displayValue = Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none';
+        console.log('updateAniVisibility called, ani_active:', Lampa.Storage.get('ani_active', 'false'), 'display:', displayValue);
+        var selector = '.settings-param[data-name="select_ani_mation"]';
+        var elements = $(selector);
         if (elements.length) {
-            elements.each(function(index, element) {
-                $(element).css('display', displayValue);
-                console.log('select_ani_mation display set to:', displayValue);
-            });
+            elements.css('display', displayValue);
+            console.log('select_ani_mation display set to:', displayValue);
         } else {
-            console.log('select_ani_mation element not found, retrying...');
-            // Спробуємо альтернативний селектор
+            console.log('select_ani_mation element not found, trying alternative selector...');
             var altElements = $('.settings-param__name').filter(function() {
                 return $(this).text().indexOf(Lampa.Lang.translate('params_ani_select')) !== -1;
             }).closest('.settings-param');
             if (altElements.length) {
-                altElements.each(function(index, element) {
-                    $(element).css('display', displayValue);
-                    console.log('select_ani_mation (alt selector) display set to:', displayValue);
-                });
+                altElements.css('display', displayValue);
+                console.log('select_ani_mation (alt selector) display set to:', displayValue);
             } else {
                 console.log('Alternative selector failed');
             }
@@ -180,19 +175,22 @@
             setTimeout(function() {
                 var retryElements = $(selector);
                 if (retryElements.length) {
-                    retryElements.each(function(index, element) {
-                        $(element).css('display', displayValue);
-                        console.log('select_ani_mation retry display set to:', displayValue);
-                    });
+                    retryElements.css('display', displayValue);
+                    console.log('select_ani_mation retry display set to:', displayValue);
                 } else {
                     console.log('select_ani_mation still not found after retry');
                 }
             }, 500);
         }
+        // Оновлюємо меню налаштувань
+        if (Lampa.Settings && Lampa.Settings.render) {
+            Lampa.Settings.render();
+            console.log('Settings rendered in updateAniVisibility');
+        }
     }
 
     // Експортуємо функцію для дебагу
-    window.updateParamsVisibility = updateParamsVisibility;
+    window.updateAniVisibility = updateAniVisibility;
 
     // Функція для ініціалізації плагіна
     function aniLoad() {
@@ -233,12 +231,8 @@
                     } else {
                         remove_activity_loader();
                     }
-                    // Оновлюємо видимість параметра вибору анімації
-                    updateParamsVisibility();
-                    if (Lampa.Settings && Lampa.Settings.render) {
-                        Lampa.Settings.render();
-                        console.log('Settings rendered after ani_active change');
-                    }
+                    // Оновлюємо видимість параметра
+                    updateAniVisibility();
                 },
                 onRender: function (item) {
                     if (item && typeof item.css === 'function') {
@@ -365,8 +359,8 @@
 
         // Оновлюємо видимість параметрів після ініціалізації
         setTimeout(function() {
-            updateParamsVisibility();
-            console.log('Initial updateParamsVisibility called');
+            updateAniVisibility();
+            console.log('Initial updateAniVisibility called');
         }, 500);
     }
 
@@ -374,14 +368,12 @@
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'ani_active') {
             console.log('Storage change: ani_active =', Lampa.Storage.get('ani_active', 'false'));
-            updateParamsVisibility();
-            if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
-                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-            }
-            if (Lampa.Settings && Lampa.Settings.render) {
-                Lampa.Settings.render();
-                console.log('Settings rendered after ani_active storage change');
-            }
+            setTimeout(function() {
+                updateAniVisibility();
+                if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
+                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                }
+            }, 100);
         }
         // Оновлюємо стилі при зміні кольору виділення
         if (e.name === 'color_plugin_main_color') {
@@ -394,27 +386,23 @@
         }
     });
 
-    // Слухаємо відкриття меню налаштувань для оновлення видимості
+    // Слухаємо відкриття меню налаштувань
     Lampa.Settings.listener.follow('open', function (e) {
         if (e.name === 'ani_load_menu') {
             console.log('Settings open: ani_load_menu');
-            updateParamsVisibility(e.body);
+            setTimeout(function() {
+                updateAniVisibility();
+            }, 100);
         }
     });
 
-    // Додатковий слухач для події settings
-    Lampa.Listener.follow('settings', function (e) {
-        if (e.type === 'open' && e.component === 'ani_load_menu') {
-            console.log('Listener settings open: ani_load_menu');
-            updateParamsVisibility();
-        }
-    });
-
-    // Резервний слухач для події app
+    // Додатковий слухач для події app
     Lampa.Listener.follow('app', function (e) {
         if (e.type === 'ready' || e.type === 'show_settings') {
             console.log('App event:', e.type);
-            updateParamsVisibility();
+            setTimeout(function() {
+                updateAniVisibility();
+            }, 100);
         }
     });
 
