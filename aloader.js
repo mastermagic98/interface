@@ -126,7 +126,8 @@
             '.ani_row { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 48px; gap: 10px; justify-items: center; width: 100%; padding: 10px; }',
             '.ani_svg { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 4px; }',
             '.ani_svg img { max-width: 40px; max-height: 40px; object-fit: contain; filter: none; fill: ' + mainColor + '; stroke: ' + mainColor + '; }',
-            '.ani_svg.focus { background-color: ' + mainColor + '; border: 0.3em solid ' + mainColor + '; transform: scale(1.1); }',
+            '.ani_svg.focus { border: 0.3em solid ' + mainColor + '; transform: scale(1.1); }',
+            '.ani_svg.focus img { fill: ' + mainColor + ' !important; stroke: ' + mainColor + ' !important; }',
             '@media (max-width: 768px) {',
             '  .color-picker-container { grid-template-columns: 1fr; }',
             '  .color-picker-container > div:nth-child(2) { justify-content: flex-start; }',
@@ -148,6 +149,20 @@
             result.push(arr.slice(i, i + size));
         }
         return result;
+    }
+
+    // Функція для оновлення видимості параметрів
+    function updateParamsVisibility(body) {
+        var selector = '.settings-param[data-name="select_ani_mation"]';
+        setTimeout(function() {
+            var elements = body ? body.find(selector) : $(selector);
+            if (elements.length) {
+                var displayValue = Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none';
+                elements.each(function(index, element) {
+                    $(element).css('display', displayValue);
+                });
+            }
+        }, 100);
     }
 
     // Функція для ініціалізації плагіна
@@ -186,10 +201,7 @@
                         remove_activity_loader();
                     }
                     // Оновлюємо видимість параметра вибору анімації
-                    var selectItem = $('.settings-param[data-name="select_ani_mation"]');
-                    if (selectItem.length) {
-                        selectItem.css('display', item === 'true' ? 'block' : 'none');
-                    }
+                    updateParamsVisibility();
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
                     }
@@ -296,27 +308,31 @@
             });
         } catch (e) {}
 
-        // Слухаємо зміни параметра ani_active
+        // Слухаємо зміни параметра ani_active та color_plugin_main_color
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'ani_active') {
-                var selectItem = $('.settings-param[data-name="select_ani_mation"]');
-                if (selectItem.length) {
-                    selectItem.css('display', Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none');
-                    if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
-                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                    }
+                updateParamsVisibility();
+                if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
+                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 }
                 if (Lampa.Settings && Lampa.Settings.render) {
                     Lampa.Settings.render();
                 }
             }
-            // Слухаємо зміни кольору виділення з попереднього плагіна
+            // Оновлюємо стилі при зміні кольору виділення
             if (e.name === 'color_plugin_main_color') {
                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active', 'false') === 'true') {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                     create_ani_modal();
                 }
+            }
+        });
+
+        // Слухаємо відкриття меню налаштувань для оновлення видимості
+        Lampa.Settings.listener.follow('open', function (e) {
+            if (e.name === 'ani_load_menu') {
+                updateParamsVisibility(e.body);
             }
         });
 
