@@ -1,6 +1,7 @@
 (function () {
     'use strict';
 
+    // Додаємо переклад для назви плагіна
     Lampa.Lang.add({
         accent_color_plugin: {
             ru: 'Налаштування акцентного кольору',
@@ -9,16 +10,18 @@
         }
     });
 
+    // Список модулів для підключення
     var modules = [
         'https://mastermagic98.github.io/interface/color.js',
         'https://mastermagic98.github.io/interface/aloader.js',
-        'https://mastermagic98.github.io/interface/loaders.js',
-      //  'https://mastermagic98.github.io/interface/animations.js',
+        'https://mastermagic98.github.io/interface/loaders.js'
+//  'https://mastermagic98.github.io/interface/animations.js',
      //   'https://mastermagic98.github.io/interface/translate_tv.js',
        // 'https://mastermagic98.github.io/interface/incardtemplate.js',
       //  'https://mastermagic98.github.io/interface/fix_lang.js'
     ];
 
+    // Асинхронне підключення модулів
     modules.forEach(function (url) {
         Lampa.Utils.putScriptAsync([url], function () {
             console.log('Модуль завантажено: ' + url);
@@ -27,11 +30,14 @@
         });
     });
 
+    // Функція ініціалізації плагіна
     function startPlugin() {
         console.log('Ініціалізація плагіну accent_color_plugin');
+        // Додаємо шаблони для налаштувань
         Lampa.Template.add('settings', '<div class="settings"></div>');
         Lampa.Template.add('settings_', '<div class="settings"></div>');
         try {
+            // Додаємо компонент до меню налаштувань
             Lampa.SettingsApi.addComponent({
                 component: 'accent_color_plugin',
                 name: Lampa.Lang.translate('accent_color_plugin'),
@@ -42,13 +48,11 @@
             console.error('Помилка додавання accent_color_plugin: ' + e.message);
         }
 
-        var savedColor = Lampa.Storage.get('accent_color_selected', '#5daa68');
-        document.documentElement.style.setProperty('--main-color', savedColor);
-        console.log('Застосовано збережений колір: ' + savedColor);
-
+        // Оновлюємо налаштування
         Lampa.Settings.render();
     }
 
+    // Запускаємо плагін після готовності програми
     if (window.appready) {
         console.log('Lampa готова, запуск плагіну');
         startPlugin();
@@ -61,6 +65,7 @@
         });
     }
 
+    // Опис маніфесту плагіна
     Lampa.Manifest.plugins = {
         name: 'accent_color_plugin',
         version: '1.0.0',
