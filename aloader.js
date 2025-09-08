@@ -94,13 +94,13 @@
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
                             '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
                             '.ani_loader_square.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
-                            '.ani_loader_square.default { background-color: #fff; width: 35px; height: 35px; border-radius: 4px; position: relative; }' +
-                            '.ani_loader_square.default::after { content: ""; position: absolute; top: 50%; left: 10%; right: 10%; height: 3px; background-color: #353535; transform: rotate(45deg); }' +
-                            '.ani_loader_square.default::before { content: ""; position: absolute; top: 50%; left: 10%; right: 10%; height: 3px; background-color: #353535; transform: rotate(-45deg); }' +
+                            '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }' +
+                            '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
                             '.svg_input { width: 360px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
                             '.svg_input.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
                             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
-                            '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
+                            '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }' +
+                            '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }';
         document.head.appendChild(style);
     }
 
@@ -109,6 +109,13 @@
         var className = 'ani_loader_square selector';
         var content = '<img src="' + src + '" alt="Loader ' + index + '">';
         return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
+    }
+
+    // Функція для створення HTML для кнопки "За замовчуванням"
+    function createDefaultSvgHtml() {
+        var className = 'ani_loader_square selector default';
+        var content = '<img src="./img/loader.svg" alt="' + Lampa.Lang.translate('default_loader') + '">';
+        return '<div class="' + className + '" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '">' + content + '</div>';
     }
 
     // Функція для конвертації HEX у RGB
@@ -207,25 +214,28 @@
                     }
                     create_ani_modal();
 
-                    // Формуємо SVG-завантажувачі без груп
-                    var svgContent = window.svg_loaders.map(function(loader, index) {
-                        return createSvgHtml(loader, index + 1);
+                    // Формуємо SVG-завантажувачі групами по 6 іконок
+                    var svgChunks = chunkArray(window.svg_loaders, 6);
+                    var svgContent = svgChunks.map(function(chunk) {
+                        return '<div class="ani_loader_row">' + chunk.map(function(loader, index) {
+                            return createSvgHtml(loader, svgChunks.indexOf(chunk) * 6 + index + 1);
+                        }).join('') + '</div>';
                     });
 
-                    // Розподіляємо іконки між двома колонками
+                    // Розподіляємо рядки між двома колонками
                     var midPoint = Math.ceil(svgContent.length / 2);
                     var leftColumn = svgContent.slice(0, midPoint).join('');
                     var rightColumn = svgContent.slice(midPoint).join('');
 
                     // Додаємо кнопку "За замовчуванням" і поле для введення SVG
-                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"></div>';
+                    var defaultButton = createDefaultSvgHtml();
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var svgDisplay = svgValue || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 360px;">' +
                                     '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                     '<div class="value">' + svgDisplay + '</div>' +
                                     '</div>';
-                    var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                    var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 20px;">' +
                                      defaultButton + inputHtml + '</div>';
 
                     var modalContent = '<div class="ani_picker_container">' +
@@ -351,20 +361,23 @@
                     create_ani_modal();
                     var modal = document.querySelector('.ani_modal_root');
                     if (modal) {
-                        var svgContent = window.svg_loaders.map(function(loader, index) {
-                            return createSvgHtml(loader, index + 1);
+                        var svgChunks = chunkArray(window.svg_loaders, 6);
+                        var svgContent = svgChunks.map(function(chunk) {
+                            return '<div class="ani_loader_row">' + chunk.map(function(loader, index) {
+                                return createSvgHtml(loader, svgChunks.indexOf(chunk) * 6 + index + 1);
+                            }).join('') + '</div>';
                         });
                         var midPoint = Math.ceil(svgContent.length / 2);
                         var leftColumn = svgContent.slice(0, midPoint).join('');
                         var rightColumn = svgContent.slice(midPoint).join('');
-                        var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"></div>';
+                        var defaultButton = createDefaultSvgHtml();
                         var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                         var svgDisplay = svgValue || 'Наприклад https://example.com/loader.svg';
                         var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 360px;">' +
                                         '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                         '<div class="value">' + svgDisplay + '</div>' +
                                         '</div>';
-                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 20px;">' +
                                          defaultButton + inputHtml + '</div>';
                         var modalContent = '<div class="ani_picker_container">' +
                                            '<div>' + leftColumn + '</div>' +
