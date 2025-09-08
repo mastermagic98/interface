@@ -23,10 +23,17 @@
     // Додаємо шаблон для модального вікна
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="color-picker-container">{ani_svg_content}</div></div>');
 
+    // Додаємо CSS для керування видимістю
+    var visibilityStyle = document.createElement('style');
+    visibilityStyle.id = 'ani-visibility';
+    visibilityStyle.textContent = '.settings-param.hide { display: none; }';
+    document.head.appendChild(visibilityStyle);
+
     // Функція для застосування кастомного завантажувача
     function setCustomLoader(url) {
         // Видаляємо попередні стилі
-        $('#aniload-id').remove();
+        var styleElement = document.getElementById('aniload-id');
+        if (styleElement) styleElement.remove();
         // Екрануємо URL для безпечного використання в CSS
         var escapedUrl = url.replace(/'/g, "\\'");
         // Отримуємо колір виділення з попереднього плагіна
@@ -58,7 +65,10 @@
                            'z-index: 9999 !important; ' +
                        '}';
         // Додаємо стилі до head
-        $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
+        var style = document.createElement('style');
+        style.id = 'aniload-id';
+        style.textContent = newStyle;
+        document.head.appendChild(style);
         // Оновлюємо елемент завантажувача
         var element = document.querySelector('.activity__loader');
         if (element) {
@@ -75,7 +85,8 @@
     // Функція для вставки прев’ю завантажувача
     function insert_activity_loader_prv(escapedUrl) {
         // Видаляємо попередні стилі прев’ю
-        $('#aniload-id-prv').remove();
+        var prvStyleElement = document.getElementById('aniload-id-prv');
+        if (prvStyleElement) prvStyleElement.remove();
         // Отримуємо колір виділення
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#353535');
         // Створюємо стилі для прев’ю
@@ -92,7 +103,10 @@
                        'stroke: ' + mainColor + '; ' +
                        '}';
         // Додаємо стилі до head
-        $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
+        var style = document.createElement('style');
+        style.id = 'aniload-id-prv';
+        style.textContent = newStyle;
+        document.head.appendChild(style);
     }
 
     // Функція для видалення кастомного завантажувача
@@ -153,34 +167,39 @@
 
     // Функція для оновлення видимості параметра select_ani_mation
     function updateAniVisibility() {
-        var displayValue = Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none';
-        console.log('updateAniVisibility called, ani_active:', Lampa.Storage.get('ani_active', 'false'), 'display:', displayValue);
+        var aniActive = Lampa.Storage.get('ani_active', 'false');
+        console.log('updateAniVisibility called, ani_active:', aniActive);
         var selector = '.settings-param[data-name="select_ani_mation"]';
-        var elements = $(selector);
+        var elements = document.querySelectorAll(selector);
         if (elements.length) {
-            elements.css('display', displayValue);
-            console.log('select_ani_mation display set to:', displayValue);
-        } else {
-            console.log('select_ani_mation element not found, trying alternative selector...');
-            var altElements = $('.settings-param__name').filter(function() {
-                return $(this).text().indexOf(Lampa.Lang.translate('params_ani_select')) !== -1;
-            }).closest('.settings-param');
-            if (altElements.length) {
-                altElements.css('display', displayValue);
-                console.log('select_ani_mation (alt selector) display set to:', displayValue);
-            } else {
-                console.log('Alternative selector failed');
+            for (var i = 0; i < elements.length; i++) {
+                if (aniActive === 'true') {
+                    elements[i].classList.remove('hide');
+                    console.log('select_ani_mation shown (hide class removed)');
+                } else {
+                    elements[i].classList.add('hide');
+                    console.log('select_ani_mation hidden (hide class added)');
+                }
             }
+        } else {
+            console.log('select_ani_mation element not found');
             // Спробуємо ще раз через затримку
             setTimeout(function() {
-                var retryElements = $(selector);
+                var retryElements = document.querySelectorAll(selector);
                 if (retryElements.length) {
-                    retryElements.css('display', displayValue);
-                    console.log('select_ani_mation retry display set to:', displayValue);
+                    for (var j = 0; j < retryElements.length; j++) {
+                        if (aniActive === 'true') {
+                            retryElements[j].classList.remove('hide');
+                            console.log('select_ani_mation retry shown (hide class removed)');
+                        } else {
+                            retryElements[j].classList.add('hide');
+                            console.log('select_ani_mation retry hidden (hide class added)');
+                        }
+                    }
                 } else {
                     console.log('select_ani_mation still not found after retry');
                 }
-            }, 500);
+            }, 1000);
         }
         // Оновлюємо меню налаштувань
         if (Lampa.Settings && Lampa.Settings.render) {
@@ -188,6 +207,38 @@
             console.log('Settings rendered in updateAniVisibility');
         }
     }
+
+    // Функція для примусового відображення параметра
+    window.forceShowAniSelect = function() {
+        console.log('forceShowAniSelect called');
+        Lampa.Storage.set('ani_active', 'true');
+        var selector = '.settings-param[data-name="select_ani_mation"]';
+        var elements = document.querySelectorAll(selector);
+        if (elements.length) {
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].classList.remove('hide');
+                console.log('forceShowAniSelect: select_ani_mation shown (hide class removed)');
+            }
+        } else {
+            console.log('forceShowAniSelect: select_ani_mation not found');
+        }
+        if (Lampa.Settings && Lampa.Settings.render) {
+            Lampa.Settings.render();
+            console.log('Settings rendered in forceShowAniSelect');
+        }
+        // Повторна спроба через затримку
+        setTimeout(function() {
+            var retryElements = document.querySelectorAll(selector);
+            if (retryElements.length) {
+                for (var j = 0; j < retryElements.length; j++) {
+                    retryElements[j].classList.remove('hide');
+                    console.log('forceShowAniSelect retry: select_ani_mation shown (hide class removed)');
+                }
+            } else {
+                console.log('forceShowAniSelect retry: select_ani_mation not found');
+            }
+        }, 1000);
+    };
 
     // Експортуємо функцію для дебагу
     window.updateAniVisibility = updateAniVisibility;
@@ -223,8 +274,9 @@
                     description: Lampa.Lang.translate('params_ani_on')
                 },
                 onChange: function (item) {
+                    console.log('ani_active changing to:', item);
                     Lampa.Storage.set('ani_active', item);
-                    console.log('ani_active changed to:', item);
+                    console.log('ani_active changed to:', Lampa.Storage.get('ani_active', 'false'));
                     if (item === 'true' && Lampa.Storage.get('ani_load')) {
                         setCustomLoader(Lampa.Storage.get('ani_load'));
                         insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -232,12 +284,14 @@
                         remove_activity_loader();
                     }
                     // Оновлюємо видимість параметра
-                    updateAniVisibility();
+                    setTimeout(function() {
+                        updateAniVisibility();
+                    }, 500);
                 },
                 onRender: function (item) {
-                    if (item && typeof item.css === 'function') {
-                        item.css('display', 'block');
-                        console.log('ani_active onRender, display: block');
+                    if (item) {
+                        item.classList.remove('hide');
+                        console.log('ani_active onRender, hide class removed');
                     }
                 }
             });
@@ -263,10 +317,15 @@
                     description: Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
-                    if (item && typeof item.css === 'function') {
-                        var displayValue = Lampa.Storage.get('ani_active', 'false') === 'true' ? 'block' : 'none';
-                        item.css('display', displayValue);
-                        console.log('select_ani_mation onRender, display:', displayValue);
+                    if (item) {
+                        var aniActive = Lampa.Storage.get('ani_active', 'false');
+                        if (aniActive === 'true') {
+                            item.classList.remove('hide');
+                            console.log('select_ani_mation onRender, hide class removed');
+                        } else {
+                            item.classList.add('hide');
+                            console.log('select_ani_mation onRender, hide class added');
+                        }
                         setTimeout(function () {
                             if (Lampa.Storage.get('ani_load')) {
                                 insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -297,14 +356,15 @@
                     var rightColumn = svg_content.slice(midPoint).join('');
                     var modalContent = '<div class="color-picker-container"><div>' + leftColumn + '</div><div>' + rightColumn + '</div></div>';
                     // Створюємо HTML для модального вікна
-                    var modalHtml = $('<div>' + modalContent + '</div>');
+                    var modalHtml = document.createElement('div');
+                    modalHtml.innerHTML = modalContent;
                     // Відкриваємо модальне вікно
                     try {
                         Lampa.Modal.open({
                             title: Lampa.Lang.translate('params_ani_select'),
                             size: 'medium',
                             align: 'center',
-                            html: modalHtml,
+                            html: $(modalHtml),
                             className: 'ani-picker-modal',
                             onBack: function () {
                                 Lampa.Modal.close();
@@ -361,7 +421,7 @@
         setTimeout(function() {
             updateAniVisibility();
             console.log('Initial updateAniVisibility called');
-        }, 500);
+        }, 1000);
     }
 
     // Слухаємо зміни параметра ani_active та color_plugin_main_color
@@ -373,7 +433,7 @@
                 if (Lampa.Storage.get('ani_active', 'false') === 'true' && Lampa.Storage.get('ani_load')) {
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 }
-            }, 100);
+            }, 500);
         }
         // Оновлюємо стилі при зміні кольору виділення
         if (e.name === 'color_plugin_main_color') {
@@ -390,9 +450,10 @@
     Lampa.Settings.listener.follow('open', function (e) {
         if (e.name === 'ani_load_menu') {
             console.log('Settings open: ani_load_menu');
+            updateAniVisibility();
             setTimeout(function() {
                 updateAniVisibility();
-            }, 100);
+            }, 500);
         }
     });
 
@@ -402,7 +463,7 @@
             console.log('App event:', e.type);
             setTimeout(function() {
                 updateAniVisibility();
-            }, 100);
+            }, 500);
         }
     });
 
