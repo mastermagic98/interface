@@ -100,7 +100,7 @@
                             '.svg_input.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
                             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
                             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }' +
-                            '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }';
+                            '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 10px; justify-content: center; }';
         document.head.appendChild(style);
     }
 
@@ -235,7 +235,7 @@
                                     '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                     '<div class="value">' + svgDisplay + '</div>' +
                                     '</div>';
-                    var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 20px;">' +
+                    var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
                                      defaultButton + inputHtml + '</div>';
 
                     var modalContent = '<div class="ani_picker_container">' +
@@ -377,7 +377,7 @@
                                         '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                         '<div class="value">' + svgDisplay + '</div>' +
                                         '</div>';
-                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 20px;">' +
+                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
                                          defaultButton + inputHtml + '</div>';
                         var modalContent = '<div class="ani_picker_container">' +
                                            '<div>' + leftColumn + '</div>' +
