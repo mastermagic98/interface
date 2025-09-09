@@ -42,7 +42,7 @@
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ddd');
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#fff');
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         var newStyle = '.activity__loader { display: none !important; }' +
                        '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
@@ -60,9 +60,9 @@
     // Функція для вставки стилів для попереднього перегляду
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ddd');
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#fff');
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
+        var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
                        '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
@@ -85,7 +85,7 @@
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ddd');
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#fff');
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 140px; padding: 0; }' +
@@ -96,7 +96,7 @@
                             '.ani_loader_square.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }' +
                             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
-                            '.svg_input { width: 360px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
+                            '.svg_input { width: 360px; height: 35px; border-radius: 8px; border: 2px solid #fff; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
                             '.svg_input.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
                             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
                             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }' +
@@ -139,6 +139,75 @@
     // Функція для перевірки валідності URL SVG
     function isValidSvgUrl(url) {
         return /^https?:\/\/.*\.svg$/.test(url);
+    }
+
+    // Функція для налаштування навігації в модальному вікні
+    function setupModalNavigation(modal) {
+        var selectors = modal.querySelectorAll('.selector');
+        var rows = modal.querySelectorAll('.ani_loader_row');
+        var topRow = modal.querySelector('.top-row');
+
+        // Додаємо слухачі подій для кожного елемента
+        for (var i = 0; i < selectors.length; i++) {
+            selectors[i].addEventListener('keydown', function (e) {
+                var current = document.activeElement;
+                var index = Array.prototype.indexOf.call(selectors, current);
+                var currentRow = current.closest('.ani_loader_row, .top-row');
+                var currentRowIndex = currentRow.classList.contains('top-row') ? -1 : Array.prototype.indexOf.call(rows, currentRow);
+                var itemsInCurrentRow = currentRow.querySelectorAll('.selector');
+                var itemIndexInRow = Array.prototype.indexOf.call(itemsInCurrentRow, current);
+
+                if (e.keyCode === 39) { // Стрілка вправо
+                    e.preventDefault();
+                    var nextIndex = (index + 1) % selectors.length;
+                    selectors[nextIndex].focus();
+                } else if (e.keyCode === 37) { // Стрілка вліво
+                    e.preventDefault();
+                    var prevIndex = (index - 1 + selectors.length) % selectors.length;
+                    selectors[prevIndex].focus();
+                } else if (e.keyCode === 38) { // Стрілка вгору
+                    e.preventDefault();
+                    if (currentRowIndex === -1) {
+                        // З верхнього рядка переходимо до останнього рядка в тій же колонці
+                        var lastRow = rows[rows.length - 1];
+                        var itemsInLastRow = lastRow.querySelectorAll('.selector');
+                        var targetIndex = Math.min(itemIndexInRow, itemsInLastRow.length - 1);
+                        itemsInLastRow[targetIndex].focus();
+                    } else if (currentRowIndex > 0) {
+                        // Переходимо до попереднього рядка
+                        var prevRow = rows[currentRowIndex - 1];
+                        var itemsInPrevRow = prevRow.querySelectorAll('.selector');
+                        var targetIndex = Math.min(itemIndexInRow, itemsInPrevRow.length - 1);
+                        itemsInPrevRow[targetIndex].focus();
+                    } else {
+                        // З першого рядка переходимо до верхнього рядка
+                        var topRowItems = topRow.querySelectorAll('.selector');
+                        var targetIndex = Math.min(itemIndexInRow, topRowItems.length - 1);
+                        topRowItems[targetIndex].focus();
+                    }
+                } else if (e.keyCode === 40) { // Стрілка вниз
+                    e.preventDefault();
+                    if (currentRowIndex === -1) {
+                        // З верхнього рядка переходимо до першого рядка в тій же колонці
+                        var firstRow = rows[0];
+                        var itemsInFirstRow = firstRow.querySelectorAll('.selector');
+                        var targetIndex = Math.min(itemIndexInRow, itemsInFirstRow.length - 1);
+                        itemsInFirstRow[targetIndex].focus();
+                    } else if (currentRowIndex < rows.length - 1) {
+                        // Переходимо до наступного рядка
+                        var nextRow = rows[currentRowIndex + 1];
+                        var itemsInNextRow = nextRow.querySelectorAll('.selector');
+                        var targetIndex = Math.min(itemIndexInRow, itemsInNextRow.length - 1);
+                        itemsInNextRow[targetIndex].focus();
+                    } else {
+                        // З останнього рядка переходимо до верхнього рядка
+                        var topRowItems = topRow.querySelectorAll('.selector');
+                        var targetIndex = Math.min(itemIndexInRow, topRowItems.length - 1);
+                        topRowItems[targetIndex].focus();
+                    }
+                }
+            });
+        }
     }
 
     // Основна функція ініціалізації плагіна
@@ -235,7 +304,7 @@
                                     '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                     '<div class="value">' + svgDisplay + '</div>' +
                                     '</div>';
-                    var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                    var topRowHtml = '<div class="top-row" style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
                                      defaultButton + inputHtml + '</div>';
 
                     var modalContent = '<div class="ani_picker_container">' +
@@ -255,6 +324,13 @@
                                 Lampa.Modal.close();
                                 Lampa.Controller.toggle('settings_component');
                                 Lampa.Controller.enable('menu');
+                            },
+                            onOpen: function (modal) {
+                                // Налаштування навігації після відкриття модального вікна
+                                setupModalNavigation(modal);
+                                // Встановлюємо фокус на перший елемент
+                                var firstSelector = modal.querySelector('.selector');
+                                if (firstSelector) firstSelector.focus();
                             },
                             onSelect: function (a) {
                                 if (a.length > 0 && a[0] instanceof HTMLElement) {
@@ -377,13 +453,15 @@
                                         '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                         '<div class="value">' + svgDisplay + '</div>' +
                                         '</div>';
-                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                        var topRowHtml = '<div class="top-row" style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
                                          defaultButton + inputHtml + '</div>';
                         var modalContent = '<div class="ani_picker_container">' +
                                            '<div>' + leftColumn + '</div>' +
                                            '<div>' + rightColumn + '</div>' +
                                            '</div>';
                         modal.innerHTML = $('<div>' + topRowHtml + modalContent + '</div>').find('.ani_modal_root').html();
+                        // Налаштування навігації після оновлення модального вікна
+                        setupModalNavigation(modal);
                     }
                 }
             }
