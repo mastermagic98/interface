@@ -47,7 +47,7 @@
     // Функція для створення SVG-фільтра
     function createSvgFilter(color) {
         var rgb = hexToRgb(color);
-        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%221 0 0 0 ' + rgb.r/255 + ' 0 1 0 0 ' + rgb.g/255 + ' 0 0 1 0 ' + rgb.b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeFlood flood-color=%22rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')%22/%3E%3CfeComposite in2=%22SourceGraphic%22 operator=%22in%22/%3E%3C/filter%3E%3C/svg%3E#color")';
     }
 
     // Функція для встановлення кастомного завантажувача
@@ -74,7 +74,7 @@
         $('#aniload-id-prv').remove();
         var mainColor = getMainColor();
         var filterValue = createSvgFilter(mainColor);
-        var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%221 0 0 0 0.8667 0 1 0 0 0.8667 0 0 1 0 0.8667 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
+        var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeFlood flood-color=%22rgb(221,221,221)%22/%3E%3CfeComposite in2=%22SourceGraphic%22 operator=%22in%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
                        '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
@@ -106,7 +106,7 @@
                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } .ani_picker_container > div:nth-child(2) { justify-content: flex-start; } }' +
                             '.ani_loader_row { display: flex; flex-direction: row; gap: 30px; margin-bottom: 10px; justify-content: center; }' +
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; fill: currentColor; filter: ' + filterValue + '; }' +
+                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; fill: none !important; stroke: currentColor !important; filter: ' + filterValue + '; }' +
                             '.ani_loader_square.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
                             '.ani_loader_square.default { background: url(./img/loader.svg) no-repeat 50% 50%; background-size: contain; width: 35px; height: 35px; border-radius: 4px; filter: ' + filterValue + '; }' +
                             '.ani_loader_square.default.focus { border: 0.3em solid var(--main-color); transform: scale(1.1); }' +
@@ -120,7 +120,7 @@
     // Функція для створення HTML для SVG-іконки
     function createSvgHtml(src, index) {
         var className = 'ani_loader_square selector';
-        var content = '<img src="' + src + '" alt="Loader ' + index + '" style="fill: currentColor;">';
+        var content = '<img src="' + src + '" alt="Loader ' + index + '" style="fill: none; stroke: currentColor;">';
         return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
     }
 
@@ -147,35 +147,32 @@
         return /^https?:\/\/.*\.svg$/.test(url);
     }
 
-    // Функція для оновлення вмісту модального вікна
-    function updateModalContent() {
-        var modal = document.querySelector('.ani_modal_root');
-        if (modal) {
-            var svgRows = chunkArray(window.svg_loaders, 6);
-            var svgContent = svgRows.map(function(row) {
-                var rowContent = row.map(function(loader, index) {
-                    return createSvgHtml(loader, svgRows.indexOf(row) * 6 + index + 1);
-                }).join('');
-                return '<div class="ani_loader_row">' + rowContent + '</div>';
-            });
-            var midPoint = Math.ceil(svgContent.length / 2);
-            var leftColumn = svgContent.slice(0, midPoint).join('');
-            var rightColumn = svgContent.slice(midPoint).join('');
-            var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"></div>';
-            var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
-            var svgDisplay = svgValue || 'Наприклад https://example.com/loader.svg';
-            var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0">' +
-                            '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
-                            '<div class="value">' + svgDisplay + '</div>' +
-                            '</div>';
-            var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
-                             defaultButton + inputHtml + '</div>';
-            var modalContent = '<div class="ani_picker_container">' +
-                               '<div>' + leftColumn + '</div>' +
-                               '<div>' + rightColumn + '</div>' +
-                               '</div>';
-            modal.innerHTML = $('<div>' + topRowHtml + modalContent + '</div>').find('.ani_modal_root').html();
-        }
+    // Функція для створення HTML вмісту модального вікна
+    function createModalContent() {
+        var svgRows = chunkArray(window.svg_loaders, 6);
+        var svgContent = svgRows.map(function(row) {
+            var rowContent = row.map(function(loader, index) {
+                return createSvgHtml(loader, svgRows.indexOf(row) * 6 + index + 1);
+            }).join('');
+            return '<div class="ani_loader_row">' + rowContent + '</div>';
+        });
+        var midPoint = Math.ceil(svgContent.length / 2);
+        var leftColumn = svgContent.slice(0, midPoint).join('');
+        var rightColumn = svgContent.slice(midPoint).join('');
+        var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"></div>';
+        var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
+        var svgDisplay = svgValue || 'Наприклад https://example.com/loader.svg';
+        var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0">' +
+                        '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
+                        '<div class="value">' + svgDisplay + '</div>' +
+                        '</div>';
+        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                         defaultButton + inputHtml + '</div>';
+        var modalContent = '<div class="ani_picker_container">' +
+                           '<div>' + leftColumn + '</div>' +
+                           '<div>' + rightColumn + '</div>' +
+                           '</div>';
+        return $('<div class="ani_modal_root">' + topRowHtml + modalContent + '</div>');
     }
 
     // Основна функція ініціалізації плагіна
@@ -245,14 +242,14 @@
                         Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
                     }
                     create_ani_modal();
-                    updateModalContent();
+                    var modalHtml = createModalContent();
 
                     try {
                         Lampa.Modal.open({
                             title: Lampa.Lang.translate('params_ani_select'),
                             size: 'medium',
                             align: 'center',
-                            html: $('.ani_modal_root'),
+                            html: modalHtml,
                             className: 'ani_picker_modal',
                             onBack: function () {
                                 Lampa.Modal.close();
@@ -333,7 +330,9 @@
                                 }
                             }
                         });
-                    } catch (e) {}
+                    } catch (e) {
+                        console.log('Помилка відкриття модального вікна:', e);
+                    }
                 }
             });
         } catch (e) {}
@@ -359,10 +358,13 @@
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 }
-                // Оновлюємо стилі та вміст модального вікна при зміні кольору
+                // Оновлюємо стилі та вміст модального вікна
                 if (document.getElementById('aniload')) {
                     create_ani_modal();
-                    updateModalContent();
+                    if (Lampa.Modal.isOpen()) {
+                        var modalHtml = createModalContent();
+                        Lampa.Modal.update(modalHtml);
+                    }
                 }
             }
         });
