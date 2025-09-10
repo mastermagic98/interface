@@ -181,7 +181,7 @@
         }
         var component = Lampa.SettingsApi.components.find(function(c) { return c.component === 'color_plugin'; });
         if (component) {
-            component.icon = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
+            component.icon = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
             if (Lampa.Settings && Lampa.Settings.render) {
                 Lampa.Settings.render();
             }
@@ -195,6 +195,7 @@
         var hasGlassStyle = body.classList.contains('glass--style');
         var computedStyle = window.getComputedStyle(body);
         var background = computedStyle.background || computedStyle.backgroundColor;
+        // Тимчасовий коментар для дебагінгу: Перевірено стилі body
     }
 
     // Функція для збереження всіх налаштувань
@@ -207,11 +208,23 @@
         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+        // Резервне збереження через localStorage
+        localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
+        localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+        localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+        localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         isSaving = false;
+        // Тимчасовий коментар для дебагінгу: Налаштування збережено
     }
 
     // Функція для застосування стилів
     function applyStyles() {
+        if (!ColorPlugin.settings.enabled) {
+            var oldStyle = document.getElementById('color-plugin-styles');
+            if (oldStyle) oldStyle.remove();
+            return;
+        }
+
         var style = document.getElementById('color-plugin-styles');
         if (!style) {
             style = document.createElement('style');
@@ -219,49 +232,46 @@
             document.head.appendChild(style);
         }
 
-        if (!ColorPlugin.settings.enabled) {
-            style.innerHTML = '';
-            return;
-        }
-
         var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
+        // Визначаємо колір рамки для .color_square.focus
+        var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? (
-            '-webkit-box-shadow: inset 0 0 0 0.15em #fff;' +
-            'box-shadow: inset 0 0 0 0.15em #fff;'
+            '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
+            'box-shadow: inset 0 0 0 0.15em #fff !important;'
         ) : '';
 
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
             '.full-start__rate {' +
-                'background: rgba(var(--main-color-rgb), 0.15);' +
+                'background: rgba(var(--main-color-rgb), 0.15) !important;' +
             '}' +
             '.full-start__rate > div:first-child {' +
-                'background: rgba(var(--main-color-rgb), 0.15);' +
+                'background: rgba(var(--main-color-rgb), 0.15) !important;' +
             '}' +
             '.reaction {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3);' +
+                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}' +
             '.full-start__button {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3);' +
+                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}' +
             '.card__vote {' +
-                'background: rgba(var(--main-color-rgb), 0.5);' +
+                'background: rgba(var(--main-color-rgb), 0.5) !important;' +
             '}' +
             '.items-line__more {' +
-                'background: rgba(var(--main-color-rgb), 0.3);' +
+                'background: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}' +
             '.card__icons-inner {' +
-                'background: rgba(var(--main-color-rgb), 0.5);' +
+                'background: rgba(var(--main-color-rgb), 0.5) !important;' +
             '}' +
             '.simple-button--filter > div {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3);' +
+                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}'
         ) : '';
 
         style.innerHTML = [
             ':root {' +
-                '--main-color: ' + ColorPlugin.settings.main_color + ';' +
-                '--main-color-rgb: ' + rgbColor + ';' +
+                '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
+                '--main-color-rgb: ' + rgbColor + ' !important;' +
             '}',
             '.modal__title {' +
                 'font-size: 1.7em !important;' +
@@ -316,18 +326,18 @@
                 'color: #ffffff !important;' +
             '}',
             '.console__tab {' +
-                'background-color: rgba(221, 221, 221, 0.06);' +
+                'background-color: rgba(221, 221, 221, 0.06) !important;' +
             '}',
             '.console__tab.focus {' +
-                'background: var(--main-color);' +
-                'color: #fff;' +
+                'background: var(--main-color) !important;' +
+                'color: #fff !important;' +
                 highlightStyles +
             '}',
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, ' +
             '.full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .head__action.focus, .head__action:hover, ' +
             '.player-panel .button.focus, .search-source.active {' +
-                'background: var(--main-color);' +
+                'background: var(--main-color) !important;' +
             '}',
             '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
             '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
@@ -335,24 +345,24 @@
                 highlightStyles +
             '}',
             '.timetable__item.focus::before {' +
-                'background-color: var(--main-color);' +
+                'background-color: var(--main-color) !important;' +
                 highlightStyles +
             '}',
             '.navigation-tabs__button.focus {' +
-                'background-color: var(--main-color);' +
-                'color: #fff;' +
+                'background-color: var(--main-color) !important;' +
+                'color: #fff !important;' +
                 highlightStyles +
             '}',
             '.items-line__more.focus {' +
-                'color: #fff;' +
-                'background-color: var(--main-color);' +
+                'color: #fff !important;' +
+                'background-color: var(--main-color) !important;' +
             '}',
             '.timetable__item.focus {' +
-                'color: #fff;' +
+                'color: #fff !important;' +
             '}',
             '.broadcast__device.focus {' +
-                'background-color: var(--main-color);' +
-                'color: #fff;' +
+                'background-color: var(--main-color) !important;' +
+                'color: #fff !important;' +
             '}',
             '.iptv-menu__list-item.focus, .iptv-program__timeline>div {' +
                 'background-color: var(--main-color) !important;' +
@@ -362,10 +372,10 @@
             '.full-review-add.focus, .full-review.focus, ' +
             '.tag-count.focus, .settings-folder.focus, .settings-param.focus, ' +
             '.selectbox-item.focus, .selectbox-item:hover {' +
-                'background: var(--main-color);' +
+                'background: var(--main-color) !important;' +
             '}',
             '.online.focus {' +
-                'box-shadow: 0 0 0 0.2em var(--main-color);' +
+                'box-shadow: 0 0 0 0.2em var(--main-color) !important;' +
             '}',
             '.online_modss.focus::after, .online-prestige.focus::after, ' +
             '.radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, ' +
@@ -373,7 +383,7 @@
                 'border-color: var(--main-color) !important;' +
             '}',
             '.card-more.focus .card-more__box::after {' +
-                'border: 0.3em solid var(--main-color);' +
+                'border: 0.3em solid var(--main-color) !important;' +
             '}',
             '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after {' +
                 'border-color: var(--main-color) !important;' +
@@ -384,172 +394,177 @@
             '.full-review-add.focus::after, .card.focus .card__view::after, ' +
             '.card:hover .card__view::after, .extensions__item.focus:after, ' +
             '.torrent-item.focus::after, .extensions__block-add.focus:after {' +
-                'border-color: var(--main-color);' +
+                'border-color: var(--main-color) !important;' +
             '}',
             '.broadcast__scan > div {' +
-                'background-color: var(--main-color);' +
+                'background-color: var(--main-color) !important;' +
             '}',
             '.card:hover .card__view, .card.focus .card__view {' +
-                'border-color: var(--main-color);' +
+                'border-color: var(--main-color) !important;' +
             '}',
             '.noty {' +
-                'background: var(--main-color);' +
+                'background: var(--main-color) !important;' +
             '}',
             '.radio-player.focus {' +
-                'background-color: var(--main-color);' +
+                'background-color: var(--main-color) !important;' +
             '}',
             '.explorer-card__head-img.focus::after {' +
-                'border: 0.3em solid var(--main-color);' +
+                'border: 0.3em solid var(--main-color) !important;' +
             '}',
             '.color_square.focus {' +
-                'border: 0.3em solid var(--main-color);' +
-                'transform: scale(1.1);' +
+                'border: 0.3em solid ' + focusBorderColor + ' !important;' +
+                'transform: scale(1.1) !important;' +
+            '}',
+            '.hex-input.focus {' +
+                'border: 0.2em solid ' + focusBorderColor + ' !important;' +
+                'transform: scale(1.1) !important;' +
             '}',
             'body.glass--style .selectbox-item.focus, ' +
             'body.glass--style .settings-folder.focus, ' +
             'body.glass--style .settings-param.focus {' +
-                'background-color: var(--main-color);' +
+                'background-color: var(--main-color) !important;' +
             '}',
             'body.glass--style .settings-folder.focus .settings-folder__icon {' +
-                '-webkit-filter: none;' +
-                'filter: none;' +
+                '-webkit-filter: none !important;' +
+                'filter: none !important;' +
             '}',
             dimmingStyles,
             '.timetable__item--any::before {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3);' +
+                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}',
             '.element {' +
-                'background: var(--main-color);' +
+                'background: var(--main-color) !important;' +
             '}',
             '.bookmarks-folder__layer {' +
-                'background-color: var(--main-color);' +
+                'background-color: var(--main-color) !important;' +
             '}',
             '.color_square.default {' +
-                'background-color: #fff;' +
-                'width: 35px;' +
-                'height: 35px;' +
-                'border-radius: 4px;' +
-                'position: relative;' +
+                'background-color: #fff !important;' +
+                'width: 35px !important;' +
+                'height: 35px !important;' +
+                'border-radius: 4px !important;' +
+                'position: relative !important;' +
             '}',
             '.color_square.default::after {' +
-                'content: "";' +
-                'position: absolute;' +
-                'top: 50%;' +
-                'left: 10%;' +
-                'right: 10%;' +
-                'height: 3px;' +
-                'background-color: #353535;' +
-                'transform: rotate(45deg);' +
+                'content: "" !important;' +
+                'position: absolute !important;' +
+                'top: 50% !important;' +
+                'left: 10% !important;' +
+                'right: 10% !important;' +
+                'height: 3px !important;' +
+                'background-color: #353535 !important;' +
+                'transform: rotate(45deg) !important;' +
             '}',
             '.color_square.default::before {' +
-                'content: "";' +
-                'position: absolute;' +
-                'top: 50%;' +
-                'left: 10%;' +
-                'right: 10%;' +
-                'height: 3px;' +
-                'background-color: #353535;' +
-                'transform: rotate(-45deg);' +
+                'content: "" !important;' +
+                'position: absolute !important;' +
+                'top: 50% !important;' +
+                'left: 10% !important;' +
+                'right: 10% !important;' +
+                'height: 3px !important;' +
+                'background-color: #353535 !important;' +
+                'transform: rotate(-45deg) !important;' +
             '}',
             '.color_square {' +
-                'width: 35px;' +
-                'height: 35px;' +
-                'border-radius: 4px;' +
-                'display: flex;' +
-                'flex-direction: column;' +
-                'justify-content: center;' +
-                'align-items: center;' +
-                'cursor: pointer;' +
+                'width: 35px !important;' +
+                'height: 35px !important;' +
+                'border-radius: 4px !important;' +
+                'display: flex !important;' +
+                'flex-direction: column !important;' +
+                'justify-content: center !important;' +
+                'align-items: center !important;' +
+                'cursor: pointer !important;' +
                 'color: #ffffff !important;' +
-                'font-size: 10px;' +
-                'text-align: center;' +
+                'font-size: 10px !important;' +
+                'text-align: center !important;' +
             '}',
             '.color-family-outline {' +
-                'display: flex;' +
-                'flex-direction: row;' +
-                'overflow: hidden;' +
-                'gap: 10px;' +
-                'border-radius: 8px;' +
-                'margin-bottom: 1px;' +
-                'padding: 5px;' +
+                'display: flex !important;' +
+                'flex-direction: row !important;' +
+                'overflow: hidden !important;' +
+                'gap: 10px !important;' +
+                'border-radius: 8px !important;' +
+                'margin-bottom: 1px !important;' +
+                'padding: 5px !important;' +
             '}',
             '.color-family-name {' +
-                'width: 80px;' +
-                'height: 35px;' +
-                'border-width: 2px;' +
-                'border-style: solid;' +
-                'border-radius: 4px;' +
-                'display: flex;' +
-                'flex-direction: column;' +
-                'justify-content: center;' +
-                'align-items: center;' +
-                'cursor: default;' +
+                'width: 80px !important;' +
+                'height: 35px !important;' +
+                'border-width: 2px !important;' +
+                'border-style: solid !important;' +
+                'border-radius: 4px !important;' +
+                'display: flex !important;' +
+                'flex-direction: column !important;' +
+                'justify-content: center !important;' +
+                'align-items: center !important;' +
+                'cursor: default !important;' +
                 'color: #ffffff !important;' +
-                'font-size: 10px;' +
-                'font-weight: bold;' +
-                'text-align: center;' +
-                'text-transform: capitalize;' +
+                'font-size: 10px !important;' +
+                'font-weight: bold !important;' +
+                'text-align: center !important;' +
+                'text-transform: capitalize !important;' +
             '}',
             '.color_square .hex {' +
-                'font-size: 9px;' +
-                'opacity: 0.9;' +
-                'text-transform: uppercase;' +
-                'z-index: 1;' +
+                'font-size: 9px !important;' +
+                'opacity: 0.9 !important;' +
+                'text-transform: uppercase !important;' +
+                'z-index: 1 !important;' +
             '}',
             '.hex-input {' +
-                'width: 360px;' +
-                'height: 35px;' +
-                'border-radius: 8px;' +
-                'border: 2px solid #ddd;' +
-                'position: relative;' +
-                'cursor: pointer;' +
-                'display: flex;' +
-                'flex-direction: column;' +
-                'align-items: center;' +
-                'justify-content: center;' +
+                'width: 360px !important;' +
+                'height: 35px !important;' +
+                'border-radius: 8px !important;' +
+                'border: 2px solid #ddd !important;' +
+                'position: relative !important;' +
+                'cursor: pointer !important;' +
+                'display: flex !important;' +
+                'flex-direction: column !important;' +
+                'align-items: center !important;' +
+                'justify-content: center !important;' +
                 'color: #fff !important;' +
-                'font-size: 12px;' +
-                'font-weight: bold;' +
-                'text-shadow: 0 0 2px #000;' +
-                'background-color: #353535;' +
+                'font-size: 12px !important;' +
+                'font-weight: bold !important;' +
+                'text-shadow: 0 0 2px #000 !important;' +
+                'background-color: #353535 !important;' +
             '}',
             '.hex-input.focus {' +
-                'border: 0.2em solid var(--main-color);' +
-                'transform: scale(1.1);' +
+                'border: 0.2em solid ' + focusBorderColor + ' !important;' +
+                'transform: scale(1.1) !important;' +
             '}',
             '.hex-input .label {' +
-                'position: absolute;' +
-                'top: 1px;' +
-                'font-size: 10px;' +
+                'position: absolute !important;' +
+                'top: 1px !important;' +
+                'font-size: 10px !important;' +
             '}',
             '.hex-input .value {' +
-                'position: absolute;' +
-                'bottom: 1px;' +
-                'font-size: 10px;' +
+                'position: absolute !important;' +
+                'bottom: 1px !important;' +
+                'font-size: 10px !important;' +
             '}',
             '.color-picker-container {' +
-                'display: grid;' +
-                'grid-template-columns: 1fr 1fr;' +
-                'gap: 140px;' +
-                'padding: 0;' +
+                'display: grid !important;' +
+                'grid-template-columns: 1fr 1fr !important;' +
+                'gap: 140px !important;' +
+                'padding: 0 !important;' +
             '}',
             '.color-picker-container > div:nth-child(2) {' +
-                'display: flex;' +
-                'flex-direction: column;' +
-                'justify-content: flex-end;' +
+                'display: flex !important;' +
+                'flex-direction: column !important;' +
+                'justify-content: flex-end !important;' +
             '}',
             '@media (max-width: 768px) {' +
                 '.color-picker-container {' +
-                    'grid-template-columns: 1fr;' +
+                    'grid-template-columns: 1fr !important;' +
                 '}' +
                 '.color-picker-container > div:nth-child(2) {' +
-                    'justify-content: flex-start;' +
+                    'justify-content: flex-start !important;' +
                 '}' +
             '}'
         ].join('');
 
         updateDateElementStyles();
         checkBodyStyles();
+        // Тимчасовий коментар для дебагінгу: Стилі застосовано, focusBorderColor: + focusBorderColor
     }
 
     // Функція для створення HTML для вибору кольору
@@ -637,8 +652,6 @@
                 className: 'color-picker-modal',
                 onBack: function () {
                     saveSettings();
-                    applyStyles();
-                    updateParamsVisibility();
                     Lampa.Modal.close();
                     Lampa.Controller.toggle('settings_component');
                     Lampa.Controller.enable('menu');
@@ -673,10 +686,10 @@
                                 Lampa.Storage.set('color_plugin_custom_hex', value);
                                 ColorPlugin.settings.main_color = value;
                                 Lampa.Storage.set('color_plugin_main_color', value);
+                                localStorage.setItem('color_plugin_main_color', value);
                                 applyStyles();
                                 updateCanvasFillStyle(window.draw_context);
                                 saveSettings();
-                                updateParamsVisibility();
                                 Lampa.Controller.toggle('settings_component');
                                 Lampa.Controller.enable('menu');
                                 if (Lampa.Settings && Lampa.Settings.render) {
@@ -693,10 +706,10 @@
 
                         ColorPlugin.settings.main_color = color;
                         Lampa.Storage.set('color_plugin_main_color', color);
+                        localStorage.setItem('color_plugin_main_color', color);
                         applyStyles();
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
-                        updateParamsVisibility();
                         Lampa.Modal.close();
                         Lampa.Controller.toggle('settings_component');
                         Lampa.Controller.enable('menu');
@@ -712,228 +725,232 @@
     // Функція для оновлення видимості параметрів
     function updateParamsVisibility(body) {
         var params = [
-            '.settings-param[data-name="color_plugin_main_color"]',
-            '.settings-param[data-name="color_plugin_highlight_enabled"]',
-            '.settings-param[data-name="color_plugin_dimming_enabled"]'
+            'color_plugin_main_color',
+            'color_plugin_highlight_enabled',
+            'color_plugin_dimming_enabled'
         ];
-        var displayValue = ColorPlugin.settings.enabled ? 'block' : 'none';
+        var container = body || document;
         for (var i = 0; i < params.length; i++) {
-            var selector = params[i];
-            var elements = body ? body.find(selector) : $(selector);
-            elements.each(function(index, element) {
-                $(element).css('display', displayValue);
+            var selector = '.settings-param[data-name="' + params[i] + '"]';
+            var elements = container.querySelectorAll ? container.querySelectorAll(selector) : $(selector);
+            if (elements.length) {
+                var displayValue = ColorPlugin.settings.enabled ? 'block' : 'none';
+                for (var j = 0; j < elements.length; j++) {
+                    var element = elements[j];
+                    if (element.style) {
+                        element.style.display = displayValue;
+                    } else if (typeof $(element).css === 'function') {
+                        $(element).css('display', displayValue);
+                    }
+                }
+            }
+        }
+        // Альтернативне оновлення через Lampa.SettingsApi
+        if (Lampa.SettingsApi && Lampa.SettingsApi.params) {
+            var componentParams = Lampa.SettingsApi.params.filter(function(p) {
+                return p.component === 'color_plugin';
             });
-        }
-        if (Lampa.Settings && Lampa.Settings.render) {
-            Lampa.Settings.render();
-        }
-        // Повторний виклик для забезпечення оновлення
-        setTimeout(function() {
-            for (var i = 0; i < params.length; i++) {
-                var selector = params[i];
-                var elements = body ? body.find(selector) : $(selector);
-                elements.each(function(index, element) {
-                    $(element).css('display', displayValue);
-                });
+            for (var k = 0; k < componentParams.length; k++) {
+                var param = componentParams[k];
+                if (param.param.name !== 'color_plugin_enabled') {
+                    var paramElement = document.querySelector('.settings-param[data-name="' + param.param.name + '"]');
+                    if (paramElement && paramElement.style) {
+                        paramElement.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
+                    }
+                }
             }
-            if (Lampa.Settings && Lampa.Settings.render) {
-                Lampa.Settings.render();
-            }
-        }, 100);
+        }
+        // Тимчасовий коментар для дебагінгу: Оновлено видимість параметрів, елементи знайдено: + elements.length
     }
 
     // Функція для ініціалізації плагіна
     function initPlugin() {
         // Завантажуємо збережені налаштування
-        ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
-        ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
-        ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
-        ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+        setTimeout(function() {
+            // Спроба завантаження з localStorage, якщо Lampa.Storage недоступний
+            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+            ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
+            ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
+            ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
+            // Тимчасовий коментар для дебагінгу: Налаштування завантажено
 
-        // Застосовуємо стилі та оновлюємо видимість
-        applyStyles();
-        updateCanvasFillStyle(window.draw_context);
-        updatePluginIcon();
-        updateParamsVisibility();
+            // Додаємо компонент до меню налаштувань
+            if (Lampa.SettingsApi) {
+                Lampa.SettingsApi.addComponent({
+                    component: 'color_plugin',
+                    name: Lampa.Lang.translate('color_plugin'),
+                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
+                });
 
-        // Додаємо слухачі подій перед налаштуванням параметрів
-        Lampa.Settings.listener.follow('open', function (e) {
-            if (e.name === 'color_plugin') {
-                ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
-                ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
-                ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
-                ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
-                applyStyles();
-                updateParamsVisibility(e.body);
-            }
-        });
+                // Увімкнення/вимкнення плагіна
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_enabled',
+                        type: 'trigger',
+                        default: ColorPlugin.settings.enabled.toString()
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('color_plugin_enabled'),
+                        description: Lampa.Lang.translate('color_plugin_enabled_description')
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+                        localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+                        applyStyles();
+                        updateCanvasFillStyle(window.draw_context);
+                        updateParamsVisibility();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                        // Тимчасовий коментар для дебагінгу: Змінено стан плагіна на: + value
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', 'block');
+                        }
+                    }
+                });
 
-        Lampa.Storage.listener.follow('change', function (e) {
-            if (e.name === 'color_plugin_enabled' || e.name === 'color_plugin_main_color' ||
-                e.name === 'color_plugin_highlight_enabled' || e.name === 'color_plugin_dimming_enabled') {
-                ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
-                ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
-                ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
-                ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
-                applyStyles();
-                updateCanvasFillStyle(window.draw_context);
-                updateParamsVisibility();
-                if (Lampa.Settings && Lampa.Settings.render) {
-                    Lampa.Settings.render();
-                }
-            }
-        });
+                // Колір виділення
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_main_color',
+                        type: 'button'
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('main_color'),
+                        description: Lampa.Lang.translate('main_color_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function () {
+                        openColorPicker();
+                    }
+                });
 
-        Lampa.Listener.follow('settings_component', function (event) {
-            if (event.type === 'open') {
-                ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
-                ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
-                ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
-                ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+                // Показати рамку
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_highlight_enabled',
+                        type: 'trigger',
+                        default: ColorPlugin.settings.highlight_enabled.toString()
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('enable_highlight'),
+                        description: Lampa.Lang.translate('enable_highlight_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.highlight_enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+                        localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                        // Тимчасовий коментар для дебагінгу: Змінено highlight_enabled на: + value
+                    }
+                });
+
+                // Застосувати колір затемнення
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_dimming_enabled',
+                        type: 'trigger',
+                        default: ColorPlugin.settings.dimming_enabled.toString()
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('enable_dimming'),
+                        description: Lampa.Lang.translate('enable_dimming_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.dimming_enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+                        localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                        // Тимчасовий коментар для дебагінгу: Змінено dimming_enabled на: + value
+                    }
+                });
+
+                // Застосовуємо стилі при ініціалізації
                 applyStyles();
                 updateCanvasFillStyle(window.draw_context);
                 updatePluginIcon();
                 updateParamsVisibility();
-            } else if (event.type === 'close') {
-                saveSettings();
-                applyStyles();
-                updateCanvasFillStyle(window.draw_context);
-                updatePluginIcon();
-                updateParamsVisibility();
+                // Тимчасовий коментар для дебагінгу: Плагін ініціалізовано
             }
-        });
-
-        // Додаємо компонент до меню налаштувань
-        if (Lampa.SettingsApi) {
-            Lampa.SettingsApi.addComponent({
-                component: 'color_plugin',
-                name: Lampa.Lang.translate('color_plugin'),
-                icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
-            });
-
-            // Увімкнення/вимкнення плагіна
-            Lampa.SettingsApi.addParam({
-                component: 'color_plugin',
-                param: {
-                    name: 'color_plugin_enabled',
-                    type: 'trigger',
-                    default: ColorPlugin.settings.enabled.toString()
-                },
-                field: {
-                    name: Lampa.Lang.translate('color_plugin_enabled'),
-                    description: Lampa.Lang.translate('color_plugin_enabled_description')
-                },
-                onChange: function (value) {
-                    ColorPlugin.settings.enabled = value === 'true';
-                    Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
-                    saveSettings();
-                    applyStyles();
-                    updateCanvasFillStyle(window.draw_context);
-                    updateParamsVisibility();
-                    if (Lampa.Settings && Lampa.Settings.render) {
-                        Lampa.Settings.render();
-                    }
-                },
-                onRender: function (item) {
-                    if (item && typeof item.css === 'function') {
-                        item.css('display', 'block');
-                        // Оновлюємо видимість залежних параметрів при рендерингу
-                        setTimeout(function() {
-                            updateParamsVisibility();
-                        }, 0);
-                    }
-                }
-            });
-
-            // Колір виділення
-            Lampa.SettingsApi.addParam({
-                component: 'color_plugin',
-                param: {
-                    name: 'color_plugin_main_color',
-                    type: 'button'
-                },
-                field: {
-                    name: Lampa.Lang.translate('main_color'),
-                    description: Lampa.Lang.translate('main_color_description')
-                },
-                onRender: function (item) {
-                    if (item && typeof item.css === 'function') {
-                        item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                    }
-                },
-                onChange: function () {
-                    openColorPicker();
-                }
-            });
-
-            // Показати рамку
-            Lampa.SettingsApi.addParam({
-                component: 'color_plugin',
-                param: {
-                    name: 'color_plugin_highlight_enabled',
-                    type: 'trigger',
-                    default: ColorPlugin.settings.highlight_enabled.toString()
-                },
-                field: {
-                    name: Lampa.Lang.translate('enable_highlight'),
-                    description: Lampa.Lang.translate('enable_highlight_description')
-                },
-                onRender: function (item) {
-                    if (item && typeof item.css === 'function') {
-                        item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                    }
-                },
-                onChange: function (value) {
-                    ColorPlugin.settings.highlight_enabled = value === 'true';
-                    Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
-                    applyStyles();
-                    saveSettings();
-                    updateParamsVisibility();
-                    if (Lampa.Settings && Lampa.Settings.render) {
-                        Lampa.Settings.render();
-                    }
-                }
-            });
-
-            // Застосувати колір затемнення
-            Lampa.SettingsApi.addParam({
-                component: 'color_plugin',
-                param: {
-                    name: 'color_plugin_dimming_enabled',
-                    type: 'trigger',
-                    default: ColorPlugin.settings.dimming_enabled.toString()
-                },
-                field: {
-                    name: Lampa.Lang.translate('enable_dimming'),
-                    description: Lampa.Lang.translate('enable_dimming_description')
-                },
-                onRender: function (item) {
-                    if (item && typeof item.css === 'function') {
-                        item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                    }
-                },
-                onChange: function (value) {
-                    ColorPlugin.settings.dimming_enabled = value === 'true';
-                    Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-                    applyStyles();
-                    saveSettings();
-                    updateParamsVisibility();
-                    if (Lampa.Settings && Lampa.Settings.render) {
-                        Lampa.Settings.render();
-                    }
-                }
-            });
-        }
+        }, 100); // Затримка для забезпечення готовності Lampa.Storage
     }
 
     // Запускаємо плагін після готовності програми
-    if (window.appready && Lampa.SettingsApi) {
+    if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
         initPlugin();
     } else {
         Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'ready' && Lampa.SettingsApi) {
+            if (event.type === 'ready' && Lampa.SettingsApi && Lampa.Storage) {
                 initPlugin();
             }
         });
     }
+
+    // Оновлюємо стилі та видимість параметрів при зміні налаштувань
+    Lampa.Storage.listener.follow('change', function (e) {
+        if (e.name === 'color_plugin_enabled' || 
+            e.name === 'color_plugin_main_color' || 
+            e.name === 'color_plugin_highlight_enabled' || 
+            e.name === 'color_plugin_dimming_enabled') {
+            ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
+            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
+            ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
+            applyStyles();
+            updateCanvasFillStyle(window.draw_context);
+            updateParamsVisibility();
+            // Тимчасовий коментар для дебагінгу: Оновлено налаштування після зміни
+        }
+    });
+
+    // Оновлюємо стилі та видимість при взаємодії з меню
+    Lampa.Listener.follow('settings_component', function (event) {
+        if (event.type === 'open') {
+            ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
+            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
+            ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
+            applyStyles();
+            updateCanvasFillStyle(window.draw_context);
+            updatePluginIcon();
+            updateParamsVisibility(event.body);
+            // Тимчасовий коментар для дебагінгу: Меню налаштувань відкрито
+        } else if (event.type === 'close') {
+            saveSettings();
+            applyStyles();
+            updateCanvasFillStyle(window.draw_context);
+            updatePluginIcon();
+            // Тимчасовий коментар для дебагінгу: Меню налаштувань закрито
+        }
+    });
 })();
