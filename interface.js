@@ -13,7 +13,7 @@
     // Список модулів для підключення
     var modules = [
         'https://mastermagic98.github.io/interface/color.js',
-  //      'https://mastermagic98.github.io/interface/aloader.js',
+        'https://mastermagic98.github.io/interface/aloader.js',
         'https://mastermagic98.github.io/interface/loaders.js'
 //  'https://mastermagic98.github.io/interface/animations.js',
      //   'https://mastermagic98.github.io/interface/translate_tv.js',
