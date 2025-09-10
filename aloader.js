@@ -352,34 +352,32 @@
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 }
                 // Оновлюємо стилі модального вікна
-                if (document.getElementById('aniload')) {
-                    create_ani_modal();
-                    var modal = document.querySelector('.ani_modal_root');
-                    if (modal) {
-                        var groupedLoaders = chunkArray(window.svg_loaders, 6);
-                        var svgContent = groupedLoaders.map(function(group) {
-                            var groupContent = group.map(function(loader, index) {
-                                return createSvgHtml(loader, groupedLoaders.indexOf(group) * 6 + index + 1);
-                            }).join('');
-                            return '<div class="ani_loader_row">' + groupContent + '</div>';
-                        });
-                        var midPoint = Math.ceil(svgContent.length / 2);
-                        var leftColumn = svgContent.slice(0, midPoint).join('');
-                        var rightColumn = svgContent.slice(midPoint).join('');
-                        var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"></div>';
-                        var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
-                        var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 410px;">' +
-                                        '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
-                                        '<div class="value">' + svgValue + '</div>' +
-                                        '</div>';
-                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
-                                         defaultButton + inputHtml + '</div>';
-                        var modalContent = '<div class="ani_picker_container">' +
-                                           '<div>' + leftColumn + '</div>' +
-                                           '<div>' + rightColumn + '</div>' +
-                                           '</div>';
-                        modal.innerHTML = $('<div>' + topRowHtml + modalContent + '</div>').find('.ani_modal_root').html();
-                    }
+                create_ani_modal();
+                var modal = document.querySelector('.ani_modal_root');
+                if (modal) {
+                    var groupedLoaders = chunkArray(window.svg_loaders, 6);
+                    var svgContent = groupedLoaders.map(function(group) {
+                        var groupContent = group.map(function(loader, index) {
+                            return createSvgHtml(loader, groupedLoaders.indexOf(group) * 6 + index + 1);
+                        }).join('');
+                        return '<div class="ani_loader_row">' + groupContent + '</div>';
+                    });
+                    var midPoint = Math.ceil(svgContent.length / 2);
+                    var leftColumn = svgContent.slice(0, midPoint).join('');
+                    var rightColumn = svgContent.slice(midPoint).join('');
+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"></div>';
+                    var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
+                    var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 410px;">' +
+                                    '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
+                                    '<div class="value">' + svgValue + '</div>' +
+                                    '</div>';
+                    var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                                     defaultButton + inputHtml + '</div>';
+                    var modalContent = '<div class="ani_picker_container">' +
+                                       '<div>' + leftColumn + '</div>' +
+                                       '<div>' + rightColumn + '</div>' +
+                                       '</div>';
+                    modal.innerHTML = $('<div>' + topRowHtml + modalContent + '</div>').find('.ani_modal_root').html();
                 }
                 // Оновлюємо стилі для всіх елементів
                 if (Lampa.Storage.get('ani_active')) {
