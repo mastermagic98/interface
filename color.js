@@ -110,7 +110,7 @@
                 '#00a6f4': 'Sky 1', '#0084d1': 'Sky 2', '#0069a8': 'Sky 3', '#00598a': 'Sky 4', '#024a70': 'Sky 5', '#052f4a': 'Sky 6',
                 '#2b7fff': 'Blue 1', '#155dfc': 'Blue 2', '#1447e6': 'Blue 3', '#193cb8': 'Blue 4', '#1c398e': 'Blue 5', '#162456': 'Blue 6',
                 '#615fff': 'Indigo 1', '#4f39f6': 'Indigo 2', '#432dd7': 'Indigo 3', '#372aac': 'Indigo 4', '#312c85': 'Indigo 5', '#1e1a4d': 'Indigo 6',
-                '#8e51ff': 'Violet 1', '#7f22fe': 'Violet 2', '#7008e7': 'Violet 3', '#5d0ec0': 'Violet 4', '#4d179a': 'Violet 5', '#2f0d68': 'Violet 6',
+                '#8e51ff': 'Violet 1', '#7f22fe': 'Violet 2', '#7008e7': 'Violet 3', '#5d0ec0': 'Violet 4', '#4d179a': 'Violet 4', '#2f0d68': 'Violet 6',
                 '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#8200db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#3c0366': 'Purple 6',
                 '#e12afb': 'Fuchsia 1', '#c800de': 'Fuchsia 2', '#a800b7': 'Fuchsia 3', '#8a0194': 'Fuchsia 4', '#721378': 'Fuchsia 5', '#4b004f': 'Fuchsia 6',
                 '#f6339a': 'Pink 1', '#e60076': 'Pink 2', '#c6005c': 'Pink 3', '#a3004c': 'Pink 4', '#861043': 'Pink 5', '#510424': 'Pink 6',
@@ -212,17 +212,16 @@
 
     // Функція для застосування стилів
     function applyStyles() {
-        if (!ColorPlugin.settings.enabled) {
-            var oldStyle = document.getElementById('color-plugin-styles');
-            if (oldStyle) oldStyle.remove();
-            return;
-        }
-
         var style = document.getElementById('color-plugin-styles');
         if (!style) {
             style = document.createElement('style');
             style.id = 'color-plugin-styles';
             document.head.appendChild(style);
+        }
+
+        if (!ColorPlugin.settings.enabled) {
+            style.innerHTML = '';
+            return;
         }
 
         var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
@@ -638,6 +637,8 @@
                 className: 'color-picker-modal',
                 onBack: function () {
                     saveSettings();
+                    applyStyles();
+                    updateParamsVisibility();
                     Lampa.Modal.close();
                     Lampa.Controller.toggle('settings_component');
                     Lampa.Controller.enable('menu');
@@ -675,6 +676,7 @@
                                 applyStyles();
                                 updateCanvasFillStyle(window.draw_context);
                                 saveSettings();
+                                updateParamsVisibility();
                                 Lampa.Controller.toggle('settings_component');
                                 Lampa.Controller.enable('menu');
                                 if (Lampa.Settings && Lampa.Settings.render) {
@@ -694,6 +696,7 @@
                         applyStyles();
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
+                        updateParamsVisibility();
                         Lampa.Modal.close();
                         Lampa.Controller.toggle('settings_component');
                         Lampa.Controller.enable('menu');
@@ -713,18 +716,17 @@
             '.settings-param[data-name="color_plugin_highlight_enabled"]',
             '.settings-param[data-name="color_plugin_dimming_enabled"]'
         ];
-        setTimeout(function() {
-            for (var i = 0; i < params.length; i++) {
-                var selector = params[i];
-                var elements = body ? body.find(selector) : $(selector);
-                if (elements.length) {
-                    var displayValue = ColorPlugin.settings.enabled ? 'block' : 'none';
-                    elements.each(function(index, element) {
-                        $(element).css('display', displayValue);
-                    });
-                }
-            }
-        }, 100);
+        var displayValue = ColorPlugin.settings.enabled ? 'block' : 'none';
+        for (var i = 0; i < params.length; i++) {
+            var selector = params[i];
+            var elements = body ? body.find(selector) : $(selector);
+            elements.each(function(index, element) {
+                $(element).css('display', displayValue);
+            });
+        }
+        if (Lampa.Settings && Lampa.Settings.render) {
+            Lampa.Settings.render();
+        }
     }
 
     // Функція для ініціалізації плагіна
@@ -734,6 +736,12 @@
         ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
         ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
         ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+
+        // Застосовуємо стилі та оновлюємо видимість
+        applyStyles();
+        updateCanvasFillStyle(window.draw_context);
+        updatePluginIcon();
+        updateParamsVisibility();
 
         // Додаємо компонент до меню налаштувань
         if (Lampa.SettingsApi) {
@@ -816,6 +824,7 @@
                     Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
                     applyStyles();
                     saveSettings();
+                    updateParamsVisibility();
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
                     }
@@ -844,23 +853,60 @@
                     Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
                     applyStyles();
                     saveSettings();
+                    updateParamsVisibility();
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
                     }
                 }
             });
-
-            // Застосовуємо стилі при ініціалізації
-            applyStyles();
-            updateCanvasFillStyle(window.draw_context);
-            updatePluginIcon();
-            updateParamsVisibility();
         }
 
         // Додаємо слухач для оновлення видимості при відкритті налаштувань
         Lampa.Settings.listener.follow('open', function (e) {
             if (e.name === 'color_plugin') {
+                ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+                ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
+                ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
+                ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+                applyStyles();
                 updateParamsVisibility(e.body);
+            }
+        });
+
+        // Додаємо слухач змін у Lampa.Storage
+        Lampa.Storage.listener.follow('change', function (e) {
+            if (e.name === 'color_plugin_enabled' || e.name === 'color_plugin_main_color' ||
+                e.name === 'color_plugin_highlight_enabled' || e.name === 'color_plugin_dimming_enabled') {
+                ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+                ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
+                ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
+                ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+                applyStyles();
+                updateCanvasFillStyle(window.draw_context);
+                updateParamsVisibility();
+                if (Lampa.Settings && Lampa.Settings.render) {
+                    Lampa.Settings.render();
+                }
+            }
+        });
+
+        // Оновлюємо стилі та видимість при взаємодії з меню
+        Lampa.Listener.follow('settings_component', function (event) {
+            if (event.type === 'open') {
+                ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+                ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535');
+                ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
+                ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+                applyStyles();
+                updateCanvasFillStyle(window.draw_context);
+                updatePluginIcon();
+                updateParamsVisibility();
+            } else if (event.type === 'close') {
+                saveSettings();
+                applyStyles();
+                updateCanvasFillStyle(window.draw_context);
+                updatePluginIcon();
+                updateParamsVisibility();
             }
         });
     }
@@ -875,32 +921,4 @@
             }
         });
     }
-
-    // Оновлюємо стилі та видимість параметрів при зміні налаштувань
-    Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_enabled') {
-            ColorPlugin.settings.enabled = e.value === 'true';
-            applyStyles();
-            updateCanvasFillStyle(window.draw_context);
-            updateParamsVisibility();
-        }
-    });
-
-    // Оновлюємо стилі та видимість при взаємодії з меню
-    Lampa.Listener.follow('settings_component', function (event) {
-        if (event.type === 'open') {
-            ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
-            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
-            ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
-            applyStyles();
-            updateCanvasFillStyle(window.draw_context);
-            updatePluginIcon();
-            updateParamsVisibility();
-        } else if (event.type === 'close') {
-            saveSettings();
-            applyStyles();
-            updateCanvasFillStyle(window.draw_context);
-            updatePluginIcon();
-        }
-    });
 })();
