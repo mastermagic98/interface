@@ -43,6 +43,34 @@
         return /^#[0-9A-F]{6}$/i.test(hex);
     }
 
+    // Функція для конвертації HEX у RGB
+    function hexToRgb(hex) {
+        var cleanHex = hex.replace('#', '');
+        if (!isValidHex(hex)) cleanHex = '353535';
+        var r = parseInt(cleanHex.substring(0, 2), 16);
+        var g = parseInt(cleanHex.substring(2, 4), 16);
+        var b = parseInt(cleanHex.substring(4, 6), 16);
+        return { r: r, g: g, b: b };
+    }
+
+    // Функція для визначення кольору SVG-фільтра у нефокусованому стані
+    function getFilterValue() {
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+        if (!isValidHex(mainColor)) mainColor = '#353535';
+        var rgb = hexToRgb(mainColor);
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + rgb.r/255 + ' 0 0 0 0 ' + rgb.g/255 + ' 0 0 0 0 ' + rgb.b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color") !important';
+    }
+
+    // Функція для визначення кольору SVG-фільтра при фокусі
+    function getFocusFilterValue() {
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+        if (!isValidHex(mainColor)) mainColor = '#353535';
+        var rgb = hexToRgb(mainColor);
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + rgb.r/255 + ' 0 0 0 0 ' + rgb.g/255 + ' 0 0 0 0 ' + rgb.b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color") !important';
+    }
+
     // Функція для отримання основного кольору
     function getMainColor() {
         var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
@@ -54,10 +82,9 @@
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var mainColor = getMainColor();
+        var filterValue = getFilterValue();
         var newStyle = '.activity__loader { display: none !important; }' +
-                       '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; z-index: 9999 !important; }' +
-                       '.activity__loader.active svg { fill: ' + mainColor + ' !important; }';
+                       '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         var element = document.querySelector('.activity__loader');
         if (element) {
@@ -72,13 +99,12 @@
     // Функція для вставки стилів для попереднього перегляду
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
+        var filterValue = getFilterValue();
+        var focusFilterValue = getFocusFilterValue();
         var mainColor = getMainColor();
-        var focusColor = getMainColor();
         var focusBorderColor = mainColor === '#353535' ? '#ffffff' : 'var(--main-color)';
-        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; }' +
-                       '.activity__loader_prv svg { fill: ' + mainColor + ' !important; }' +
-                       '.activity__loader_prv.focus, .activity__loader_prv:hover { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }' +
-                       '.activity__loader_prv.focus svg, .activity__loader_prv:hover svg { fill: ' + focusColor + ' !important; }';
+        var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
+                       '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -101,7 +127,8 @@
         var style = document.createElement('style');
         style.id = 'aniload';
         var mainColor = getMainColor();
-        var focusColor = getMainColor();
+        var filterValue = getFilterValue();
+        var focusFilterValue = getFocusFilterValue();
         var focusBorderColor = mainColor === '#353535' ? '#ffffff' : 'var(--main-color)';
         var rootStyle = ':root { --main-color: ' + mainColor + ' !important; --accent-color: ' + mainColor + ' !important; }';
         style.textContent = rootStyle +
@@ -111,14 +138,11 @@
                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
                             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 10px; justify-content: center; }' +
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
-                            '.ani_loader_square img svg { fill: ' + mainColor + ' !important; }' +
+                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
                             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }' +
-                            '.ani_loader_square.focus img svg { fill: ' + focusColor + ' !important; }' +
-                            '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; background-image: url(./img/loader.svg); background-size: contain; background-repeat: no-repeat; background-position: center; }' +
-                            '.ani_loader_square.default svg { fill: ' + mainColor + ' !important; }' +
-                            '.ani_loader_square.default.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }' +
-                            '.ani_loader_square.default.focus svg { fill: ' + focusColor + ' !important; }' +
+                            '.ani_loader_square.focus img { filter: ' + focusFilterValue + '; }' +
+                            '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; background-image: url(./img/loader.svg); background-size: contain; background-repeat: no-repeat; background-position: center; filter: ' + filterValue + '; }' +
+                            '.ani_loader_square.default.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); filter: ' + focusFilterValue + '; }' +
                             '.svg_input { width: 410px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
                             '.svg_input.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }' +
                             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
@@ -359,6 +383,7 @@
             if (e.name === 'color_plugin_main_color' || e.name === 'color_plugin_enabled') {
                 var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
                 var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
+                if (!isValidHex(mainColor)) mainColor = '#353535';
                 document.documentElement.style.setProperty('--main-color', mainColor, 'important');
                 document.documentElement.style.setProperty('--accent-color', mainColor, 'important');
                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
