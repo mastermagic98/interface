@@ -41,6 +41,7 @@
     // Функція для конвертації HEX у RGB
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
+        if (cleanHex.length !== 6) cleanHex = '353535'; // Резервний колір, якщо HEX некоректний
         var r = parseInt(cleanHex.substring(0, 2), 16);
         var g = parseInt(cleanHex.substring(2, 4), 16);
         var b = parseInt(cleanHex.substring(4, 6), 16);
@@ -51,14 +52,14 @@
     function getFilterValue() {
         var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
         var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
-        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color") !important';
     }
 
     // Функція для визначення кольору SVG-фільтра при фокусі
     function getFocusFilterValue() {
         var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
         var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
-        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color") !important';
     }
 
     // Функція для встановлення кастомного завантажувача
@@ -88,7 +89,7 @@
         var focusFilterValue = getFocusFilterValue();
         var focusBorderColor = mainColor === '#353535' ? '#ffffff' : 'var(--main-color)';
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
-                       '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }';
+                       '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -115,7 +116,7 @@
         var filterValue = getFilterValue();
         var focusFilterValue = getFocusFilterValue();
         var focusBorderColor = mainColor === '#353535' ? '#ffffff' : 'var(--main-color)';
-        var rootStyle = ':root { --main-color: ' + mainColor + ' !important; }';
+        var rootStyle = ':root { --main-color: ' + mainColor + ' !important; --accent-color: ' + mainColor + ' !important; }';
         style.textContent = rootStyle +
                             '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 140px; padding: 0; }' +
@@ -124,12 +125,12 @@
                             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 10px; justify-content: center; }' +
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
                             '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
-                            '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+                            '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }' +
                             '.ani_loader_square.focus img { filter: ' + focusFilterValue + '; }' +
                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; background-image: url(./img/loader.svg); background-size: contain; background-repeat: no-repeat; background-position: center; filter: ' + filterValue + '; }' +
-                            '.ani_loader_square.default.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); filter: ' + focusFilterValue + '; }' +
+                            '.ani_loader_square.default.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); filter: ' + focusFilterValue + '; }' +
                             '.svg_input { width: 410px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
-                            '.svg_input.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+                            '.svg_input.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1); }' +
                             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
                             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
         document.head.appendChild(style);
@@ -364,7 +365,8 @@
             if (e.name === 'color_plugin_main_color' || e.name === 'color_plugin_enabled') {
                 var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
                 var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-                document.documentElement.style.setProperty('--main-color', mainColor);
+                document.documentElement.style.setProperty('--main-color', mainColor, 'important');
+                document.documentElement.style.setProperty('--accent-color', mainColor, 'important');
                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -487,10 +489,11 @@
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
-        // Ініціалізація var(--main-color) при завантаженні
+        // Ініціалізація var(--main-color) і var(--accent-color) при завантаженні
         var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
         var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-        document.documentElement.style.setProperty('--main-color', mainColor);
+        document.documentElement.style.setProperty('--main-color', mainColor, 'important');
+        document.documentElement.style.setProperty('--accent-color', mainColor, 'important');
     }
 
     // Функція для застосування налаштувань за темою
@@ -499,10 +502,11 @@
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
-        // Оновлюємо var(--main-color) при зміні теми
+        // Оновлюємо var(--main-color) і var(--accent-color) при зміні теми
         var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
         var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-        document.documentElement.style.setProperty('--main-color', mainColor);
+        document.documentElement.style.setProperty('--main-color', mainColor, 'important');
+        document.documentElement.style.setProperty('--accent-color', mainColor, 'important');
     }
 
     // Запускаємо плагін після готовності програми
