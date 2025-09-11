@@ -175,7 +175,7 @@
         if (!Lampa.SettingsApi || !Lampa.SettingsApi.components) {
             var menuItem = document.querySelector('.menu__item[data-component="color_plugin"] .menu__ico');
             if (menuItem) {
-                menuItem.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
+                menuItem.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
             }
             return;
         }
@@ -195,7 +195,6 @@
         var hasGlassStyle = body.classList.contains('glass--style');
         var computedStyle = window.getComputedStyle(body);
         var background = computedStyle.background || computedStyle.backgroundColor;
-        // Тимчасовий коментар для дебагінгу: Перевірено стилі body
     }
 
     // Функція для збереження всіх налаштувань
@@ -208,13 +207,11 @@
         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-        // Резервне збереження через localStorage
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         isSaving = false;
-        // Тимчасовий коментар для дебагінгу: Налаштування збережено
     }
 
     // Функція для застосування стилів
@@ -225,6 +222,11 @@
             return;
         }
 
+        // Перевірка коректності HEX-коду
+        if (!isValidHex(ColorPlugin.settings.main_color)) {
+            ColorPlugin.settings.main_color = '#353535';
+        }
+
         var style = document.getElementById('color-plugin-styles');
         if (!style) {
             style = document.createElement('style');
@@ -233,7 +235,6 @@
         }
 
         var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
-        // Визначаємо колір рамки для .color_square.focus
         var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? (
@@ -272,6 +273,7 @@
             ':root {' +
                 '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
                 '--main-color-rgb: ' + rgbColor + ' !important;' +
+                '--accent-color: ' + ColorPlugin.settings.main_color + ' !important;' +
             '}',
             '.modal__title {' +
                 'font-size: 1.7em !important;' +
@@ -531,16 +533,6 @@
                 'border: 0.2em solid ' + focusBorderColor + ' !important;' +
                 'transform: scale(1.1) !important;' +
             '}',
-            '.hex-input .label {' +
-                'position: absolute !important;' +
-                'top: 1px !important;' +
-                'font-size: 10px !important;' +
-            '}',
-            '.hex-input .value {' +
-                'position: absolute !important;' +
-                'bottom: 1px !important;' +
-                'font-size: 10px !important;' +
-            '}',
             '.color-picker-container {' +
                 'display: grid !important;' +
                 'grid-template-columns: 1fr 1fr !important;' +
@@ -564,7 +556,6 @@
 
         updateDateElementStyles();
         checkBodyStyles();
-        // Тимчасовий коментар для дебагінгу: Стилі застосовано, focusBorderColor: + focusBorderColor
     }
 
     // Функція для створення HTML для вибору кольору
@@ -622,7 +613,6 @@
             return '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
         });
 
-        // Розподіляємо кольори між двома колонками
         var midPoint = Math.ceil(colorContent.length / 2);
         var leftColumn = colorContent.slice(0, midPoint).join('');
         var rightColumn = colorContent.slice(midPoint).join('');
@@ -745,7 +735,6 @@
                 }
             }
         }
-        // Альтернативне оновлення через Lampa.SettingsApi
         if (Lampa.SettingsApi && Lampa.SettingsApi.params) {
             var componentParams = Lampa.SettingsApi.params.filter(function(p) {
                 return p.component === 'color_plugin';
@@ -760,29 +749,23 @@
                 }
             }
         }
-        // Тимчасовий коментар для дебагінгу: Оновлено видимість параметрів, елементи знайдено: + elements.length
     }
 
     // Функція для ініціалізації плагіна
     function initPlugin() {
-        // Завантажуємо збережені налаштування
         setTimeout(function() {
-            // Спроба завантаження з localStorage, якщо Lampa.Storage недоступний
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
             ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
             ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
-            // Тимчасовий коментар для дебагінгу: Налаштування завантажено
 
-            // Додаємо компонент до меню налаштувань
             if (Lampa.SettingsApi) {
                 Lampa.SettingsApi.addComponent({
                     component: 'color_plugin',
                     name: Lampa.Lang.translate('color_plugin'),
-                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
+                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
                 });
 
-                // Увімкнення/вимкнення плагіна
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -805,7 +788,6 @@
                         if (Lampa.Settings && Lampa.Settings.render) {
                             Lampa.Settings.render();
                         }
-                        // Тимчасовий коментар для дебагінгу: Змінено стан плагіна на: + value
                     },
                     onRender: function (item) {
                         if (item && typeof item.css === 'function') {
@@ -814,7 +796,6 @@
                     }
                 });
 
-                // Колір виділення
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -835,7 +816,6 @@
                     }
                 });
 
-                // Показати рамку
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -861,11 +841,9 @@
                         if (Lampa.Settings && Lampa.Settings.render) {
                             Lampa.Settings.render();
                         }
-                        // Тимчасовий коментар для дебагінгу: Змінено highlight_enabled на: + value
                     }
                 });
 
-                // Застосувати колір затемнення
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -891,21 +869,17 @@
                         if (Lampa.Settings && Lampa.Settings.render) {
                             Lampa.Settings.render();
                         }
-                        // Тимчасовий коментар для дебагінгу: Змінено dimming_enabled на: + value
                     }
                 });
 
-                // Застосовуємо стилі при ініціалізації
                 applyStyles();
                 updateCanvasFillStyle(window.draw_context);
                 updatePluginIcon();
                 updateParamsVisibility();
-                // Тимчасовий коментар для дебагінгу: Плагін ініціалізовано
             }
-        }, 100); // Затримка для забезпечення готовності Lampa.Storage
+        }, 100);
     }
 
-    // Запускаємо плагін після готовності програми
     if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
         initPlugin();
     } else {
@@ -916,7 +890,6 @@
         });
     }
 
-    // Оновлюємо стилі та видимість параметрів при зміні налаштувань
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_enabled' || 
             e.name === 'color_plugin_main_color' || 
@@ -929,11 +902,9 @@
             applyStyles();
             updateCanvasFillStyle(window.draw_context);
             updateParamsVisibility();
-            // Тимчасовий коментар для дебагінгу: Оновлено налаштування після зміни
         }
     });
 
-    // Оновлюємо стилі та видимість при взаємодії з меню
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
@@ -944,13 +915,11 @@
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
             updateParamsVisibility(event.body);
-            // Тимчасовий коментар для дебагінгу: Меню налаштувань відкрито
         } else if (event.type === 'close') {
             saveSettings();
             applyStyles();
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
-            // Тимчасовий коментар для дебагінгу: Меню налаштувань закрито
         }
     });
 })();
