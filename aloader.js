@@ -38,12 +38,27 @@
     // Додаємо шаблон для модального вікна вибору анімації
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
 
+    // Функція для конвертації HEX у RGB
+    function hexToRgb(hex) {
+        var cleanHex = hex.replace('#', '');
+        var r = parseInt(cleanHex.substring(0, 2), 16);
+        var g = parseInt(cleanHex.substring(2, 4), 16);
+        var b = parseInt(cleanHex.substring(4, 6), 16);
+        return { r: r, g: g, b: b };
+    }
+
+    // Функція для визначення кольору SVG-фільтра
+    function getFilterValue() {
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+    }
+
     // Функція для встановлення кастомного завантажувача
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var mainColor = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var filterValue = getFilterValue();
         var newStyle = '.activity__loader { display: none !important; }' +
                        '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
@@ -60,8 +75,9 @@
     // Функція для вставки стилів для попереднього перегляду
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var mainColor = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
+        var filterValue = getFilterValue();
         var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
         var focusBorderColor = mainColor === '#353535' ? '#ffffff' : 'var(--main-color)';
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
@@ -87,8 +103,9 @@
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
-        var mainColor = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
+        var filterValue = getFilterValue();
         var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
         var focusBorderColor = mainColor === '#353535' ? '#ffffff' : 'var(--main-color)';
         var rootStyle = ':root { --main-color: ' + mainColor + '; }';
@@ -116,15 +133,6 @@
         var className = 'ani_loader_square selector';
         var content = '<img src="' + src + '" alt="Loader ' + index + '">';
         return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
-    }
-
-    // Функція для конвертації HEX у RGB
-    function hexToRgb(hex) {
-        var cleanHex = hex.replace('#', '');
-        var r = parseInt(cleanHex.substring(0, 2), 16);
-        var g = parseInt(cleanHex.substring(2, 4), 16);
-        var b = parseInt(cleanHex.substring(4, 6), 16);
-        return { r: r, g: g, b: b };
     }
 
     // Функція для розбиття масиву на частини
@@ -347,6 +355,9 @@
         // Слухач зміни кольору та стану плагіна color.js
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'color_plugin_main_color' || e.name === 'color_plugin_enabled') {
+                var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+                var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
+                document.documentElement.style.setProperty('--main-color', mainColor);
                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -381,9 +392,6 @@
                         modal.innerHTML = $('<div>' + topRowHtml + modalContent + '</div>').find('.ani_modal_root').html();
                     }
                 }
-                // Оновлюємо var(--main-color) для синхронізації
-                var mainColor = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
-                document.documentElement.style.setProperty('--main-color', mainColor);
             }
         });
 
@@ -473,7 +481,8 @@
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
         // Ініціалізація var(--main-color) при завантаженні
-        var mainColor = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
         document.documentElement.style.setProperty('--main-color', mainColor);
     }
 
@@ -484,7 +493,8 @@
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         }
         // Оновлюємо var(--main-color) при зміні теми
-        var mainColor = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
+        var isColorPluginEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        var mainColor = isColorPluginEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#353535';
         document.documentElement.style.setProperty('--main-color', mainColor);
     }
 
