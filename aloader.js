@@ -47,18 +47,57 @@
         return { r: r, g: g, b: b };
     }
 
+    // Функція для обчислення яскравості кольору (Y = 0.299R + 0.587G + 0.114B, нормалізована 0-1)
+    function getLuminance(hex) {
+        var rgb = hexToRgb(hex);
+        var r = rgb.r / 255;
+        var g = rgb.g / 255;
+        var b = rgb.b / 255;
+        return 0.299 * r + 0.587 * g + 0.114 * b;
+    }
+
+    // Функція для отримання коригованої нормалізованої RGB (для темних кольорів робимо світлішим)
+    function getAdjustedNormalizedRgb(hex) {
+        var rgb = hexToRgb(hex);
+        var normR = rgb.r / 255;
+        var normG = rgb.g / 255;
+        var normB = rgb.b / 255;
+        var luminance = getLuminance(hex);
+        if (luminance < 0.5) {
+            // Для темних кольорів додаємо 0.5 до нормалізованих значень, але не більше 1
+            normR = Math.min(1, normR + 0.5);
+            normG = Math.min(1, normG + 0.5);
+            normB = Math.min(1, normB + 0.5);
+        }
+        return { r: normR, g: normG, b: normB };
+    }
+
     // Функція для створення модифікованого SVG для дефолтної іконки
     function applyDefaultLoaderColor() {
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
-                         '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
-                         '<circle cx="50" cy="50" fill="none" stroke="currentColor" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
-                         '  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
-                         '</circle>' +
-                         '</svg>';
-        var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        return { src: encodedSvg, filter: filterValue };
+        if (mainColor === '#ffffff') {
+            // Для білого кольору використовуємо оригінальний SVG з stroke="#ffffff"
+            var originalSvg = '<?xml version="1.0" encoding="utf-8"?>' +
+                              '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
+                              '<circle cx="50" cy="50" fill="none" stroke="#ffffff" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
+                              '  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
+                              '</circle>' +
+                              '</svg>';
+            var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(originalSvg);
+            return { src: encodedSvg, filter: '' };
+        } else {
+            // Для інших кольорів використовуємо stroke="currentColor" і застосовуємо фільтр
+            var adjustedRgb = getAdjustedNormalizedRgb(mainColor);
+            var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
+                             '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
+                             '<circle cx="50" cy="50" fill="none" stroke="currentColor" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
+                             '  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
+                             '</circle>' +
+                             '</svg>';
+            var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
+            var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + adjustedRgb.r + ' 0 0 0 0 ' + adjustedRgb.g + ' 0 0 0 0 ' + adjustedRgb.b + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+            return { src: encodedSvg, filter: filterValue };
+        }
     }
 
     // Функція для встановлення кастомного завантажувача
@@ -66,7 +105,8 @@
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var adjustedRgb = getAdjustedNormalizedRgb(mainColor);
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + adjustedRgb.r + ' 0 0 0 0 ' + adjustedRgb.g + ' 0 0 0 0 ' + adjustedRgb.b + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         var newStyle = '.activity__loader { display: none !important; }' +
                        '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
@@ -84,7 +124,8 @@
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var adjustedRgb = getAdjustedNormalizedRgb(mainColor);
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + adjustedRgb.r + ' 0 0 0 0 ' + adjustedRgb.g + ' 0 0 0 0 ' + adjustedRgb.b + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
                        '.activity__loader_prv.focus, .activity__loader_prv:hover { filter: ' + focusFilterValue + '; }';
@@ -110,7 +151,8 @@
         var style = document.createElement('style');
         style.id = 'aniload';
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + hexToRgb(mainColor).r/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).g/255 + ' 0 0 0 0 ' + hexToRgb(mainColor).b/255 + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var adjustedRgb = getAdjustedNormalizedRgb(mainColor);
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + adjustedRgb.r + ' 0 0 0 0 ' + adjustedRgb.g + ' 0 0 0 0 ' + adjustedRgb.b + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 140px; padding: 0; }' +
                             '.ani_picker_container > div { display: flex; flex-direction: column; align-items: center; }' +
