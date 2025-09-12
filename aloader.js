@@ -195,7 +195,7 @@
             prvElement.removeClass('focus');
         }
 
-        // Функція для застосування кольору фокуса (#ffffff)
+        // Функція для застосування кольору фокуса (#ffffff для кастомної іконки)
         function applyFocusColor() {
             var currentUrl = prvElement.css('background-image').replace(/^url\(["']?|["']?\)$/g, '');
             if (!currentUrl || currentUrl === applyDefaultLoaderColor().src) {
