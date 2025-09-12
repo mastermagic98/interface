@@ -91,11 +91,18 @@
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var rgb = getFilterRgb(mainColor);
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
+        var filterValue = '';
+        // Якщо це стандартна іконка або ani_load порожнє, використовуємо білу іконку без фільтра
+        if (!escapedUrl || escapedUrl === './img/loader.svg') {
+            var defaultLoader = applyDefaultLoaderColor();
+            escapedUrl = defaultLoader.src;
+        } else {
+            // Застосовуємо фільтр для кастомної іконки
+            var rgb = getFilterRgb(mainColor);
+            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        }
         var newStyle = '.activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; filter: ' + filterValue + '; }' +
-                       '.activity__loader_prv.focus { filter: ' + focusFilterValue + '; }';
+                       '.activity__loader_prv.focus { filter: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color"); }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
 
@@ -173,16 +180,31 @@
         // Функція для застосування звичайного кольору
         function applyNormalColor() {
             var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-            var rgb = getFilterRgb(mainColor);
-            var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-            prvElement.css('filter', filterValue);
+            var currentUrl = prvElement.css('background-image').replace(/^url\(["']?|["']?\)$/g, '');
+            if (!currentUrl || currentUrl === applyDefaultLoaderColor().src) {
+                // Для стандартної іконки фільтр не застосовується
+                prvElement.css('filter', '');
+            } else {
+                // Для кастомної іконки застосовуємо фільтр
+                var rgb = getFilterRgb(mainColor);
+                var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+                prvElement.css('filter', filterValue);
+            }
             prvElement.removeClass('focus');
         }
 
-        // Функція для застосування кольору фокуса (#ddd)
+        // Функція для застосування кольору фокуса (#ffffff)
         function applyFocusColor() {
-            var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 0 0.8667 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
-            prvElement.css('filter', focusFilterValue);
+            var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+            var currentUrl = prvElement.css('background-image').replace(/^url\(["']?|["']?\)$/g, '');
+            if (!currentUrl || currentUrl === applyDefaultLoaderColor().src || mainColor === '#ffffff') {
+                // Для стандартної іконки або якщо mainColor === #ffffff, фільтр не потрібен
+                prvElement.css('filter', '');
+            } else {
+                // Застосовуємо білий колір (#ffffff) для кастомної іконки
+                var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
+                prvElement.css('filter', focusFilterValue);
+            }
             prvElement.addClass('focus');
         }
 
@@ -376,6 +398,8 @@
                                                 }, 500);
                                             }
                                         }, 0);
+                                    } else {
+                                        insert_activity_loader_prv('./img/loader.svg');
                                     }
                                     Lampa.Modal.close();
                                     Lampa.Controller.toggle('settings_component');
@@ -397,8 +421,8 @@
                 var selectItem = $('.settings-param[data-name="select_ani_mation"]');
                 if (selectItem.length) {
                     selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
-                    if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load')) {
-                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                    if (Lampa.Storage.get('ani_active')) {
+                        insert_activity_loader_prv(Lampa.Storage.get('ani_load', './img/loader.svg'));
                     }
                 }
                 Lampa.Settings.render();
@@ -411,6 +435,8 @@
                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                } else {
+                    insert_activity_loader_prv('./img/loader.svg');
                 }
                 // Оновлюємо стилі модального вікна при зміні кольору
                 if (document.getElementById('aniload')) {
@@ -530,6 +556,8 @@
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+        } else {
+            insert_activity_loader_prv('./img/loader.svg');
         }
     }
 
@@ -538,6 +566,8 @@
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+        } else {
+            insert_activity_loader_prv('./img/loader.svg');
         }
     }
 
