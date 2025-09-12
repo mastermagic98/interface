@@ -118,6 +118,8 @@
             element.style.display = 'none';
             element.style.backgroundImage = '';
         }
+        // Відображаємо стандартну іконку після видалення кастомного завантажувача
+        insert_activity_loader_prv('./img/loader.svg');
     }
 
     // Функція для створення стилів модального вікна
@@ -195,13 +197,12 @@
 
         // Функція для застосування кольору фокуса (#ffffff)
         function applyFocusColor() {
-            var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
             var currentUrl = prvElement.css('background-image').replace(/^url\(["']?|["']?\)$/g, '');
-            if (!currentUrl || currentUrl === applyDefaultLoaderColor().src || mainColor === '#ffffff') {
-                // Для стандартної іконки або якщо mainColor === #ffffff, фільтр не потрібен
+            if (!currentUrl || currentUrl === applyDefaultLoaderColor().src) {
+                // Для стандартної іконки фільтр не потрібен (вже біла)
                 prvElement.css('filter', '');
             } else {
-                // Застосовуємо білий колір (#ffffff) для кастомної іконки
+                // Для кастомної іконки застосовуємо білий колір (#ffffff)
                 var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
                 prvElement.css('filter', focusFilterValue);
             }
@@ -252,6 +253,8 @@
                         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
                             setCustomLoader(Lampa.Storage.get('ani_load'));
                             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                        } else {
+                            insert_activity_loader_prv('./img/loader.svg');
                         }
                     } else {
                         remove_activity_loader();
@@ -432,7 +435,7 @@
         // Слухач зміни кольору з color.js
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name === 'color_plugin_main_color') {
-                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 } else {
