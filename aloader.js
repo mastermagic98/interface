@@ -78,24 +78,15 @@
         var newStyle = '.activity__loader { display: none !important; }' +
                        '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }' +
                        '.lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; filter: ' + whiteFilter + ' !important; }' +
-                       'body .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; filter: ' + whiteFilter + ' !important; backdrop-filter: none !important; background-color: rgba(0, 0, 0, 0.3) !important; }';
+                       '.player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; filter: ' + whiteFilter + ' !important; backdrop-filter: none !important; background-color: rgba(0, 0, 0, 0.3) !important; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
-        
-        // Застосовуємо стилі до всіх .player-video__loader з затримкою
-        setTimeout(function() {
-            var playerLoaderElements = document.querySelectorAll('.player-video__loader');
-            for (var i = 0; i < playerLoaderElements.length; i++) {
-                playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-                playerLoaderElements[i].style.backgroundRepeat = 'no-repeat';
-                playerLoaderElements[i].style.backgroundPosition = '50% 50%';
-                playerLoaderElements[i].style.backgroundSize = '80% 80%';
-                playerLoaderElements[i].style.filter = whiteFilter;
-                playerLoaderElements[i].style.backdropFilter = 'none';
-                playerLoaderElements[i].style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-                console.log('Застосовано кастомний loader до .player-video__loader:', playerLoaderElements[i].style.backgroundImage);
-            }
-        }, 300);
-        
+
+        // Застосовуємо стилі до всіх .player-video__loader
+        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
+        for (var i = 0; i < playerLoaderElements.length; i++) {
+            playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+        }
+
         // Застосовуємо стилі до .activity__loader
         var element = document.querySelector('.activity__loader');
         if (element) {
@@ -105,15 +96,11 @@
                 element.style.display = 'block';
             }
         }
-        
+
         // Застосовуємо стилі до .lampac-balanser-loader
         var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
         for (var i = 0; i < balanserElements.length; i++) {
             balanserElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            balanserElements[i].style.backgroundRepeat = 'no-repeat';
-            balanserElements[i].style.backgroundPosition = '50% 50%';
-            balanserElements[i].style.backgroundSize = 'contain';
-            balanserElements[i].style.filter = whiteFilter;
         }
     }
 
@@ -147,20 +134,10 @@
         var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
         for (var i = 0; i < balanserElements.length; i++) {
             balanserElements[i].style.backgroundImage = '';
-            balanserElements[i].style.backgroundRepeat = '';
-            balanserElements[i].style.backgroundPosition = '';
-            balanserElements[i].style.backgroundSize = 'contain';
-            balanserElements[i].style.filter = '';
         }
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
             playerLoaderElements[i].style.backgroundImage = '';
-            playerLoaderElements[i].style.backgroundRepeat = '';
-            playerLoaderElements[i].style.backgroundPosition = '';
-            playerLoaderElements[i].style.backgroundSize = '80% 80%';
-            playerLoaderElements[i].style.filter = '';
-            playerLoaderElements[i].style.backdropFilter = '';
-            playerLoaderElements[i].style.backgroundColor = '';
         }
         insert_activity_loader_prv('./img/loader.svg');
     }
@@ -386,4 +363,289 @@
                                                 return;
                                             }
                                             Lampa.Storage.set('ani_load_custom_svg', value);
-                                            Lampa.Storage.set('ani_load',
+                                            Lampa.Storage.set('ani_load', value);
+                                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
+                                                setCustomLoader(Lampa.Storage.get('ani_load'));
+                                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                                            }
+                                            Lampa.Controller.toggle('settings_component');
+                                            Lampa.Controller.enable('menu');
+                                            if (Lampa.Settings && Lampa.Settings.render) {
+                                                Lampa.Settings.render();
+                                            }
+                                        });
+                                        return;
+                                    } else if (selectedElement.classList.contains('default')) {
+                                        srcValue = './img/loader.svg';
+                                        Lampa.Storage.set('ani_load', '');
+                                        remove_activity_loader();
+                                    } else {
+                                        var imgElement = selectedElement.querySelector('img');
+                                        srcValue = imgElement ? imgElement.getAttribute('src') : Lampa.Storage.get('ani_load', './img/loader.svg');
+                                        Lampa.Storage.set('ani_load', srcValue);
+                                    }
+
+                                    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && srcValue !== './img/loader.svg') {
+                                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                                        setTimeout(function () {
+                                            var element = document.querySelector('.activity__loader');
+                                            if (element) {
+                                                element.classList.add('active');
+                                                element.style.display = 'block';
+                                                setTimeout(function () {
+                                                    element.classList.remove('active');
+                                                    element.style.display = 'none';
+                                                }, 500);
+                                            }
+                                        }, 0);
+                                    } else {
+                                        insert_activity_loader_prv('./img/loader.svg');
+                                    }
+                                    Lampa.Modal.close();
+                                    Lampa.Controller.toggle('settings_component');
+                                    Lampa.Controller.enable('menu');
+                                    if (Lampa.Settings && Lampa.Settings.render) {
+                                        Lampa.Settings.render();
+                                    }
+                                }
+                            }
+                        });
+                    } catch (e) {}
+                }
+            });
+        } catch (e) {}
+
+        // Слухач зміни параметра ani_active
+        Lampa.Storage.listener.follow('change', function (e) {
+            if (e.name === 'ani_active') {
+                var selectItem = $('.settings-param[data-name="select_ani_mation"]');
+                if (selectItem.length) {
+                    selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                    if (Lampa.Storage.get('ani_active')) {
+                        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                            setCustomLoader(Lampa.Storage.get('ani_load'));
+                            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                        } else {
+                            insert_activity_loader_prv('./img/loader.svg');
+                        }
+                    } else {
+                        remove_activity_loader();
+                    }
+                }
+                Lampa.Settings.render();
+            }
+        });
+
+        // Слухач зміни кольору
+        Lampa.Storage.listener.follow('change', function (e) {
+            if (e.name === 'color_plugin_main_color') {
+                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                    insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                } else {
+                    remove_activity_loader();
+                }
+                if (document.getElementById('aniload')) {
+                    create_ani_modal();
+                    var modal = document.querySelector('.ani_modal_root');
+                    if (modal) {
+                        var groupedLoaders = chunkArray(window.svg_loaders, 6);
+                        var svgContent = groupedLoaders.map(function(group) {
+                            var groupContent = group.map(function(loader, index) {
+                                return createSvgHtml(loader, groupedLoaders.indexOf(group) * 6 + index + 1);
+                            }).join('');
+                            return '<div class="ani_loader_row">' + groupContent + '</div>';
+                        });
+                        var midPoint = Math.ceil(svgContent.length / 2);
+                        var leftColumn = svgContent.slice(0, midPoint).join('');
+                        var rightColumn = svgContent.slice(midPoint).join('');
+                        var defaultLoader = applyDefaultLoaderColor();
+                        var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + defaultLoader.filter + ';"></div>';
+                        var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
+                        var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 410px;">' +
+                                        '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
+                                        '<div class="value">' + svgValue + '</div>' +
+                                        '</div>';
+                        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                                         defaultButton + inputHtml + '</div>';
+                        var modalContent = '<div class="ani_picker_container">' +
+                                           '<div>' + leftColumn + '</div>' +
+                                           '<div>' + rightColumn + '</div>' +
+                                           '</div>';
+                        modal.innerHTML = $('<div>' + topRowHtml + modalContent + '</div>').find('.ani_modal_root').html();
+                    }
+                }
+            }
+        });
+
+        // Спостерігач за змінами DOM
+        setTimeout(function () {
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(function (node) {
+                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader'))) {
+                                console.log('Виявлено новий елемент:', node.className);
+                                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                                    setTimeout(function () {
+                                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                                    }, 100);
+                                }
+                            }
+                        });
+                        mutation.removedNodes.forEach(function (node) {
+                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader'))) {
+                                console.log('Видалено елемент:', node.className);
+                                remove_activity_loader();
+                            }
+                        });
+                    } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
+                            console.log('Виявлено додавання класу video--load до .player-video');
+                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                                setTimeout(function () {
+                                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                                    console.log('Застосовано setCustomLoader для .player-video__loader');
+                                }, 200); // Збільшено затримку до 200 мс
+                            }
+                        } else if (mutation.target.classList.contains('player-video') && !mutation.target.classList.contains('video--load')) {
+                            console.log('Виявлено видалення класу video--load з .player-video');
+                            remove_activity_loader();
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        }, 1000);
+
+        // Слухач подій плеєра
+        Lampa.Listener.follow('player', function (e) {
+            if (e.type === 'load' || e.type === 'loading') {
+                console.log('Виявлено подію player:', e.type);
+                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                    setTimeout(function () {
+                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                        console.log('Застосовано setCustomLoader для player event:', e.type);
+                        // Діагностика
+                        var loader = document.querySelector('.player-video.video--load .player-video__loader');
+                        if (loader) {
+                            console.log('.player-video__loader знайдено, backgroundImage:', loader.style.backgroundImage);
+                        } else {
+                            console.log('.player-video__loader не знайдено');
+                        }
+                    }, 200); // Збільшено затримку до 200 мс
+                }
+            }
+        });
+
+        Lampa.Listener.follow('full', function (e) {
+            var element = document.querySelector('.activity__loader');
+            if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
+                element.classList.add('active');
+                element.style.display = 'block';
+                setCustomLoader(Lampa.Storage.get('ani_load'));
+            } else if (e.type === 'complete' && element) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+            }
+            if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                setTimeout(function () {
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                }, 100);
+            }
+        });
+
+        Lampa.Listener.follow('activity', function (event) {
+            var element = document.querySelector('.activity__loader');
+            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
+                element.classList.add('active');
+                element.style.display = 'block';
+                setCustomLoader(Lampa.Storage.get('ani_load'));
+            } else if (event.type === 'loaded' && element) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+            }
+            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                setTimeout(function () {
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                }, 100);
+            }
+        });
+
+        Lampa.Activity.listener.follow('push', function (event) {
+            var element = document.querySelector('.activity__loader');
+            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
+                element.classList.add('active');
+                element.style.display = 'block';
+                setCustomLoader(Lampa.Storage.get('ani_load'));
+            } else if (event.status === 'ready' && element) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+            }
+            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                setTimeout(function () {
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                }, 100);
+            }
+        });
+
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type === 'back') {
+                var element = document.querySelector('.activity__loader');
+                if (element) {
+                    element.classList.remove('active');
+                    element.style.display = 'none';
+                }
+            }
+        });
+
+        setInterval(function () {
+            var element = document.querySelector('.activity__loader');
+            if (element && element.classList.contains('active')) {
+                element.classList.remove('active');
+                element.style.display = 'none';
+            }
+        }, 500);
+
+        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+            setCustomLoader(Lampa.Storage.get('ani_load'));
+            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+        } else {
+            remove_activity_loader();
+        }
+    }
+
+    // Функція для застосування налаштувань за темою
+    function byTheme() {
+        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+            setCustomLoader(Lampa.Storage.get('ani_load'));
+            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+        } else {
+            remove_activity_loader();
+        }
+    }
+
+    // Запускаємо плагін після готовності програми
+    if (window.appready) {
+        aniLoad();
+        byTheme();
+    } else {
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type === 'ready') {
+                aniLoad();
+                byTheme();
+            }
+        });
+    }
+
+    // Слухач зміни акцентного кольору
+    Lampa.Storage.listener.follow('change', function (e) {
+        if (e.name === 'accent_color_selected') {
+            byTheme();
+        }
+    });
+
+    // Експортуємо функцію byTheme
+    window.byTheme = byTheme;
+})();
