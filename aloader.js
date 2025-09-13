@@ -33,8 +33,7 @@
             '<circle cx="50" cy="50" fill="none" stroke="#ffffff" stroke-width="5" r="35" stroke-dasharray="164.9 56.9">' +
             '<animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50"></animateTransform>' +
             '</circle></svg>';
-        var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
-        return { src: encodedSvg, filter: '' };
+        return 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
     }
 
     function isValidSvgUrl(url) {
@@ -70,16 +69,14 @@
             'filter:'+whiteFilter+';background-color:rgba(0,0,0,0.3)!important;}';
 
         $('<style id="aniload-id">'+style+'</style>').appendTo('head');
-        console.log('setCustomLoader застосовано');
+        updatePreviewIcon(url);
     }
 
-    // Очікування появи .player-video__loader
     function waitForPlayerLoader(callback) {
         var tries = 0;
         var interval = setInterval(function() {
             var loader = document.querySelector('.player-video.video--load .player-video__loader');
             if (loader) {
-                console.log('Виявлено .player-video__loader');
                 clearInterval(interval);
                 callback(loader);
             }
@@ -92,6 +89,7 @@
         $('#aniload-id').remove();
         var all = document.querySelectorAll('.player-video__loader,.activity__loader');
         for (var i=0;i<all.length;i++){ all[i].style.backgroundImage=''; all[i].style.filter=''; }
+        updatePreviewIcon('');
     }
 
     // === Побудова модального вікна вибору ===
@@ -105,10 +103,31 @@
             return '<div class="ani_loader_row">'+group.map(function(loader, i){return createSvgHtml(loader,i);}).join('')+'</div>';
         }).join('');
         var defaultLoader = applyDefaultLoaderColor();
-        var defaultBtn = '<div class="ani_loader_square selector default" tabindex="0"><img src="'+defaultLoader.src+'"></div>';
+        var defaultBtn = '<div class="ani_loader_square selector default" tabindex="0"><img src="'+defaultLoader+'"></div>';
         var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width:410px;"><div class="label">'+Lampa.Lang.translate('custom_svg_input')+'</div><div class="value">'+(Lampa.Storage.get('ani_load_custom_svg','')||'')+'</div></div>';
         var topRow = '<div style="display:flex;gap:30px;justify-content:center;margin-bottom:10px;">'+defaultBtn+inputHtml+'</div>';
         return $('<div>'+topRow+'<div>'+svgContent+'</div></div>');
+    }
+
+    // === Прев’ю-іконка в меню налаштувань ===
+    function updatePreviewIcon(url) {
+        var icon = document.querySelector('.settings-param[data-name="select_ani_mation"] .settings-param__name img');
+        if (!icon) {
+            var nameEl = document.querySelector('.settings-param[data-name="select_ani_mation"] .settings-param__name');
+            if (nameEl) {
+                var img = document.createElement('img');
+                img.style.width = '20px';
+                img.style.height = '20px';
+                img.style.marginLeft = '10px';
+                img.style.verticalAlign = 'middle';
+                nameEl.appendChild(img);
+                icon = img;
+            }
+        }
+        if (icon) {
+            if (!url) icon.src = applyDefaultLoaderColor();
+            else icon.src = url;
+        }
     }
 
     // === Ініціалізація ===
@@ -174,21 +193,18 @@
             }
         });
 
-        // Слухач на появу video--load
+        updatePreviewIcon(Lampa.Storage.get('ani_load',''));
+
         var observer = new MutationObserver(function(m){
             m.forEach(function(mu){
                 if (mu.type==='attributes' && mu.attributeName==='class' && mu.target.classList.contains('player-video')) {
                     if (mu.target.classList.contains('video--load')) {
-                        console.log('Виявлено video--load');
                         if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load')) {
                             waitForPlayerLoader(function(){
                                 setCustomLoader(Lampa.Storage.get('ani_load'));
                             });
                         }
-                    } else {
-                        console.log('Видалено video--load');
-                        remove_activity_loader();
-                    }
+                    } else remove_activity_loader();
                 }
             });
         });
@@ -196,7 +212,6 @@
 
         Lampa.Listener.follow('player', function(e){
             if (e.type==='load' && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load')) {
-                console.log('player load');
                 waitForPlayerLoader(function(){
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                 });
