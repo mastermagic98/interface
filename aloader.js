@@ -74,175 +74,10 @@
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var rgb = getFilterRgb(mainColor);
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var newStyle = '.content-loading::after {' +
-                       '  content: "";' +
-                       '  display: block;' +
-                       '  height: 3em;' +
-                       '  width: 3em;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  -webkit-background-size: contain;' +
-                       '     -moz-background-size: contain;' +
-                       '       -o-background-size: contain;' +
-                       '          background-size: contain;' +
-                       '  position: absolute;' +
-                       '  top: 50%;' +
-                       '  left: 50%;' +
-                       '  margin-left: -1.5em;' +
-                       '  margin-top: -1.5em;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.processing__loader {' +
-                       '  background-image: url(\'' + escapedUrl + '\');' +
-                       '  background-position: 50% 50%;' +
-                       '  background-repeat: no-repeat;' +
-                       '  -webkit-background-size: contain;' +
-                       '     -moz-background-size: contain;' +
-                       '       -o-background-size: contain;' +
-                       '          background-size: contain;' +
-                       '  width: 1.6em;' +
-                       '  height: 1.6em;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.activity__loader {' +
-                       '  position: absolute;' +
-                       '  top: 0;' +
-                       '  left: 0;' +
-                       '  width: 100%;' +
-                       '  height: 100%;' +
-                       '  display: none;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.activity__loader.active {' +
-                       '  background-attachment: scroll;' +
-                       '  background-clip: border-box;' +
-                       '  background-color: rgba(0, 0, 0, 0) !important;' +
-                       '  background-origin: padding-box;' +
-                       '  background-position-x: 50%;' +
-                       '  background-position-y: 50%;' +
-                       '  background-repeat: no-repeat;' +
-                       '  background-size: contain !important;' +
-                       '  box-sizing: border-box;' +
-                       '  display: block !important;' +
-                       '  position: fixed !important;' +
-                       '  left: 50% !important;' +
-                       '  top: 50% !important;' +
-                       '  transform: translate(-50%, -50%) scale(1) !important;' +
-                       '  -webkit-transform: translate(-50%, -50%) scale(1) !important;' +
-                       '  width: 108px !important;' +
-                       '  height: 108px !important;' +
-                       '  filter: ' + filterValue + ';' +
-                       '  z-index: 9999 !important;' +
-                       '}' +
-                       '.player-video__loader {' +
-                       '  background-image: url(\'' + escapedUrl + '\');' +
-                       '  background-repeat: no-repeat;' +
-                       '  background-position: 50% 50%;' +
-                       '  -webkit-background-size: 80% 80%;' +
-                       '     -moz-background-size: 80% 80%;' +
-                       '       -o-background-size: 80% 80%;' +
-                       '          background-size: 80% 80%;' +
-                       '  display: none;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.birthday__poster {' +
-                       '  position: relative;' +
-                       '  padding-bottom: 65%;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.loading-layer__ico {' +
-                       '  width: 1.9em;' +
-                       '  height: 1.9em;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat center;' +
-                       '  -webkit-background-size: contain;' +
-                       '     -moz-background-size: contain;' +
-                       '       -o-background-size: contain;' +
-                       '          background-size: contain;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.search-source--loading .search-source__count {' +
-                       '  background-image: url(\'' + escapedUrl + '\');' +
-                       '  background-repeat: no-repeat;' +
-                       '  background-position: center;' +
-                       '  -webkit-background-size: 1.2em 1.2em;' +
-                       '     -moz-background-size: 1.2em;' +
-                       '       -o-background-size: 1.2em;' +
-                       '          background-size: 1.2em;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.modal-loading {' +
-                       '  height: 6em;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  -webkit-background-size: contain;' +
-                       '     -moz-background-size: contain;' +
-                       '       -o-background-size: contain;' +
-                       '          background-size: contain;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.modal-pending__loading {' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  -webkit-background-size: contain;' +
-                       '     -moz-background-size: contain;' +
-                       '       -o-background-size: contain;' +
-                       '          background-size: contain;' +
-                       '  height: 6em;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.season-episode__loader {' +
-                       '  position: absolute;' +
-                       '  top: 50%;' +
-                       '  left: 50%;' +
-                       '  width: 2em;' +
-                       '  height: 2em;' +
-                       '  margin-left: -1em;' +
-                       '  margin-top: -1em;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat center center;' +
-                       '  -webkit-background-size: contain;' +
-                       '     -moz-background-size: contain;' +
-                       '       -o-background-size: contain;' +
-                       '          background-size: contain;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.screensaver__preload {' +
-                       '  position: fixed;' +
-                       '  top: 0;' +
-                       '  width: 100%;' +
-                       '  height: 100%;' +
-                       '  left: 0;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.extensions__item-check {' +
-                       '  width: 1.2em;' +
-                       '  height: 1.2em;' +
-                       '  background-color: rgba(0, 0, 0, 0.18);' +
-                       '  background-image: url(\'' + escapedUrl + '\');' +
-                       '  background-repeat: no-repeat;' +
-                       '  -webkit-background-size: 1em 1em;' +
-                       '     -moz-background-size: 1em;' +
-                       '       -o-background-size: 1em;' +
-                       '          background-size: 1em;' +
-                       '  background-position: 50% 50%;' +
-                       '  -webkit-border-radius: 100%;' +
-                       '     -moz-border-radius: 100%;' +
-                       '          border-radius: 100%;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}' +
-                       '.iframe__body {' +
-                       '  position: fixed;' +
-                       '  top: 2em;' +
-                       '  right: 2em;' +
-                       '  bottom: 2em;' +
-                       '  left: 2em;' +
-                       '  display: -webkit-box;' +
-                       '  display: -webkit-flex;' +
-                       '  display: -moz-box;' +
-                       '  display: -ms-flexbox;' +
-                       '  display: flex;' +
-                       '  background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
-                       '  filter: ' + filterValue + ';' +
-                       '}';
+        var newStyle = '.activity__loader { display: none !important; }' +
+                       '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }' +
+                       '.lampac-balanser-loader { background: url(\'' + escapedUrl + '\') no-repeat 50% 50% !important; background-size: contain !important; filter: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color") !important; }' +
+                       '.player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; filter: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color") !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         var element = document.querySelector('.activity__loader');
         if (element) {
@@ -251,6 +86,17 @@
                 element.classList.add('active');
                 element.style.display = 'block';
             }
+        }
+        var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
+        for (var i = 0; i < balanserElements.length; i++) {
+            balanserElements[i].style.background = 'url(\'' + escapedUrl + '\') no-repeat 50% 50%';
+            balanserElements[i].style.backgroundSize = 'contain';
+            balanserElements[i].style.filter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        }
+        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
+        for (var i = 0; i < playerLoaderElements.length; i++) {
+            playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+            playerLoaderElements[i].style.filter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         }
     }
 
@@ -283,7 +129,18 @@
             element.style.display = 'none';
             element.style.backgroundImage = '';
         }
-        // Відображаємо стандартну іконку після видалення кастомного завантажувача
+        var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
+        for (var i = 0; i < balanserElements.length; i++) {
+            balanserElements[i].style.background = 'url(./img/loader.svg) no-repeat 50% 50%';
+            balanserElements[i].style.backgroundSize = 'contain';
+            balanserElements[i].style.filter = '';
+        }
+        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
+        for (var i = 0; i < playerLoaderElements.length; i++) {
+            playerLoaderElements[i].style.backgroundImage = 'url(./img/loader.svg)';
+            playerLoaderElements[i].style.filter = '';
+        }
+        // Відображаємо стандартну іконку для .activity__loader_prv
         insert_activity_loader_prv('./img/loader.svg');
     }
 
@@ -609,7 +466,7 @@
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
                 } else {
-                    insert_activity_loader_prv('./img/loader.svg');
+                    remove_activity_loader();
                 }
                 // Оновлюємо стилі модального вікна при зміні кольору
                 if (document.getElementById('aniload')) {
@@ -645,19 +502,19 @@
             }
         });
 
-        // Спостерігач за додаванням/видаленням елемента .activity__loader
+        // Спостерігач за додаванням/видаленням елементів .activity__loader, .lampac-balanser-loader, .player-video__loader
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
                     mutation.addedNodes.forEach(function (node) {
-                        if (node.nodeType === 1 && node.matches('.activity__loader')) {
+                        if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader'))) {
                             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                 setCustomLoader(Lampa.Storage.get('ani_load'));
                             }
                         }
                     });
                     mutation.removedNodes.forEach(function (node) {
-                        if (node.nodeType === 1 && node.matches('.activity__loader')) {
+                        if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader'))) {
                             remove_activity_loader();
                         }
                     });
@@ -730,7 +587,7 @@
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         } else {
-            insert_activity_loader_prv('./img/loader.svg');
+            remove_activity_loader();
         }
     }
 
@@ -740,7 +597,7 @@
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         } else {
-            insert_activity_loader_prv('./img/loader.svg');
+            remove_activity_loader();
         }
     }
 
