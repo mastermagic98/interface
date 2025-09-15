@@ -139,7 +139,7 @@
         }
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
-            playerLoaderElements[i].style.background = 'url(./img/loader.svg) no-repeat 50% 50%';
+            playerLoaderElements[i].style.background = 'url(../img/loader.svg) no-repeat 50% 50%';
             playerLoaderElements[i].style.backgroundSize = 'contain';
             playerLoaderElements[i].style.filter = '';
         }
@@ -226,7 +226,7 @@
                 prvElement.css('filter', '');
             } else {
                 // Для кастомної іконки застосовуємо білий колір (#ffffff)
-                var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+                var focusFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22focus_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#focus_color")';
                 prvElement.css('filter', focusFilterValue);
             }
             prvElement.addClass('focus');
@@ -511,6 +511,7 @@
                 mutations.forEach(function (mutation) {
                     mutation.addedNodes.forEach(function (node) {
                         if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader'))) {
+                            console.log('Виявлено новий елемент:', node.className);
                             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                 setCustomLoader(Lampa.Storage.get('ani_load'));
                             }
@@ -518,6 +519,7 @@
                     });
                     mutation.removedNodes.forEach(function (node) {
                         if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader'))) {
+                            console.log('Видалено елемент:', node.className);
                             remove_activity_loader();
                         }
                     });
