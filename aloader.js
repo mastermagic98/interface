@@ -74,14 +74,14 @@
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var rgb = getFilterRgb(mainColor);
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        // Оновлено: Повернуто темний круг (rgba(0, 0, 0, 0.3)) для всіх елементів
+        // Оновлено: Збільшено специфічність і забезпечено темний круг
         var newStyle = '.activity__loader { display: none !important; }' +
                        '.activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: rgba(0, 0, 0, 0.3) !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }' +
                        '.lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: rgba(0, 0, 0, 0.3) !important; filter: ' + filterValue + ' !important; }' +
-                       // Оновлено: Збільшено специфічність і повернуто темний круг
-                       'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: rgba(0, 0, 0, 0.3) !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
+                       // Оновлено: Збільшено специфічність для .player-video__loader
+                       'body .player-video .player-video__loader.custom, body .player-video.video--load .player-video__loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: rgba(0, 0, 0, 0.3) !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
                        // Оновлено: Явне скидання стандартного стилю
-                       'body .player-video__loader { background-image: none !important; }';
+                       'body .player-video__loader:not(.custom) { background-image: none !important; background-color: transparent !important; display: none !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
         console.log('setCustomLoader викликано з URL:', url);
@@ -89,10 +89,13 @@
         // Застосовуємо стилі до всіх .player-video__loader
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
+            playerLoaderElements[i].classList.add('custom');
             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             playerLoaderElements[i].style.filter = filterValue;
             playerLoaderElements[i].style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
             console.log('Стилі застосовано до .player-video__loader:', playerLoaderElements[i].style.backgroundImage, 'filter:', playerLoaderElements[i].style.filter, 'backgroundColor:', playerLoaderElements[i].style.backgroundColor);
+            // Оновлено: Додано перевірку getComputedStyle
+            console.log('Computed styles:', getComputedStyle(playerLoaderElements[i]).backgroundImage, getComputedStyle(playerLoaderElements[i]).backgroundColor);
         }
 
         // Застосовуємо стилі до .activity__loader
@@ -106,6 +109,7 @@
                 element.style.display = 'block';
             }
             console.log('Стилі застосовано до .activity__loader:', element.style.backgroundImage, 'backgroundColor:', element.style.backgroundColor);
+            console.log('Computed styles:', getComputedStyle(element).backgroundImage, getComputedStyle(element).backgroundColor);
         }
 
         // Застосовуємо стилі до .lampac-balanser-loader
@@ -115,6 +119,7 @@
             balanserElements[i].style.filter = filterValue;
             balanserElements[i].style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
             console.log('Стилі застосовано до .lampac-balanser-loader:', balanserElements[i].style.backgroundImage, 'backgroundColor:', balanserElements[i].style.backgroundColor);
+            console.log('Computed styles:', getComputedStyle(balanserElements[i]).backgroundImage, getComputedStyle(balanserElements[i]).backgroundColor);
         }
     }
 
@@ -157,6 +162,7 @@
         }
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
+            playerLoaderElements[i].classList.remove('custom');
             playerLoaderElements[i].style.backgroundImage = '';
             playerLoaderElements[i].style.filter = '';
             playerLoaderElements[i].style.backgroundColor = 'transparent';
@@ -480,7 +486,7 @@
                                     setTimeout(function () {
                                         setCustomLoader(Lampa.Storage.get('ani_load'));
                                         console.log('setCustomLoader викликано для нового елемента:', node.className);
-                                    }, 100); // Оновлено: Збільшено затримку до 100 мс
+                                    }, 200); // Оновлено: Збільшено затримку до 200 мс
                                 }
                             }
                         });
@@ -500,10 +506,11 @@
                                     var loader = document.querySelector('.player-video.video--load .player-video__loader');
                                     if (loader) {
                                         console.log('.player-video__loader знайдено, backgroundImage:', loader.style.backgroundImage, 'filter:', loader.style.filter, 'backgroundColor:', loader.style.backgroundColor);
+                                        console.log('Computed styles:', getComputedStyle(loader).backgroundImage, getComputedStyle(loader).backgroundColor);
                                     } else {
                                         console.log('.player-video__loader не знайдено');
                                     }
-                                }, 100); // Оновлено: Збільшено затримку до 100 мс
+                                }, 200); // Оновлено: Збільшено затримку до 200 мс
                             }
                         } else if (mutation.target.classList.contains('player-video') && !mutation.target.classList.contains('video--load')) {
                             console.log('Виявлено видалення класу video--load з .player-video');
@@ -516,32 +523,41 @@
             console.log('MutationObserver ініціалізовано');
         }, 500);
 
-        // Оновлено: Розширено список подій плеєра
-        Lampa.Listener.follow('player', function (e) {
-            console.log('Player event debug:', e.type); // Додано для діагностики
-            if (e.type === 'init' || e.type === 'load' || e.type === 'loading' || e.type === 'start' || e.type === 'ready' || e.type === 'play' || e.type === 'playing' || e.type === 'buffering' || e.type === 'waiting') {
-                console.log('Виявлено подію player:', e.type);
-                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                    setTimeout(function () {
-                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                        console.log('Застосовано setCustomLoader для player event:', e.type);
-                        var loader = document.querySelector('.player-video.video--load .player-video__loader');
-                        if (loader) {
-                            console.log('.player-video__loader знайдено, backgroundImage:', loader.style.backgroundImage, 'filter:', loader.style.filter, 'backgroundColor:', loader.style.backgroundColor);
-                        } else {
-                            console.log('.player-video__loader не знайдено');
+        // Оновлено: Слухач подій для <video> елемента
+        setTimeout(function () {
+            var videoElement = document.querySelector('video');
+            if (videoElement) {
+                ['play', 'playing', 'waiting', 'stalled', 'loadstart', 'loadeddata'].forEach(function (eventType) {
+                    videoElement.addEventListener(eventType, function (e) {
+                        console.log('Video element event:', e.type);
+                        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                            setTimeout(function () {
+                                setCustomLoader(Lampa.Storage.get('ani_load'));
+                                console.log('Застосовано setCustomLoader для video event:', e.type);
+                                var loader = document.querySelector('.player-video.video--load .player-video__loader');
+                                if (loader) {
+                                    console.log('.player-video__loader знайдено, backgroundImage:', loader.style.backgroundImage, 'filter:', loader.style.filter, 'backgroundColor:', loader.style.backgroundColor);
+                                    console.log('Computed styles:', getComputedStyle(loader).backgroundImage, getComputedStyle(loader).backgroundColor);
+                                } else {
+                                    console.log('.player-video__loader не знайдено');
+                                }
+                            }, 200);
                         }
-                    }, 100); // Оновлено: Збільшено затримку до 100 мс
-                }
+                    });
+                });
+                console.log('Додано слухачі подій для <video> елемента');
             }
-        });
+        }, 1000);
 
-        // Оновлено: Додано періодичну перевірку .player-video__loader
+        // Оновлено: Посилена періодична перевірка
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var loader = document.querySelector('.player-video.video--load .player-video__loader');
                 if (loader && getComputedStyle(loader).backgroundImage.indexOf('lampa-main/img/loader.svg') !== -1) {
                     console.log('Виявлено стандартну іконку, застосовується setCustomLoader');
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                } else if (loader && getComputedStyle(loader).backgroundColor !== 'rgba(0, 0, 0, 0.3)') {
+                    console.log('Виявлено некоректний backgroundColor, застосовується setCustomLoader');
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                 }
             }
@@ -563,7 +579,7 @@
                 setTimeout(function () {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     console.log('setCustomLoader викликано для full event: start');
-                }, 100);
+                }, 200);
             }
         });
 
@@ -583,7 +599,7 @@
                 setTimeout(function () {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     console.log('setCustomLoader викликано для activity event: start');
-                }, 100);
+                }, 200);
             }
         });
 
@@ -603,7 +619,7 @@
                 setTimeout(function () {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
                     console.log('setCustomLoader викликано для activity push: active');
-                }, 100);
+                }, 200);
             }
         });
 
