@@ -1,7 +1,6 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для плагіна
     Lampa.Lang.add({
         params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },
         params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },
@@ -11,10 +10,8 @@
         svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
     });
 
-    // Додаємо шаблон для модального вікна вибору анімації
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
 
-    // Функція для конвертації HEX у RGB
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
@@ -23,15 +20,13 @@
         return { r: r, g: g, b: b };
     }
 
-    // Функція для отримання RGB для SVG-фільтра
     function getFilterRgb(mainColor) {
         if (mainColor.toLowerCase() === '#353535') {
-            return { r: 255, g: 255, b: 255 }; // Білий для темної теми
+            return { r: 255, g: 255, b: 255 };
         }
         return hexToRgb(mainColor);
     }
 
-    // Функція для створення SVG для дефолтної іконки
     function applyDefaultLoaderColor() {
         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
@@ -43,7 +38,6 @@
         return { src: encodedSvg, filter: '' };
     }
 
-    // Функція для встановлення кастомного завантажувача
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
@@ -59,20 +53,14 @@
                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
-        console.log('setCustomLoader викликано з URL:', url);
-
-        // Застосовуємо стилі до .player-video__loader без примусового display
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
             playerLoaderElements[i].classList.add('custom');
             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             playerLoaderElements[i].style.filter = filterValue;
             playerLoaderElements[i].style.backgroundColor = 'transparent';
-            console.log('Стилі застосовано до .player-video__loader:', playerLoaderElements[i].style.backgroundImage, 'filter:', playerLoaderElements[i].style.filter, 'backgroundColor:', playerLoaderElements[i].style.backgroundColor);
-            console.log('Computed styles:', getComputedStyle(playerLoaderElements[i]).backgroundImage, getComputedStyle(playerLoaderElements[i]).backgroundColor, getComputedStyle(playerLoaderElements[i]).display);
         }
 
-        // Застосовуємо стилі до .activity__loader
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
@@ -82,34 +70,25 @@
                 element.classList.add('active');
                 element.style.display = 'block';
             }
-            console.log('Стилі застосовано до .activity__loader:', element.style.backgroundImage, 'backgroundColor:', element.style.backgroundColor);
-            console.log('Computed styles:', getComputedStyle(element).backgroundImage, getComputedStyle(element).backgroundColor);
         }
 
-        // Застосовуємо стилі до .lampac-balanser-loader
         var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
         for (var i = 0; i < balanserElements.length; i++) {
             balanserElements[i].classList.add('custom');
             balanserElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             balanserElements[i].style.filter = filterValue;
             balanserElements[i].style.backgroundColor = 'transparent';
-            console.log('Стилі застосовано до .lampac-balanser-loader:', balanserElements[i].style.backgroundImage, 'backgroundColor:', balanserElements[i].style.backgroundColor);
-            console.log('Computed styles:', getComputedStyle(balanserElements[i]).backgroundImage, getComputedStyle(balanserElements[i]).backgroundColor);
         }
 
-        // Застосовуємо стилі до .loading-layer__ico
         var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
         for (var i = 0; i < loadingLayerIco.length; i++) {
             loadingLayerIco[i].classList.add('custom');
             loadingLayerIco[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             loadingLayerIco[i].style.filter = filterValue;
             loadingLayerIco[i].style.backgroundColor = 'transparent';
-            console.log('Стилі застосовано до .loading-layer__ico:', loadingLayerIco[i].style.backgroundImage, 'filter:', loadingLayerIco[i].style.filter, 'backgroundColor:', loadingLayerIco[i].style.backgroundColor);
-            console.log('Computed styles:', getComputedStyle(loadingLayerIco[i]).backgroundImage, getComputedStyle(loadingLayerIco[i]).backgroundColor, getComputedStyle(loadingLayerIco[i]).display);
         }
     }
 
-    // Функція для вставки стилів для попереднього перегляду
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
@@ -124,21 +103,17 @@
         }
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
-        console.log('Прев’ю стилі застосовано з URL:', escapedUrl);
 
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
                 prvElement.style.filter = whiteFilterValue;
-                console.log('Примусово застосовано білий фільтр до .activity__loader_prv:', prvElement.style.filter);
             } else {
-                console.log('prvElement не знайдено, повторна спроба через 500 мс');
                 setTimeout(checkPrvElement, 500);
             }
         }, 100);
     }
 
-    // Функція для видалення стилів завантажувача
     function remove_activity_loader() {
         var styleElement = document.getElementById('aniload-id');
         if (styleElement) styleElement.remove();
@@ -151,7 +126,6 @@
             element.style.backgroundImage = '';
             element.style.filter = '';
             element.style.backgroundColor = 'transparent';
-            console.log('Скинуто стилі для .activity__loader, backgroundColor:', element.style.backgroundColor);
         }
         var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
         for (var i = 0; i < balanserElements.length; i++) {
@@ -159,7 +133,6 @@
             balanserElements[i].style.backgroundImage = '';
             balanserElements[i].style.filter = '';
             balanserElements[i].style.backgroundColor = 'transparent';
-            console.log('Скинуто стилі для .lampac-balanser-loader, backgroundColor:', balanserElements[i].style.backgroundColor);
         }
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
@@ -168,7 +141,6 @@
             playerLoaderElements[i].style.filter = '';
             playerLoaderElements[i].style.backgroundColor = 'transparent';
             playerLoaderElements[i].style.display = 'none';
-            console.log('Скинуто стилі для .player-video__loader, backgroundColor:', playerLoaderElements[i].style.backgroundColor);
         }
         var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
         for (var i = 0; i < loadingLayerIco.length; i++) {
@@ -177,13 +149,10 @@
             loadingLayerIco[i].style.filter = '';
             loadingLayerIco[i].style.backgroundColor = 'transparent';
             loadingLayerIco[i].style.display = 'none';
-            console.log('Скинуто стилі для .loading-layer__ico, backgroundColor:', loadingLayerIco[i].style.backgroundColor);
         }
         insert_activity_loader_prv('./img/loader.svg');
-        console.log('Стилі завантажувача видалено');
     }
 
-    // Функція для створення стилів модального вікна
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
@@ -207,14 +176,12 @@
         document.head.appendChild(style);
     }
 
-    // Функція для створення HTML для SVG-іконки
     function createSvgHtml(src, index) {
         var className = 'ani_loader_square selector';
         var content = '<img src="' + src + '" alt="Loader ' + index + '">';
         return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
     }
 
-    // Функція для розбиття масиву на частини
     function chunkArray(arr, size) {
         var result = [];
         for (var i = 0; i < arr.length; i += size) {
@@ -223,17 +190,12 @@
         return result;
     }
 
-    // Функція для перевірки валідності URL SVG
     function isValidSvgUrl(url) {
         return /^https?:\/\/.*\.svg$/.test(url);
     }
 
-    // Функція для додавання слухача фокуса (не використовується, оскільки .activity__loader_prv завжди біла)
-    function addPrvFocusListener() {
-        console.log('addPrvFocusListener більше не потрібен, .activity__loader_prv завжди біла');
-    }
+    function addPrvFocusListener() {}
 
-    // Основна функція ініціалізації плагіна
     function aniLoad() {
         var icon_plugin = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
 
@@ -243,9 +205,7 @@
                 name: Lampa.Lang.translate('params_ani_name'),
                 icon: icon_plugin
             });
-        } catch (e) {
-            console.log('Помилка додавання компонента ani_load_menu:', e);
-        }
+        } catch (e) {}
 
         try {
             Lampa.SettingsApi.addParam({
@@ -259,7 +219,6 @@
                     name: Lampa.Lang.translate('params_ani_on')
                 },
                 onChange: function (item) {
-                    console.log('ani_active змінено на:', item);
                     Lampa.Storage.set('ani_active', item === 'true');
                     var selectItem = $('.settings-param[data-name="select_ani_mation"]');
                     if (selectItem.length) {
@@ -280,14 +239,11 @@
                         setTimeout(function () {
                             var selectItem = $('.settings-param[data-name="select_ani_mation"]');
                             selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
-                            console.log('Примусово оновлено видимість select_ani_mation:', Lampa.Storage.get('ani_active'));
                         }, 50);
                     }
                 }
             });
-        } catch (e) {
-            console.log('Помилка додавання параметра ani_active:', e);
-        }
+        } catch (e) {}
 
         try {
             Lampa.SettingsApi.addParam({
@@ -312,7 +268,6 @@
                 },
                 onChange: function () {
                     if (!window.svg_loaders || window.svg_loaders.length === 0) {
-                        console.log('svg_loaders недоступні або порожні');
                         return;
                     }
                     if (!Lampa.Template.get('ani_modal')) {
@@ -436,92 +391,53 @@
                                 }
                             }
                         });
-                    } catch (e) {
-                        console.log('Помилка відкриття модального вікна:', e);
-                    }
+                    } catch (e) {}
                 }
             });
-        } catch (e) {
-            console.log('Помилка додавання параметра select_ani_mation:', e);
-        }
+        } catch (e) {}
 
-        // Спостерігач за змінами DOM
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(function (node) {
                             if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video'))) {
-                                console.log('Виявлено новий елемент:', node.className);
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                     setTimeout(function () {
                                         setCustomLoader(Lampa.Storage.get('ani_load'));
-                                        console.log('setCustomLoader викликано для нового елемента:', node.className);
                                     }, 200);
                                 }
                             }
                         });
                         mutation.removedNodes.forEach(function (node) {
                             if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video'))) {
-                                console.log('Видалено елемент:', node.className);
                                 remove_activity_loader();
                             }
                         });
                     } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                         if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
-                            console.log('Виявлено додавання класу video--load до .player-video');
                             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                 setTimeout(function () {
                                     setCustomLoader(Lampa.Storage.get('ani_load'));
-                                    console.log('Застосовано setCustomLoader для .player-video__loader або .loading-layer__ico');
-                                    var playerVideo = document.querySelector('.player-video.video--load');
-                                    if (playerVideo) {
-                                        console.log('DOM .player-video:', playerVideo.outerHTML);
-                                        var loader = playerVideo.querySelector('.player-video__loader');
-                                        var loadingIco = playerVideo.querySelector('.loading-layer__ico');
-                                        if (loader) {
-                                            console.log('Computed styles .player-video__loader:', getComputedStyle(loader).backgroundImage, getComputedStyle(loader).backgroundColor, getComputedStyle(loader).display);
-                                        } else {
-                                            console.log('.player-video__loader не знайдено');
-                                        }
-                                        if (loadingIco) {
-                                            console.log('Computed styles .loading-layer__ico:', getComputedStyle(loadingIco).backgroundImage, getComputedStyle(loadingIco).backgroundColor, getComputedStyle(loadingIco).display);
-                                        } else {
-                                            console.log('.loading-layer__ico не знайдено');
-                                        }
-                                    } else {
-                                        console.log('.player-video.video--load не знайдено');
-                                    }
-                                    var loadingLayer = document.querySelector('.loading-layer');
-                                    if (loadingLayer) {
-                                        console.log('DOM .loading-layer:', loadingLayer.outerHTML);
-                                    } else {
-                                        console.log('.loading-layer не знайдено');
-                                    }
                                 }, 200);
                             }
                         } else if (mutation.target.classList.contains('player-video') && !mutation.target.classList.contains('video--load')) {
-                            console.log('Виявлено видалення класу video--load з .player-video');
                             var playerLoader = document.querySelector('.player-video__loader');
                             if (playerLoader) {
                                 playerLoader.style.display = 'none';
-                                console.log('Ховаємо .player-video__loader через видалення video--load, display:', playerLoader.style.display);
                             }
                         }
                     }
                 });
             });
             observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-            console.log('MutationObserver ініціалізовано');
         }, 500);
 
-        // Слухачі подій <video> для синхронізації видимості .player-video__loader
         setInterval(function () {
             var videoElement = document.querySelector('video');
             if (videoElement && !videoElement.dataset.listenersAdded) {
                 ['play', 'playing', 'waiting', 'stalled', 'loadstart', 'loadeddata'].forEach(function (eventType) {
                     videoElement.addEventListener(eventType, function (e) {
-                        console.log('Video element event:', e.type);
                         var playerLoader = document.querySelector('.player-video__loader');
                         if (playerLoader) {
                             if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
@@ -534,59 +450,38 @@
                                     playerLoader.style.filter = filterValue;
                                     playerLoader.style.backgroundColor = 'transparent';
                                     playerLoader.style.display = 'block';
-                                    console.log('Показуємо .player-video__loader для події:', e.type, 'backgroundImage:', playerLoader.style.backgroundImage, 'display:', playerLoader.style.display);
                                 }
                             } else if (e.type === 'playing' || e.type === 'loadeddata') {
                                 playerLoader.style.display = 'none';
-                                console.log('Ховаємо .player-video__loader для події:', e.type, 'display:', playerLoader.style.display);
                             }
-                            console.log('Computed styles після події', e.type, ':', getComputedStyle(playerLoader).backgroundImage, getComputedStyle(playerLoader).backgroundColor, getComputedStyle(playerLoader).display);
-                        } else {
-                            console.log('.player-video__loader не знайдено для події:', e.type);
                         }
                     });
                 });
                 videoElement.dataset.listenersAdded = true;
-                console.log('Додано слухачі подій для <video> елемента');
             }
         }, 1000);
 
-        // Періодична перевірка
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var playerVideo = document.querySelector('.player-video.video--load');
                 if (playerVideo) {
-                    console.log('DOM .player-video:', playerVideo.outerHTML);
                     var loader = playerVideo.querySelector('.player-video__loader');
                     if (loader) {
                         var computedBg = getComputedStyle(loader).backgroundImage;
                         if (computedBg.includes('lampa-main/img/loader.svg')) {
-                            console.log('Виявлено стандартну іконку в .player-video__loader, застосовується setCustomLoader');
                             setCustomLoader(Lampa.Storage.get('ani_load'));
                         }
-                        console.log('Computed styles .player-video__loader:', getComputedStyle(loader).backgroundImage, getComputedStyle(loader).backgroundColor, getComputedStyle(loader).display);
-                    } else {
-                        console.log('.player-video__loader не знайдено');
                     }
                     var allElements = document.querySelectorAll('.player-video *');
                     allElements.forEach(function (el) {
                         var bgImage = getComputedStyle(el).backgroundImage;
                         if (bgImage.includes('lampa-main/img/loader.svg')) {
-                            console.log('Виявлено стандартну іконку в елементі:', el.className, 'Застосовується setCustomLoader');
                             el.classList.add('custom');
                             el.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
                             el.style.filter = filterValue;
                             el.style.backgroundColor = 'transparent';
                         }
                     });
-                } else {
-                    console.log('Перевірка .player-video.video--load: null');
-                }
-                var loadingLayer = document.querySelector('.loading-layer');
-                if (loadingLayer) {
-                    console.log('DOM .loading-layer:', loadingLayer.outerHTML);
-                } else {
-                    console.log('.loading-layer не знайдено');
                 }
             }
         }, 100);
@@ -597,16 +492,13 @@
                 element.classList.add('active');
                 element.style.display = 'block';
                 setCustomLoader(Lampa.Storage.get('ani_load'));
-                console.log('Стилі застосовано для full event: start');
             } else if (e.type === 'complete' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
-                console.log('Стилі видалено для full event: complete');
             }
             if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 setTimeout(function () {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
-                    console.log('setCustomLoader викликано для full event: start');
                 }, 200);
             }
         });
@@ -617,36 +509,30 @@
                 element.classList.add('active');
                 element.style.display = 'block';
                 setCustomLoader(Lampa.Storage.get('ani_load'));
-                console.log('Стилі застосовано для activity event: start');
             } else if (event.type === 'loaded' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
-                console.log('Стилі видалено для activity event: loaded');
             }
             if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 setTimeout(function () {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
-                    console.log('setCustomLoader викликано для activity event: start');
                 }, 200);
             }
         });
 
-        Lampa.Activity.listener.follow('push', function (event) {
+        Lampa.Listener.follow('activity', function (event) {
             var element = document.querySelector('.activity__loader');
             if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
                 element.classList.add('active');
                 element.style.display = 'block';
                 setCustomLoader(Lampa.Storage.get('ani_load'));
-                console.log('Стилі застосовано для activity push: active');
             } else if (event.status === 'ready' && element) {
                 element.classList.remove('active');
                 element.style.display = 'none';
-                console.log('Стилі видалено для activity push: ready');
             }
             if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 setTimeout(function () {
                     setCustomLoader(Lampa.Storage.get('ani_load'));
-                    console.log('setCustomLoader викликано для activity push: active');
                 }, 200);
             }
         });
@@ -657,7 +543,6 @@
                 if (element) {
                     element.classList.remove('active');
                     element.style.display = 'none';
-                    console.log('Стилі видалено для app event: back');
                 }
             }
         });
@@ -667,55 +552,43 @@
             if (element && element.classList.contains('active')) {
                 element.classList.remove('active');
                 element.style.display = 'none';
-                console.log('Стилі видалено через setInterval');
             }
         }, 500);
 
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-            console.log('Початкове застосування кастомного завантажувача');
         } else {
             remove_activity_loader();
-            console.log('Початкове видалення стилів завантажувача');
         }
     }
 
-    // Функція для застосування налаштувань за темою
     function byTheme() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-            console.log('byTheme: Застосовано кастомний завантажувач');
         } else {
             remove_activity_loader();
-            console.log('byTheme: Видалено стилі завантажувача');
         }
     }
 
-    // Запускаємо плагін після готовності програми
     if (window.appready) {
         aniLoad();
         byTheme();
-        console.log('Плагін ініціалізовано (appready)');
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 aniLoad();
                 byTheme();
-                console.log('Плагін ініціалізовано (app event: ready)');
             }
         });
     }
 
-    // Слухач зміни акцентного кольору
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'accent_color_selected') {
             byTheme();
-            console.log('Змінено accent_color_selected, викликано byTheme');
         }
     });
 
-    // Експортуємо функцію byTheme
     window.byTheme = byTheme;
 })();
