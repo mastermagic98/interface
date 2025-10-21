@@ -50,7 +50,8 @@
                        'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
                        'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
-                       'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }';
+                       'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
+                       'body .player-video__youtube-needclick > div { text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
@@ -86,6 +87,20 @@
             loadingLayerIco[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             loadingLayerIco[i].style.filter = filterValue;
             loadingLayerIco[i].style.backgroundColor = 'transparent';
+        }
+
+        var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
+        for (var i = 0; i < youtubeNeedclickElements.length; i++) {
+            youtubeNeedclickElements[i].classList.add('custom');
+            youtubeNeedclickElements[i].textContent = '';
+            youtubeNeedclickElements[i].style.textIndent = '-9999px';
+            youtubeNeedclickElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+            youtubeNeedclickElements[i].style.backgroundRepeat = 'no-repeat';
+            youtubeNeedclickElements[i].style.backgroundPosition = '50% 50%';
+            youtubeNeedclickElements[i].style.backgroundSize = '80% 80%';
+            youtubeNeedclickElements[i].style.backgroundColor = 'transparent';
+            youtubeNeedclickElements[i].style.filter = filterValue;
+            youtubeNeedclickElements[i].style.zIndex = '9999';
         }
     }
 
@@ -151,6 +166,19 @@
             loadingLayerIco[i].style.filter = '';
             loadingLayerIco[i].style.backgroundColor = 'transparent';
             loadingLayerIco[i].style.display = 'none';
+        }
+        var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
+        for (var i = 0; i < youtubeNeedclickElements.length; i++) {
+            youtubeNeedclickElements[i].classList.remove('custom');
+            youtubeNeedclickElements[i].style.textIndent = '';
+            youtubeNeedclickElements[i].style.backgroundImage = '';
+            youtubeNeedclickElements[i].style.backgroundRepeat = '';
+            youtubeNeedclickElements[i].style.backgroundPosition = '';
+            youtubeNeedclickElements[i].style.backgroundSize = '';
+            youtubeNeedclickElements[i].style.backgroundColor = '';
+            youtubeNeedclickElements[i].style.filter = '';
+            youtubeNeedclickElements[i].style.zIndex = '';
+            youtubeNeedclickElements[i].textContent = Lampa.Lang.translate('loading') || 'Завантаження...';
         }
         insert_activity_loader_prv('./img/loader.svg');
     }
@@ -403,7 +431,7 @@
                 mutations.forEach(function (mutation) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(function (node) {
-                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video'))) {
+                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick'))) {
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                     setTimeout(function () {
                                         setCustomLoader(Lampa.Storage.get('ani_load'));
@@ -412,7 +440,7 @@
                             }
                         });
                         mutation.removedNodes.forEach(function (node) {
-                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video'))) {
+                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick'))) {
                                 remove_activity_loader();
                             }
                         });
@@ -428,6 +456,10 @@
                             if (playerLoader) {
                                 playerLoader.style.display = 'none';
                             }
+                            var youtubeNeedclick = document.querySelector('.player-video__youtube-needclick > div');
+                            if (youtubeNeedclick) {
+                                youtubeNeedclick.style.display = 'none';
+                            }
                         }
                     }
                 });
@@ -441,20 +473,40 @@
                 ['play', 'playing', 'waiting', 'stalled', 'loadstart', 'loadeddata'].forEach(function (eventType) {
                     videoElement.addEventListener(eventType, function (e) {
                         var playerLoader = document.querySelector('.player-video__loader');
-                        if (playerLoader) {
+                        var youtubeNeedclick = document.querySelector('.player-video__youtube-needclick > div');
+                        if (playerLoader || youtubeNeedclick) {
                             if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                     var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
                                     var rgb = getFilterRgb(mainColor);
                                     var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-                                    playerLoader.classList.add('custom');
-                                    playerLoader.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
-                                    playerLoader.style.filter = filterValue;
-                                    playerLoader.style.backgroundColor = 'transparent';
-                                    playerLoader.style.display = 'block';
+                                    if (playerLoader) {
+                                        playerLoader.classList.add('custom');
+                                        playerLoader.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
+                                        playerLoader.style.filter = filterValue;
+                                        playerLoader.style.backgroundColor = 'transparent';
+                                        playerLoader.style.display = 'block';
+                                    }
+                                    if (youtubeNeedclick) {
+                                        youtubeNeedclick.classList.add('custom');
+                                        youtubeNeedclick.textContent = '';
+                                        youtubeNeedclick.style.textIndent = '-9999px';
+                                        youtubeNeedclick.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
+                                        youtubeNeedclick.style.backgroundRepeat = 'no-repeat';
+                                        youtubeNeedclick.style.backgroundPosition = '50% 50%';
+                                        youtubeNeedclick.style.backgroundSize = '80% 80%';
+                                        youtubeNeedclick.style.backgroundColor = 'transparent';
+                                        youtubeNeedclick.style.filter = filterValue;
+                                        youtubeNeedclick.style.display = 'block';
+                                    }
                                 }
                             } else if (e.type === 'playing' || e.type === 'loadeddata') {
-                                playerLoader.style.display = 'none';
+                                if (playerLoader) {
+                                    playerLoader.style.display = 'none';
+                                }
+                                if (youtubeNeedclick) {
+                                    youtubeNeedclick.style.display = 'none';
+                                }
                             }
                         }
                     });
@@ -471,6 +523,13 @@
                     if (loader) {
                         var computedBg = getComputedStyle(loader).backgroundImage;
                         if (computedBg.includes('lampa-main/img/loader.svg')) {
+                            setCustomLoader(Lampa.Storage.get('ani_load'));
+                        }
+                    }
+                    var youtubeNeedclick = playerVideo.querySelector('.player-video__youtube-needclick > div');
+                    if (youtubeNeedclick) {
+                        var computedBg = getComputedStyle(youtubeNeedclick).backgroundImage;
+                        if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
                             setCustomLoader(Lampa.Storage.get('ani_load'));
                         }
                     }
@@ -522,7 +581,7 @@
             }
         });
 
-        Lampa.Activity.listener.follow('push', function (event) {
+        Lampa.Listener.follow('activity', function (event) {
             var element = document.querySelector('.activity__loader');
             if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
                 element.classList.add('active');
