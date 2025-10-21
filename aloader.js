@@ -51,7 +51,7 @@
                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
                        'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .player-video__youtube-needclick > div { text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }';
+                       'body .player-video__youtube-needclick > div { text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; margin-left: -4em !important; margin-top: -4em !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
@@ -101,6 +101,10 @@
             youtubeNeedclickElements[i].style.backgroundColor = 'transparent';
             youtubeNeedclickElements[i].style.filter = filterValue;
             youtubeNeedclickElements[i].style.zIndex = '9999';
+            youtubeNeedclickElements[i].style.width = '8em';
+            youtubeNeedclickElements[i].style.height = '8em';
+            youtubeNeedclickElements[i].style.marginLeft = '-4em';
+            youtubeNeedclickElements[i].style.marginTop = '-4em';
         }
     }
 
@@ -178,6 +182,10 @@
             youtubeNeedclickElements[i].style.backgroundColor = '';
             youtubeNeedclickElements[i].style.filter = '';
             youtubeNeedclickElements[i].style.zIndex = '';
+            youtubeNeedclickElements[i].style.width = '';
+            youtubeNeedclickElements[i].style.height = '';
+            youtubeNeedclickElements[i].style.marginLeft = '';
+            youtubeNeedclickElements[i].style.marginTop = '';
             youtubeNeedclickElements[i].textContent = Lampa.Lang.translate('loading') || 'Завантаження...';
         }
         insert_activity_loader_prv('./img/loader.svg');
@@ -497,6 +505,10 @@
                                         youtubeNeedclick.style.backgroundSize = '80% 80%';
                                         youtubeNeedclick.style.backgroundColor = 'transparent';
                                         youtubeNeedclick.style.filter = filterValue;
+                                        youtubeNeedclick.style.width = '8em';
+                                        youtubeNeedclick.style.height = '8em';
+                                        youtubeNeedclick.style.marginLeft = '-4em';
+                                        youtubeNeedclick.style.marginTop = '-4em';
                                         youtubeNeedclick.style.display = 'block';
                                     }
                                 }
