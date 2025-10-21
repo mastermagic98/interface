@@ -51,7 +51,8 @@
                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
                        'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .player-video__youtube-needclick { position: relative !important; }' +
+                       'body .player-video { position: relative !important; width: 100% !important; height: 100vh !important; }' +
+                       'body .player-video__youtube-needclick { position: relative !important; width: 100% !important; height: 100% !important; }' +
                        'body .player-video__youtube-needclick > div { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
