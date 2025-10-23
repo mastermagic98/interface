@@ -328,7 +328,7 @@
                 'color: #ffffff !important;' +
             '}',
             '.console__tab {' +
-                'background-color: rgba(221, 221, 221, 0.06) !important;' +
+                'background-color: var(--main-color) !important;' +
             '}',
             '.console__tab.focus {' +
                 'background: var(--main-color) !important;' +
@@ -340,6 +340,10 @@
             '.simple-button.focus, .head__action.focus, .head__action:hover, ' +
             '.player-panel .button.focus, .search-source.active {' +
                 'background: var(--main-color) !important;' +
+            '}',
+            '.player-panel .button.focus {' +
+                'background-color: var(--main-color) !important;' +
+                'color: #fff !important;' +
             '}',
             '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
             '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
@@ -430,12 +434,36 @@
                 '-webkit-filter: none !important;' +
                 'filter: none !important;' +
             '}',
+            'body.glass--style .selectbox-item.focus::after {' +
+                'border-color: #fff !important;' +
+            '}',
+            'body.glass--style .selectbox-item.focus {' +
+                'filter: none !important;' +
+            '}',
+            '.player-panel__position > div::after {' +
+                'background-color: var(--main-color) !important;' +
+            '}',
+            '.player-panel__position {' +
+                'background-color: var(--main-color) !important;' +
+            '}',
+            '.time-line > div {' +
+                'background-color: var(--main-color) !important;' +
+            '}',
+            '.head__action.active::after {' +
+                'background-color: var(--main-color) !important;' +
+            '}',
+            '.card--tv .card__type {' +
+                'background: var(--main-color) !important;' +
+            '}',
+            '.torrent-serial__progress {' +
+                'background: var(--main-color) !important;' +
+            '}',
             dimmingStyles,
             '.timetable__item--any::before {' +
                 'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}',
             '.element {' +
-                'background: var(--main-color) !important;' +
+                'background: none !important;' +
             '}',
             '.bookmarks-folder__layer {' +
                 'background-color: var(--main-color) !important;' +
