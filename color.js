@@ -59,7 +59,7 @@
             uk: 'Введи HEX-код кольору'
         },
         hex_input_hint: {
-            ru: 'Используйте формат #FFFFFF, например #123524',
+             ru: 'Используйте формат #FFFFFF, например #123524',
             en: 'Use the format #FFFFFF, for example #123524',
             uk: 'Використовуйте формат #FFFFFF, наприклад #123524'
         },
@@ -440,6 +440,9 @@
             'body.glass--style .selectbox-item.focus {' +
                 'filter: none !important;' +
             '}',
+            'body.glass--style .selectbox-item.focus .selectbox-item__checkbox {' +
+                'filter: none !important;' +
+            '}',
             '.player-panel__position > div::after {' +
                 'background-color: var(--main-color) !important;' +
             '}',
@@ -464,6 +467,7 @@
             '}',
             '.element {' +
                 'background: none !important;' +
+                'width: 253px !important;' +
             '}',
             '.bookmarks-folder__layer {' +
                 'background-color: var(--main-color) !important;' +
@@ -564,7 +568,7 @@
             '.color-picker-container {' +
                 'display: grid !important;' +
                 'grid-template-columns: 1fr 1fr !important;' +
-                'gap: 140px !important;' +
+                'gap: 10px !important;' +
                 'padding: 0 !important;' +
             '}',
             '.color-picker-container > div:nth-child(2) {' +
@@ -579,6 +583,40 @@
                 '.color-picker-container > div:nth-child(2) {' +
                     'justify-content: flex-start !important;' +
                 '}' +
+            '}',
+            '.torrent-item__viewed {' +
+                'color: var(--main-color) !important;' +
+            '}',
+            '.online-prestige__viewed {' +
+                'background: rgba(var(--main-color-rgb), 0.45) !important;' +
+            '}',
+            '.extensions__item-proto.protocol-https {' +
+                'color: var(--main-color) !important;' +
+            '}',
+            '.extensions__item-code.success {' +
+                'color: var(--main-color) !important;' +
+            '}',
+            '.navigation-tabs__badge {' +
+                'background: var(--main-color) !important;' +
+            '}',
+            '.player-info__values .value--size span {' +
+                'background: rgba(var(--main-color-rgb), 0.18) !important;' +
+            '}',
+            '.torrent-item__ffprobe > div {' +
+                'background: rgba(var(--main-color-rgb), 0.19) !important;' +
+            '}',
+            '.explorer-card__head-rate > span {' +
+                'color: var(--main-color) !important;' +
+            '}',
+            '.explorer-card__head-rate > svg {' +
+                'color: var(--main-color) !important;' +
+            '}',
+            '.console__tab > span {' +
+                'background-color: #0009 !important;' +
+            '}',
+            '.torrent-item__size {' +
+                'background-color: var(--main-color) !important;' +
+                'color: #fff !important;' +
             '}'
         ].join('');
 
@@ -740,42 +778,12 @@
         } catch (e) {}
     }
 
-    // Функція для оновлення видимості параметрів
-    function updateParamsVisibility(body) {
-        var params = [
-            'color_plugin_main_color',
-            'color_plugin_highlight_enabled',
-            'color_plugin_dimming_enabled'
-        ];
-        var container = body || document;
-        for (var i = 0; i < params.length; i++) {
-            var selector = '.settings-param[data-name="' + params[i] + '"]';
-            var elements = container.querySelectorAll ? container.querySelectorAll(selector) : $(selector);
-            if (elements.length) {
-                var displayValue = ColorPlugin.settings.enabled ? 'block' : 'none';
-                for (var j = 0; j < elements.length; j++) {
-                    var element = elements[j];
-                    if (element.style) {
-                        element.style.display = displayValue;
-                    } else if (typeof $(element).css === 'function') {
-                        $(element).css('display', displayValue);
-                    }
-                }
-            }
-        }
-        if (Lampa.SettingsApi && Lampa.SettingsApi.params) {
-            var componentParams = Lampa.SettingsApi.params.filter(function(p) {
-                return p.component === 'color_plugin';
-            });
-            for (var k = 0; k < componentParams.length; k++) {
-                var param = componentParams[k];
-                if (param.param.name !== 'color_plugin_enabled') {
-                    var paramElement = document.querySelector('.settings-param[data-name="' + param.param.name + '"]');
-                    if (paramElement && paramElement.style) {
-                        paramElement.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
-                    }
-                }
-            }
+    // Функція для оновлення SVG-іконок
+    function updateSvgIcons() {
+        var paths = document.querySelectorAll('path[d="M2 1.5H19C19.2761 1.5 19.5 1.72386 19.5 2V27.9618C19.5 28.3756 19.0261 28.6103 18.697 28.3595L12.6212 23.7303C11.3682 22.7757 9.63183 22.7757 8.37885 23.7303L2.30302 28.3595C1.9739 28.6103 1.5 28.3756 1.5 27.9618V2C1.5 1.72386 1.72386 1.5 2 1.5Z"], ' +
+            'path[d="M3.81972 14.5957V10.2679C3.81972 5.41336 7.7181 1.5 12.5 1.5C17.2819 1.5 21.1803 5.41336 21.1803 10.2679V14.5957C21.1803 15.8462 21.5399 17.0709 22.2168 18.1213L23.0727 19.4494C24.2077 21.2106 22.9392 23.5 20.9098 23.5H4.09021C2.06084 23.5 0.792282 21.2106 1.9273 19.4494L2.78317 18.1213C3.46012 17.0709 3.81972 15.8462 3.81972 14.5957Z"]');
+        for (var i = 0; i < paths.length; i++) {
+            paths[i].setAttribute('fill', 'none');
         }
     }
 
@@ -904,6 +912,7 @@
                 updateCanvasFillStyle(window.draw_context);
                 updatePluginIcon();
                 updateParamsVisibility();
+                updateSvgIcons();
             }
         }, 100);
     }
@@ -930,6 +939,7 @@
             applyStyles();
             updateCanvasFillStyle(window.draw_context);
             updateParamsVisibility();
+            updateSvgIcons();
         }
     });
 
@@ -943,11 +953,13 @@
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
             updateParamsVisibility(event.body);
+            updateSvgIcons();
         } else if (event.type === 'close') {
             saveSettings();
             applyStyles();
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
+            updateSvgIcons();
         }
     });
 })();
