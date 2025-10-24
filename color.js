@@ -293,7 +293,7 @@
                 'background: rgba(var(--main-color-rgb), 0.5) !important;' +
             '}' +
             '.simple-button--filter > div {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
+                'background-color: #0009 !important;' +
             '}'
         ) : '';
 
@@ -616,7 +616,7 @@
                 'color: var(--main-color) !important;' +
             '}',
             '.online-prestige__viewed {' +
-                'background: rgba(var(--main-color-rgb), 0.45) !important;' +
+                'background: rgba(var(--main-color-rgb), 0) !important;' +
             '}',
             '.extensions__item-proto.protocol-https {' +
                 'color: var(--main-color) !important;' +
@@ -628,10 +628,10 @@
                 'background: var(--main-color) !important;' +
             '}',
             '.player-info__values .value--size span {' +
-                'background: rgba(var(--main-color-rgb), 0.18) !important;' +
+                'background: rgba(var(--main-color-rgb), 0) !important;' +
             '}',
             '.torrent-item__ffprobe > div {' +
-                'background: rgba(var(--main-color-rgb), 0.19) !important;' +
+                'background: rgba(var(--main-color-rgb), 0) !important;' +
             '}',
             '.explorer-card__head-rate > span {' +
                 'color: var(--main-color) !important;' +
@@ -645,6 +645,15 @@
             '.torrent-item__size {' +
                 'background-color: var(--main-color) !important;' +
                 'color: #fff !important;' +
+            '}',
+            '.torrent-serial__size {' +
+                'background: var(--main-color) !important;' +
+            '}',
+            '.online-prestige-rate > span {' +
+                'color: var(--main-color) !important;' +
+            '}',
+            '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] {' +
+                'fill: var(--main-color) !important;' +
             '}'
         ].join('');
 
@@ -811,9 +820,15 @@
     // Функція для оновлення SVG-іконок
     function updateSvgIcons() {
         var paths = document.querySelectorAll('path[d="M2 1.5H19C19.2761 1.5 19.5 1.72386 19.5 2V27.9618C19.5 28.3756 19.0261 28.6103 18.697 28.3595L12.6212 23.7303C11.3682 22.7757 9.63183 22.7757 8.37885 23.7303L2.30302 28.3595C1.9739 28.6103 1.5 28.3756 1.5 27.9618V2C1.5 1.72386 1.72386 1.5 2 1.5Z"], ' +
-            'path[d="M3.81972 14.5957V10.2679C3.81972 5.41336 7.7181 1.5 12.5 1.5C17.2819 1.5 21.1803 5.41336 21.1803 10.2679V14.5957C21.1803 15.8462 21.5399 17.0709 22.2168 18.1213L23.0727 19.4494C24.2077 21.2106 22.9392 23.5 20.9098 23.5H4.09021C2.06084 23.5 0.792282 21.2106 1.9273 19.4494L2.78317 18.1213C3.46012 17.0709 3.81972 15.8462 3.81972 14.5957Z"]');
+            'path[d="M3.81972 14.5957V10.2679C3.81972 5.41336 7.7181 1.5 12.5 1.5C17.2819 1.5 21.1803 5.41336 21.1803 10.2679V14.5957C21.1803 15.8462 21.5399 17.0709 22.2168 18.1213L23.0727 19.4494C24.2077 21.2106 22.9392 23.5 20.9098 23.5H4.09021C2.06084 23.5 0.792282 21.2106 1.9273 19.4494L2.78317 18.1213C3.46012 17.0709 3.81972 15.8462 3.81972 14.5957Z"], ' +
+            'path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"]');
         for (var i = 0; i < paths.length; i++) {
-            paths[i].setAttribute('fill', 'none');
+            var path = paths[i];
+            if (path.getAttribute('d').indexOf('M8.39409 0.192139') !== -1) {
+                path.setAttribute('fill', 'var(--main-color)');
+            } else {
+                path.setAttribute('fill', 'none');
+            }
         }
     }
 
