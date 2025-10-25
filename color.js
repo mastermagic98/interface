@@ -269,8 +269,13 @@
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;box-shadow: inset 0 0 0 0.15em #fff !important;' : '';
 
-        // Замінено rgba(255,255,255,0.3) → #0009 !important
-        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}.simple-button--filter > div{background-color: #0009 !important;}' : '';
+        // Базові затемнення (без .simple-button--filter)
+        var baseDimming = '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}';
+
+        // Окреме правило для .simple-button--filter з !important і в кінці
+        var filterButtonStyle = '.simple-button--filter > div{background-color: #0009 !important;}';
+
+        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? baseDimming + filterButtonStyle : '';
 
         var cssContent = ':root{--main-color: ' + ColorPlugin.settings.main_color + ' !important;--main-color-rgb: ' + rgbColor + ' !important;--accent-color: ' + ColorPlugin.settings.main_color + ' !important;}' +
             '.modal__title{font-size: 1.7em !important;}' +
@@ -352,6 +357,16 @@
 
         updateDateElementStyles();
         checkBodyStyles();
+    }
+
+    // Функція для примусового перезапису стилю кнопок фільтрів (на випадок, якщо Lampa перезаписує їх пізніше)
+    function forceFilterButtonStyle() {
+        if (!ColorPlugin.settings.enabled || !ColorPlugin.settings.dimming_enabled) return;
+
+        var buttons = document.querySelectorAll('.simple-button--filter > div');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].style.backgroundColor = 'rgba(0,0,0,0.035)'; // #0009
+        }
     }
 
     // Функція для створення HTML для вибору кольору
@@ -451,6 +466,7 @@
                                 Lampa.Storage.set('color_plugin_main_color', value);
                                 localStorage.setItem('color_plugin_main_color', value);
                                 applyStyles();
+                                forceFilterButtonStyle(); // Примусово після зміни
                                 updateCanvasFillStyle(window.draw_context);
                                 saveSettings();
                                 updateParamsVisibility();
@@ -472,6 +488,7 @@
                         Lampa.Storage.set('color_plugin_main_color', color);
                         localStorage.setItem('color_plugin_main_color', color);
                         applyStyles();
+                        forceFilterButtonStyle(); // Примусово після зміни
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         updateParamsVisibility();
@@ -526,6 +543,7 @@
                         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
                         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
                         applyStyles();
+                        forceFilterButtonStyle();
                         updateCanvasFillStyle(window.draw_context);
                         updateParamsVisibility();
                         saveSettings();
@@ -567,12 +585,14 @@
                         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
                         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
                         applyStyles();
+                        forceFilterButtonStyle();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
                 applyStyles();
+                forceFilterButtonStyle();
                 updateCanvasFillStyle(window.draw_context);
                 updatePluginIcon();
                 updateParamsVisibility();
@@ -598,6 +618,7 @@
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
             applyStyles();
+            forceFilterButtonStyle();
             updateCanvasFillStyle(window.draw_context);
             updateParamsVisibility();
             updateSvgIcons();
@@ -611,6 +632,7 @@
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
             applyStyles();
+            forceFilterButtonStyle();
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
             updateParamsVisibility();
@@ -618,9 +640,36 @@
         } else if (event.type === 'close') {
             saveSettings();
             applyStyles();
+            forceFilterButtonStyle();
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
             updateSvgIcons();
         }
     });
+
+    // Додатковий MutationObserver для примусового застосування стилю при динамічному додаванні елементів
+    setTimeout(function() {
+        if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(function(mutations) {
+                if (ColorPlugin.settings.enabled && ColorPlugin.settings.dimming_enabled) {
+                    var needForce = false;
+                    mutations.forEach(function(mutation) {
+                        if (mutation.addedNodes) {
+                            for (var i = 0; i < mutation.addedNodes.length; i++) {
+                                var node = mutation.addedNodes[i];
+                                if (node.nodeType === 1 && (node.matches && node.matches('.simple-button--filter') || node.querySelector && node.querySelector('.simple-button--filter'))) {
+                                    needForce = true;
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    if (needForce) {
+                        setTimeout(forceFilterButtonStyle, 50);
+                    }
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    }, 500);
 })();
