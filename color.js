@@ -6,7 +6,7 @@
         color_plugin: {
             ru: 'Настройка цветов',
             en: 'Color settings',
-            uk: 'Нала012штування кольорів'
+            uk: 'Налаштування кольорів'
         },
         color_plugin_enabled: {
             ru: 'Включить плагин',
