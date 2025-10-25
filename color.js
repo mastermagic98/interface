@@ -59,7 +59,7 @@
             uk: 'Введи HEX-код кольору'
         },
         hex_input_hint: {
-             ru: 'Используйте формат #FFFFFF, например #123524',
+            ru: 'Используйте формат #FFFFFF, например #123524',
             en: 'Use the format #FFFFFF, for example #123524',
             uk: 'Використовуйте формат #FFFFFF, наприклад #123524'
         },
@@ -168,7 +168,7 @@
     function updateCanvasFillStyle(context) {
         if (context && context.fillStyle) {
             var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
-            context.fillStyleток = 'rgba(' + rgbColor + ', 1)';
+            context.fillStyle = 'rgba(' + rgbColor + ', 1)';
         }
     }
 
@@ -235,10 +235,8 @@
         }
     }
 
-    // === НОВА ФУНКЦІЯ: Примусово замінює rgba(255,255,255,0.3) на rgba(0,0,0,0.3) ===
-    function replaceFilterBackground() {
-        if (!ColorPlugin.settings.enabled || !ColorPlugin.settings.dimming_enabled) return;
-
+    // === ЗАВЖДИ застосовуємо заміну rgba(255,255,255,0.3) → rgba(0,0,0,0.3) ===
+    function forceBlackFilterBackground() {
         var elements = document.querySelectorAll('.simple-button--filter > div');
         for (var i = 0; i < elements.length; i++) {
             var el = elements[i];
@@ -257,7 +255,6 @@
             return;
         }
 
-        // Перевірка коректності HEX-коду
         if (!isValidHex(ColorPlugin.settings.main_color)) {
             ColorPlugin.settings.main_color = '#353535';
         }
@@ -274,7 +271,6 @@
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;box-shadow: inset 0 0 0 0.15em #fff !important;' : '';
 
-        // Базові затемнення (БЕЗ .simple-button--filter — ми його обробляємо окремо)
         var baseDimming = '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}';
 
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? baseDimming : '';
@@ -304,7 +300,7 @@
             '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before{border-color: var(--main-color) !important;}' +
             '.card-more.focus .card-more__box::after{border: 0.3em solid var(--main-color) !important;}' +
             '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after{border-color: var(--main-color) !important;}' +
-            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card:hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after{border-color: var(--main-color) !important;}' +
+            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card.hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after{border-color: var(--main-color) !important;}' +
             '.broadcast__scan > div{background-color: var(--main-color) !important;}' +
             '.card:hover .card__view, .card.focus .card__view{border-color: var(--main-color) !important;}' +
             '.noty{background: var(--main-color) !important;}' +
@@ -358,9 +354,7 @@
         style.innerHTML = cssContent;
 
         updateDateElementStyles();
-
-        // Примусово замінюємо фон фільтрів
-        replaceFilterBackground();
+        forceBlackFilterBackground();
     }
 
     // Функція для створення HTML для вибору кольору
@@ -400,11 +394,11 @@
                 return createColorHtml(color, ColorPlugin.colors.main[color]);
             }).join('');
             return '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
-        });
+        }).join('');
 
-        var midPoint = Math.ceil(colorContent.length / 2);
-        var leftColumn = colorContent.slice(0, midPoint).join('');
-        var rightColumn = colorContent.slice(midPoint).join('');
+        var midPoint = Math.ceil(colorsByFamily.length / 2);
+        var leftColumn = colorContent.slice(0, midPoint);
+        var rightColumn = colorContent.slice(midPoint);
 
         var defaultButton = createColorHtml('default', Lampa.Lang.translate('default_color'));
         var hexValue = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
@@ -460,7 +454,7 @@
                                 Lampa.Storage.set('color_plugin_main_color', value);
                                 localStorage.setItem('color_plugin_main_color', value);
                                 applyStyles();
-                                replaceFilterBackground();
+                                forceBlackFilterBackground();
                                 updateCanvasFillStyle(window.draw_context);
                                 saveSettings();
                                 updateParamsVisibility();
@@ -482,7 +476,7 @@
                         Lampa.Storage.set('color_plugin_main_color', color);
                         localStorage.setItem('color_plugin_main_color', color);
                         applyStyles();
-                        replaceFilterBackground();
+                        forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         updateParamsVisibility();
@@ -537,7 +531,7 @@
                         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
                         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
                         applyStyles();
-                        replaceFilterBackground();
+                        forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
                         updateParamsVisibility();
                         saveSettings();
@@ -579,14 +573,13 @@
                         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
                         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
                         applyStyles();
-                        replaceFilterBackground();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
                 applyStyles();
-                replaceFilterBackground();
+                forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
                 updatePluginIcon();
                 updateParamsVisibility();
@@ -612,7 +605,7 @@
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
             applyStyles();
-            replaceFilterBackground();
+            forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateParamsVisibility();
             updateSvgIcons();
@@ -626,7 +619,7 @@
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
             applyStyles();
-            replaceFilterBackground();
+            forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
             updateParamsVisibility();
@@ -634,33 +627,31 @@
         } else if (event.type === 'close') {
             saveSettings();
             applyStyles();
-            replaceFilterBackground();
+            forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updatePluginIcon();
             updateSvgIcons();
         }
     });
 
-    // === MutationObserver для динамічних елементів ===
+    // MutationObserver для динамічних елементів
     setTimeout(function() {
         if (typeof MutationObserver !== 'undefined') {
             var observer = new MutationObserver(function(mutations) {
-                if (ColorPlugin.settings.enabled && ColorPlugin.settings.dimming_enabled) {
-                    var hasFilter = false;
-                    mutations.forEach(function(mutation) {
-                        if (mutation.addedNodes) {
-                            for (var i = 0; i < mutation.addedNodes.length; i++) {
-                                var node = mutation.addedNodes[i];
-                                if (node.nodeType === 1 && (node.querySelector && node.querySelector('.simple-button--filter'))) {
-                                    hasFilter = true;
-                                    break;
-                                }
+                var hasFilter = false;
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes) {
+                        for (var i = 0; i < mutation.addedNodes.length; i++) {
+                            var node = mutation.addedNodes[i];
+                            if (node.nodeType === 1 && node.querySelector && node.querySelector('.simple-button--filter')) {
+                                hasFilter = true;
+                                break;
                             }
                         }
-                    });
-                    if (hasFilter) {
-                        setTimeout(replaceFilterBackground, 100);
                     }
+                });
+                if (hasFilter) {
+                    setTimeout(forceBlackFilterBackground, 100);
                 }
             });
             observer.observe(document.body, { childList: true, subtree: true });
