@@ -267,7 +267,7 @@
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;box-shadow: inset 0 0 0 0.15em #fff !important;' : '';
 
-        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(vars(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}.simple-button--filter > div{background-color: rgba(var(--main-color-rgb), 1) !important;}' : '';
+        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}.simple-button--filter > div{background-color: rgba(var(--main-color-rgb), 1) !important;}' : '';
 
         var cssContent = ':root{--main-color: ' + ColorPlugin.settings.main_color + ' !important;--main-color-rgb: ' + rgbColor + ' !important;--accent-color: ' + ColorPlugin.settings.main_color + ' !important;}' +
             '.modal__title{font-size: 1.7em !important;}' +
@@ -307,11 +307,11 @@
             'body.glass--style .selectbox-item.focus::after{border-color: #fff !important;}' +
             'body.glass--style .selectbox-item.focus{filter: none !important;}' +
             'body.glass--style .selectbox-item.focus .selectbox-item__checkbox{filter: none !important;}' +
-            '.player-panel__position > div::after{background-color: var(--main-color) !important;}' +
+            '.player-panel__position > div::after{background-color: #fff !important;}' +
             '.player-panel__position{background-color: var(--main-color) !important;}' +
             '.time-line > div{background-color: var(--main-color) !important;}' +
             '.head__action.active::after{background-color: var(--main-color) !important;}' +
-            '.card--tv .card__type{background: var(--main-color) !important;}' +
+            '.card--tv .card__type{background: ims var(--main-color) !important;}' +
             '.torrent-serial__progress{background: var(--main-color) !important;}' +
             dimmingStyles +
             '.timetable__item--any::before{background-color: rgba(var(--main-color-rgb), 0.3) !important;}' +
@@ -330,7 +330,7 @@
             '.color-picker-container > div:nth-child(2){display: flex !important;flex-direction: column !important;justify-content: flex-end !important;}' +
             '@media (max-width: 768px){.color-picker-container{grid-template-columns: 1fr !important;}.color-picker-container > div:nth-child(2){justify-content: flex-start !important;}}' +
             '.torrent-item__viewed{color: var(--main-color) !important;}' +
-            '.online-prestige__viewed{background: rgba(var(--main-color-rgb), 1) !important;}' +
+            '.online-prestige__viewed{background: rgb(255,255,255) !important;color: rgba(var(--main-color-rgb), 1) !important;}' +
             '.extensions__item-proto.protocol-https{color: var(--main-color) !important;}' +
             '.extensions__item-code.success{color: var(--main-color) !important;}' +
             '.navigation-tabs__badge{background: var(--main-color) !important;}' +
@@ -341,7 +341,6 @@
             '.console__tab > span{background-color: #0009 !important;}' +
             '.torrent-item__size{background-color: var(--main-color) !important;color: #fff !important;}' +
             '.torrent-serial__size{background: var(--main-color) !important;}' +
-            '.online-prestige-rate > span{color: var(--main-color) !important;}' +
             '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"]{fill: var(--main-color) !important;}';
 
         style.innerHTML = cssContent;
