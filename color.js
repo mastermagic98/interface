@@ -19,7 +19,7 @@
             uk: 'Змінює вигляд деяких елементів інтерфейсу Lampa'
         },
         main_color: {
-            ru: 'Цвет выделения',
+            ru: 'Цвсе выделения',
             en: 'Highlight color',
             uk: 'Колір виділення'
         },
@@ -70,7 +70,9 @@
         lime: { ru: 'Лаймовый', en: 'Lime', uk: 'Лаймовий' },
         green: { ru: 'Зеленый', en: 'Green', uk: 'Зелений' },
         emerald: { ru: 'Изумрудный', en: 'Emerald', uk: 'Смарагдовий' },
-        teal: { ru: 'Бирюзовый', en: 'Teal', uk: 'Бірюзовий' },
+        teal: { ru: '
+
+Бирюзовый', en: 'Teal', uk: 'Бірюзовий' },
         cyan: { ru: 'Голубой', en: 'Cyan', uk: 'Блакитний' },
         sky: { ru: 'Небесный', en: 'Sky', uk: 'Небесний' },
         blue: { ru: 'Синий', en: 'Blue', uk: 'Синій' },
@@ -244,11 +246,34 @@
         }
     }
 
+    // === КРИТИЧНЕ ВИПРАВЛЕННЯ: Примусове застосування #0009 через inline-style + !important CSS + MutationObserver ===
+    function forceFilterButtonStyle() {
+        if (!ColorPlugin.settings.enabled || !ColorPlugin.settings.dimming_enabled) return;
+
+        // 1. Inline-style (найвищий пріоритет)
+        var buttons = document.querySelectorAll('.simple-button--filter > div');
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            btn.style.setProperty('background-color', 'rgba(0, 0, 0, 0.035)', 'important'); // #0009
+        }
+
+        // 2. Додатковий CSS з !important (на випадок, якщо inline не вистачить)
+        var forceStyle = document.getElementById('color-plugin-force-filter');
+        if (!forceStyle) {
+            forceStyle = document.createElement('style');
+            forceStyle.id = 'color-plugin-force-filter';
+            document.head.appendChild(forceStyle);
+        }
+        forceStyle.innerHTML = '.simple-button--filter > div { background-color: rgba(0, 0, 0, 0.035) !important; }';
+    }
+
     // Функція для застосування стилів
     function applyStyles() {
         if (!ColorPlugin.settings.enabled) {
             var oldStyle = document.getElementById('color-plugin-styles');
             if (oldStyle) oldStyle.remove();
+            var forceStyle = document.getElementById('color-plugin-force-filter');
+            if (forceStyle) forceStyle.remove();
             return;
         }
 
@@ -269,13 +294,10 @@
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;box-shadow: inset 0 0 0 0.15em #fff !important;' : '';
 
-        // Базові затемнення (без .simple-button--filter)
+        // Базові затемнення (БЕЗ .simple-button--filter — ми його обробляємо окремо)
         var baseDimming = '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}';
 
-        // Окреме правило для .simple-button--filter з !important і в кінці
-        var filterButtonStyle = '.simple-button--filter > div{background-color: #0009 !important;}';
-
-        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? baseDimming + filterButtonStyle : '';
+        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? baseDimming : '';
 
         var cssContent = ':root{--main-color: ' + ColorPlugin.settings.main_color + ' !important;--main-color-rgb: ' + rgbColor + ' !important;--accent-color: ' + ColorPlugin.settings.main_color + ' !important;}' +
             '.modal__title{font-size: 1.7em !important;}' +
@@ -288,7 +310,7 @@
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, .selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, .full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .player-panel .button, .player-panel .button.focus, .search-source, .search-source.active, .radio-item, .radio-item.focus, .lang__selector-item, .lang__selector-item.focus, .modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, .full-review-add, .full-review-add.focus, .full-review, .full-review.focus, .tag-count, .tag-count.focus, .settings-folder, .settings-folder.focus, .noty, .radio-player, .radio-player.focus{color: #ffffff !important;}' +
             '.console__tab{background-color: var(--main-color) !important;}' +
             '.console__tab.focus{background: var(--main-color) !important;color: #fff !important;' + highlightStyles + '}' +
-            '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action:hover, .player-panel .button.focus, .search-source.active{background: var(--main-color) !important;}' +
+            '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action:hover, .player-panel .button.focus, .search-source.active{background: var(--main-color) !-important;}' +
             '.player-panel .button.focus{background-color: var(--main-color) !important;color: #fff !important;}' +
             '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, .menu__item.focus, .settings-folder.focus, .head__action.focus, .selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus{' + highlightStyles + '}' +
             '.timetable__item.focus::before{background-color: var(--main-color) !important;' + highlightStyles + '}' +
@@ -302,7 +324,7 @@
             '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before{border-color: var(--main-color) !important;}' +
             '.card-more.focus .card-more__box::after{border: 0.3em solid var(--main-color) !important;}' +
             '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after{border-color: var(--main-color) !important;}' +
-            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card:hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after{border-color: var(--main-color) !important;}' +
+            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card.hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after{border-color: var(--main-color) !important;}' +
             '.broadcast__scan > div{background-color: var(--main-color) !important;}' +
             '.card:hover .card__view, .card.focus .card__view{border-color: var(--main-color) !important;}' +
             '.noty{background: var(--main-color) !important;}' +
@@ -357,16 +379,9 @@
 
         updateDateElementStyles();
         checkBodyStyles();
-    }
 
-    // Функція для примусового перезапису стилю кнопок фільтрів (на випадок, якщо Lampa перезаписує їх пізніше)
-    function forceFilterButtonStyle() {
-        if (!ColorPlugin.settings.enabled || !ColorPlugin.settings.dimming_enabled) return;
-
-        var buttons = document.querySelectorAll('.simple-button--filter > div');
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].style.backgroundColor = 'rgba(0,0,0,0.035)'; // #0009
-        }
+        // Примусово застосовуємо #0009 після основних стилів
+        forceFilterButtonStyle();
     }
 
     // Функція для створення HTML для вибору кольору
@@ -466,7 +481,7 @@
                                 Lampa.Storage.set('color_plugin_main_color', value);
                                 localStorage.setItem('color_plugin_main_color', value);
                                 applyStyles();
-                                forceFilterButtonStyle(); // Примусово після зміни
+                                forceFilterButtonStyle();
                                 updateCanvasFillStyle(window.draw_context);
                                 saveSettings();
                                 updateParamsVisibility();
@@ -488,7 +503,7 @@
                         Lampa.Storage.set('color_plugin_main_color', color);
                         localStorage.setItem('color_plugin_main_color', color);
                         applyStyles();
-                        forceFilterButtonStyle(); // Примусово після зміни
+                        forceFilterButtonStyle();
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         updateParamsVisibility();
@@ -604,7 +619,7 @@
     if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
         initPlugin();
     } else {
-        Lampa.Listener.follow('app', function (event) {
+        Lampa.Listener.follow('app', function (event)  {
             if (event.type === 'ready' && Lampa.SettingsApi && Lampa.Storage) {
                 initPlugin();
             }
@@ -647,25 +662,25 @@
         }
     });
 
-    // Додатковий MutationObserver для примусового застосування стилю при динамічному додаванні елементів
+    // === MutationObserver для динамічних елементів ===
     setTimeout(function() {
         if (typeof MutationObserver !== 'undefined') {
             var observer = new MutationObserver(function(mutations) {
                 if (ColorPlugin.settings.enabled && ColorPlugin.settings.dimming_enabled) {
-                    var needForce = false;
+                    var hasFilter = false;
                     mutations.forEach(function(mutation) {
                         if (mutation.addedNodes) {
                             for (var i = 0; i < mutation.addedNodes.length; i++) {
                                 var node = mutation.addedNodes[i];
-                                if (node.nodeType === 1 && (node.matches && node.matches('.simple-button--filter') || node.querySelector && node.querySelector('.simple-button--filter'))) {
-                                    needForce = true;
+                                if (node.nodeType === 1 && (node.querySelector && node.querySelector('.simple-button--filter'))) {
+                                    hasFilter = true;
                                     break;
                                 }
                             }
                         }
                     });
-                    if (needForce) {
-                        setTimeout(forceFilterButtonStyle, 50);
+                    if (hasFilter) {
+                        setTimeout(forceFilterButtonStyle, 100); // Додаємо затримку, щоб Lampa встигла застосувати свій стиль
                     }
                 }
             });
