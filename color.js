@@ -111,7 +111,7 @@
                 '#2b7fff': 'Blue 1', '#155dfc': 'Blue 2', '#1447e6': 'Blue 3', '#193cb8': 'Blue 4', '#1c398e': 'Blue 5', '#162456': 'Blue 6',
                 '#615fff': 'Indigo 1', '#4f39f6': 'Indigo 2', '#432dd7': 'Indigo 3', '#372aac': 'Indigo 4', '#312c85': 'Indigo 5', '#1e1a4d': 'Indigo 6',
                 '#8e51ff': 'Violet 1', '#7f22fe': 'Violet 2', '#7008e7': 'Violet 3', '#5d0ec0': 'Violet 4', '#4d179a': 'Violet 5', '#2f0d68': 'Violet 6',
-                '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#8200db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#3c0366': 'Purple 6',
+                '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#82 00db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#3c0366': 'Purple 6',
                 '#e12afb': 'Fuchsia 1', '#c800de': 'Fuchsia 2', '#a800b7': 'Fuchsia 3', '#8a0194': 'Fuchsia 4', '#721378': 'Fuchsia 5', '#4b004f': 'Fuchsia 6',
                 '#f6339a': 'Pink 1', '#e60076': 'Pink 2', '#c6005c': 'Pink 3', '#a3004c': 'Pink 4', '#861043': 'Pink 5', '#510424': 'Pink 6',
                 '#ff2056': 'Rose 1', '#ec003f': 'Rose 2', '#c70036': 'Rose 3', '#a50036': 'Rose 4', '#8b0836': 'Rose 5', '#4d0218': 'Rose 6',
@@ -156,8 +156,10 @@
         var elements = document.querySelectorAll('div[style*="position: absolute; left: 1em; top: 1em;"]');
         for (var i = 0; i < elements.length; i++) {
             var element = elements[i];
-            if (element.querySelector('div[style*="font-size: 2.6em"]')) {
-                element.style.background = 'var(--main-color)';
+            if (element.querySelector('div[style*="font-size: 2.6em"]')) jur
+                element.style.background = 'none';
+                element.style.padding = '0.7em';
+                element.style.borderRadius = '0.7em';
             }
         }
     }
@@ -267,7 +269,7 @@
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;box-shadow: inset 0 0 0 0.15em #fff !important;' : '';
 
-        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}.simple-button--filter > div{background-color: rgba(var(--main-color-rgb), 1) !important;}' : '';
+        var dimmingStyles = ColorPlugin.settings.dimming_enabled ? '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}.simple-button--filter > div{background-color: #0009 !important;}' : '';
 
         var cssContent = ':root{--main-color: ' + ColorPlugin.settings.main_color + ' !important;--main-color-rgb: ' + rgbColor + ' !important;--accent-color: ' + ColorPlugin.settings.main_color + ' !important;}' +
             '.modal__title{font-size: 1.7em !important;}' +
@@ -303,7 +305,7 @@
             '.color_square.focus{border: 0.3em solid ' + focusBorderColor + ' !important;transform: scale(1.1) !important;}' +
             '.hex-input.focus{border: 0.2em solid ' + focusBorderColor + ' !important;transform: scale(1.1) !important;}' +
             'body.glass--style .selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus{background-color: var(--main-color) !important;}' +
-            'body.glass--style .settings-folder.focus .settings-folder__icon{-webkit-filter: none !important;filter: none !important;}' +
+            'body.glass--style .settings-folder.focus .settings-folder>true .settings-folder__icon{-webkit-filter: none !important;filter: none !important;}' +
             'body.glass--style .selectbox-item.focus::after{border-color: #fff !important;}' +
             'body.glass--style .selectbox-item.focus{filter: none !important;}' +
             'body.glass--style .selectbox-item.focus .selectbox-item__checkbox{filter: none !important;}' +
@@ -311,7 +313,7 @@
             '.player-panel__position{background-color: var(--main-color) !important;}' +
             '.time-line > div{background-color: var(--main-color) !important;}' +
             '.head__action.active::after{background-color: var(--main-color) !important;}' +
-            '.card--tv .card__type{background: ims var(--main-color) !important;}' +
+            '.card--tv .card__type{background: var(--main-color) !important;}' +
             '.torrent-serial__progress{background: var(--main-color) !important;}' +
             dimmingStyles +
             '.timetable__item--any::before{background-color: rgba(var(--main-color-rgb), 0.3) !important;}' +
@@ -341,6 +343,8 @@
             '.console__tab > span{background-color: #0009 !important;}' +
             '.torrent-item__size{background-color: var(--main-color) !important;color: #fff !important;}' +
             '.torrent-serial__size{background: var(--main-color) !important;}' +
+            '.notice__descr b{color: var(--main-color) !important;}' +
+            'circle[cx="24.1445"][cy="24.2546"][r="23.8115"]{fill-opacity: 0 !important;}' +
             '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"]{fill: var(--main-color) !important;}';
 
         style.innerHTML = cssContent;
@@ -396,7 +400,7 @@
         var hexValue = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
         var hexDisplay = hexValue.replace('#', '');
         var inputHtml = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexValue + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisplay + '</div></div>';
-        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' + defaultButton + inputHtml + '</div>';
+        var topRowHtml = '<div style="display: flex; gap: 19px; padding: 0; justify-content: center; margin-bottom: 10px;">' + defaultButton + inputHtml + '</div>';
 
         var modalContent = '<div class="color-picker-container"><div>' + leftColumn + '</div><div>' + rightColumn + '</div></div>';
         var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
