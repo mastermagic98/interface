@@ -6,7 +6,7 @@
         color_plugin: {
             ru: 'Настройка цветов',
             en: 'Color settings',
-            uk: 'Налаштування кольорів'
+            uk: 'Нала012штування кольорів'
         },
         color_plugin_enabled: {
             ru: 'Включить плагин',
@@ -269,6 +269,7 @@
 
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;box-shadow: inset 0 0 0 0.15em #fff !important;' : '';
 
+        // Замінено rgba(255,255,255,0.3) → #0009 !important
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? '.full-start__rate{background: rgba(var(--main-color-rgb), 0.15) !important;}.full-start__rate > div:first-child{background: rgba(var(--main-color-rgb), 0.15) !important;}.reaction{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.full-start__button{background-color: rgba(var(--main-color-rgb), 0.3) !important;}.card__vote{background: rgba(var(--main-color-rgb), 0.5) !important;}.items-line__more{background: rgba(var(--main-color-rgb), 0.3) !important;}.card__icons-inner{background: rgba(var(--main-color-rgb), 0.5) !important;}.simple-button--filter > div{background-color: #0009 !important;}' : '';
 
         var cssContent = ':root{--main-color: ' + ColorPlugin.settings.main_color + ' !important;--main-color-rgb: ' + rgbColor + ' !important;--accent-color: ' + ColorPlugin.settings.main_color + ' !important;}' +
@@ -343,7 +344,7 @@
             '.console__tab > span{background-color: #0009 !important;}' +
             '.torrent-item__size{background-color: var(--main-color) !important;color: #fff !important;}' +
             '.torrent-serial__size{background: var(--main-color) !important;}' +
-            '.notice__ ' + 'b{color: var(--main-color) !important;}' +
+            '.notice__descr b{color: var(--main-color) !important;}' +
             'circle[cx="24.1445"][cy="24.2546"][r="23.8115"]{fill-opacity: 0 !important;}' +
             '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"]{fill: var(--main-color) !important;}';
 
