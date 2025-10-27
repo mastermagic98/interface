@@ -138,7 +138,7 @@
         isSaving = false;
     }
 
-    // ОНОВЛЕНА ФУНКЦІЯ – негайне оновлення видимості
+    // ПОКРАЩЕНА ВИДИМІСТЬ – негайне оновлення + примусовий рендер
     function updateParamsVisibility() {
         if (!Lampa.SettingsApi || !Lampa.SettingsApi.params) return;
         var params = Lampa.SettingsApi.params['color_plugin'];
@@ -154,7 +154,10 @@
         if (hi && hi.field && typeof hi.field.css === 'function') hi.field.css('display', show);
         if (dim && dim.field && typeof dim.field.css === 'function') dim.field.css('display', show);
 
-        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+        // Примусово перемальовуємо налаштування
+        if (Lampa.Settings && Lampa.Settings.render) {
+            setTimeout(function() { Lampa.Settings.render(); }, 0);
+        }
     }
 
     function forceBlackFilterBackground() {
@@ -210,7 +213,7 @@
             '.timetable__item.focus{color: #fff !important;}' +
             '.broadcast__device.focus{background-color: var(--main-color) !important;color: #fff !important;}' +
             '.iptv-menu__list-item.focus, .iptv-program__timeline>div{background-color: var(--main-color) !important;}' +
-            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard . Hac-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item:hover{background: var(--main-color) !important;}' +
+            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item:hover{background: var(--main-color) !important;}' +
             '.online.focus{box-shadow: 0 0 0 0.2em var(--main-color) !important;}' +
             '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before{border-color: var(--main-color) !important;}' +
             '.card-more.focus .card-more__box::after{border: 0.3em solid var(--main-color) !important;}' +
@@ -283,6 +286,7 @@
         return '<div class="color-family-name" style="border-color: ' + (color || '#353535') + ';">' + Lampa.Lang.translate(name.toLowerCase()) + '</div>';
     }
 
+    // ВИПРАВЛЕНО: hex(py) → hexInput
     function openColorPicker() {
         var keys = Object.keys(ColorPlugin.colors.main);
         var families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral', 'Stone'];
@@ -308,7 +312,7 @@
         var hexVal = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
         var hexDisp = hexVal.replace('#', '');
         var hexInput = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexVal + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisp + '</div></div>';
-        var top = '<div style="display: flex; gap: 19px; justify-content: center; margin-bottom: 10px;">' + defBtn + hex(py) + '</div>';
+        var top = '<div style="display: flex; gap: 19px; justify-content: center; margin-bottom: 10px;">' + defBtn + hexInput + '</div>';
 
         var modalHtml = $('<div>' + top + '<div class="color-picker-container"><div>' + left + '</div><div>' + right + '</div></div></div>');
 
