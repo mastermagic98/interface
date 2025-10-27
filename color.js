@@ -192,18 +192,20 @@
         var names = ['color_plugin_main_color', 'color_plugin_highlight_enabled', 'color_plugin_dimming_enabled'];
         names.forEach(function(name) {
             var $el = ColorPlugin.$params[name];
-            if ($el && typeof $el.css === 'function') {
+            if ($el && $el.length) {
                 $el.css('display', disp);
             }
         });
-        // Примусово оновлюємо відображення
+        // Примусово рендеримо меню
         if (Lampa.Settings && Lampa.Settings.render) {
-            setTimeout(Lampa.Settings.render, 0);
+            setTimeout(function() {
+                Lampa.Settings.render();
+            }, 0);
         }
     }
 
     /* --------------------------------------------------------------
-       Модальне вікно вибору кольору (повністю робоче)
+       Модальне вікно вибору кольору
     -------------------------------------------------------------- */
     function openColorPicker() {
         var modalHtml = '<div class="color-picker-container">' +
@@ -302,9 +304,6 @@
                 '<div class="value">' + currentHex + '</div>' +
                 '</div>';
             customContainer.append(hexBtn);
-
-            // Оновлюємо фокус
-            Lampa.Controller.update();
         }, 100);
     }
 
@@ -403,7 +402,7 @@
     }
 
     /* --------------------------------------------------------------
-       Реакція на зміни в Storage
+       Слухання змін у Storage
     -------------------------------------------------------------- */
     Lampa.Storage.listener.follow('change', function(e) {
         if (e.name.indexOf('color_plugin_') !== 0) return;
@@ -416,13 +415,15 @@
     });
 
     /* --------------------------------------------------------------
-       При відкритті меню — гарантовано показати залежні пункти
+       Ключове: При кожному відкритті меню — перевіряємо стан
     -------------------------------------------------------------- */
     Lampa.Listener.follow('settings_component', function(e) {
         if (e.type === 'open') {
             setTimeout(function() {
-                toggleDependentParams(ColorPlugin.settings.enabled);
-            }, 100);
+                var enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true');
+                ColorPlugin.settings.enabled = enabled;
+                toggleDependentParams(enabled);
+            }, 150);
         }
     });
 
