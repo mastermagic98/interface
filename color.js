@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади
+    // Переклади
     Lampa.Lang.add({
         color_plugin: {ru: 'Настройка цветов', en: 'Color settings', uk: 'Налаштування кольорів'},
         color_plugin_enabled: {ru: 'Включить плагин', en: 'Enable plugin', uk: 'Увімкнути плагін'},
@@ -201,192 +201,240 @@
         }
     }
 
+    // === ПОВНІСТЮ ПЕРЕПИСАНИЙ КОД МОДАЛЬНОГО ВІКНА ===
     function openColorPicker() {
-        var modalHtml = '<div class="color-picker-container"><div></div><div></div></div>';
-        Lampa.Modal.open({
-            title: Lampa.Lang.translate('main_color'),
-            html: $(modalHtml),
-            size: 'large',
-            onBack: function() {
-                Lampa.Modal.close();
-                Lampa.Controller.toggle('settings_component');
-            },
-            onSelect: function(el) {
-                if (!el || !el[0]) return;
-                var selected = el[0];
-                var hex = '';
+        var colorKeys = Object.keys(ColorPlugin.colors.main);
+        var families = [
+            'Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan',
+            'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate',
+            'Gray', 'Zinc', 'Neutral', 'Stone'
+        ];
+        var colorsByFamily = [];
 
-                if (selected.classList.contains('default')) {
-                    hex = '#353535';
-                    Lampa.Storage.set('color_plugin_main_color', '');
-                } else if (selected.classList.contains('hex-input')) {
-                    Lampa.Noty.show(Lampa.Lang.translate('hex_input_hint'));
-                    Lampa.Modal.close();
-                    Lampa.Input.edit({
-                        name: 'color_plugin_main_color',
-                        value: ColorPlugin.settings.main_color,
-                        placeholder: '#FFFFFF'
-                    }, function(v) {
-                        if (v && isValidHex(v)) {
-                            ColorPlugin.settings.main_color = v;
-                            Lampa.Storage.set('color_plugin_main_color', v);
-                            applyStyles();
-                        } else if (v === '') {
-                            ColorPlugin.settings.main_color = '#353535';
-                            Lampa.Storage.set('color_plugin_main_color', '');
-                            applyStyles();
-                        }
-                        Lampa.Controller.toggle('settings_component');
-                    });
-                    return;
-                } else {
-                    hex = selected.getAttribute('data-hex');
-                    if (hex && isValidHex(hex)) {
-                        ColorPlugin.settings.main_color = hex;
-                        Lampa.Storage.set('color_plugin_main_color', hex);
-                    }
-                }
-                if (hex) applyStyles();
-                Lampa.Modal.close();
-                Lampa.Controller.toggle('settings_component');
+        for (var i = 0; i < families.length; i++) {
+            var family = families[i];
+            var familyColors = colorKeys.filter(function(key) {
+                return ColorPlugin.colors.main[key].indexOf(family) === 0 && key !== 'default';
+            });
+            if (familyColors.length > 0) {
+                colorsByFamily.push({
+                    name: family,
+                    colors: familyColors
+                });
             }
+        }
+
+        var colorContent = colorsByFamily.map(function(family) {
+            var firstColor = family.colors[0];
+            var familyNameHtml = '<div class="color-family-name" style="border-color: ' + firstColor + ';">' + Lampa.Lang.translate(family.name.toLowerCase()) + '</div>';
+            var groupContent = family.colors.map(function(color) {
+                return '<div class="color_square selector" data-hex="' + color + '" style="background-color: ' + color + ';" tabindex="0"><span class="hex">' + color.replace('#', '') + '</span></div>';
+            }).join('');
+            return '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
         });
 
-        setTimeout(function() {
-            var left = $('.color-picker-container > div:first-child');
-            var right = $('.color-picker-container > div:last-child');
+        var midPoint = Math.ceil(colorContent.length / 2);
+        var leftColumn = colorContent.slice(0, midPoint).join('');
+        var rightColumn = colorContent.slice(midPoint).join('');
 
-            // По замовчуванню
-            left.append('<div class="color_square default selector" tabindex="0" title="' + Lampa.Lang.translate('default_color') + '"></div>');
+        var defaultButton = '<div class="color_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_color') + '"></div>';
+        var currentHex = ColorPlugin.settings.main_color.replace('#', '');
+        var inputHtml = '<div class="hex-input selector" tabindex="0" style="background-color: ' + ColorPlugin.settings.main_color + ';">' +
+                        '<div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div>' +
+                        '<div class="value">' + currentHex + '</div>' +
+                        '</div>';
+        var topRowHtml = '<div style="display: flex; gap: 30px; padding: 0; justify-content: center; margin-bottom: 10px;">' +
+                         defaultButton + inputHtml + '</div>';
 
-            // Палітра
-            var colors = ColorPlugin.colors.main;
-            var families = {};
-            for (var h in colors) {
-                if (h === 'default') continue;
-                var name = colors[h];
-                var fam = name.split(' ')[0].toLowerCase();
-                if (!families[fam]) families[fam] = [];
-                families[fam].push(h);
+        var modalContent = '<div class="color-picker-container">' +
+                           '<div>' + leftColumn + '</div>' +
+                           '<div>' + rightColumn + '</div>' +
+                           '</div>';
+        var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
+
+        Lampa.Modal.open({
+            title: Lampa.Lang.translate('main_color'),
+            size: 'medium',
+            align: 'center',
+            html: modalHtml,
+            className: 'color-picker-modal',
+            onBack: function () {
+                saveSettings();
+                Lampa.Modal.close();
+                Lampa.Controller.toggle('settings_component');
+                Lampa.Controller.enable('menu');
+            },
+            onSelect: function (a) {
+                if (a.length > 0 && a[0] instanceof HTMLElement) {
+                    var selectedElement = a[0];
+                    var color;
+
+                    if (selectedElement.classList.contains('hex-input')) {
+                        Lampa.Noty.show(Lampa.Lang.translate('hex_input_hint'));
+                        Lampa.Modal.close();
+                        var inputOptions = {
+                            name: 'color_plugin_custom_hex',
+                            value: ColorPlugin.settings.main_color,
+                            placeholder: '#FFFFFF'
+                        };
+
+                        Lampa.Input.edit(inputOptions, function (value) {
+                            if (value === '') {
+                                color = '#353535';
+                                Lampa.Storage.set('color_plugin_main_color', '');
+                                localStorage.setItem('color_plugin_main_color', '');
+                            } else if (isValidHex(value)) {
+                                color = value;
+                                Lampa.Storage.set('color_plugin_main_color', color);
+                                localStorage.setItem('color_plugin_main_color', color);
+                            } else {
+                                Lampa.Noty.show('Невірний формат HEX-коду. Використовуйте формат #FFFFFF.');
+                                Lampa.Controller.toggle('settings_component');
+                                Lampa.Controller.enable('menu');
+                                return;
+                            }
+
+                            ColorPlugin.settings.main_color = color;
+                            applyStyles();
+                            saveSettings();
+                            Lampa.Controller.toggle('settings_component');
+                            Lampa.Controller.enable('menu');
+                            if (Lampa.Settings && Lampa.Settings.render) {
+                                Lampa.Settings.render();
+                            }
+                        });
+                        return;
+                    } else if (selectedElement.classList.contains('default')) {
+                        color = '#353535';
+                        Lampa.Storage.set('color_plugin_main_color', '');
+                        localStorage.setItem('color_plugin_main_color', '');
+                    } else {
+                        color = selectedElement.getAttribute('data-hex');
+                        if (color && isValidHex(color)) {
+                            Lampa.Storage.set('color_plugin_main_color', color);
+                            localStorage.setItem('color_plugin_main_color', color);
+                        } else {
+                            return;
+                        }
+                    }
+
+                    ColorPlugin.settings.main_color = color;
+                    applyStyles();
+                    saveSettings();
+                    Lampa.Modal.close();
+                    Lampa.Controller.toggle('settings_component');
+                    Lampa.Controller.enable('menu');
+                    if (Lampa.Settings && Lampa.Settings.render) {
+                        Lampa.Settings.render();
+                    }
+                }
             }
-            var order = ['red','orange','amber','yellow','lime','green','emerald','teal','cyan','sky','blue','indigo','violet','purple','fuchsia','pink','rose','slate','gray','zinc','neutral','stone'];
-            order.forEach(function(f) {
-                if (!families[f]) return;
-                var name = Lampa.Lang.translate(f) || f;
-                var row = '<div class="color-family-outline">';
-                row += '<div class="color-family-name" style="background:' + families[f][0] + ';">' + name + '</div>';
-                families[f].forEach(function(h) {
-                    row += '<div class="color_square selector" data-hex="' + h + '" style="background:' + h + ';" tabindex="0"><span class="hex">' + h + '</span></div>';
-                });
-                row += '</div>';
-                left.append(row);
-            });
-
-            // HEX
-            var current = ColorPlugin.settings.main_color;
-            right.append('<div class="hex-input selector" tabindex="0"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + current + '</div></div>');
-        }, 100);
+        });
     }
 
     function initPlugin() {
-        // Завантаження
-        ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
-        ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
-        ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
-        ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
+        setTimeout(function() {
+            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+            ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
+            ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
+            ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
 
-        Lampa.SettingsApi.addComponent({
-            component: 'color_plugin',
-            name: Lampa.Lang.translate('color_plugin'),
-            icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.30 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
-        });
+            if (Lampa.SettingsApi) {
+                Lampa.SettingsApi.addComponent({
+                    component: 'color_plugin',
+                    name: Lampa.Lang.translate('color_plugin'),
+                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
+                });
 
-        Lampa.SettingsApi.addParam({
-            component: 'color_plugin',
-            param: {name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString()},
-            field: {name: Lampa.Lang.translate('color_plugin_enabled'), description: Lampa.Lang.translate('color_plugin_enabled_description')},
-            onChange: function(v) {
-                ColorPlugin.settings.enabled = (v === 'true');
-                Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
-                localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString()},
+                    field: {name: Lampa.Lang.translate('color_plugin_enabled'), description: Lampa.Lang.translate('color_plugin_enabled_description')},
+                    onChange: function (value) {
+                        ColorPlugin.settings.enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+                        localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+                        applyStyles();
+                        updateParamsVisibility();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    },
+                    onRender: function (item) { if (item && typeof item.css === 'function') item.css('display', 'block'); }
+                });
+
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {name: 'color_plugin_main_color', type: 'button'},
+                    field: {name: Lampa.Lang.translate('main_color'), description: Lampa.Lang.translate('main_color_description')},
+                    onRender: function (item) { if (item && typeof item.css === 'function') item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none'); },
+                    onChange: openColorPicker
+                });
+
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString()},
+                    field: {name: Lampa.Lang.translate('enable_highlight'), description: Lampa.Lang.translate('enable_highlight_description')},
+                    onRender: function (item) { if (item && typeof item.css === 'function') item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none'); },
+                    onChange: function (value) {
+                        ColorPlugin.settings.highlight_enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+                        localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    }
+                });
+
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {name: 'color_plugin_dimming_enabled', type: 'trigger', default: ColorPlugin.settings.dimming_enabled.toString()},
+                    field: {name: Lampa.Lang.translate('enable_dimming'), description: Lampa.Lang.translate('enable_dimming_description')},
+                    onRender: function (item) { if (item && typeof item.css === 'function') item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none'); },
+                    onChange: function (value) {
+                        ColorPlugin.settings.dimming_enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+                        localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    }
+                });
+
                 applyStyles();
                 updateParamsVisibility();
-                saveSettings();
-                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'color_plugin',
-            param: {name: 'color_plugin_main_color', type: 'button'},
-            field: {name: Lampa.Lang.translate('main_color'), description: Lampa.Lang.translate('main_color_description')},
-            onRender: function(item) { $(item).css('display', ColorPlugin.settings.enabled ? 'block' : 'none'); },
-            onChange: openColorPicker
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'color_plugin',
-            param: {name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString()},
-            field: {name: Lampa.Lang.translate('enable_highlight'), description: Lampa.Lang.translate('enable_highlight_description')},
-            onRender: function(item) { $(item).css('display', ColorPlugin.settings.enabled ? 'block' : 'none'); },
-            onChange: function(v) {
-                ColorPlugin.settings.highlight_enabled = (v === 'true');
-                Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
-                localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
-                applyStyles();
-                saveSettings();
-                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
-            }
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'color_plugin',
-            param: {name: 'color_plugin_dimming_enabled', type: 'trigger', default: ColorPlugin.settings.dimming_enabled.toString()},
-            field: {name: Lampa.Lang.translate('enable_dimming'), description: Lampa.Lang.translate('enable_dimming_description')},
-            onRender: function(item) { $(item).css('display', ColorPlugin.settings.enabled ? 'block' : 'none'); },
-            onChange: function(v) {
-                ColorPlugin.settings.dimming_enabled = (v === 'true');
-                Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-                localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-                applyStyles();
-                saveSettings();
-                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
-            }
-        });
-
-        applyStyles();
-        updateParamsVisibility();
+        }, 100);
     }
 
     if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
         initPlugin();
     } else {
-        Lampa.Listener.follow('app', function(e) {
-            if (e.type === 'ready') initPlugin();
+        Lampa.Listener.follow('app', function (event) {
+            if (event.type === 'ready' && Lampa.SettingsApi && Lampa.Storage) {
+                initPlugin();
+            }
         });
     }
 
-    // Слухання Storage
-    Lampa.Storage.listener.follow('change', function(e) {
-        if (e.name.indexOf('color_plugin_') !== 0) return;
-        ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
-        ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
-        ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
-        ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
-        applyStyles();
-        updateParamsVisibility();
-    });
-
-    // Ключове: при відкритті меню — завжди оновлюємо видимість
-    Lampa.Listener.follow('settings_component', function(e) {
-        if (e.type === 'open') {
-            setTimeout(function() {
-                ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
-                updateParamsVisibility(e.body);
-            }, 150);
-        } else if (e.type === 'close') {
-            saveSettings();
+    Lampa.Storage.listener.follow('change', function (e) {
+        if (e.name.indexOf('color_plugin_') === 0) {
+            ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
+            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+            ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
+            ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
+            applyStyles();
+            updateParamsVisibility();
         }
     });
 
+    Lampa.Listener.follow('settings_component', function (event) {
+        if (event.type === 'open') {
+            setTimeout(function() {
+                ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
+                updateParamsVisibility(event.body);
+            }, 150);
+        } else if (event.type === 'close') {
+            saveSettings();
+        }
+    });
 })();
