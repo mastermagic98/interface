@@ -387,34 +387,63 @@
             }
         }
 
-        var colorContent = colorsByFamily.map(function(family) {
-            var firstColor = family.colors[0];
-            var familyNameHtml = createFamilyNameHtml(family.name, firstColor);
-            var groupContent = family.colors.map(function(color) {
-                return createColorHtml(color, ColorPlugin.colors.main[color]);
-            }).join('');
-            return '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
-        }).join('');
+        // ВИПРАВЛЕНО: Використовуємо document.createElement + innerHTML для уникнення екранування < > "
+        var container = document.createElement('div');
+        container.className = 'color-picker-container';
+
+        var leftColumn = document.createElement('div');
+        var rightColumn = document.createElement('div');
 
         var midPoint = Math.ceil(colorsByFamily.length / 2);
-        var leftColumn = colorContent.slice(0, midPoint);
-        var rightColumn = colorContent.slice(midPoint);
 
-        var defaultButton = createColorHtml('default', Lampa.Lang.translate('default_color'));
+        for (var j = 0; j < colorsByFamily.length; j++) {
+            var family = colorsByFamily[j];
+            var firstColor = family.colors[0];
+            var familyNameHtml = createFamilyNameHtml(family.name, firstColor);
+            var groupContent = '';
+            for (var k = 0; k < family.colors.length; k++) {
+                groupContent += createColorHtml(family.colors[k], ColorPlugin.colors.main[family.colors[k]]);
+            }
+            var familyOutline = '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
+
+            var familyElement = document.createElement('div');
+            familyElement.innerHTML = familyOutline;
+
+            if (j < midPoint) {
+                leftColumn.appendChild(familyElement.firstChild);
+            } else {
+                rightColumn.appendChild(familyElement.firstChild);
+            }
+        }
+
+        // Верхній рядок: default + hex input
+        var topRow = document.createElement('div');
+        topRow.style.cssText = 'display: flex; gap: 19px; padding: 0; justify-content: center; margin-bottom: 10px;';
+
+        var defaultButton = document.createElement('div');
+        defaultButton.innerHTML = createColorHtml('default', Lampa.Lang.translate('default_color'));
+        topRow.appendChild(defaultButton.firstChild);
+
         var hexValue = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
         var hexDisplay = hexValue.replace('#', '');
-        var inputHtml = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexValue + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisplay + '</div></div>';
-        var topRowHtml = '<div style="display: flex; gap: 19px; padding: 0; justify-content: center; margin-bottom: 10px;">' + defaultButton + inputHtml + '</div>';
+        var hexInput = document.createElement('div');
+        hexInput.innerHTML = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexValue + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisplay + '</div></div>';
+        topRow.appendChild(hexInput.firstChild);
 
-        var modalContent = '<div class="color-picker-container"><div>' + leftColumn + '</div><div>' + rightColumn + '</div></div>';
-        var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
+        // Додаємо все до контейнера
+        var topRowWrapper = document.createElement('div');
+        topRowWrapper.appendChild(topRow);
+
+        container.appendChild(topRowWrapper);
+        container.appendChild(leftColumn);
+        container.appendChild(rightColumn);
 
         try {
             Lampa.Modal.open({
                 title: Lampa.Lang.translate('main_color'),
                 size: 'medium',
                 align: 'center',
-                html: modalHtml,
+                html: container,
                 className: 'color-picker-modal',
                 onBack: function () {
                     saveSettings();
