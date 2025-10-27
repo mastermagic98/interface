@@ -16,10 +16,10 @@
         'https://mastermagic98.github.io/interface/aloader.js',
         'https://mastermagic98.github.io/interface/loaders.js',
         //'https://mastermagic98.github.io/interface/forall.js',
- 'https://mastermagic98.github.io/interface/animations.js',
+ //'https://mastermagic98.github.io/interface/animations.js',
    //'https://mastermagic98.github.io/interface/translate_tv.js',
    //     'https://mastermagic98.github.io/interface/incardtemplate.js',
-        'https://mastermagic98.github.io/interface/fix_lang.js'
+    //    'https://mastermagic98.github.io/interface/fix_lang.js'
     ];
 
     // Асинхронне підключення модулів
