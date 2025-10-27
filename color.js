@@ -108,7 +108,7 @@
                 '#00bba7': 'Teal 1', '#009689': 'Teal 2', '#00786f': 'Teal 3', '#005f5a': 'Teal 4', '#0b4f4a': 'Teal 5', '#022f2e': 'Teal 6',
                 '#00b8db': 'Cyan 1', '#0092b8': 'Cyan 2', '#007595': 'Cyan 3', '#005f78': 'Cyan 4', '#104e64': 'Cyan 5', '#053345': 'Cyan 6',
                 '#00a6f4': 'Sky 1', '#0084d1': 'Sky 2', '#0069a8': 'Sky 3', '#00598a': 'Sky 4', '#024a70': 'Sky 5', '#052f4a': 'Sky 6',
-                '#2b7fff': 'Blue 1', '#155dfc': 'Blue 2', '#1447e6': 'Blue 3', '#193cb8': 'Blue 4', '#1c398e': 'Blue 5', '#162456': 'Blue 6',
+                '#2b7fff': 'Blue 1', '#155dfc': 'Blue 2', '#1447e6': 'Blue 3', '#193cb8': 'Blue 4', '#1c398e': 'Blue 5', '# Ψ162456': 'Blue 6',
                 '#615fff': 'Indigo 1', '#4f39f6': 'Indigo 2', '#432dd7': 'Indigo 3', '#372aac': 'Indigo 4', '#312c85': 'Indigo 5', '#1e1a4d': 'Indigo 6',
                 '#8e51ff': 'Violet 1', '#7f22fe': 'Violet 2', '#7008e7': 'Violet 3', '#5d0ec0': 'Violet 4', '#4d179a': 'Violet 5', '#2f0d68': 'Violet 6',
                 '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#8200db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#3c0366': 'Purple 6',
@@ -177,7 +177,7 @@
         if (!Lampa.SettingsApi || !Lampa.SettingsApi.components) {
             var menuItem = document.querySelector('.menu__item[data-component="color_plugin"] .menu__ico');
             if (menuItem) {
-                menuItem.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
+                menuItem.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c 1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
             }
             return;
         }
@@ -300,7 +300,7 @@
             '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before{border-color: var(--main-color) !important;}' +
             '.card-more.focus .card-more__box::after{border: 0.3em solid var(--main-color) !important;}' +
             '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after{border-color: var(--main-color) !important;}' +
-            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card.hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after{border-color: var(--main-color) !important;}' +
+            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card:hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after{border-color: var(--main-color) !important;}' +
             '.broadcast__scan > div{background-color: var(--main-color) !important;}' +
             '.card:hover .card__view, .card.focus .card__view{border-color: var(--main-color) !important;}' +
             '.noty{background: var(--main-color) !important;}' +
@@ -308,7 +308,7 @@
             '.explorer-card__head-img.focus::after{border: 0.3em solid var(--main-color) !important;}' +
             '.color_square.focus{border: 0.3em solid ' + focusBorderColor + ' !important;transform: scale(1.1) !important;}' +
             '.hex-input.focus{border: 0.2em solid ' + focusBorderColor + ' !important;transform: scale(1.1) !important;}' +
-            'body.glass--style .selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus{background-color: var(--main-color) !important;}' +
+            'body.glass--style .selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus{background-color: var LID(--main-color) !important;}' +
             'body.glass--style .settings-folder.focus .settings-folder__icon{-webkit-filter: none !important;filter: none !important;}' +
             'body.glass--style .selectbox-item.focus::after{border-color: #fff !important;}' +
             'body.glass--style .selectbox-item.focus{filter: none !important;}' +
@@ -387,63 +387,35 @@
             }
         }
 
-        // ВИПРАВЛЕНО: Використовуємо document.createElement + innerHTML для уникнення екранування < > "
-        var container = document.createElement('div');
-        container.className = 'color-picker-container';
-
-        var leftColumn = document.createElement('div');
-        var rightColumn = document.createElement('div');
-
-        var midPoint = Math.ceil(colorsByFamily.length / 2);
-
-        for (var j = 0; j < colorsByFamily.length; j++) {
-            var family = colorsByFamily[j];
+        // Правильне формування HTML для колонок
+        var colorContent = colorsByFamily.map(function(family) {
             var firstColor = family.colors[0];
             var familyNameHtml = createFamilyNameHtml(family.name, firstColor);
-            var groupContent = '';
-            for (var k = 0; k < family.colors.length; k++) {
-                groupContent += createColorHtml(family.colors[k], ColorPlugin.colors.main[family.colors[k]]);
-            }
-            var familyOutline = '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
+            var groupContent = family.colors.map(function(color) {
+                return createColorHtml(color, ColorPlugin.colors.main[color]);
+            }).join('');
+            return '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
+        });
 
-            var familyElement = document.createElement('div');
-            familyElement.innerHTML = familyOutline;
+        var midPoint = Math.ceil(colorContent.length / 2);
+        var leftColumn = colorContent.slice(0, midPoint).join('');
+        var rightColumn = colorContent.slice(midPoint).join('');
 
-            if (j < midPoint) {
-                leftColumn.appendChild(familyElement.firstChild);
-            } else {
-                rightColumn.appendChild(familyElement.firstChild);
-            }
-        }
-
-        // Верхній рядок: default + hex input
-        var topRow = document.createElement('div');
-        topRow.style.cssText = 'display: flex; gap: 19px; padding: 0; justify-content: center; margin-bottom: 10px;';
-
-        var defaultButton = document.createElement('div');
-        defaultButton.innerHTML = createColorHtml('default', Lampa.Lang.translate('default_color'));
-        topRow.appendChild(defaultButton.firstChild);
-
+        var defaultButton = createColorHtml('default', Lampa.Lang.translate('default_color'));
         var hexValue = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
         var hexDisplay = hexValue.replace('#', '');
-        var hexInput = document.createElement('div');
-        hexInput.innerHTML = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexValue + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisplay + '</div></div>';
-        topRow.appendChild(hexInput.firstChild);
+        var inputHtml = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexValue + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisplay + '</div></div>';
+        var topRowHtml = '<div style="display: flex; gap: 19px; padding: 0; justify-content: center; margin-bottom: 10px;">' + defaultButton + inputHtml + '</div>';
 
-        // Додаємо все до контейнера
-        var topRowWrapper = document.createElement('div');
-        topRowWrapper.appendChild(topRow);
-
-        container.appendChild(topRowWrapper);
-        container.appendChild(leftColumn);
-        container.appendChild(rightColumn);
+        var modalContent = '<div class="color-picker-container"><div>' + leftColumn + '</div><div>' + rightColumn + '</div></div>';
+        var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
 
         try {
             Lampa.Modal.open({
                 title: Lampa.Lang.translate('main_color'),
                 size: 'medium',
                 align: 'center',
-                html: container,
+                html: modalHtml,
                 className: 'color-picker-modal',
                 onBack: function () {
                     saveSettings();
@@ -539,7 +511,16 @@
     // Функція для ініціалізації плагіна
     function initPlugin() {
         setTimeout(function() {
-            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+            // Встановлюємо колір за замовчуванням #353535 при першому запуску
+            var savedColor = Lampa.Storage.get('color_plugin_main_color', '');
+            if (!savedColor || savedColor === 'undefined' || !isValidHex(savedColor)) {
+                ColorPlugin.settings.main_color = '#353535';
+                Lampa.Storage.set('color_plugin_main_color', '#353535');
+                localStorage.setItem('color_plugin_main_color', '#353535');
+            } else {
+                ColorPlugin.settings.main_color = savedColor;
+            }
+
             ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
             ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
             ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
