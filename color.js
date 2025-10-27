@@ -64,7 +64,7 @@
                 '#615fff': 'Indigo 1', '#4f39f6': 'Indigo 2', '#432dd7': 'Indigo 3', '#372aac': 'Indigo 4', '#312c85': 'Indigo 5', '#1e1a4d': 'Indigo 6',
                 '#8e51ff': 'Violet 1', '#7f22fe': 'Violet 2', '#7008e7': 'Violet 3', '#5d0ec0': 'Violet 4', '#4d179a': 'Violet 5', '#2f0d68': 'Violet 6',
                 '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#8200db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#3c0366': 'Purple 6',
-                '# '#e12afb': 'Fuchsia 1', '#c800de': 'Fuchsia 2', '#a800b7': 'Fuchsia 3', '#8a0194': 'Fuchsia 4', '#721378': 'Fuchsia 5', '#4b004f': 'Fuchsia 6',
+                '#e12afb': 'Fuchsia 1', '#c800de': 'Fuchsia 2', '#a800b7': 'Fuchsia 3', '#8a0194': 'Fuchsia 4', '#721378': 'Fuchsia 5', '#4b004f': 'Fuchsia 6',
                 '#f6339a': 'Pink 1', '#e60076': 'Pink 2', '#c6005c': 'Pink 3', '#a3004c': 'Pink 4', '#861043': 'Pink 5', '#510424': 'Pink 6',
                 '#ff2056': 'Rose 1', '#ec003f': 'Rose 2', '#c70036': 'Rose 3', '#a50036': 'Rose 4', '#8b0836': 'Rose 5', '#4d0218': 'Rose 6',
                 '#62748e': 'Slate 1', '#45556c': 'Slate 2', '#314158': 'Slate 3', '#1d293d': 'Slate 4', '#0f172b': 'Slate 5', '#020618': 'Slate 6',
@@ -210,7 +210,7 @@
             '.timetable__item.focus{color: #fff !important;}' +
             '.broadcast__device.focus{background-color: var(--main-color) !important;color: #fff !important;}' +
             '.iptv-menu__list-item.focus, .iptv-program__timeline>div{background-color: var(--main-color) !important;}' +
-            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item:hover{background: var(--main-color) !important;}' +
+            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard . Hac-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item:hover{background: var(--main-color) !important;}' +
             '.online.focus{box-shadow: 0 0 0 0.2em var(--main-color) !important;}' +
             '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before{border-color: var(--main-color) !important;}' +
             '.card-more.focus .card-more__box::after{border: 0.3em solid var(--main-color) !important;}' +
@@ -248,7 +248,7 @@
             '.hex-input{width: 266px !important;height: 35px !important;border-radius: 8px !important;border: 2px solid #ddd !important;position: relative !important;cursor: pointer !important;display: flex !important;flex-direction: column !important;align-items: center !important;justify-content: center !important;color: #fff !important;font-size: 12px !important;font-weight: bold !important;text-shadow: 0 0 2px #000 !important;background-color: #353535 !important;}' +
             '.hex-input.focus{border: 0.2em solid ' + focusBorder + ' !important;transform: scale(1.1) !important;}' +
             '.color-picker-container{display: grid !important;grid-template-columns: 1fr 1fr !important;gap: 10px !important;padding: 0 !important;}' +
-            '.color-picker-container > div{display: flex !important;flex-direction: column !important;gap: 1px !important;}' +  // ДОДАНО – виправлення колонок
+            '.color-picker-container > div{display: flex !important;flex-direction: column !important;gap: 1px !important;}' +
             '@media (max-width: 768px){.color-picker-container{grid-template-columns: 1fr !important;}}' +
             '.torrent-item__viewed{color: var(--main-color) !important;}' +
             '.online-prestige__viewed{background: rgb(255,255,255) !important;color: rgba(var(--main-color-rgb), 1) !important;}' +
@@ -283,7 +283,6 @@
         return '<div class="color-family-name" style="border-color: ' + (color || '#353535') + ';">' + Lampa.Lang.translate(name.toLowerCase()) + '</div>';
     }
 
-    // ВИПРАВЛЕНО – правильне формування колонок
     function openColorPicker() {
         var keys = Object.keys(ColorPlugin.colors.main);
         var families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral', 'Stone'];
@@ -309,7 +308,7 @@
         var hexVal = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
         var hexDisp = hexVal.replace('#', '');
         var hexInput = '<div class="color_square selector hex-input" tabindex="0" style="background-color: ' + hexVal + ';"><div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div><div class="value">' + hexDisp + '</div></div>';
-        var top = '<div style="display: flex; gap: 19px; justify-content: center; margin-bottom: 10px;">' + defBtn + hexInput + '</div>';
+        var top = '<div style="display: flex; gap: 19px; justify-content: center; margin-bottom: 10px;">' + defBtn + hex(py) + '</div>';
 
         var modalHtml = $('<div>' + top + '<div class="color-picker-container"><div>' + left + '</div><div>' + right + '</div></div></div>');
 
@@ -506,7 +505,7 @@
             updatePluginIcon();
             updateParamsVisibility();
             updateSvgIcons();
-        } else if (e.type === since) {
+        } else if (e.type === 'close') {
             saveSettings();
             applyStyles();
             forceBlackFilterBackground();
