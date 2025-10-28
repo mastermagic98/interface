@@ -138,7 +138,6 @@
         isSaving = false;
     }
 
-    // ПОКРАЩЕНА ВИДИМІСТЬ – негайне оновлення + примусовий рендер
     function updateParamsVisibility() {
         if (!Lampa.SettingsApi || !Lampa.SettingsApi.params) return;
         var params = Lampa.SettingsApi.params['color_plugin'];
@@ -154,7 +153,6 @@
         if (hi && hi.field && typeof hi.field.css === 'function') hi.field.css('display', show);
         if (dim && dim.field && typeof dim.field.css === 'function') dim.field.css('display', show);
 
-        // Примусово перемальовуємо налаштування
         if (Lampa.Settings && Lampa.Settings.render) {
             setTimeout(function() { Lampa.Settings.render(); }, 0);
         }
@@ -245,7 +243,8 @@
             '.color_square.default::after{content: "" !important;position: absolute !important;top: 50% !important;left: 10% !important;right: 10% !important;height: 3px !important;background-color: #353535 !important;transform: rotate(45deg) !important;}' +
             '.color_square.default::before{content: "" !important;position: absolute !important;top: 50% !important;left: 10% !important;right: 10% !important;height: 3px !important;background-color: #353535 !important;transform: rotate(-45deg) !important;}' +
             '.color_square{width: 35px !important;height: 35px !important;border-radius: 4px !important;display: flex !important;flex-direction: column !important;justify-content: center !important;align-items: center !important;cursor: pointer !important;color: #ffffff !important;font-size: 10px !important;text-align: center !important;}' +
-            '.color-family-outline{display: flex !important;flex-direction: row !important;overflow: hidden !important;gap: 10px !important;border-radius: 8px !important;margin-bottom: 1px !important;padding: 5px !important;}' +
+            // ВИПРАВЛЕНО: рядок кольорів – без переносу, горизонтальна прокрутка
+            '.color-family-outline{display: flex !important;flex-direction: row !important;flex-wrap: nowrap !important;overflow-x: auto !important;gap: 10px !important;border-radius: 8px !important;margin-bottom: 1px !important;padding: 5px !important;}' +
             '.color-family-name{width: 80px !important;height: 35px !important;border-width: 2px !important;border-style: solid !important;border-radius: 4px !important;display: flex !important;flex-direction: column !important;justify-content: center !important;align-items: center !important;cursor: default !important;color: #ffffff !important;font-size: 10px !important;font-weight: bold !important;text-align: center !important;text-transform: capitalize !important;}' +
             '.color_square .hex{font-size: 9px !important;opacity: 0.9 !important;text-transform: uppercase !important;z-index: 1 !important;}' +
             '.hex-input{width: 266px !important;height: 35px !important;border-radius: 8px !important;border: 2px solid #ddd !important;position: relative !important;cursor: pointer !important;display: flex !important;flex-direction: column !important;align-items: center !important;justify-content: center !important;color: #fff !important;font-size: 12px !important;font-weight: bold !important;text-shadow: 0 0 2px #000 !important;background-color: #353535 !important;}' +
@@ -286,7 +285,6 @@
         return '<div class="color-family-name" style="border-color: ' + (color || '#353535') + ';">' + Lampa.Lang.translate(name.toLowerCase()) + '</div>';
     }
 
-    // ВИПРАВЛЕНО: hex(py) → hexInput
     function openColorPicker() {
         var keys = Object.keys(ColorPlugin.colors.main);
         var families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral', 'Stone'];
@@ -420,7 +418,7 @@
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
-                        updateParamsVisibility();   // негайно
+                        updateParamsVisibility();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     },
