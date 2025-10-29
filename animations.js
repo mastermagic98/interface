@@ -60,6 +60,30 @@ component: 'accent_color_plugin'
         animations();
     };
 
+    // Додаємо пункт "Анімації" у вже існуюче меню "Налаштування кольору акценту"
+    Lampa.Settings.listener.follow('open', function (e) {
+        if (e.name === 'main' && e.body.find('[data-component="accent_color_plugin"]').length) {
+            var $accent = e.body.find('[data-component="accent_color_plugin"]');
+            if ($accent.length && !$accent.find('[data-name="maxsm_animations"]').length) {
+                Lampa.SettingsApi.addParam({
+                    component: 'accent_color_plugin',
+                    param: {
+                        name: 'maxsm_animations',
+                        type: "trigger",
+                        "default": true
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('maxsm_animations'),
+                        description: ''
+                    },
+                    onChange: function () {
+                        animations();
+                    }
+                }, $accent);
+            }
+        }
+    });
+
     if (window.appready) {
         startPlugin();
     } else {
