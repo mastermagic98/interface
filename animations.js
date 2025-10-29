@@ -3,7 +3,7 @@
 
     Lampa.Lang.add({
         animations: {
-            ru: 'Анімації',
+            ru: 'Анимации',
             en: 'Animations',
             uk: 'Анімації'
         }
