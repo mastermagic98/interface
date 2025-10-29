@@ -12,11 +12,13 @@
     var STYLE_ID = 'animations_style';
     var animEnabled = false;
 
+    // Функція застосування/видалення стилів
     function applyAnimations() {
-        // Завжди видаляємо старий стиль
+        // 1. Завжди видаляємо попередній стиль
         $('#' + STYLE_ID).remove();
 
         if (animEnabled) {
+            // 2. Якщо увімкнено — додаємо CSS
             var css = '<style id="' + STYLE_ID + '">' +
                 '.card{transform:scale(1);transition:transform .3s ease}' +
                 '.card.focus{transform:scale(1.03)}' +
@@ -30,11 +32,18 @@
                 '.selectbox-item.focus,.settings-folder.focus,.settings-param.focus{transform:translateX(.2em)}' +
                 '</style>';
             $('head').append(css);
+        } else {
+            // 3. Якщо вимкнено — додаємо "заглушку", що блокує анімацію
+            var disableCss = '<style id="' + STYLE_ID + '">' +
+                '.card,.torrent-item,.online-prestige,.extensions__item,.extensions__block-add,.full-review-add,.full-review,.tag-count,.full-person,.full-episode,.simple-button,.full-start__button,.items-cards .selector,.card-more,.explorer-card__head-img.selector,.card-episode,.menu__item,.selectbox-item,.settings-folder,.settings-param{' +
+                'transform:none !important;transition:none !important}' +
+                '</style>';
+            $('head').append(disableCss);
         }
     }
 
     function startPlugin() {
-        // Читаємо збережене значення
+        // Читаємо значення з localStorage
         var saved = localStorage.getItem('animations');
         if (saved === null) {
             localStorage.setItem('animations', 'true');
@@ -43,7 +52,7 @@
             animEnabled = saved === 'true';
         }
 
-        // Додаємо пункт у меню "Налаштування кольору акценту"
+        // Додаємо пункт у "Налаштування кольору акценту"
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: {
@@ -56,17 +65,17 @@
                 description: ''
             },
             onChange: function (val) {
-                animEnabled = !!val; // true/false
+                animEnabled = !!val;
                 localStorage.setItem('animations', animEnabled);
-                applyAnimations();
+                applyAnimations(); // Оновлюємо негайно
             }
         });
 
-        // Застосовуємо при старті
+        // Застосовуємо при запуску
         applyAnimations();
     }
 
-    // Запуск
+    // Запуск плагіну
     if (window.appready) {
         startPlugin();
     } else {
@@ -79,7 +88,7 @@
 
     Lampa.Manifest.plugins = {
         name: 'animations',
-        version: '1.1',
-        description: 'animations toggle in accent color settings'
+        version: '1.2',
+        description: 'Toggle animations in accent color settings (fully disables when off)'
     };
 })();
