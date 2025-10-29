@@ -2,8 +2,13 @@
     'use strict';
 
     Lampa.Lang.add({
+        animations_plugin: {
+            ru: 'Анімації',
+            en: 'Animations',
+            uk: 'Анімації'
+        },
         animations: {
-            ru: 'Анимации',
+            ru: 'Анімації',
             en: 'Animations',
             uk: 'Анімації'
         }
@@ -31,6 +36,13 @@
     }
 
     function init() {
+        // Додаємо розділ у налаштуваннях
+        Lampa.SettingsApi.addComponent({
+            component: 'animations_plugin',
+            name: Lampa.Lang.translate('animations_plugin')
+        });
+
+        // Додаємо перемикач
         Lampa.SettingsApi.addParam({
             component: 'animations_plugin',
             param: {
@@ -45,6 +57,7 @@
             onChange: animations
         });
 
+        // Викликаємо при старті
         animations();
     }
 
