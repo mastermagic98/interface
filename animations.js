@@ -1,4 +1,3 @@
-component: 'accent_color_plugin'
 (function () {
     'use strict';
 
