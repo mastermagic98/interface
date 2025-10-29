@@ -9,14 +9,15 @@
         }
     });
 
-    var animEnabled = localStorage.getItem('animations') !== 'false';
+    var STYLE_ID = 'animations_style';
+    var animEnabled = false;
 
-    function toggleAnimations() {
-        var styleId = 'animations_style';
-        $('#' + styleId).remove();
+    function applyAnimations() {
+        // Завжди видаляємо старий стиль
+        $('#' + STYLE_ID).remove();
 
         if (animEnabled) {
-            var css = '<style id="' + styleId + '">' +
+            var css = '<style id="' + STYLE_ID + '">' +
                 '.card{transform:scale(1);transition:transform .3s ease}' +
                 '.card.focus{transform:scale(1.03)}' +
                 '.torrent-item,.online-prestige{transform:scale(1);transition:transform .3s ease}' +
@@ -33,10 +34,13 @@
     }
 
     function startPlugin() {
-        if (localStorage.getItem('animations') === null) {
+        // Читаємо збережене значення
+        var saved = localStorage.getItem('animations');
+        if (saved === null) {
             localStorage.setItem('animations', 'true');
+            animEnabled = true;
         } else {
-            animEnabled = localStorage.getItem('animations') === 'true';
+            animEnabled = saved === 'true';
         }
 
         // Додаємо пункт у меню "Налаштування кольору акценту"
@@ -52,15 +56,17 @@
                 description: ''
             },
             onChange: function (val) {
-                animEnabled = val;
-                localStorage.setItem('animations', val);
-                toggleAnimations();
+                animEnabled = !!val; // true/false
+                localStorage.setItem('animations', animEnabled);
+                applyAnimations();
             }
         });
 
-        toggleAnimations();
+        // Застосовуємо при старті
+        applyAnimations();
     }
 
+    // Запуск
     if (window.appready) {
         startPlugin();
     } else {
@@ -73,7 +79,7 @@
 
     Lampa.Manifest.plugins = {
         name: 'animations',
-        version: '1.0',
-        description: 'animations toggle'
+        version: '1.1',
+        description: 'animations toggle in accent color settings'
     };
 })();
