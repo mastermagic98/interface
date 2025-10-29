@@ -41,7 +41,7 @@
 
         // Додаємо пункт у вже існуюче меню "Налаштування кольору акценту"
         Lampa.SettingsApi.addParam({
-            component: 'interface',
+            component: 'accent_color_plugin',
             param: {
                 name: 'animations',
                 type: 'trigger',
