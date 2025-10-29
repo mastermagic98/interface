@@ -13,7 +13,7 @@
         const enabled = localStorage.getItem('maxsm_themes_animations') === 'true';
         const styleId = '#maxsm_themes_animations';
 
-        // видаляємо попередній стиль
+        // прибираємо будь-які старі стилі
         $(styleId).remove();
 
         if (enabled) {
@@ -42,43 +42,58 @@
                 </style>
             `;
             $('body').append(css);
+        } else {
+            // Якщо вимкнено — додаємо стиль, який скасовує всі переходи
+            const cssOff = `
+                <style id="maxsm_themes_animations">
+                    .card, .torrent-item, .online-prestige, .extensions__item, .extensions__block-add,
+                    .full-review-add, .full-review, .tag-count, .full-person, .full-episode,
+                    .simple-button, .full-start__button, .items-cards .selector, .card-more,
+                    .explorer-card__head-img.selector, .card-episode, .menu__item,
+                    .selectbox-item, .settings-folder, .settings-param {
+                        transition: none !important;
+                        transform: none !important;
+                    }
+                </style>
+            `;
+            $('body').append(cssOff);
         }
     }
 
     function initAnimationsSetting() {
-        // встановлюємо значення за замовчуванням, якщо його ще немає
+        // якщо значення не встановлене, встановлюємо "true" за замовчуванням
         if (localStorage.getItem('maxsm_themes_animations') === null) {
             localStorage.setItem('maxsm_themes_animations', 'true');
         }
 
-        const isEnabled = localStorage.getItem('maxsm_themes_animations') === 'true';
+        const saved = localStorage.getItem('maxsm_themes_animations') === 'true';
 
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: {
                 name: 'maxsm_themes_animations',
                 type: 'trigger',
-                default: isEnabled
+                default: saved
             },
             field: {
                 name: Lampa.Lang.translate('maxsm_themes_animations'),
-                description: Lampa.Lang.translate('Увімкнути або вимкнути анімації при навігації в інтерфейсі.')
+                description: Lampa.Lang.translate('Увімкнути або вимкнути анімації інтерфейсу.')
             },
             onChange: function (value) {
-                // зберігаємо стан
-                localStorage.setItem('maxsm_themes_animations', value ? 'true' : 'false');
+                // 🔧 коректно приводимо тип
+                const val = (value === true || value === 'true');
+                localStorage.setItem('maxsm_themes_animations', val ? 'true' : 'false');
 
-                // оновлюємо Lampa (миттєве застосування)
+                // оновлення застосовується одразу
                 setTimeout(() => {
                     applyAnimations();
-                    // оновлюємо відображення параметрів у налаштуваннях
                     if (Lampa.Settings) Lampa.Settings.update();
-                }, 100);
+                }, 50);
             }
         });
 
-        // застосовуємо поточний стан після ініціалізації
-        setTimeout(applyAnimations, 150);
+        // застосовуємо поточний стан
+        applyAnimations();
     }
 
     if (window.appready) {
