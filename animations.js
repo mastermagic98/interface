@@ -2,11 +2,6 @@
     'use strict';
 
     Lampa.Lang.add({
-        animations_plugin: {
-            ru: 'Анімації',
-            en: 'Animations',
-            uk: 'Анімації'
-        },
         animations: {
             ru: 'Анімації',
             en: 'Animations',
@@ -35,38 +30,29 @@
         $('body').append(css);
     }
 
-    function init() {
-        // Додаємо розділ у налаштуваннях
-        Lampa.SettingsApi.addComponent({
-            component: 'animations_plugin',
-            name: Lampa.Lang.translate('animations_plugin')
-        });
+    // Додаємо перемикач у вже існуючий компонент accent_color_plugin
+    Lampa.SettingsApi.addParam({
+        component: 'accent_color_plugin',
+        param: {
+            name: 'animations',
+            type: 'trigger',
+            default: true
+        },
+        field: {
+            name: Lampa.Lang.translate('animations'),
+            description: ''
+        },
+        onChange: animations
+    });
 
-        // Додаємо перемикач
-        Lampa.SettingsApi.addParam({
-            component: 'animations_plugin',
-            param: {
-                name: 'animations',
-                type: 'trigger',
-                default: true
-            },
-            field: {
-                name: Lampa.Lang.translate('animations'),
-                description: ''
-            },
-            onChange: animations
-        });
+    // Викликаємо при старті, щоб анімація застосовувалася одразу
+    animations();
 
-        // Викликаємо при старті
-        animations();
-    }
-
-    if (window.appready) {
-        init();
-    } else {
+    // Якщо Lampa ще не готова — чекаємо
+    if (!window.appready) {
         Lampa.Listener.follow('app', function (e) {
             if (e.type === 'ready') {
-                init();
+                animations();
             }
         });
     }
