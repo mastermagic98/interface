@@ -3,7 +3,7 @@
 
     Lampa.Lang.add({
         animations: {
-            ru: 'Анімації',
+            ru: 'Анимации',
             en: 'Animations',
             uk: 'Анімації'
         }
@@ -13,8 +13,8 @@
         var enabled = Lampa.Storage.get('animations', 'true') === 'true';
         var $style = $('#animations_style');
 
-        // Якщо анімація увімкнена — додаємо стиль
         if (enabled) {
+            // Додаємо стиль ТІЛЬКИ якщо його ще немає
             if ($style.length === 0) {
                 var css = '<style id="animations_style">' +
                     '.card { transform: scale(1); transition: transform 0.3s ease; }' +
@@ -31,7 +31,7 @@
                 $('body').append(css);
             }
         } else {
-            // Якщо вимкнено — завжди видаляємо
+            // Повне видалення при вимкненні
             $style.remove();
         }
     }
@@ -49,11 +49,19 @@
             description: ''
         },
         onChange: function () {
-            animations(); // Оновлюємо при зміні
+            // Оновлюємо при зміні перемикача
+            animations();
         }
     });
 
-    // Застосовуємо при старті
+    // Головний слухач: реагує на будь-яку зміну в Storage (навіть з інших місць)
+    Lampa.Storage.listener.follow('change', function (e) {
+        if (e.name === 'animations') {
+            animations();
+        }
+    });
+
+    // Застосовуємо при запуску Lampa
     function applyOnReady() {
         animations();
     }
@@ -68,10 +76,6 @@
         });
     }
 
-    // Додатково: реагуємо на зміну налаштувань в реальному часі
-    Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'animations') {
-            animations();
-        }
-    });
+    // Додатково: викликаємо при першому завантаженні (на випадок, якщо appready вже true)
+    animations();
 })();
