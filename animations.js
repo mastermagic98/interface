@@ -10,15 +10,12 @@
     });
 
     function applyAnimations() {
-        const enabled = Lampa.Storage.get('maxsm_themes_animations', 'true') === 'true';
-        const styleId = '#accent_color_animations';
-
-        // Видаляємо попередній стиль, якщо є
-        $(styleId).remove();
+        const enabled = localStorage.getItem('maxsm_themes_animations') === 'true';
+        $('#maxsm_themes_animations').remove();
 
         if (enabled) {
             const css = `
-                <style id="accent_color_animations">
+                <style id="maxsm_themes_animations">
                     .card, .torrent-item, .online-prestige, .extensions__item, .extensions__block-add,
                     .full-review-add, .full-review, .tag-count, .full-person, .full-episode,
                     .simple-button, .full-start__button, .items-cards .selector, .card-more,
@@ -46,19 +43,24 @@
     }
 
     function initAnimationsSetting() {
+        // якщо параметр ще не збережений у localStorage — встановлюємо значення за замовчуванням
+        if (localStorage.getItem('maxsm_themes_animations') === null) {
+            localStorage.setItem('maxsm_themes_animations', 'true');
+        }
+
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: {
                 name: 'maxsm_themes_animations',
                 type: 'trigger',
-                default: true
+                default: localStorage.getItem('maxsm_themes_animations') === 'true'
             },
             field: {
                 name: Lampa.Lang.translate('maxsm_themes_animations'),
-                description: Lampa.Lang.translate('Увімкнути або вимкнути анімації при навігації в інтерфейсі.')
+                description: Lampa.Lang.translate('Увімкнути або вимкнути анімації при навігації інтерфейсом.')
             },
             onChange: function (value) {
-                Lampa.Storage.set('maxsm_themes_animations', value ? 'true' : 'false');
+                localStorage.setItem('maxsm_themes_animations', value ? 'true' : 'false');
                 applyAnimations();
             }
         });
