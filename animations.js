@@ -11,7 +11,10 @@
 
     function applyAnimations() {
         const enabled = localStorage.getItem('maxsm_themes_animations') === 'true';
-        $('#maxsm_themes_animations').remove();
+        const styleId = '#maxsm_themes_animations';
+
+        // видаляємо попередній стиль
+        $(styleId).remove();
 
         if (enabled) {
             const css = `
@@ -43,29 +46,39 @@
     }
 
     function initAnimationsSetting() {
-        // якщо параметр ще не збережений у localStorage — встановлюємо значення за замовчуванням
+        // встановлюємо значення за замовчуванням, якщо його ще немає
         if (localStorage.getItem('maxsm_themes_animations') === null) {
             localStorage.setItem('maxsm_themes_animations', 'true');
         }
+
+        const isEnabled = localStorage.getItem('maxsm_themes_animations') === 'true';
 
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: {
                 name: 'maxsm_themes_animations',
                 type: 'trigger',
-                default: localStorage.getItem('maxsm_themes_animations') === 'true'
+                default: isEnabled
             },
             field: {
                 name: Lampa.Lang.translate('maxsm_themes_animations'),
-                description: Lampa.Lang.translate('Увімкнути або вимкнути анімації при навігації інтерфейсом.')
+                description: Lampa.Lang.translate('Увімкнути або вимкнути анімації при навігації в інтерфейсі.')
             },
             onChange: function (value) {
+                // зберігаємо стан
                 localStorage.setItem('maxsm_themes_animations', value ? 'true' : 'false');
-                applyAnimations();
+
+                // оновлюємо Lampa (миттєве застосування)
+                setTimeout(() => {
+                    applyAnimations();
+                    // оновлюємо відображення параметрів у налаштуваннях
+                    if (Lampa.Settings) Lampa.Settings.update();
+                }, 100);
             }
         });
 
-        applyAnimations();
+        // застосовуємо поточний стан після ініціалізації
+        setTimeout(applyAnimations, 150);
     }
 
     if (window.appready) {
