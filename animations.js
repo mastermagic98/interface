@@ -1,152 +1,174 @@
 (function () {
     'use strict';
 
-    Lampa.Lang.add({
-        themes_animations: {
-            ru: 'Анимации интерфейса',
-            en: 'Interface animations',
-            uk: 'Анімації інтерфейсу'
-        }
-    });
-
-    const STYLE_ID = 'themes_animations';
-    const BODY_CLASS = 'no-animations';
-    let observer = null;
-
-    function createStyle(enabled) {
-        let css;
-        if (!enabled) {
-            css = `
-<style id="${STYLE_ID}">
-/* Вимкнення плавності, але без блокування transform */
-body.${BODY_CLASS} *, 
-body.${BODY_CLASS} *::before, 
-body.${BODY_CLASS} *::after {
-  transition: none !important;
-  animation: none !important;
-  -webkit-transition: none !important;
-  -webkit-animation: none !important;
-  will-change: auto !important;
-}
-
-/* Вимикаємо підсвічування при фокусі */
-body.${BODY_CLASS} .focus, 
-body.${BODY_CLASS} :focus, 
-body.${BODY_CLASS} :focus-visible {
-  transition: none !important;
-  animation: none !important;
-}
-</style>`;
-        } else {
-            css = `<style id="${STYLE_ID}"></style>`;
-        }
-        return css;
-    }
-
-    function stripInlineAnimations(node) {
-        if (!node || node.nodeType !== 1) return;
-        try {
-            const s = node.style;
-            if (s) {
-                if (s.transition && s.transition !== 'none') s.transition = 'none';
-                if (s.animation && s.animation !== 'none') s.animation = 'none';
-                s.webkitTransition = 'none';
-                s.webkitAnimation = 'none';
-            }
-        } catch (e) {}
-        let child = node.firstElementChild;
-        while (child) {
-            stripInlineAnimations(child);
-            child = child.nextElementSibling;
-        }
-    }
-
-    function startObserver() {
-        stopObserver();
-        observer = new MutationObserver(mutations => {
-            for (const m of mutations) {
-                if (m.type === 'childList' && m.addedNodes) {
-                    m.addedNodes.forEach(n => {
-                        if (n.nodeType === 1) stripInlineAnimations(n);
-                    });
-                } else if (m.type === 'attributes' && m.attributeName === 'style' && m.target) {
-                    stripInlineAnimations(m.target);
-                }
-            }
-        });
-
-        try {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style']
-            });
-        } catch (e) {}
-    }
-
-    function stopObserver() {
-        if (observer) {
-            try { observer.disconnect(); } catch (e) {}
-            observer = null;
-        }
-    }
-
     function applyAnimations() {
-        const raw = localStorage.getItem('themes_animations');
-        const enabled = (raw === null) ? true : (raw === 'true' || raw === true);
+        const enabled = localStorage.getItem('themes_animations') === 'true';
 
-        const old = document.getElementById(STYLE_ID);
-        if (old) old.remove();
+        $('#themes_animations').remove();
 
-        const css = createStyle(enabled);
-        document.head.insertAdjacentHTML('beforeend', css);
+        if (enabled) {
+            const css = `
+                <style id="themes_animations">
+                .card,
+                .torrent-item,
+                .online-prestige,
+                .extensions__item,
+                .extensions__block-add,
+                .full-review-add,
+                .full-review,
+                .tag-count,
+                .full-person,
+                .full-episode,
+                .simple-button,
+                .full-start__button,
+                .items-cards .selector,
+                .card-more,
+                .explorer-card__head-img.selector,
+                .card-episode,
+                .menu__item,
+                .selectbox-item,
+                .settings-folder,
+                .settings-param {
+                    transition: transform 0.3s ease !important;
+                }
+                .card.focus { transform: scale(1.03); }
+                .torrent-item.focus,
+                .online-prestige.focus { transform: scale(1.01); }
+                .extensions__item.focus,
+                .extensions__block-add.focus,
+                .full-review-add.focus,
+                .full-review.focus,
+                .tag-count.focus,
+                .full-person.focus,
+                .full-episode.focus,
+                .simple-button.focus,
+                .full-start__button.focus,
+                .items-cards .selector.focus,
+                .card-more.focus,
+                .explorer-card__head-img.selector.focus,
+                .card-episode.focus {
+                    transform: scale(1.03);
+                }
+                .menu__item.focus { transform: translateX(-0.2em); }
+                .selectbox-item.focus,
+                .settings-folder.focus,
+                .settings-param.focus {
+                    transform: translateX(0.2em);
+                }
+                </style>
+            `;
+            $('body').append(css);
+        }
+    }
 
-        if (!enabled) {
-            document.documentElement.classList.add(BODY_CLASS);
-            document.body && stripInlineAnimations(document.body);
-            startObserver();
+    function setupAnimationToggle() {
+        // перевіряємо або створюємо перемикач у налаштуваннях
+        if (!$('.settings-param[data-name="animations"]').length) {
+            const toggle = $('<div class="settings-param selector" data-name="animations"><div class="settings-param__name">Анімації</div><div class="settings-param__value"></div></div>');
+
+            toggle.on('hover:enter', function () {
+                const current = localStorage.getItem('themes_animations') === 'true';
+                const newValue = !current;
+                localStorage.setItem('themes_animations', newValue);
+                toggle.find('.settings-param__value').text(newValue ? 'Увімкнено' : 'Вимкнено');
+                applyAnimations(); // миттєво змінює поведінку
+                Lampa.Settings.update();
+            });
+
+            $('.settings-content').append(toggle);
+
+            const initState = localStorage.getItem('themes_animations') === 'true';
+            toggle.find('.settings-param__value').text(initState ? 'Увімкнено' : 'Вимкнено');
+        }
+    }
+
+    // --- основна логіка підвантаження / скролу ---
+    function enableSmoothScrollFix(screen, params, content, html, body, _self) {
+        if (screen) {
+            let start_position = 0;
+            let move_position = 0;
+            let end_position = 0;
+            let scroll_position = 0;
+
+            const movestart = (e) => {
+                start_position = params.horizontal ? e.clientX : e.clientY;
+                end_position = start_position;
+                move_position = start_position;
+
+                if (localStorage.getItem('themes_animations') === 'true') {
+                    body.toggleClass('notransition', true);
+                } else {
+                    body.classList.add('notransition');
+                }
+            };
+
+            const move = (e) => {
+                end_position = params.horizontal ? e.clientX : e.clientY;
+                if (move_position && end_position) {
+                    const delta = move_position - end_position;
+                    const direct = params.horizontal ? 'left' : 'top';
+                    let scrl = scroll_position;
+                    const scrl_padding = parseInt(window.getComputedStyle(content, null).getPropertyValue('padding-' + direct));
+                    let max = params.horizontal ? 30000 : body.offsetHeight;
+                    max -= params.horizontal ? html.offsetWidth : html.offsetHeight;
+                    max += scrl_padding * 2;
+                    scrl -= delta;
+                    scrl = Math.min(0, Math.max(-max, scrl));
+                    scroll_position = scrl;
+                    translateScroll();
+                    move_position = end_position;
+                }
+            };
+
+            const moveend = (e) => {
+                end_position = 0;
+                start_position = 0;
+                move_position = 0;
+                body.toggleClass('notransition', false);
+                scrollEnded();
+                if (_self.onAnimateEnd) _self.onAnimateEnd();
+            };
+
+            html.addEventListener('scroll', (e) => {
+                html.scrollTop = 0;
+                html.scrollLeft = 0;
+            });
+
+            html.addEventListener('touchstart', (e) => {
+                movestart(e.touches[0] || e.changedTouches[0]);
+            });
+            html.addEventListener('touchmove', (e) => {
+                move(e.touches[0] || e.changedTouches[0]);
+            });
+            html.addEventListener('touchend', moveend);
         } else {
-            document.documentElement.classList.remove(BODY_CLASS);
-            stopObserver();
+            let native_scroll_animate = false;
+            let native_scroll_timer = null;
+
+            html.addEventListener('scroll', function () {
+                clearTimeout(native_scroll_timer);
+                const delay = localStorage.getItem('themes_animations') === 'true' ? 300 : 0;
+
+                native_scroll_timer = setTimeout(() => {
+                    if (_self.onAnimateEnd) _self.onAnimateEnd();
+                }, delay);
+
+                if (!native_scroll_animate) {
+                    native_scroll_animate = true;
+                    requestAnimationFrame(() => {
+                        native_scroll_animate = false;
+                        scroll_position = -(params.horizontal ? html.scrollLeft : html.scrollTop);
+                        scrollEnded();
+                    });
+                }
+            });
         }
     }
 
-    function initAnimationsSetting() {
-        if (localStorage.getItem('themes_animations') === null) {
-            localStorage.setItem('themes_animations', 'true');
-        }
+    // ініціалізація
+    applyAnimations();
+    setupAnimationToggle();
 
-        const saved = localStorage.getItem('themes_animations') === 'true';
-
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'themes_animations',
-                type: 'trigger',
-                default: saved
-            },
-            field: {
-                name: Lampa.Lang.translate('themes_animations'),
-                description: Lampa.Lang.translate('Увімкнути або вимкнути всі анімації в інтерфейсі.')
-            },
-            onChange: value => {
-                const val = (value === true || value === 'true' || value === 1 || value === '1');
-                localStorage.setItem('themes_animations', val ? 'true' : 'false');
-                setTimeout(applyAnimations, 20);
-            }
-        });
-
-        setTimeout(applyAnimations, 30);
-    }
-
-    if (window.appready) {
-        initAnimationsSetting();
-    } else {
-        Lampa.Listener.follow('app', event => {
-            if (event.type === 'ready') {
-                initAnimationsSetting();
-            }
-        });
-    }
+    // якщо треба — експортуємо функцію для підвантаження
+    window.enableSmoothScrollFix = enableSmoothScrollFix;
 })();
