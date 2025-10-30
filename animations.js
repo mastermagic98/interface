@@ -13,13 +13,12 @@
     const BODY_CLASS = 'no-animations';
     let observer = null;
 
-    // Генеруємо CSS для вимкнення всіх плавних ефектів, включно з fade-in/out
     function createStyle(enabled) {
         let css;
         if (!enabled) {
             css = `
 <style id="${STYLE_ID}">
-/* Повне відключення плавності */
+/* Вимкнення плавності, але без блокування transform */
 body.${BODY_CLASS} *, 
 body.${BODY_CLASS} *::before, 
 body.${BODY_CLASS} *::after {
@@ -27,44 +26,15 @@ body.${BODY_CLASS} *::after {
   animation: none !important;
   -webkit-transition: none !important;
   -webkit-animation: none !important;
-  opacity: 1 !important;
   will-change: auto !important;
 }
 
-/* Відключення fade-in/out Lampa */
-body.${BODY_CLASS} .layer--fade,
-body.${BODY_CLASS} .layer,
-body.${BODY_CLASS} .modal,
-body.${BODY_CLASS} .settings-box,
-body.${BODY_CLASS} .selectbox,
-body.${BODY_CLASS} .background,
-body.${BODY_CLASS} .screensaver,
-body.${BODY_CLASS} .menu,
-body.${BODY_CLASS} .head,
-body.${BODY_CLASS} .activity,
-body.${BODY_CLASS} .full,
-body.${BODY_CLASS} .explorer-card__head-img {
-  opacity: 1 !important;
+/* Вимикаємо підсвічування при фокусі */
+body.${BODY_CLASS} .focus, 
+body.${BODY_CLASS} :focus, 
+body.${BODY_CLASS} :focus-visible {
   transition: none !important;
   animation: none !important;
-}
-
-/* Вимикаємо рух або масштабування при фокусі */
-body.${BODY_CLASS} .focus,
-body.${BODY_CLASS} :focus,
-body.${BODY_CLASS} :focus-visible,
-body.${BODY_CLASS} .hover,
-body.${BODY_CLASS} .selector {
-  transition: none !important;
-  animation: none !important;
-}
-
-/* Вимикаємо затемнення бекграунду при відкритті модалок */
-body.${BODY_CLASS} .layer__overlay,
-body.${BODY_CLASS} .modal__background {
-  opacity: 1 !important;
-  background: rgba(0,0,0,0) !important;
-  transition: none !important;
 }
 </style>`;
         } else {
@@ -73,7 +43,6 @@ body.${BODY_CLASS} .modal__background {
         return css;
     }
 
-    // Видаляє inline-переходи й анімації (але не transform)
     function stripInlineAnimations(node) {
         if (!node || node.nodeType !== 1) return;
         try {
@@ -92,7 +61,6 @@ body.${BODY_CLASS} .modal__background {
         }
     }
 
-    // Відстеження нових елементів, щоб прибирати inline-анімації
     function startObserver() {
         stopObserver();
         observer = new MutationObserver(mutations => {
@@ -124,7 +92,6 @@ body.${BODY_CLASS} .modal__background {
         }
     }
 
-    // Застосування стилю
     function applyAnimations() {
         const raw = localStorage.getItem('themes_animations');
         const enabled = (raw === null) ? true : (raw === 'true' || raw === true);
@@ -137,7 +104,7 @@ body.${BODY_CLASS} .modal__background {
 
         if (!enabled) {
             document.documentElement.classList.add(BODY_CLASS);
-            if (document.body) stripInlineAnimations(document.body);
+            document.body && stripInlineAnimations(document.body);
             startObserver();
         } else {
             document.documentElement.classList.remove(BODY_CLASS);
@@ -145,7 +112,6 @@ body.${BODY_CLASS} .modal__background {
         }
     }
 
-    // Ініціалізація в налаштуваннях
     function initAnimationsSetting() {
         if (localStorage.getItem('themes_animations') === null) {
             localStorage.setItem('themes_animations', 'true');
@@ -162,12 +128,12 @@ body.${BODY_CLASS} .modal__background {
             },
             field: {
                 name: Lampa.Lang.translate('themes_animations'),
-                description: Lampa.Lang.translate('Увімкнути або вимкнути всі анімації в інтерфейсі (включно із затемненням).')
+                description: Lampa.Lang.translate('Увімкнути або вимкнути всі анімації в інтерфейсі.')
             },
-            onChange: function (value) {
+            onChange: value => {
                 const val = (value === true || value === 'true' || value === 1 || value === '1');
                 localStorage.setItem('themes_animations', val ? 'true' : 'false');
-                setTimeout(() => applyAnimations(), 20);
+                setTimeout(applyAnimations, 20);
             }
         });
 
