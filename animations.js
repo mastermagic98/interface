@@ -9,64 +9,138 @@
         }
     });
 
-    function applyAnimations() {
-        const enabled = localStorage.getItem('maxsm_themes_animations') === 'true';
-        $('#maxsm_themes_animations').remove();
+    var STYLE_ID = 'maxsm_themes_animations';
+    var BODY_CLASS = 'no-animations';
+    var observer = null;
 
-        if (enabled) {
-            // --- Анімації УВІМКНЕНО ---
-            const cssOn = `
-                <style id="maxsm_themes_animations">
-                    .card, .torrent-item, .online-prestige, .extensions__item, .extensions__block-add,
-                    .full-review-add, .full-review, .tag-count, .full-person, .full-episode,
-                    .simple-button, .full-start__button, .items-cards .selector, .card-more,
-                    .explorer-card__head-img.selector, .card-episode, .menu__item,
-                    .selectbox-item, .settings-folder, .settings-param, .icon, .button,
-                    .menu__ico, .settings-param__name, .layer--card .card, .navigation-bar__item {
-                        transform: scale(1);
-                        transition: transform 0.3s ease, background 0.3s ease, opacity 0.3s ease;
-                    }
-                    .focus, :focus-visible {
-                        transition: transform 0.3s ease, background 0.3s ease, opacity 0.3s ease;
-                    }
-                    .card.focus { transform: scale(1.03); }
-                    .torrent-item.focus, .online-prestige.focus { transform: scale(1.01); }
-                    .menu__item.focus, .settings-param.focus, .settings-folder.focus {
-                        transform: translateX(0.2em);
-                    }
-                </style>
-            `;
-            $('body').append(cssOn);
+    // CSS для обох станів: коли анімації ввімкнені - видаляємо наш клас,
+    // коли вимкнені - додаємо потужне перезаписуюче правило.
+    function createStyle(enabled) {
+        var css;
+        if (!enabled) {
+            css = '\
+<style id="' + STYLE_ID + '">\
+/* Глобальне відключення анімацій */\
+body.' + BODY_CLASS + ' *, body.' + BODY_CLASS + ' *::before, body.' + BODY_CLASS + ' *::after {\
+  transition: none !important;\
+  animation: none !important;\
+  -webkit-transition: none !important;\
+  -webkit-animation: none !important;\
+  transform: none !important;\
+  -webkit-transform: none !important;\
+  will-change: auto !important;\
+}\
+/* Забезпечити відключення для псевдокласів фокусу/hover */\
+body.' + BODY_CLASS + ' .focus, body.' + BODY_CLASS + ' :focus, body.' + BODY_CLASS + ' :focus-visible {\
+  transform: none !important;\
+  transition: none !important;\
+  animation: none !important;\
+}\
+</style>';
         } else {
-            // --- Анімації ВИМКНЕНО ---
-            const cssOff = `
-                <style id="maxsm_themes_animations">
-                    * {
-                        transition: none !important;
-                        animation: none !important;
-                    }
-                    .card, .torrent-item, .online-prestige, .extensions__item, .extensions__block-add,
-                    .full-review-add, .full-review, .tag-count, .full-person, .full-episode,
-                    .simple-button, .full-start__button, .items-cards .selector, .card-more,
-                    .explorer-card__head-img.selector, .card-episode, .menu__item,
-                    .selectbox-item, .settings-folder, .settings-param, .icon, .button,
-                    .menu__ico, .settings-param__name, .navigation-bar__item, .focus, :focus-visible {
-                        transform: none !important;
-                        transition: none !important;
-                        animation: none !important;
-                    }
-                </style>
-            `;
-            $('body').append(cssOff);
+            // При увімкненому стані видаляємо наші правила (порожній стиль)
+            css = '<style id="' + STYLE_ID + '"></style>';
+        }
+        return css;
+    }
+
+    // Видаляємо inline-переходи та анімації з елементу (і рекурсивно з дітей)
+    function stripInlineAnimations(node) {
+        if (!node || node.nodeType !== 1) return;
+        try {
+            var s = node.style;
+            if (s) {
+                if (s.transition && s.transition !== 'none') s.transition = 'none';
+                if (s.animation && s.animation !== 'none') s.animation = 'none';
+                if (s.transform && s.transform !== 'none') s.transform = 'none';
+                // додатково видаляємо конкретні префікси
+                s.webkitTransition = 'none';
+                s.webkitAnimation = 'none';
+                s.webkitTransform = 'none';
+            }
+        } catch (e) {
+            // інколи доступ до style може кидати помилку (SVG, чужі фрейми) — ігноруємо
+        }
+
+        // швидкий перебір дітей — але не дуже дорогий: обмежуємо глибину? поки що обходимо повністю
+        var child = node.firstElementChild;
+        while (child) {
+            stripInlineAnimations(child);
+            child = child.nextElementSibling;
         }
     }
 
+    // Стартуємо MutationObserver, щоб перехоплювати нові елементи / inline-атрибути
+    function startObserver() {
+        stopObserver();
+
+        observer = new MutationObserver(function (mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+                var m = mutations[i];
+
+                if (m.type === 'childList') {
+                    // нові вузли — обнуляємо у них переходи
+                    m.addedNodes && m.addedNodes.forEach && m.addedNodes.forEach(function (n) {
+                        if (n.nodeType === 1) stripInlineAnimations(n);
+                    });
+                } else if (m.type === 'attributes') {
+                    // якщо хтось змінив атрибут style - обнуляємо transition/animation
+                    if (m.attributeName === 'style' && m.target) {
+                        stripInlineAnimations(m.target);
+                    }
+                }
+            }
+        });
+
+        try {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        } catch (e) {
+            // якщо document.body ще не готовий — просто ігноруємо (буде застосовано при init)
+        }
+    }
+
+    function stopObserver() {
+        if (observer) {
+            try { observer.disconnect(); } catch (e) { }
+            observer = null;
+        }
+    }
+
+    function applyAnimations() {
+        var raw = localStorage.getItem('maxsm_themes_animations');
+        var enabled = (raw === null) ? true : (raw === 'true' || raw === true);
+
+        // видаляємо старий стиль
+        var old = document.getElementById(STYLE_ID);
+        if (old) old.parentNode.removeChild(old);
+
+        // додаємо новий стиль
+        var css = createStyle(enabled);
+        document.head.insertAdjacentHTML('beforeend', css);
+
+        // додаємо/видаляємо клас на body
+        if (!enabled) {
+            document.documentElement.classList.add(BODY_CLASS);
+            document.body && stripInlineAnimations(document.body);
+            startObserver();
+        } else {
+            document.documentElement.classList.remove(BODY_CLASS);
+            stopObserver();
+        }
+    }
+
+    // Ініціалізація налаштування у Lampa.SettingsApi
     function initAnimationsSetting() {
         if (localStorage.getItem('maxsm_themes_animations') === null) {
             localStorage.setItem('maxsm_themes_animations', 'true');
         }
 
-        const saved = localStorage.getItem('maxsm_themes_animations') === 'true';
+        var saved = localStorage.getItem('maxsm_themes_animations') === 'true';
 
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
@@ -80,17 +154,22 @@
                 description: Lampa.Lang.translate('Увімкнути або вимкнути всі анімації в інтерфейсі.')
             },
             onChange: function (value) {
-                const val = (value === true || value === 'true');
+                // Приводимо до булевого значення коректно
+                var val = (value === true || value === 'true' || value === 1 || value === '1');
                 localStorage.setItem('maxsm_themes_animations', val ? 'true' : 'false');
 
-                setTimeout(() => {
+                // застосовуємо миттєво (маленька затримка, щоб Lampa встигла оновити інтерфейс)
+                setTimeout(function () {
                     applyAnimations();
-                    if (Lampa.Settings) Lampa.Settings.update();
-                }, 50);
+                    if (Lampa.Settings) {
+                        try { Lampa.Settings.update(); } catch (e) { }
+                    }
+                }, 20);
             }
         });
 
-        applyAnimations();
+        // Якщо Lampa може ще промальовувати — даємо невелику паузу та застосовуємо
+        setTimeout(applyAnimations, 30);
     }
 
     if (window.appready) {
@@ -102,4 +181,5 @@
             }
         });
     }
+
 })();
