@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Мовні ключі
+    // --- локалізації ---
     Lampa.Lang.add({
         themes_animations: {
             ru: 'Анимации интерфейса',
@@ -19,16 +19,27 @@
     const BODY_CLASS = 'no-animations';
     let observer = null;
 
-    // Безпечне оголошення body
-    const body = document.body || document.querySelector('body');
+    // безпечне посилання на body
+    const body = document.body || document.querySelector('body') || document.documentElement;
 
-    // Створення стилю для вимкнення анімацій
+    // безпечний toggleClass (у випадку, якщо в середовищі немає jQuery)
+    function safeToggleClass(el, cls, state) {
+        if (!el || !cls) return;
+        try {
+            if (typeof state === 'boolean') {
+                if (state) el.classList.add(cls); else el.classList.remove(cls);
+            } else {
+                el.classList.toggle(cls);
+            }
+        } catch (e) {}
+    }
+
+    // створює CSS (не відключає transform — щоб меню/скрол працювали)
     function createStyle(enabled) {
-        let css;
         if (!enabled) {
-            css = `
+            return `
 <style id="${STYLE_ID}">
-/* Глобальне вимкнення анімацій */
+/* Вимикаємо анімації та переходи, але не блокуючи transform/позиціювання */
 body.${BODY_CLASS} *, 
 body.${BODY_CLASS} *::before, 
 body.${BODY_CLASS} *::after {
@@ -39,29 +50,36 @@ body.${BODY_CLASS} *::after {
   will-change: auto !important;
 }
 
-/* Дозволяємо рух скролу (щоб працювало підвантаження) */
+/* Дозволяємо скрол-контенту працювати: даємо слабкий transition тільки для технічних рухів*/
 body.${BODY_CLASS} .scroll-body,
-body.${BODY_CLASS} .scroll__content {
-  transition: transform 0.1s !important;
+body.${BODY_CLASS} .scroll__content,
+body.${BODY_CLASS} .items-line,
+body.${BODY_CLASS} .items-container {
+  transition: transform 0.05s linear !important;
 }
 
-/* Вимикаємо фокус-анімації */
-body.${BODY_CLASS} .focus, 
-body.${BODY_CLASS} :focus, 
+/* Вимикаємо анімації фокусу/hover для елементів UI */
+body.${BODY_CLASS} .focus,
+body.${BODY_CLASS} :focus,
 body.${BODY_CLASS} :focus-visible {
   transition: none !important;
   animation: none !important;
 }
 </style>`;
         } else {
-            css = `<style id="${STYLE_ID}"></style>`;
+            return `<style id="${STYLE_ID}"></style>`;
         }
-        return css;
     }
 
-    // Очищення інлайнових transition/animation
+    // очистити інлайн transition|animation (але пропускаємо скрол-елементи)
     function stripInlineAnimations(node) {
         if (!node || node.nodeType !== 1) return;
+        // пропускаємо елементи, які відповідають за підвантаження/стрічки
+        const skipClasses = ['scroll-body', 'scroll__content', 'items-line', 'items-container', 'card', 'items-line__item'];
+        for (let c of skipClasses) {
+            if (node.classList && node.classList.contains(c)) return;
+        }
+
         try {
             const s = node.style;
             if (s) {
@@ -69,8 +87,10 @@ body.${BODY_CLASS} :focus-visible {
                 if (s.animation && s.animation !== 'none') s.animation = 'none';
                 s.webkitTransition = 'none';
                 s.webkitAnimation = 'none';
+                // НЕ чіпаємо transform (щоб не зламати позиціювання)
             }
         } catch (e) {}
+
         let child = node.firstElementChild;
         while (child) {
             stripInlineAnimations(child);
@@ -78,7 +98,7 @@ body.${BODY_CLASS} :focus-visible {
         }
     }
 
-    // Спостерігач DOM з винятками
+    // MutationObserver з винятками для динамічного контенту Lampa
     function startObserver() {
         stopObserver();
         observer = new MutationObserver(mutations => {
@@ -86,19 +106,27 @@ body.${BODY_CLASS} :focus-visible {
                 if (m.type === 'childList' && m.addedNodes) {
                     m.addedNodes.forEach(n => {
                         if (!n || n.nodeType !== 1) return;
-                        // Пропускаємо динамічні елементи Lampa
-                        if (n.classList && (
+                        // пропускаємо контейнерні/стрічкові елементи, щоб не перешкоджати підвантаженню
+                        const skip = n.classList && (
                             n.classList.contains('scroll-body') ||
                             n.classList.contains('scroll__content') ||
                             n.classList.contains('items-line') ||
-                            n.classList.contains('card') ||
-                            n.classList.contains('items-container')
-                        )) return;
-
-                        stripInlineAnimations(n);
+                            n.classList.contains('items-container') ||
+                            n.classList.contains('card')
+                        );
+                        if (!skip) stripInlineAnimations(n);
                     });
                 } else if (m.type === 'attributes' && m.attributeName === 'style' && m.target) {
-                    stripInlineAnimations(m.target);
+                    // якщо inline-style змінюється на елементі, який НЕ в списку пропуску — очищуємо
+                    const t = m.target;
+                    const skip = t.classList && (
+                        t.classList.contains('scroll-body') ||
+                        t.classList.contains('scroll__content') ||
+                        t.classList.contains('items-line') ||
+                        t.classList.contains('items-container') ||
+                        t.classList.contains('card')
+                    );
+                    if (!skip) stripInlineAnimations(t);
                 }
             }
         });
@@ -110,7 +138,9 @@ body.${BODY_CLASS} :focus-visible {
                 attributes: true,
                 attributeFilter: ['style']
             });
-        } catch (e) {}
+        } catch (e) {
+            // якщо body ще не готовий або обмеження безпеки — ігноруємо
+        }
     }
 
     function stopObserver() {
@@ -120,7 +150,7 @@ body.${BODY_CLASS} :focus-visible {
         }
     }
 
-    // Застосування стану анімацій
+    // застосувати стиль/стан анімацій
     function applyAnimations() {
         const raw = localStorage.getItem('themes_animations');
         const enabled = (raw === null) ? true : (raw === 'true' || raw === true);
@@ -129,7 +159,7 @@ body.${BODY_CLASS} :focus-visible {
         if (old) old.remove();
 
         const css = createStyle(enabled);
-        document.head.insertAdjacentHTML('beforeend', css);
+        try { document.head.insertAdjacentHTML('beforeend', css); } catch (e) { }
 
         if (!enabled) {
             document.documentElement.classList.add(BODY_CLASS);
@@ -141,7 +171,7 @@ body.${BODY_CLASS} :focus-visible {
         }
     }
 
-    // Ініціалізація параметра в меню
+    // реєстрація налаштування в Lampa
     function initAnimationsSetting() {
         if (localStorage.getItem('themes_animations') === null) {
             localStorage.setItem('themes_animations', 'true');
@@ -163,21 +193,84 @@ body.${BODY_CLASS} :focus-visible {
             onChange: value => {
                 const val = (value === true || value === 'true' || value === 1 || value === '1');
                 localStorage.setItem('themes_animations', val ? 'true' : 'false');
+                // невелика пауза, даємо Lampa промалювати, потім застосовуємо
                 setTimeout(applyAnimations, 30);
             }
         });
 
-        setTimeout(applyAnimations, 50);
+        // застосувати початковий стан
+        setTimeout(applyAnimations, 40);
     }
 
-    // Запуск після готовності додатку
+    // --- ДОДАТКОВО: глобальні слухачі, щоб гарантувати виклик scrollEnded/onAnimateEnd ---
+    // Ці слухачі працюють загально для контролерів Lampa (items_line etc.)
+    (function enableScrollFallbacks() {
+        let native_scroll_timer = null;
+        let native_scroll_animate = false;
+
+        // допоміжна функція: викликаємо методи контролера, якщо вони існують
+        function callControllerScrollEnd() {
+            try {
+                const ctrl = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled();
+                if (!ctrl) return;
+                if (typeof ctrl.scrollEnded === 'function') {
+                    try { ctrl.scrollEnded(); } catch (e) {}
+                }
+                if (typeof ctrl.onAnimateEnd === 'function') {
+                    try { ctrl.onAnimateEnd(); } catch (e) {}
+                }
+            } catch (e) {}
+        }
+
+        // touchstart: додаємо notransition (як робив Lampa)
+        document.addEventListener('touchstart', function (e) {
+            safeToggleClass(body, 'notransition', true);
+        }, { passive: true });
+
+        // touchend: знімаємо notransition і викликаємо завершення скролу
+        document.addEventListener('touchend', function (e) {
+            safeToggleClass(body, 'notransition', false);
+
+            // невелика затримка, щоб DOM оновився
+            setTimeout(callControllerScrollEnd, 20);
+        }, { passive: true });
+
+        // scroll: fallback — таймер + rAF, щоб викликати scrollEnded
+        window.addEventListener('scroll', function () {
+            // якщо анімації вимкнені, зменшуємо затримку
+            const delay = localStorage.getItem('themes_animations') === 'true' ? 300 : 0;
+
+            clearTimeout(native_scroll_timer);
+            native_scroll_timer = setTimeout(function () {
+                // викликаємо onAnimateEnd якщо є
+                try {
+                    const ctrl = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled();
+                    if (ctrl && typeof ctrl.onAnimateEnd === 'function') {
+                        try { ctrl.onAnimateEnd(); } catch (e) {}
+                    }
+                } catch (e) {}
+            }, delay);
+
+            if (!native_scroll_animate) {
+                native_scroll_animate = true;
+                requestAnimationFrame(function () {
+                    native_scroll_animate = false;
+                    // також викликаємо scrollEnded
+                    callControllerScrollEnd();
+                });
+            }
+        }, { passive: true });
+    })();
+
+    // ініціалізація плагіна після готовності Lampa
     if (window.appready) {
         initAnimationsSetting();
     } else {
-        Lampa.Listener.follow('app', event => {
+        Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 initAnimationsSetting();
             }
         });
     }
+
 })();
