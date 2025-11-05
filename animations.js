@@ -1,9 +1,9 @@
 (function () {
     'use strict';
 
-    const STYLE_ID = 'themes_animations';
-    const BODY_CLASS = 'no-animations';
     const STORAGE_KEY = 'themes_animations';
+    const STYLE_ID = 'themes_animations_style';
+    const BODY_CLASS = 'no-animations';
 
     Lampa.Lang.add({
         themes_animations: {
@@ -12,22 +12,23 @@
             uk: 'Анімації інтерфейсу'
         },
         themes_animations_descr: {
-            ru: 'Включить или выключить анимации интерфейса',
-            en: 'Enable or disable interface animations',
-            uk: 'Увімкнути або вимкнути анімації інтерфейсу'
+            ru: 'Включить или выключить все анимации интерфейса, кроме прокрутки.',
+            en: 'Enable or disable all interface animations except scrolling.',
+            uk: 'Увімкнути або вимкнути всі анімації інтерфейсу, крім прокрутки.'
         }
     });
 
-    /** Додає або оновлює CSS */
-    function createOrUpdateStyle(disableAnimations) {
-        document.getElementById(STYLE_ID)?.remove();
+    /** Видалення старого стилю і створення нового */
+    function updateAnimationStyle(disable) {
+        const old = document.getElementById(STYLE_ID);
+        if (old) old.remove();
 
-        if (!disableAnimations) return;
+        if (!disable) return;
 
         const style = document.createElement('style');
         style.id = STYLE_ID;
         style.textContent = `
-/* Вимкнення усіх анімацій */
+/* Повне вимкнення анімацій, крім скролу */
 body.${BODY_CLASS} *, 
 body.${BODY_CLASS} *::before, 
 body.${BODY_CLASS} *::after {
@@ -35,20 +36,29 @@ body.${BODY_CLASS} *::after {
   animation: none !important;
 }
 
-/* Окремо для карток, меню, кнопок */
+/* Окремо блокуємо фокусні ефекти карток, меню, кнопок */
 body.${BODY_CLASS} .card,
-body.${BODY_CLASS} .focus,
+body.${BODY_CLASS} .card.focus,
 body.${BODY_CLASS} .selector,
 body.${BODY_CLASS} .menu__item,
+body.${BODY_CLASS} .menu__item.focus,
 body.${BODY_CLASS} .settings-param,
+body.${BODY_CLASS} .settings-param.focus,
 body.${BODY_CLASS} .simple-button,
+body.${BODY_CLASS} .simple-button.focus,
 body.${BODY_CLASS} .full-person,
-body.${BODY_CLASS} .explorer-card__head-img.selector {
+body.${BODY_CLASS} .explorer-card__head-img.selector,
+body.${BODY_CLASS} .full-episode,
+body.${BODY_CLASS} .torrent-item,
+body.${BODY_CLASS} .torrent-item.focus,
+body.${BODY_CLASS} .online-prestige,
+body.${BODY_CLASS} .online-prestige.focus {
   transition: none !important;
   animation: none !important;
+  transform: none !important;
 }
 
-/* Не блокуємо плавність скролу */
+/* Не чіпаємо плавність скролу, щоб підвантаження працювало */
 body.${BODY_CLASS} .scroll__body,
 body.${BODY_CLASS} .scroll__content,
 body.${BODY_CLASS} .scrollbar,
@@ -59,27 +69,25 @@ body.${BODY_CLASS} .scroll__bar {
         document.head.appendChild(style);
     }
 
-    /** Застосування поточного стану */
+    /** Застосування налаштування */
     function applyAnimations() {
-        const disable = localStorage.getItem(STORAGE_KEY) === 'false';
-        const body = document.body;
-        if (!body) return;
+        const enabled = localStorage.getItem(STORAGE_KEY);
+        const disable = enabled === 'false'; // false = вимкнено
 
-        body.classList.toggle(BODY_CLASS, disable);
-        createOrUpdateStyle(disable);
-
-        console.log('[Animations]', disable ? 'disabled' : 'enabled');
+        document.body.classList.toggle(BODY_CLASS, disable);
+        updateAnimationStyle(disable);
     }
 
-    /** Ініціалізація налаштування */
-    function initSetting() {
-        if (localStorage.getItem(STORAGE_KEY) === null)
+    /** Реєстрація параметра в меню кольору акценту */
+    function initSettings() {
+        if (localStorage.getItem(STORAGE_KEY) === null) {
             localStorage.setItem(STORAGE_KEY, 'true');
+        }
 
         const current = localStorage.getItem(STORAGE_KEY) === 'true';
 
         Lampa.SettingsApi.addParam({
-            component: 'more', // гарантовано існує в меню "Ще"
+            component: 'accent_color_plugin',
             param: {
                 name: STORAGE_KEY,
                 type: 'trigger',
@@ -90,21 +98,23 @@ body.${BODY_CLASS} .scroll__bar {
                 description: Lampa.Lang.translate('themes_animations_descr')
             },
             onChange: value => {
-                localStorage.setItem(STORAGE_KEY, value ? 'true' : 'false');
-                setTimeout(applyAnimations, 100);
+                const val = (value === true || value === 'true' || value === 1);
+                localStorage.setItem(STORAGE_KEY, val ? 'true' : 'false');
+                setTimeout(applyAnimations, 50);
             }
         });
 
-        setTimeout(applyAnimations, 300);
+        setTimeout(applyAnimations, 200);
     }
 
-    /** Запуск після готовності додатку */
-    function ready(fn) {
-        if (window.appready) fn();
-        else Lampa.Listener.follow('app', e => {
-            if (e.type === 'ready') fn();
+    /** Запуск після готовності Lampa */
+    if (window.appready) {
+        initSettings();
+    } else {
+        Lampa.Listener.follow('app', e => {
+            if (e.type === 'ready') {
+                initSettings();
+            }
         });
     }
-
-    ready(initSetting);
 })();
