@@ -1,6 +1,7 @@
 (function () {
     'use strict';
 
+    // Мовні ключі
     Lampa.Lang.add({
         themes_animations: {
             ru: 'Анимации интерфейса',
@@ -18,11 +19,16 @@
     const BODY_CLASS = 'no-animations';
     let observer = null;
 
+    // Безпечне оголошення body
+    const body = document.body || document.querySelector('body');
+
+    // Створення стилю для вимкнення анімацій
     function createStyle(enabled) {
         let css;
         if (!enabled) {
             css = `
 <style id="${STYLE_ID}">
+/* Глобальне вимкнення анімацій */
 body.${BODY_CLASS} *, 
 body.${BODY_CLASS} *::before, 
 body.${BODY_CLASS} *::after {
@@ -32,6 +38,14 @@ body.${BODY_CLASS} *::after {
   -webkit-animation: none !important;
   will-change: auto !important;
 }
+
+/* Дозволяємо рух скролу (щоб працювало підвантаження) */
+body.${BODY_CLASS} .scroll-body,
+body.${BODY_CLASS} .scroll__content {
+  transition: transform 0.1s !important;
+}
+
+/* Вимикаємо фокус-анімації */
 body.${BODY_CLASS} .focus, 
 body.${BODY_CLASS} :focus, 
 body.${BODY_CLASS} :focus-visible {
@@ -45,6 +59,7 @@ body.${BODY_CLASS} :focus-visible {
         return css;
     }
 
+    // Очищення інлайнових transition/animation
     function stripInlineAnimations(node) {
         if (!node || node.nodeType !== 1) return;
         try {
@@ -63,13 +78,24 @@ body.${BODY_CLASS} :focus-visible {
         }
     }
 
+    // Спостерігач DOM з винятками
     function startObserver() {
         stopObserver();
         observer = new MutationObserver(mutations => {
             for (const m of mutations) {
                 if (m.type === 'childList' && m.addedNodes) {
                     m.addedNodes.forEach(n => {
-                        if (n.nodeType === 1) stripInlineAnimations(n);
+                        if (!n || n.nodeType !== 1) return;
+                        // Пропускаємо динамічні елементи Lampa
+                        if (n.classList && (
+                            n.classList.contains('scroll-body') ||
+                            n.classList.contains('scroll__content') ||
+                            n.classList.contains('items-line') ||
+                            n.classList.contains('card') ||
+                            n.classList.contains('items-container')
+                        )) return;
+
+                        stripInlineAnimations(n);
                     });
                 } else if (m.type === 'attributes' && m.attributeName === 'style' && m.target) {
                     stripInlineAnimations(m.target);
@@ -94,6 +120,7 @@ body.${BODY_CLASS} :focus-visible {
         }
     }
 
+    // Застосування стану анімацій
     function applyAnimations() {
         const raw = localStorage.getItem('themes_animations');
         const enabled = (raw === null) ? true : (raw === 'true' || raw === true);
@@ -106,7 +133,7 @@ body.${BODY_CLASS} :focus-visible {
 
         if (!enabled) {
             document.documentElement.classList.add(BODY_CLASS);
-            if (document.body) stripInlineAnimations(document.body);
+            body && stripInlineAnimations(body);
             startObserver();
         } else {
             document.documentElement.classList.remove(BODY_CLASS);
@@ -114,6 +141,7 @@ body.${BODY_CLASS} :focus-visible {
         }
     }
 
+    // Ініціалізація параметра в меню
     function initAnimationsSetting() {
         if (localStorage.getItem('themes_animations') === null) {
             localStorage.setItem('themes_animations', 'true');
@@ -135,13 +163,14 @@ body.${BODY_CLASS} :focus-visible {
             onChange: value => {
                 const val = (value === true || value === 'true' || value === 1 || value === '1');
                 localStorage.setItem('themes_animations', val ? 'true' : 'false');
-                setTimeout(applyAnimations, 20);
+                setTimeout(applyAnimations, 30);
             }
         });
 
-        setTimeout(applyAnimations, 30);
+        setTimeout(applyAnimations, 50);
     }
 
+    // Запуск після готовності додатку
     if (window.appready) {
         initAnimationsSetting();
     } else {
