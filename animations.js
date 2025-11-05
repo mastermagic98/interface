@@ -10,29 +10,32 @@
             ru: 'Анимации интерфейса',
             en: 'Interface animations',
             uk: 'Анімації інтерфейсу'
+        },
+        themes_animations_descr: {
+            ru: 'Включить или выключить анимации интерфейса',
+            en: 'Enable or disable interface animations',
+            uk: 'Увімкнути або вимкнути анімації інтерфейсу'
         }
     });
 
-    /** Додає або видаляє CSS */
+    /** Додає або оновлює CSS */
     function createOrUpdateStyle(disableAnimations) {
         document.getElementById(STYLE_ID)?.remove();
 
-        if (!disableAnimations) {
-            return; // якщо анімації дозволені — не додаємо CSS
-        }
+        if (!disableAnimations) return;
 
         const style = document.createElement('style');
         style.id = STYLE_ID;
         style.textContent = `
-/* Вимкнення більшості transition/animation */
-body.${BODY_CLASS} *,
-body.${BODY_CLASS} *::before,
+/* Вимкнення усіх анімацій */
+body.${BODY_CLASS} *, 
+body.${BODY_CLASS} *::before, 
 body.${BODY_CLASS} *::after {
   transition: none !important;
   animation: none !important;
 }
 
-/* Для карток, меню, кнопок */
+/* Окремо для карток, меню, кнопок */
 body.${BODY_CLASS} .card,
 body.${BODY_CLASS} .focus,
 body.${BODY_CLASS} .selector,
@@ -45,7 +48,7 @@ body.${BODY_CLASS} .explorer-card__head-img.selector {
   animation: none !important;
 }
 
-/* Не чіпаємо елементи скролу */
+/* Не блокуємо плавність скролу */
 body.${BODY_CLASS} .scroll__body,
 body.${BODY_CLASS} .scroll__content,
 body.${BODY_CLASS} .scrollbar,
@@ -56,11 +59,10 @@ body.${BODY_CLASS} .scroll__bar {
         document.head.appendChild(style);
     }
 
-    /** Застосування стану */
+    /** Застосування поточного стану */
     function applyAnimations() {
         const disable = localStorage.getItem(STORAGE_KEY) === 'false';
         const body = document.body;
-
         if (!body) return;
 
         body.classList.toggle(BODY_CLASS, disable);
@@ -69,7 +71,7 @@ body.${BODY_CLASS} .scroll__bar {
         console.log('[Animations]', disable ? 'disabled' : 'enabled');
     }
 
-    /** Ініціалізація пункту в налаштуваннях */
+    /** Ініціалізація налаштування */
     function initSetting() {
         if (localStorage.getItem(STORAGE_KEY) === null)
             localStorage.setItem(STORAGE_KEY, 'true');
@@ -77,7 +79,7 @@ body.${BODY_CLASS} .scroll__bar {
         const current = localStorage.getItem(STORAGE_KEY) === 'true';
 
         Lampa.SettingsApi.addParam({
-            component: 'interface',
+            component: 'more', // гарантовано існує в меню "Ще"
             param: {
                 name: STORAGE_KEY,
                 type: 'trigger',
@@ -85,18 +87,18 @@ body.${BODY_CLASS} .scroll__bar {
             },
             field: {
                 name: Lampa.Lang.translate('themes_animations'),
-                description: 'Увімкнути або вимкнути анімації інтерфейсу (без впливу на підвантаження контенту)'
+                description: Lampa.Lang.translate('themes_animations_descr')
             },
             onChange: value => {
                 localStorage.setItem(STORAGE_KEY, value ? 'true' : 'false');
-                setTimeout(applyAnimations, 200);
+                setTimeout(applyAnimations, 100);
             }
         });
 
-        setTimeout(applyAnimations, 500);
+        setTimeout(applyAnimations, 300);
     }
 
-    /** Запуск після повного завантаження Lampa */
+    /** Запуск після готовності додатку */
     function ready(fn) {
         if (window.appready) fn();
         else Lampa.Listener.follow('app', e => {
