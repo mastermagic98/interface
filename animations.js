@@ -1,6 +1,10 @@
 (function () {
     'use strict';
 
+    const STYLE_ID = 'themes_animations';
+    const BODY_CLASS = 'no-animations';
+    const STORAGE_KEY = 'themes_animations';
+
     Lampa.Lang.add({
         themes_animations: {
             ru: 'Анимации интерфейса',
@@ -9,92 +13,96 @@
         }
     });
 
-    const STYLE_ID = 'themes_animations';
-    const BODY_CLASS = 'no-animations';
+    /** Додає або видаляє CSS */
+    function createOrUpdateStyle(disableAnimations) {
+        document.getElementById(STYLE_ID)?.remove();
 
-    function createStyle(enabled) {
-        if (enabled) return `<style id="${STYLE_ID}"></style>`;
+        if (!disableAnimations) {
+            return; // якщо анімації дозволені — не додаємо CSS
+        }
 
-        return `
-<style id="${STYLE_ID}">
-/* Повне вимкнення декоративних transition і animation */
-body.${BODY_CLASS} *:not(.scroll__body):not(.scroll__content):not(.scrollbar):not(.scroll__bar):not(.controller__focus):not(.layer__body):not(.items-line) {
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = `
+/* Вимкнення більшості transition/animation */
+body.${BODY_CLASS} *,
+body.${BODY_CLASS} *::before,
+body.${BODY_CLASS} *::after {
   transition: none !important;
   animation: none !important;
 }
 
-/* Фокус без анімації */
-body.${BODY_CLASS} .focus,
-body.${BODY_CLASS} :focus,
-body.${BODY_CLASS} :focus-visible {
-  transition: none !important;
-  animation: none !important;
-}
-
-/* Картки, кнопки, плашки */
+/* Для карток, меню, кнопок */
 body.${BODY_CLASS} .card,
-body.${BODY_CLASS} .torrent-item,
-body.${BODY_CLASS} .simple-button,
-body.${BODY_CLASS} .settings-param,
+body.${BODY_CLASS} .focus,
+body.${BODY_CLASS} .selector,
 body.${BODY_CLASS} .menu__item,
+body.${BODY_CLASS} .settings-param,
+body.${BODY_CLASS} .simple-button,
 body.${BODY_CLASS} .full-person,
-body.${BODY_CLASS} .explorer-card__head-img.selector,
-body.${BODY_CLASS} .items-cards .selector {
+body.${BODY_CLASS} .explorer-card__head-img.selector {
   transition: none !important;
   animation: none !important;
 }
 
-/* Не чіпаємо скрол */
+/* Не чіпаємо елементи скролу */
 body.${BODY_CLASS} .scroll__body,
 body.${BODY_CLASS} .scroll__content,
 body.${BODY_CLASS} .scrollbar,
 body.${BODY_CLASS} .scroll__bar {
   transition: all 0.3s ease !important;
 }
-</style>`;
+        `;
+        document.head.appendChild(style);
     }
 
+    /** Застосування стану */
     function applyAnimations() {
-        const raw = localStorage.getItem('themes_animations');
-        const enabled = (raw === null) ? true : (raw === 'true' || raw === true);
+        const disable = localStorage.getItem(STORAGE_KEY) === 'false';
+        const body = document.body;
 
-        document.getElementById(STYLE_ID)?.remove();
-        document.head.insertAdjacentHTML('beforeend', createStyle(enabled));
+        if (!body) return;
 
-        document.body.classList.toggle(BODY_CLASS, !enabled);
+        body.classList.toggle(BODY_CLASS, disable);
+        createOrUpdateStyle(disable);
+
+        console.log('[Animations]', disable ? 'disabled' : 'enabled');
     }
 
-    function initAnimationsSetting() {
-        if (localStorage.getItem('themes_animations') === null)
-            localStorage.setItem('themes_animations', 'true');
+    /** Ініціалізація пункту в налаштуваннях */
+    function initSetting() {
+        if (localStorage.getItem(STORAGE_KEY) === null)
+            localStorage.setItem(STORAGE_KEY, 'true');
 
-        const saved = localStorage.getItem('themes_animations') === 'true';
+        const current = localStorage.getItem(STORAGE_KEY) === 'true';
 
         Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
+            component: 'interface',
             param: {
-                name: 'themes_animations',
+                name: STORAGE_KEY,
                 type: 'trigger',
-                default: saved
+                default: current
             },
             field: {
                 name: Lampa.Lang.translate('themes_animations'),
-                description: Lampa.Lang.translate('Увімкнути або вимкнути декоративні анімації (без впливу на прокрутку та підвантаження контенту).')
+                description: 'Увімкнути або вимкнути анімації інтерфейсу (без впливу на підвантаження контенту)'
             },
             onChange: value => {
-                localStorage.setItem('themes_animations', value ? 'true' : 'false');
-                setTimeout(applyAnimations, 100);
+                localStorage.setItem(STORAGE_KEY, value ? 'true' : 'false');
+                setTimeout(applyAnimations, 200);
             }
         });
 
-        setTimeout(applyAnimations, 200);
+        setTimeout(applyAnimations, 500);
     }
 
-    if (window.appready) {
-        initAnimationsSetting();
-    } else {
-        Lampa.Listener.follow('app', e => {
-            if (e.type === 'ready') initAnimationsSetting();
+    /** Запуск після повного завантаження Lampa */
+    function ready(fn) {
+        if (window.appready) fn();
+        else Lampa.Listener.follow('app', e => {
+            if (e.type === 'ready') fn();
         });
     }
+
+    ready(initSetting);
 })();
