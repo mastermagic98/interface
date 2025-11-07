@@ -18,7 +18,9 @@
     var styleId = 'incard-style-control';
 
     function applyButtonStyles(){
-        var showIconsOnly = Lampa.Storage.get('incard_icons_only', false);
+        var iconsOnly = Lampa.Storage.get('incard_icons_only', false);
+        var showAll = Lampa.Storage.get('incard_show_all', true);
+
         var style = document.getElementById(styleId);
         if(!style){
             style = document.createElement('style');
@@ -26,15 +28,20 @@
             document.head.appendChild(style);
         }
 
-        if(showIconsOnly){
+        // логіка: якщо тільки іконки — ховаємо span
+        // якщо show_all — все видимо
+        if(iconsOnly){
             style.innerHTML = '.full-start__button span { display: none !important; }';
-        } else {
+        } else if(showAll){
             style.innerHTML = '.full-start__button span { display: inline-block !important; }';
+        } else {
+            style.innerHTML = '';
         }
     }
 
     function addSettings(){
         try {
+            // Показувати всі кнопки
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: { name: 'incard_show_all', type: 'trigger', default: true },
@@ -44,10 +51,12 @@
                 },
                 onChange: function(v){
                     Lampa.Storage.set('incard_show_all', !!v);
+                    if(v) Lampa.Storage.set('incard_icons_only', false); // скидаємо другий параметр
                     applyButtonStyles();
                 }
             });
 
+            // Показувати тільки іконки
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: { name: 'incard_icons_only', type: 'trigger', default: false },
@@ -57,6 +66,7 @@
                 },
                 onChange: function(v){
                     Lampa.Storage.set('incard_icons_only', !!v);
+                    if(v) Lampa.Storage.set('incard_show_all', false); // вимикаємо show_all
                     applyButtonStyles();
                 }
             });
