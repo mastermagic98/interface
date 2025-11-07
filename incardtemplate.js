@@ -5,34 +5,39 @@
         // --- Переклади ---
         Lampa.Lang.add({
             showbutton_desc: {
-                ru: "Отображает все кнопки действий в карточке",
-                en: "Display all action buttons in the card",
-                uk: "Відображає всі кнопки дій у картці"
+                ru: "Показывает большие кнопки действий в карточке",
+                en: "Shows large action buttons in the card",
+                uk: "Показує великі кнопки дій у картці"
             },
             showbuttonwn_desc: {
                 ru: "Оставить только иконки",
                 en: "Show only icons",
                 uk: "Залишити тільки іконки"
             },
-            showhidden_desc: {
-                ru: "Показать кнопки, скрытые под 'Смотреть'",
-                en: "Show buttons hidden under 'Watch'",
-                uk: "Показувати кнопки, приховані під «Дивитись»"
+            showall_desc: {
+                ru: "Показать все кнопки, включая скрытые под «Смотреть»",
+                en: "Show all buttons including hidden under 'Watch'",
+                uk: "Показувати всі кнопки, включно з прихованими під «Дивитись»"
             },
             showbutton_title: {
                 ru: "Показывать большие кнопки",
                 en: "Show large buttons",
                 uk: "Показувати великі кнопки"
+            },
+            showall_title: {
+                ru: "Показывать все кнопки",
+                en: "Show all buttons",
+                uk: "Показувати всі кнопки"
             }
         });
 
         var style_id = 'buttons-style';
 
-        // --- Основна логіка відображення ---
+        // --- Основна функція застосування стилів ---
         function applyButtonMode() {
             var showLarge = Lampa.Storage.get('showbutton', false);
             var onlyIcons = Lampa.Storage.get('showbuttonwn', false);
-            var showHidden = Lampa.Storage.get('showhidden', false);
+            var showAll = Lampa.Storage.get('showall', false);
 
             var style = document.getElementById(style_id);
             if (!style) {
@@ -43,31 +48,35 @@
 
             var css = '';
 
-            // Відображення великих кнопок
+            // Показувати великі кнопки
             if (showLarge) {
                 css += '.full-start__button, .full-start-new__button { display: flex !important; visibility: visible !important; opacity: 1 !important; }';
+            } else {
+                css += '.full-start__button, .full-start-new__button { display: flex; visibility: visible; opacity: 1; }';
             }
 
-            // Приховати текст, залишити іконки
+            // Показувати тільки іконки
             if (onlyIcons) {
                 css += '.full-start__button span, .full-start-new__button span { display: none !important; }';
             } else {
                 css += '.full-start__button span, .full-start-new__button span { display: inline-block !important; }';
             }
 
-            // Показати приховані кнопки під «Дивитись»
-            if (showHidden) {
+            // Показувати всі кнопки (включно з прихованими)
+            if (showAll) {
                 css += '.full-start__button.hide, .full-start-new__button.hide { display: flex !important; }';
             }
 
             style.innerHTML = css;
         }
 
-        // --- Розгортання всіх кнопок (адаптація вашого main$2) ---
+        // --- Повна логіка розгортання картки ---
         function showAllButtonsLogic() {
             Lampa.Listener.follow('full', function (e) {
-                if (e.type === 'complite' && Lampa.Storage.get('showbutton')) {
+                if ((e.type === 'render' || e.type === 'complite')) {
                     setTimeout(function () {
+                        if (!Lampa.Storage.get('showbutton')) return;
+
                         var fullContainer = e.object.activity.render();
                         var targetContainer = fullContainer.find('.full-start-new__buttons');
                         fullContainer.find('.button--play').remove();
@@ -80,20 +89,15 @@
                         allButtons.each(function () {
                             var $button = $(this);
                             var className = $button.attr('class');
-                            if (className.includes('online')) {
-                                categories.online.push($button);
-                            } else if (className.includes('torrent')) {
-                                categories.torrent.push($button);
-                            } else if (className.includes('trailer')) {
-                                categories.trailer.push($button);
-                            } else {
-                                categories.other.push($button.clone(true));
-                            }
+                            if (className.includes('online')) categories.online.push($button);
+                            else if (className.includes('torrent')) categories.torrent.push($button);
+                            else if (className.includes('trailer')) categories.trailer.push($button);
+                            else categories.other.push($button.clone(true));
                         });
 
                         var buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
-
                         targetContainer.empty();
+
                         buttonSortOrder.forEach(function (category) {
                             categories[category].forEach(function ($button) {
                                 targetContainer.append($button);
@@ -113,12 +117,13 @@
                         });
 
                         Lampa.Controller.toggle("full_start");
+                        applyButtonMode(); // одразу оновлюємо стилі
                     }, 100);
                 }
             });
         }
 
-        // --- Додаємо параметри у accent_color_plugin ---
+        // --- Параметри в accent_color_plugin ---
         function addSettings() {
             if (!Lampa.SettingsApi || !Lampa.SettingsApi.addParam) {
                 setTimeout(addSettings, 500);
@@ -128,11 +133,7 @@
             // 1️⃣ Показувати великі кнопки
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
-                param: {
-                    name: 'showbutton',
-                    type: 'trigger',
-                    default: false
-                },
+                param: { name: 'showbutton', type: 'trigger', default: false },
                 field: {
                     name: Lampa.Lang.translate('showbutton_title'),
                     description: Lampa.Lang.translate('showbutton_desc')
@@ -146,11 +147,7 @@
             // 2️⃣ Залишити тільки іконки
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
-                param: {
-                    name: 'showbuttonwn',
-                    type: 'trigger',
-                    default: false
-                },
+                param: { name: 'showbuttonwn', type: 'trigger', default: false },
                 field: {
                     name: Lampa.Lang.translate('showbuttonwn_desc'),
                     description: Lampa.Lang.translate('showbuttonwn_desc')
@@ -161,20 +158,16 @@
                 }
             });
 
-            // 3️⃣ Показувати кнопки, приховані під «Дивитись»
+            // 3️⃣ Показувати всі кнопки (включно з прихованими)
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
-                param: {
-                    name: 'showhidden',
-                    type: 'trigger',
-                    default: false
-                },
+                param: { name: 'showall', type: 'trigger', default: false },
                 field: {
-                    name: Lampa.Lang.translate('showhidden_desc'),
-                    description: Lampa.Lang.translate('showhidden_desc')
+                    name: Lampa.Lang.translate('showall_title'),
+                    description: Lampa.Lang.translate('showall_desc')
                 },
                 onChange: function (value) {
-                    Lampa.Storage.set('showhidden', value);
+                    Lampa.Storage.set('showall', value);
                     applyButtonMode();
                 }
             });
