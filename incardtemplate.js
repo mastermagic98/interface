@@ -3,7 +3,7 @@
 
     function main() {
         // --- Переклади ---
-        Lampa.Lang.add({
+        Lampa.Lang.add({ 
             lme_showbutton_desc: {
                 ru: "Выводит все кнопки действий в карточке",
                 en: "Show all action buttons in card",
