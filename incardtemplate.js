@@ -1,7 +1,7 @@
-(function(){
+(function () {
     'use strict';
 
-    // --- Переклади ---
+    // --- Мова ---
     Lampa.Lang.add({
         incard_buttons_mode: {
             uk: 'Кнопки в картці',
@@ -23,19 +23,17 @@
     var STORAGE_KEY = 'incard_buttons_mode';
     var STYLE_ID = 'incard-buttons-mode-style';
 
-    function getMode(){
-        var val = 'all';
-        try { val = Lampa.Storage.get(STORAGE_KEY, 'all'); } catch(e){}
-        return val;
+    function getMode() {
+        return Lampa.Storage.get(STORAGE_KEY, 'all');
     }
 
-    function setMode(v){
-        try { Lampa.Storage.set(STORAGE_KEY, v); } catch(e){}
+    function setMode(v) {
+        Lampa.Storage.set(STORAGE_KEY, v);
     }
 
-    function updateStyleForMode(mode){
+    function updateStyle(mode) {
         var style = document.getElementById(STYLE_ID);
-        if(!style){
+        if (!style) {
             style = document.createElement('style');
             style.id = STYLE_ID;
             document.head.appendChild(style);
@@ -48,61 +46,63 @@
             '.full-start-new__buttons .full-start-new__button span'
         ].join(', ');
 
-        if(mode === 'icons'){
+        if (mode === 'icons') {
             style.innerHTML = selectors + ' { display: none !important; }';
         } else {
             style.innerHTML = selectors + ' { display: inline-block !important; }';
         }
     }
 
-    function restoreButtons(){
+    function restoreButtons() {
         var btns = document.querySelectorAll('.full-start__button, .full-start-new__button');
-        for(var i=0;i<btns.length;i++){
-            var b = btns[i];
-            if(!b) continue;
+        btns.forEach(function (b) {
             b.classList.remove('hide', 'hidden');
             b.style.display = '';
             b.style.visibility = '';
             var spans = b.querySelectorAll('span');
-            for(var j=0;j<spans.length;j++){
-                spans[j].style.display = '';
-            }
-        }
+            spans.forEach(function (s) {
+                s.style.display = '';
+            });
+        });
     }
 
-    function applyToOpenCard(){
+    function applyToOpenCard() {
         restoreButtons();
-        updateStyleForMode(getMode());
+        updateStyle(getMode());
     }
 
-    function addSetting(){
-        // Якщо accent_color_plugin ще не створений — повторюємо спробу
-        if(!Lampa.SettingsApi.components || !Lampa.SettingsApi.components.accent_color_plugin){
-            setTimeout(addSetting, 500);
+    function addSettings() {
+        // чекаємо доки з’явиться accent_color_plugin
+        if (!Lampa.SettingsApi.components || !Lampa.SettingsApi.components.accent_color_plugin) {
+            setTimeout(addSettings, 500);
             return;
         }
 
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
-            param: { name: STORAGE_KEY, type: 'list', default: 'all' },
+            param: {
+                name: STORAGE_KEY,
+                type: 'list',
+                default: 'all'
+            },
             field: {
                 name: Lampa.Lang.translate('incard_buttons_mode'),
-                description: Lampa.Lang.translate('incard_mode_all') + ' / ' + Lampa.Lang.translate('incard_mode_icons'),
+                description: '',
                 values: [
                     { id: 'all', name: Lampa.Lang.translate('incard_mode_all') },
                     { id: 'icons', name: Lampa.Lang.translate('incard_mode_icons') }
                 ]
             },
-            onChange: function(v){
+            onChange: function (v) {
                 setMode(v);
                 applyToOpenCard();
             }
         });
     }
 
-    function hookFullRender(){
-        Lampa.Listener.follow('full', function(e){
-            if(e.type === 'render'){
+    function hookFullRender() {
+        Lampa.Listener.follow('full', function (e) {
+            if (e.type === 'render') {
                 setTimeout(applyToOpenCard, 100);
                 setTimeout(applyToOpenCard, 500);
                 setTimeout(applyToOpenCard, 1000);
@@ -110,13 +110,15 @@
         });
     }
 
-    function init(){
-        addSetting();
+    function init() {
+        addSettings();
         applyToOpenCard();
         hookFullRender();
     }
 
-    if(window.appready) init();
-    else Lampa.Listener.follow('app', function(e){ if(e.type === 'ready') init(); });
+    if (window.appready) init();
+    else Lampa.Listener.follow('app', function (e) {
+        if (e.type === 'ready') init();
+    });
 
 })();
