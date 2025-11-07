@@ -4,41 +4,40 @@
     function main() {
         // --- Переклади ---
         Lampa.Lang.add({
-            lme_showbutton_desc: {
+            showbutton_desc: {
                 ru: "Показывает большие кнопки действий в карточке",
                 en: "Show large action buttons in card",
                 uk: "Показує великі кнопки дій у картці"
             },
-            lme_showbuttonwn_desc: {
+            showbuttonwn_desc: {
                 ru: "Оставить только иконки",
                 en: "Keep only icons",
                 uk: "Залишити тільки іконки"
             },
-            lme_showhidden_desc: {
+            showhidden_desc: {
                 ru: "Показывает кнопки, которые скрыты под кнопкой Смотреть",
                 en: "Show buttons hidden under 'Watch'",
                 uk: "Показувати кнопки, які ховаються під кнопкою 'Дивитись'"
             },
-            lme_showbutton_title: {
-                ru: "Показ больших кнопок",
+            showbutton_title: {
+                ru: "Показывать большие кнопки",
                 en: "Show large buttons",
                 uk: "Показувати великі кнопки"
             },
-            lme_showhidden_title: {
-                ru: "Показ скрытых кнопок",
+            showhidden_title: {
+                ru: "Показывать скрытые кнопки",
                 en: "Show hidden buttons",
                 uk: "Показувати приховані кнопки"
             }
         });
 
-        var style_id = 'lme-buttons-style';
+        var style_id = 'buttons-style';
 
         function applyButtonMode() {
-            var showBig = Lampa.Storage.get('lme_showbutton', false);
-            var onlyIcons = Lampa.Storage.get('lme_showbuttonwn', false);
-            var showHidden = Lampa.Storage.get('lme_showhidden', false);
+            var showBig = Lampa.Storage.get('showbutton', false);
+            var onlyIcons = Lampa.Storage.get('showbuttonwn', false);
+            var showHidden = Lampa.Storage.get('showhidden', false);
 
-            // Створюємо або оновлюємо <style>
             var style = document.getElementById(style_id);
             if (!style) {
                 style = document.createElement('style');
@@ -48,10 +47,13 @@
 
             var css = '';
 
-            // 1️⃣ Великі кнопки
+            // 1️⃣ Великі кнопки (якщо вкл.)
             if (showBig) {
                 css += '.full-start__button, .full-start-new__button { display: flex !important; visibility: visible !important; opacity: 1 !important; }';
                 css += '.full-start__button.hide, .full-start-new__button.hide { display: flex !important; }';
+            } else {
+                css += '.full-start__button, .full-start-new__button { display: none !important; }';
+                css += '.full-start__button.button--play, .full-start-new__button.button--play { display: flex !important; }';
             }
 
             // 2️⃣ Тільки іконки
@@ -80,16 +82,16 @@
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: {
-                    name: 'lme_showbutton',
+                    name: 'showbutton',
                     type: 'trigger',
                     default: false
                 },
                 field: {
-                    name: Lampa.Lang.translate('lme_showbutton_title'),
-                    description: Lampa.Lang.translate('lme_showbutton_desc')
+                    name: Lampa.Lang.translate('showbutton_title'),
+                    description: Lampa.Lang.translate('showbutton_desc')
                 },
                 onChange: function (value) {
-                    Lampa.Storage.set('lme_showbutton', value);
+                    Lampa.Storage.set('showbutton', value);
                     applyButtonMode();
                 }
             });
@@ -98,40 +100,40 @@
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: {
-                    name: 'lme_showbuttonwn',
+                    name: 'showbuttonwn',
                     type: 'trigger',
                     default: false
                 },
                 field: {
-                    name: Lampa.Lang.translate('lme_showbuttonwn_desc'),
-                    description: Lampa.Lang.translate('lme_showbuttonwn_desc')
+                    name: Lampa.Lang.translate('showbuttonwn_desc'),
+                    description: Lampa.Lang.translate('showbuttonwn_desc')
                 },
                 onChange: function (value) {
-                    Lampa.Storage.set('lme_showbuttonwn', value);
+                    Lampa.Storage.set('showbuttonwn', value);
                     applyButtonMode();
                 }
             });
 
-            // 3️⃣ Показувати кнопки з “Дивитись”
+            // 3️⃣ Показувати приховані кнопки з “Дивитись”
             Lampa.SettingsApi.addParam({
                 component: 'accent_color_plugin',
                 param: {
-                    name: 'lme_showhidden',
+                    name: 'showhidden',
                     type: 'trigger',
                     default: false
                 },
                 field: {
-                    name: Lampa.Lang.translate('lme_showhidden_title'),
-                    description: Lampa.Lang.translate('lme_showhidden_desc')
+                    name: Lampa.Lang.translate('showhidden_title'),
+                    description: Lampa.Lang.translate('showhidden_desc')
                 },
                 onChange: function (value) {
-                    Lampa.Storage.set('lme_showhidden', value);
+                    Lampa.Storage.set('showhidden', value);
                     applyButtonMode();
                 }
             });
         }
 
-        // --- Слухач рендеру картки ---
+        // --- Рендер картки ---
         Lampa.Listener.follow('full', function (e) {
             if (e.type === 'render') {
                 setTimeout(applyButtonMode, 100);
