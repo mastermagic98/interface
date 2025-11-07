@@ -60,8 +60,7 @@
         for(var i=0;i<btns.length;i++){
             var b = btns[i];
             if(!b) continue;
-            b.classList.remove('hide');
-            b.classList.remove('hidden');
+            b.classList.remove('hide', 'hidden');
             b.style.display = '';
             b.style.visibility = '';
             var spans = b.querySelectorAll('span');
@@ -77,8 +76,14 @@
     }
 
     function addSetting(){
+        // Якщо accent_color_plugin ще не створений — повторюємо спробу
+        if(!Lampa.SettingsApi.components || !Lampa.SettingsApi.components.accent_color_plugin){
+            setTimeout(addSetting, 500);
+            return;
+        }
+
         Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin', // жорстко додаємо в цю категорію
+            component: 'accent_color_plugin',
             param: { name: STORAGE_KEY, type: 'list', default: 'all' },
             field: {
                 name: Lampa.Lang.translate('incard_buttons_mode'),
@@ -98,9 +103,9 @@
     function hookFullRender(){
         Lampa.Listener.follow('full', function(e){
             if(e.type === 'render'){
-                setTimeout(applyToOpenCard, 50);
-                setTimeout(applyToOpenCard, 300);
-                setTimeout(applyToOpenCard, 800);
+                setTimeout(applyToOpenCard, 100);
+                setTimeout(applyToOpenCard, 500);
+                setTimeout(applyToOpenCard, 1000);
             }
         });
     }
