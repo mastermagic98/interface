@@ -5,14 +5,14 @@
   function Lang() {
     Lampa.Lang.add({
       bigbuttons_name: {
-        ru: "Текст на всех кнопках",
-        en: "Text on all buttons",
-        uk: "Текст на всіх кнопках"
+        ru: "Великі кнопки",
+        en: "Large buttons",
+        uk: "Великі кнопки"
       },
       bigbuttons_desc: {
-        ru: "Показывает текст на всех кнопках, даже без фокуса (на мобильных — скрывается)",
-        en: "Shows text on all buttons, even without focus (hidden on mobile)",
-        uk: "Показує текст на всіх кнопках, навіть без фокусу (на мобільних — приховується)"
+        ru: "Збільшує розмір кнопок і показує текст на всіх (на мобільних — компактний режим)",
+        en: "Increases button size and shows text on all (compact on mobile)",
+        uk: "Збільшує розмір кнопок і показує текст на всіх (на мобільних — компактний режим)"
       },
       showbutton_name: {
         ru: "Все кнопки в карточке",
@@ -42,17 +42,39 @@
     });
   }
 
-  // --- Стилі для тексту на всіх кнопках (без перезавантаження) ---
+  // --- Стилі для великих кнопок (збільшення розміру + текст без фокусу) ---
   function applyBigButtons() {
     var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
     $('#accent_color_bigbuttons').remove();
 
     if (enabled) {
       var style = '<style id="accent_color_bigbuttons">' +
-        '.full-start-new__buttons .full-start__button:not(.focus) span { display: inline; }' +
-        '@media screen and (max-width: 580px) { ' +
-        '  .full-start-new__buttons { overflow: auto; } ' +
-        '  .full-start-new__buttons .full-start__button:not(.focus) span { display: none; } ' +
+        // Збільшення кнопок
+        '.full-start-new__buttons .full-start__button {' +
+        '  min-width: 120px !important;' +
+        '  padding: 8px 12px !important;' +
+        '  font-size: 14px !important;' +
+        '}' +
+        // Текст на всіх кнопках (без фокусу)
+        '.full-start-new__buttons .full-start__button:not(.focus) span {' +
+        '  display: inline !important;' +
+        '}' +
+        // Мобільна адаптація
+        '@media screen and (max-width: 580px) {' +
+        '  .full-start-new__buttons {' +
+        '    overflow-x: auto;' +
+        '    overflow-y: hidden;' +
+        '    white-space: nowrap;' +
+        '    padding-bottom: 10px;' +
+        '  }' +
+        '  .full-start-new__buttons .full-start__button {' +
+        '    min-width: 80px !important;' +
+        '    padding: 6px 8px !important;' +
+        '    font-size: 12px !important;' +
+        '  }' +
+        '  .full-start-new__buttons .full-start__button:not(.focus) span {' +
+        '    display: none !important;' +
+        '  }' +
         '}' +
         '</style>';
       $('body').append(style);
@@ -61,7 +83,7 @@
 
   // --- Налаштування ---
   function Settings() {
-    // 1️⃣ Текст на всіх кнопках (без перезавантаження)
+    // 1️⃣ Великі кнопки (без перезавантаження)
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -102,7 +124,7 @@
       }
     });
 
-    // 3️⃣ Сховати текст — тільки якщо showbutton увімкнено (з перезавантаженням)
+    // 3️⃣ Сховати текст — тільки якщо showbutton увімкнено
     if (Lampa.Storage.get('showbutton') === true) {
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
@@ -173,9 +195,6 @@
               justifyContent: 'flex-start'
             });
 
-            // Застосувати bigbuttons до поточної картки
-            applyBigButtonsToCard(targetContainer);
-
             Lampa.Controller.toggle('full_start');
           } catch (err) {
             console.error('[ShowButtons Plugin Error]', err);
@@ -185,23 +204,13 @@
     });
   }
 
-  // --- Застосування bigbuttons до конкретної картки (для динаміки) ---
-  function applyBigButtonsToCard(container) {
-    if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
-      container.find('.full-start__button:not(.focus) span').css('display', 'inline');
-      if (window.innerWidth <= 580) {
-        container.find('.full-start__button:not(.focus) span').css('display', 'none');
-      }
-    }
-  }
-
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "1.4.0",
+    version: "1.5.0",
     author: "@chatgpt",
-    name: "Show Buttons + Text in Card",
-    description: "Виводить усі кнопки в картці, дозволяє приховати текст та показувати його на всіх кнопках без фокусу (без перезавантаження).",
+    name: "Show Buttons + Large Buttons",
+    description: "Виводить усі кнопки в картці + збільшує їх розмір і показує текст на всіх (без перезавантаження).",
     component: "accent_color_plugin"
   };
 
@@ -209,15 +218,21 @@
   function add() {
     Lang();
     Settings();
-    applyBigButtons(); // Застосовуємо глобальні стилі
+    applyBigButtons(); // Застосовуємо стилі одразу
 
-    // Динамічне застосування при відкритті картки
+    // Динамічне оновлення при відкритті картки
     Lampa.Listener.follow('full', function (e) {
       if (e.type === 'complite') {
         setTimeout(function () {
           var fullContainer = e.object.activity.render();
           var targetContainer = fullContainer.find('.full-start-new__buttons');
-          applyBigButtonsToCard(targetContainer);
+          if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
+            targetContainer.find('.full-start__button').css({
+              'min-width': (window.innerWidth <= 580 ? '80px' : '120px'),
+              'padding': (window.innerWidth <= 580 ? '6px 8px' : '8px 12px'),
+              'font-size': (window.innerWidth <= 580 ? '12px' : '14px')
+            });
+          }
         }, 200);
       }
     });
