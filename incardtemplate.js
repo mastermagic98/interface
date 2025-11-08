@@ -4,6 +4,16 @@
   // --- Локалізація ---
   function Lang() {
     Lampa.Lang.add({
+      bigbuttons_name: {
+        ru: "Текст на всех кнопках",
+        en: "Text on all buttons",
+        uk: "Текст на всіх кнопках"
+      },
+      bigbuttons_desc: {
+        ru: "Показывает текст на всех кнопках, даже без фокуса (на мобильных — скрывается)",
+        en: "Shows text on all buttons, even without focus (hidden on mobile)",
+        uk: "Показує текст на всіх кнопках, навіть без фокусу (на мобільних — приховується)"
+      },
       showbutton_name: {
         ru: "Все кнопки в карточке",
         en: "All buttons in card",
@@ -24,16 +34,6 @@
         en: "Show only icons on buttons (works when all buttons are enabled)",
         uk: "Показує лише іконки на кнопках (працює при ввімкненні всіх кнопок)"
       },
-      bigbuttons_name: {
-        ru: "Текст на всех кнопках",
-        en: "Text on all buttons",
-        uk: "Текст на всіх кнопках"
-      },
-      bigbuttons_desc: {
-        ru: "Показывает текст на всех кнопках, даже без фокуса (на мобильных — скрывается)",
-        en: "Shows text on all buttons, even without focus (hidden on mobile)",
-        uk: "Показує текст на всіх кнопках, навіть без фокусу (на мобільних — приховується)"
-      },
       reloading: {
         ru: "Перезагрузка...",
         en: "Reloading...",
@@ -42,9 +42,51 @@
     });
   }
 
+  // --- Стилі для тексту на всіх кнопках (незалежно від showbutton) ---
+  function applyBigButtons() {
+    var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
+    $('#accent_color_bigbuttons').remove();
+
+    if (enabled) {
+      var style = '<style id="accent_color_bigbuttons">' +
+        '.full-start-new__buttons .full-start__button:not(.focus) span,' +
+        '.full-start__button:not(.focus) span { display: inline !important; }' +
+        '@media screen and (max-width: 580px) {' +
+        '  .full-start-new__buttons,' +
+        '  .full-start__buttons { overflow-x: auto; overflow-y: hidden; white-space: nowrap; }' +
+        '  .full-start-new__buttons .full-start__button:not(.focus) span,' +
+        '  .full-start__button:not(.focus) span { display: none !important; }' +
+        '}' +
+        '</style>';
+      $('body').append(style);
+    }
+  }
+
   // --- Налаштування ---
   function Settings() {
-    // 1️⃣ Усі кнопки в картці
+    // 1️⃣ Текст на всіх кнопках (на початку, незалежно від showbutton)
+    Lampa.SettingsApi.addParam({
+      component: "accent_color_plugin",
+      param: {
+        name: "bigbuttons",
+        type: "trigger",
+        default: false
+      },
+      field: {
+        name: Lampa.Lang.translate('bigbuttons_name'),
+        description: Lampa.Lang.translate('bigbuttons_desc')
+      },
+      onChange: function (value) {
+        Lampa.Storage.set('bigbuttons', value);
+        Lampa.Settings.update();
+        setTimeout(function () {
+          Lampa.Noty.show(Lampa.Lang.translate('reloading'));
+          location.reload();
+        }, 300);
+      }
+    });
+
+    // 2️⃣ Усі кнопки в картці
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -59,14 +101,14 @@
       onChange: function (value) {
         Lampa.Storage.set('showbutton', value);
         Lampa.Settings.update();
-        setTimeout(() => {
+        setTimeout(function () {
           Lampa.Noty.show(Lampa.Lang.translate('reloading'));
           location.reload();
         }, 300);
       }
     });
 
-    // 2️⃣ Сховати текст (тільки якщо showbutton увімкнено)
+    // 3️⃣ Сховати текст — тільки якщо showbutton увімкнено
     if (Lampa.Storage.get('showbutton') === true) {
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
@@ -82,54 +124,12 @@
         onChange: function (value) {
           Lampa.Storage.set('showbuttonwn', value);
           Lampa.Settings.update();
-          setTimeout(() => {
+          setTimeout(function () {
             Lampa.Noty.show(Lampa.Lang.translate('reloading'));
             location.reload();
           }, 300);
         }
       });
-    }
-
-    // 3️⃣ Текст на всіх кнопках без фокусу
-    Lampa.SettingsApi.addParam({
-      component: "accent_color_plugin",
-      param: {
-        name: "bigbuttons",
-        type: "trigger",
-        default: false
-      },
-      field: {
-        name: Lampa.Lang.translate('bigbuttons_name'),
-        description: Lampa.Lang.translate('bigbuttons_desc')
-      },
-      onChange: function () {
-        applyBigButtons();
-      }
-    });
-  }
-
-  // --- Стилі для тексту на всіх кнопках ---
-  function applyBigButtons() {
-    var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
-    $('#accent_color_bigbuttons').remove();
-
-    if (enabled) {
-      var style = '<style id="accent_color_bigbuttons">' +
-        '.full-start-new__buttons .full-start__button:not(.focus) span {' +
-        '  display: inline !important;' +
-        '}' +
-        '@media screen and (max-width: 580px) {' +
-        '  .full-start-new__buttons {' +
-        '    overflow-x: auto;' +
-        '    overflow-y: hidden;' +
-        '    white-space: nowrap;' +
-        '  }' +
-        '  .full-start-new__buttons .full-start__button:not(.focus) span {' +
-        '    display: none !important;' +
-        '  }' +
-        '}' +
-        '</style>';
-      $('body').append(style);
     }
   }
 
@@ -141,25 +141,25 @@
           try {
             if (Lampa.Storage.get('showbutton') !== true) return;
 
-            const fullContainer = e.object.activity.render();
-            const targetContainer = fullContainer.find('.full-start-new__buttons');
+            var fullContainer = e.object.activity.render();
+            var targetContainer = fullContainer.find('.full-start-new__buttons');
             fullContainer.find('.button--play').remove();
 
-            const allButtons = fullContainer
+            var allButtons = fullContainer
               .find('.buttons--container .full-start__button')
               .add(targetContainer.find('.full-start__button'));
 
-            const categories = { online: [], torrent: [], trailer: [], other: [] };
+            var categories = { online: [], torrent: [], trailer: [], other: [] };
             allButtons.each(function () {
-              const $button = $(this);
-              const className = $button.attr('class') || '';
-              if (className.includes('online')) categories.online.push($button);
-              else if (className.includes('torrent')) categories.torrent.push($button);
-              else if (className.includes('trailer')) categories.trailer.push($button);
+              var $button = $(this);
+              var className = $button.attr('class') || '';
+              if (className.indexOf('online') !== -1) categories.online.push($button);
+              else if (className.indexOf('torrent') !== -1) categories.torrent.push($button);
+              else if (className.indexOf('trailer') !== -1) categories.trailer.push($button);
               else categories.other.push($button.clone(true));
             });
 
-            const order = ['torrent', 'online', 'trailer', 'other'];
+            var order = ['torrent', 'online', 'trailer', 'other'];
             targetContainer.empty();
             order.forEach(function (c) {
               categories[c].forEach(function ($b) {
@@ -169,10 +169,9 @@
 
             // Сховати текст, якщо увімкнено
             if (Lampa.Storage.get('showbuttonwn') === true) {
-              targetContainer.find("span").remove();
+              targetContainer.find('span').remove();
             }
 
-            // Стилі для контейнера
             targetContainer.css({
               display: 'flex',
               flexWrap: 'wrap',
@@ -180,7 +179,7 @@
               justifyContent: 'flex-start'
             });
 
-            Lampa.Controller.toggle("full_start");
+            Lampa.Controller.toggle('full_start');
           } catch (err) {
             console.error('[ShowButtons Plugin Error]', err);
           }
@@ -190,9 +189,9 @@
   }
 
   // --- Маніфест ---
-  const manifest = {
+  var manifest = {
     type: "other",
-    version: "1.2.0",
+    version: "1.3.0",
     author: "@chatgpt",
     name: "Show Buttons + Text in Card",
     description: "Виводить усі кнопки в картці, дозволяє приховати текст та показувати його на всіх кнопках без фокусу.",
@@ -203,7 +202,7 @@
   function add() {
     Lang();
     Settings();
-    applyBigButtons(); // Застосовуємо стилі одразу
+    applyBigButtons(); // Застосовуємо стилі одразу (працює навіть без showbutton)
     Lampa.Manifest.plugins = manifest;
 
     if (Lampa.Storage.get('showbutton') === true) {
@@ -216,8 +215,8 @@
     if (window.appready) {
       add();
     } else {
-      Lampa.Listener.follow("app", function (e) {
-        if (e.type === "ready") {
+      Lampa.Listener.follow('app', function (e) {
+        if (e.type === 'ready') {
           add();
         }
       });
