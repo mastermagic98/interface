@@ -26,64 +26,73 @@
     });
   }
 
-  // 🔹 Основна функція обробки картки
+  // Безпечна функція обробки картки
   function processCard() {
-    const active = Lampa.Activity.active();
-    if (!active) return;
+    try {
+      const active = Lampa.Activity.active();
+      if (!active || typeof active.render !== 'function') return;
 
-    const fullContainer = active.render();
-    if (!fullContainer.length) return;
+      const fullContainer = active.render();
+      if (!fullContainer || !fullContainer.length) return;
 
-    const targetContainer = fullContainer.find('.full-start-new__buttons');
-    if (!targetContainer.length) return;
+      const targetContainer = fullContainer.find('.full-start-new__buttons');
+      if (!targetContainer.length) return;
 
-    fullContainer.find('.button--play').remove();
+      // Перевіряємо, чи є кнопки взагалі
+      const allButtons = fullContainer.find('.buttons--container .full-start__button')
+        .add(targetContainer.find('.full-start__button'));
+      if (!allButtons.length) return;
 
-    const allButtons = fullContainer
-      .find('.buttons--container .full-start__button')
-      .add(targetContainer.find('.full-start__button'));
+      // Видаляємо "play" (якщо є)
+      fullContainer.find('.button--play').remove();
 
-    const categories = {
-      online: [],
-      torrent: [],
-      trailer: [],
-      other: []
-    };
+      const categories = {
+        online: [],
+        torrent: [],
+        trailer: [],
+        other: []
+      };
 
-    allButtons.each(function () {
-      const $button = $(this);
-      const className = $button.attr('class') || '';
-      if (className.includes('online')) categories.online.push($button);
-      else if (className.includes('torrent')) categories.torrent.push($button);
-      else if (className.includes('trailer')) categories.trailer.push($button);
-      else categories.other.push($button.clone(true));
-    });
-
-    const buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
-
-    targetContainer.empty();
-    buttonSortOrder.forEach(function (category) {
-      categories[category].forEach(function ($button) {
-        targetContainer.append($button);
+      allButtons.each(function () {
+        const $button = $(this);
+        const className = $button.attr('class') || '';
+        if (className.includes('online')) categories.online.push($button);
+        else if (className.includes('torrent')) categories.torrent.push($button);
+        else if (className.includes('trailer')) categories.trailer.push($button);
+        else categories.other.push($button.clone(true));
       });
-    });
 
-    // 🔸 застосування стилів
-    targetContainer.css({
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '10px'
-    });
+      const buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
 
-    // 🔸 приховування тексту на кнопках
-    if (Lampa.Storage.get('showbuttonwn') === true) {
-      targetContainer.find("span").remove();
+      targetContainer.empty();
+      buttonSortOrder.forEach(function (category) {
+        (categories[category] || []).forEach(function ($button) {
+          targetContainer.append($button);
+        });
+      });
+
+      // Стилі для переносу кнопок
+      targetContainer.css({
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '10px'
+      });
+
+      // Якщо ввімкнено “лише іконки” — видаляємо текст
+      if (Lampa.Storage.get('showbuttonwn') === true) {
+        targetContainer.find("span").remove();
+      }
+
+      // Безпечне оновлення контролера
+      if (Lampa.Controller && typeof Lampa.Controller.toggle === 'function') {
+        Lampa.Controller.toggle("full_start");
+      }
+    } catch (err) {
+      console.error('ShowButtons plugin error:', err);
     }
-
-    Lampa.Controller.toggle("full_start");
   }
 
-  // 🔹 Додаємо налаштування
+  // Налаштування
   function Settings() {
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
@@ -100,10 +109,10 @@
         Lampa.Storage.set('showbutton', value);
         if (value === true) {
           addHideTextOption();
-          processCard(); // 🔸 застосовує одразу
+          setTimeout(processCard, 200); // затримка для безпечного оновлення
         } else {
           Lampa.Storage.set('showbuttonwn', false);
-          processCard(); // 🔸 прибирає ефект одразу
+          setTimeout(processCard, 200);
         }
         Lampa.Settings.update();
       }
@@ -114,7 +123,7 @@
     }
   }
 
-  // 🔹 Додаємо опцію "Сховати текст на кнопках"
+  // Друга опція
   function addHideTextOption() {
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
@@ -129,27 +138,27 @@
       },
       onChange: function (value) {
         Lampa.Storage.set('showbuttonwn', value);
-        processCard(); // 🔸 застосовує ефект миттєво
+        setTimeout(processCard, 200);
         Lampa.Settings.update();
       }
     });
   }
 
-  // 🔹 Слухаємо подію відкриття картки
+  // Обробник відкриття картки
   function initListener() {
     Lampa.Listener.follow('full', function (e) {
       if (e.type === 'complite' && Lampa.Storage.get('showbutton') === true) {
-        setTimeout(processCard, 100);
+        setTimeout(processCard, 150);
       }
     });
   }
 
   const manifest = {
     type: "other",
-    version: "1.0.3",
+    version: "1.0.4",
     author: "@chatgpt",
     name: "Show Buttons in Card",
-    description: "Показує всі кнопки дій у картці, з можливістю приховати текст без перезавантаження",
+    description: "Показує всі кнопки дій у картці з можливістю приховати текст, без помилок",
     component: "accent_color_plugin"
   };
 
@@ -158,7 +167,7 @@
     Settings();
     initListener();
     Lampa.Manifest.plugins = manifest;
-    if (Lampa.Storage.get('showbutton') === true) processCard();
+    if (Lampa.Storage.get('showbutton') === true) setTimeout(processCard, 300);
   }
 
   function startPlugin() {
