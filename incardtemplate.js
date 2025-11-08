@@ -1,143 +1,148 @@
 (function () {
-    'use strict';
+  'use strict';
 
-    function main() {
-        // --- Мовні переклади ---
-        Lampa.Lang.add({
-            show_big_buttons_desc: {
-                ru: "Отображает все крупные кнопки в карточке",
-                en: "Show all large buttons in card",
-                uk: "Показує всі великі кнопки у картці"
-            },
-            show_hidden_buttons_desc: {
-                ru: "Показывает кнопки, скрытые под «Смотреть»",
-                en: "Show buttons hidden under 'Watch'",
-                uk: "Показує кнопки, приховані під «Дивитись»"
-            },
-            icons_only_desc: {
-                ru: "Оставить только иконки без текста",
-                en: "Keep only icons, hide text",
-                uk: "Залишити тільки іконки без тексту"
-            },
-            show_text_hover_desc: {
-                ru: "Показывать текст кнопок при наведении",
-                en: "Show button text on hover",
-                uk: "Показувати текст на кнопках при наведенні"
-            }
-        });
+  function Lang() {
+    Lampa.Lang.add({
+      showbutton_desc: {
+        ru: "Выводит все кнопки действий в карточке",
+        en: "Show all action buttons in card",
+        uk: "Виводить усі кнопки дій у картці"
+      },
+      showbuttonwn_desc: {
+        ru: "Показывать только иконки",
+        en: "Show only icons",
+        uk: "Відображати тільки іконки"
+      },
+      showbutton_name: {
+        ru: "Все кнопки в карточке",
+        en: "All buttons in card",
+        uk: "Усі кнопки в картці"
+      },
+      showbuttonwn_name: {
+        ru: "Скрыть текст на кнопках",
+        en: "Hide text on buttons",
+        uk: "Сховати текст на кнопках"
+      }
+    });
+  }
 
-        // --- Параметри ---
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'show_big_buttons',
-                type: 'trigger',
-                'default': false
-            },
-            field: {
-                name: 'Показувати великі кнопки',
-                description: Lampa.Lang.translate('show_big_buttons_desc')
-            },
-            onChange: function (value) {
-                Lampa.Storage.set('show_big_buttons', value);
-                applySettings();
-            }
-        });
+  function Settings() {
+    // Основний параметр: показати всі кнопки
+    Lampa.SettingsApi.addParam({
+      component: "showbutton",
+      param: {
+        name: "showbutton",
+        type: "trigger",
+        default: false
+      },
+      field: {
+        name: Lampa.Lang.translate('showbutton_name'),
+        description: Lampa.Lang.translate('showbutton_desc')
+      },
+      onChange: function () {
+        Lampa.Settings.update();
+      }
+    });
 
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'show_hidden_buttons',
-                type: 'trigger',
-                'default': false
-            },
-            field: {
-                name: 'Не приховувати кнопки',
-                description: Lampa.Lang.translate('show_hidden_buttons_desc')
-            },
-            onChange: function (value) {
-                Lampa.Storage.set('show_hidden_buttons', value);
-                applySettings();
-            }
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'icons_only',
-                type: 'trigger',
-                'default': false
-            },
-            field: {
-                name: 'Залишити тільки іконки',
-                description: Lampa.Lang.translate('icons_only_desc')
-            },
-            onChange: function (value) {
-                Lampa.Storage.set('icons_only', value);
-                applySettings();
-            }
-        });
-
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: {
-                name: 'show_text_hover',
-                type: 'trigger',
-                'default': true
-            },
-            field: {
-                name: 'Показувати текст на кнопках при наведенні',
-                description: Lampa.Lang.translate('show_text_hover_desc')
-            },
-            onChange: function (value) {
-                Lampa.Storage.set('show_text_hover', value);
-                applySettings();
-            }
-        });
-
-        // --- Застосування налаштувань ---
-        function applySettings() {
-            var showBig = Lampa.Storage.get('show_big_buttons');
-            var showHidden = Lampa.Storage.get('show_hidden_buttons');
-            var iconsOnly = Lampa.Storage.get('icons_only');
-            var hoverText = Lampa.Storage.get('show_text_hover');
-
-            $('.full-start__button').each(function () {
-                var btn = $(this);
-
-                if (showBig) btn.addClass('big');
-                else btn.removeClass('big');
-
-                if (iconsOnly) btn.find('span').hide();
-                else btn.find('span').show();
-
-                if (!hoverText) btn.addClass('always-text');
-                else btn.removeClass('always-text');
-            });
-
-            if (showHidden) {
-                var moreBtn = $('.button--more');
-                if (moreBtn.length) moreBtn.trigger('hover:enter');
-            }
+    // Додатковий параметр: показати тільки іконки
+    if (Lampa.Storage.get('showbutton') === true) {
+      Lampa.SettingsApi.addParam({
+        component: "showbutton",
+        param: {
+          name: "showbuttonwn",
+          type: "trigger",
+          default: false
+        },
+        field: {
+          name: Lampa.Lang.translate('showbuttonwn_name'),
+          description: Lampa.Lang.translate('showbuttonwn_desc')
+        },
+        onChange: function () {
+          Lampa.Settings.update();
         }
-
-        // --- Слухач для оновлення після відкриття картки ---
-        Lampa.Listener.follow('full', function (e) {
-            if (e.type === 'complite') {
-                setTimeout(applySettings, 200);
-            }
-        });
-
-        // --- CSS для тексту на кнопках ---
-        var style = document.createElement('style');
-        style.textContent = `
-            .full-start__button.always-text span { display: inline !important; }
-            .full-start__button:not(.always-text) span { opacity: 0; transition: opacity 0.2s; }
-            .full-start__button:not(.always-text):hover span,
-            .full-start__button:not(.always-text):focus span { opacity: 1; }
-        `;
-        document.head.appendChild(style);
+      });
     }
+  }
 
-    main();
+  function ShowButtons() {
+    Lampa.Listener.follow('full', function (e) {
+      if (e.type === 'complite') {
+        setTimeout(function () {
+          var fullContainer = e.object.activity.render();
+          var targetContainer = fullContainer.find('.full-start-new__buttons');
+          fullContainer.find('.button--play').remove();
+
+          var allButtons = fullContainer
+            .find('.buttons--container .full-start__button')
+            .add(targetContainer.find('.full-start__button'));
+
+          var categories = {
+            online: [],
+            torrent: [],
+            trailer: [],
+            other: []
+          };
+
+          allButtons.each(function () {
+            var $button = $(this);
+            var className = $button.attr('class') || '';
+            if (className.includes('online')) categories.online.push($button);
+            else if (className.includes('torrent')) categories.torrent.push($button);
+            else if (className.includes('trailer')) categories.trailer.push($button);
+            else categories.other.push($button.clone(true));
+          });
+
+          var buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
+
+          targetContainer.empty();
+          buttonSortOrder.forEach(function (category) {
+            categories[category].forEach(function ($button) {
+              targetContainer.append($button);
+            });
+          });
+
+          // Якщо ввімкнено "показувати тільки іконки"
+          if (Lampa.Storage.get('showbuttonwn') === true) {
+            targetContainer.find("span").remove();
+          }
+
+          targetContainer.css({
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '10px'
+          });
+
+          Lampa.Controller.toggle("full_start");
+        }, 100);
+      }
+    });
+  }
+
+  const manifest = {
+    type: "other",
+    version: "1.0.0",
+    author: "@chatgpt",
+    name: "Show Buttons in Card",
+    description: "Показує всі кнопки дій у картці, з можливістю приховати текст",
+    component: "showbutton"
+  };
+
+  function add() {
+    Lang();
+    Settings();
+    Lampa.Manifest.plugins = manifest;
+    if (Lampa.Storage.get('showbutton') === true) ShowButtons();
+  }
+
+  function startPlugin() {
+    window.plugin_showbutton_ready = true;
+    if (window.appready) add();
+    else {
+      Lampa.Listener.follow("app", function (e) {
+        if (e.type === "ready") add();
+      });
+    }
+  }
+
+  if (!window.plugin_showbutton_ready) startPlugin();
 })();
