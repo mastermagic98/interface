@@ -29,7 +29,7 @@
   function Settings() {
     // Основний параметр: показати всі кнопки
     Lampa.SettingsApi.addParam({
-      component: "showbutton",
+      component: "accent_color_plugin",
       param: {
         name: "showbutton",
         type: "trigger",
@@ -47,7 +47,7 @@
     // Додатковий параметр: показати тільки іконки
     if (Lampa.Storage.get('showbutton') === true) {
       Lampa.SettingsApi.addParam({
-        component: "showbutton",
+        component: "accent_color_plugin",
         param: {
           name: "showbuttonwn",
           type: "trigger",
@@ -120,11 +120,11 @@
 
   const manifest = {
     type: "other",
-    version: "1.0.0",
+    version: "1.0.1",
     author: "@chatgpt",
     name: "Show Buttons in Card",
     description: "Показує всі кнопки дій у картці, з можливістю приховати текст",
-    component: "showbutton"
+    component: "accent_color_plugin"
   };
 
   function add() {
