@@ -27,7 +27,7 @@
   }
 
   function Settings() {
-    // Основний параметр: показати всі кнопки
+    // Основний параметр
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -39,29 +39,43 @@
         name: Lampa.Lang.translate('showbutton_name'),
         description: Lampa.Lang.translate('showbutton_desc')
       },
-      onChange: function () {
+      onChange: function (value) {
+        Lampa.Storage.set('showbutton', value);
+        // Якщо активовано — додаємо другу опцію
+        if (value === true) {
+          addHideTextOption();
+        } else {
+          // Якщо вимкнено — видаляємо її зі сховища
+          Lampa.Storage.set('showbuttonwn', false);
+        }
+        // Оновлюємо налаштування, щоб одразу зʼявилось
         Lampa.Settings.update();
       }
     });
 
-    // Додатковий параметр: показати тільки іконки
+    // Якщо вже була активована раніше — додаємо другу опцію відразу
     if (Lampa.Storage.get('showbutton') === true) {
-      Lampa.SettingsApi.addParam({
-        component: "accent_color_plugin",
-        param: {
-          name: "showbuttonwn",
-          type: "trigger",
-          default: false
-        },
-        field: {
-          name: Lampa.Lang.translate('showbuttonwn_name'),
-          description: Lampa.Lang.translate('showbuttonwn_desc')
-        },
-        onChange: function () {
-          Lampa.Settings.update();
-        }
-      });
+      addHideTextOption();
     }
+  }
+
+  function addHideTextOption() {
+    Lampa.SettingsApi.addParam({
+      component: "accent_color_plugin",
+      param: {
+        name: "showbuttonwn",
+        type: "trigger",
+        default: false
+      },
+      field: {
+        name: Lampa.Lang.translate('showbuttonwn_name'),
+        description: Lampa.Lang.translate('showbuttonwn_desc')
+      },
+      onChange: function (value) {
+        Lampa.Storage.set('showbuttonwn', value);
+        Lampa.Settings.update();
+      }
+    });
   }
 
   function ShowButtons() {
@@ -101,7 +115,7 @@
             });
           });
 
-          // Якщо ввімкнено "показувати тільки іконки"
+          // Якщо ввімкнено “показувати тільки іконки”
           if (Lampa.Storage.get('showbuttonwn') === true) {
             targetContainer.find("span").remove();
           }
@@ -120,7 +134,7 @@
 
   const manifest = {
     type: "other",
-    version: "1.0.1",
+    version: "1.0.2",
     author: "@chatgpt",
     name: "Show Buttons in Card",
     description: "Показує всі кнопки дій у картці, з можливістю приховати текст",
