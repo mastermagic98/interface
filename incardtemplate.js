@@ -10,9 +10,9 @@
         uk: "Виводить усі кнопки дій у картці"
       },
       showbuttonwn_desc: {
-        ru: "Показывать только иконки",
-        en: "Show only icons",
-        uk: "Відображати тільки іконки"
+        ru: "Показывать только иконки (работает при включении всех кнопок)",
+        en: "Show only icons (works when all buttons are enabled)",
+        uk: "Відображати тільки іконки (працює, якщо увімкнено всі кнопки)"
       },
       showbutton_name: {
         ru: "Все кнопки в карточке",
@@ -29,7 +29,7 @@
 
   // --- Налаштування ---
   function Settings() {
-    // Основний параметр: показати всі кнопки
+    // Опція 1 — Усі кнопки в картці
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -43,21 +43,17 @@
       },
       onChange: function (value) {
         Lampa.Storage.set('showbutton', value);
-        if (value === true) {
-          addHideTextOption();
-        } else {
-          Lampa.Storage.set('showbuttonwn', false);
-        }
         Lampa.Settings.update();
+
+        // 🔄 Автоматичне перезавантаження сторінки
+        setTimeout(() => {
+          Lampa.Noty.show(Lampa.Lang.translate('reloading') || 'Перезавантаження...');
+          location.reload();
+        }, 300);
       }
     });
 
-    // Якщо була активована — додаємо одразу другу
-    if (Lampa.Storage.get('showbutton') === true) addHideTextOption();
-  }
-
-  // --- Друга опція ---
-  function addHideTextOption() {
+    // Опція 2 — Сховати текст на кнопках (завжди показується)
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -76,44 +72,36 @@
     });
   }
 
-  // --- Основна логіка виводу кнопок ---
+  // --- Основна логіка відображення кнопок ---
   function ShowButtons() {
     Lampa.Listener.follow('full', function (e) {
       if (e.type === 'complite') {
         setTimeout(function () {
           try {
-            var fullContainer = e.object.activity.render();
-            var targetContainer = fullContainer.find('.full-start-new__buttons');
+            if (Lampa.Storage.get('showbutton') !== true) return;
 
-            // Видаляємо стандартну кнопку "Play", бо дублюється
+            const fullContainer = e.object.activity.render();
+            const targetContainer = fullContainer.find('.full-start-new__buttons');
+
             fullContainer.find('.button--play').remove();
 
-            // Збираємо всі кнопки з двох блоків
-            var allButtons = fullContainer
+            const allButtons = fullContainer
               .find('.buttons--container .full-start__button')
               .add(targetContainer.find('.full-start__button'));
 
-            // Категоризація за типами
-            var categories = {
-              online: [],
-              torrent: [],
-              trailer: [],
-              other: []
-            };
+            const categories = { online: [], torrent: [], trailer: [], other: [] };
 
             allButtons.each(function () {
-              var $button = $(this);
-              var className = $button.attr('class') || '';
+              const $button = $(this);
+              const className = $button.attr('class') || '';
               if (className.includes('online')) categories.online.push($button);
               else if (className.includes('torrent')) categories.torrent.push($button);
               else if (className.includes('trailer')) categories.trailer.push($button);
-              else categories.other.push($button.clone(true)); // клонуємо з подіями
+              else categories.other.push($button.clone(true));
             });
 
-            // Порядок сортування (якщо збережено у Storage)
-            var buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
+            const buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
 
-            // Очищаємо та формуємо в потрібному порядку
             targetContainer.empty();
             buttonSortOrder.forEach(function (category) {
               categories[category].forEach(function ($button) {
@@ -121,12 +109,10 @@
               });
             });
 
-            // Якщо активовано «Сховати текст»
             if (Lampa.Storage.get('showbuttonwn') === true) {
               targetContainer.find("span").remove();
             }
 
-            // Вирівнювання стилів
             targetContainer.css({
               display: 'flex',
               flexWrap: 'wrap',
@@ -135,7 +121,6 @@
               marginTop: '10px'
             });
 
-            // Увімкнути контроль кнопок після оновлення
             Lampa.Controller.toggle("full_start");
           } catch (err) {
             console.error('[ShowButtons Plugin Error]', err);
@@ -148,10 +133,10 @@
   // --- Маніфест ---
   const manifest = {
     type: "other",
-    version: "1.0.3",
+    version: "1.0.5",
     author: "@chatgpt",
     name: "Show Buttons in Card",
-    description: "Виводить усі кнопки дій у картці, з можливістю відображати лише іконки",
+    description: "Виводить усі кнопки дій у картці, з можливістю приховати текст, автоперезавантаження після зміни опції",
     component: "accent_color_plugin"
   };
 
@@ -160,11 +145,7 @@
     Lang();
     Settings();
     Lampa.Manifest.plugins = manifest;
-
-    // Якщо користувач активував опцію — запускаємо основну логіку
-    if (Lampa.Storage.get('showbutton') === true) {
-      ShowButtons();
-    }
+    if (Lampa.Storage.get('showbutton') === true) ShowButtons();
   }
 
   function startPlugin() {
