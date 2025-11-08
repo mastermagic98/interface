@@ -9,9 +9,9 @@
         uk: "Виводить усі кнопки дій у картці"
       },
       showbuttonwn_desc: {
-        ru: "Показывать только иконки",
-        en: "Show only icons",
-        uk: "Відображати тільки іконки"
+        ru: "Показывать только иконки без текста",
+        en: "Show only icons without text",
+        uk: "Відображати тільки іконки без тексту"
       },
       showbutton_name: {
         ru: "Все кнопки в карточке",
@@ -26,86 +26,75 @@
     });
   }
 
-  // --- Функція оновлення кнопок у картці ---
   function processCard() {
     const active = Lampa.Activity.active();
     if (!active) return;
 
-    const fullContainer = active.render();
-    if (!fullContainer || !fullContainer.length) return;
+    const full = active.render();
+    if (!full || !full.length) return;
 
-    const targetContainer = fullContainer.find('.full-start-new__buttons');
-    if (!targetContainer.length) return;
+    const buttonsContainer = full.find('.full-start-new__buttons');
+    if (!buttonsContainer.length) return;
 
-    fullContainer.find('.button--play').remove();
+    full.find('.button--play').remove();
 
-    const allButtons = fullContainer
-      .find('.buttons--container .full-start__button')
-      .add(targetContainer.find('.full-start__button'));
+    const allBtns = full.find('.buttons--container .full-start__button')
+      .add(buttonsContainer.find('.full-start__button'));
 
-    const categories = {
-      online: [],
-      torrent: [],
-      trailer: [],
-      other: []
-    };
-
-    allButtons.each(function () {
-      const $button = $(this);
-      const cls = $button.attr('class') || '';
-      if (cls.includes('online')) categories.online.push($button);
-      else if (cls.includes('torrent')) categories.torrent.push($button);
-      else if (cls.includes('trailer')) categories.trailer.push($button);
-      else categories.other.push($button.clone(true));
+    const cats = { online: [], torrent: [], trailer: [], other: [] };
+    allBtns.each(function () {
+      const el = $(this);
+      const c = el.attr('class') || '';
+      if (c.includes('online')) cats.online.push(el);
+      else if (c.includes('torrent')) cats.torrent.push(el);
+      else if (c.includes('trailer')) cats.trailer.push(el);
+      else cats.other.push(el.clone(true));
     });
 
     const order = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
-
-    targetContainer.empty();
-    order.forEach(cat => {
-      categories[cat].forEach(btn => targetContainer.append(btn));
-    });
+    buttonsContainer.empty();
+    order.forEach(k => cats[k].forEach(b => buttonsContainer.append(b)));
 
     if (Lampa.Storage.get('showbuttonwn') === true) {
-      targetContainer.find('span').remove();
+      buttonsContainer.find('span').remove();
     }
 
-    targetContainer.css({
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '10px'
-    });
-
-    Lampa.Controller.toggle("full_start");
+    buttonsContainer.css({ display: 'flex', flexWrap: 'wrap', gap: '10px' });
+    Lampa.Controller.toggle('full_start');
   }
 
-  // --- Безпечне додавання параметрів у розділ accent_color_plugin ---
-  function SafeAddSetting(param) {
-    try {
-      if (Lampa.SettingsApi && Lampa.SettingsApi.addParam) {
-        Lampa.SettingsApi.addParam(param);
+  // — очікуємо появи компонента у налаштуваннях
+  function waitForAccentSettings(callback) {
+    let tries = 0;
+    const interval = setInterval(() => {
+      tries++;
+      if (Lampa.SettingsApi.getComponent('accent_color_plugin')) {
+        clearInterval(interval);
+        callback();
+      } else if (tries > 50) {
+        clearInterval(interval);
+        console.warn('[ShowButtons] accent_color_plugin not found');
       }
-    } catch (e) {
-      console.log('[ShowButtons Plugin] SettingsApi.addParam error:', e);
-    }
+    }, 200);
   }
 
-  // --- Ініціалізація налаштувань ---
-  function Settings() {
-    SafeAddSetting({
-      component: "accent_color_plugin",
+  function addSettings() {
+    const SettingsApi = Lampa.SettingsApi;
+
+    SettingsApi.addParam({
+      component: 'accent_color_plugin',
       param: {
-        name: "showbutton",
-        type: "trigger",
+        name: 'showbutton',
+        type: 'trigger',
         default: false
       },
       field: {
         name: Lampa.Lang.translate('showbutton_name'),
         description: Lampa.Lang.translate('showbutton_desc')
       },
-      onChange: function (value) {
-        Lampa.Storage.set('showbutton', value);
-        if (value === true) {
+      onChange: (val) => {
+        Lampa.Storage.set('showbutton', val);
+        if (val) {
           addHideTextOption();
           processCard();
         } else {
@@ -116,67 +105,52 @@
       }
     });
 
-    if (Lampa.Storage.get('showbutton') === true) {
-      addHideTextOption();
-    }
+    if (Lampa.Storage.get('showbutton') === true) addHideTextOption();
   }
 
   function addHideTextOption() {
-    SafeAddSetting({
-      component: "accent_color_plugin",
+    const SettingsApi = Lampa.SettingsApi;
+
+    SettingsApi.addParam({
+      component: 'accent_color_plugin',
       param: {
-        name: "showbuttonwn",
-        type: "trigger",
+        name: 'showbuttonwn',
+        type: 'trigger',
         default: false
       },
       field: {
         name: Lampa.Lang.translate('showbuttonwn_name'),
         description: Lampa.Lang.translate('showbuttonwn_desc')
       },
-      onChange: function (value) {
-        Lampa.Storage.set('showbuttonwn', value);
+      onChange: (val) => {
+        Lampa.Storage.set('showbuttonwn', val);
         processCard();
         Lampa.Settings.update();
       }
     });
   }
 
-  function initListener() {
-    Lampa.Listener.follow('full', function (e) {
-      if (e.type === 'complite' && Lampa.Storage.get('showbutton') === true) {
+  function startListeners() {
+    Lampa.Listener.follow('full', (e) => {
+      if (e.type === 'complite' && Lampa.Storage.get('showbutton')) {
         setTimeout(processCard, 100);
       }
     });
   }
 
-  const manifest = {
-    type: "other",
-    version: "1.0.4",
-    author: "@chatgpt",
-    name: "Show Buttons in Card",
-    description: "Показує всі кнопки дій у картці, з можливістю приховати текст. Миттєве застосування без помилок.",
-    component: "accent_color_plugin"
-  };
-
-  function add() {
+  function init() {
     Lang();
-    Settings();
-    initListener();
-    if (Lampa.Manifest && Lampa.Manifest.plugins) {
-      Lampa.Manifest.plugins = manifest;
-    }
-    if (Lampa.Storage.get('showbutton') === true) processCard();
+    waitForAccentSettings(() => {
+      addSettings();
+      startListeners();
+      if (Lampa.Storage.get('showbutton')) processCard();
+    });
   }
 
-  function startPlugin() {
-    window.plugin_showbutton_ready = true;
-    if (window.appready) add();
-    else {
-      Lampa.Listener.follow("app", function (e) {
-        if (e.type === "ready") add();
-      });
-    }
+  if (window.appready) init();
+  else {
+    Lampa.Listener.follow('app', (e) => {
+      if (e.type === 'ready') init();
+    });
   }
-
-  if (!window.plugin_showbutton_ready) startPlugin();
 })();
