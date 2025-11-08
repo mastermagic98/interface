@@ -49,13 +49,10 @@
 
     if (enabled) {
       var style = '<style id="accent_color_bigbuttons">' +
-        '.full-start-new__buttons .full-start__button:not(.focus) span,' +
-        '.full-start__button:not(.focus) span { display: inline !important; }' +
-        '@media screen and (max-width: 580px) {' +
-        '  .full-start-new__buttons,' +
-        '  .full-start__buttons { overflow-x: auto; overflow-y: hidden; white-space: nowrap; }' +
-        '  .full-start-new__buttons .full-start__button:not(.focus) span,' +
-        '  .full-start__button:not(.focus) span { display: none !important; }' +
+        '.full-start-new__buttons .full-start__button:not(.focus) span { display: inline; }' +
+        '@media screen and (max-width: 580px) { ' +
+        '  .full-start-new__buttons { overflow: auto; } ' +
+        '  .full-start-new__buttons .full-start__button:not(.focus) span { display: none; } ' +
         '}' +
         '</style>';
       $('body').append(style);
@@ -191,7 +188,7 @@
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "1.3.0",
+    version: "1.3.1",
     author: "@chatgpt",
     name: "Show Buttons + Text in Card",
     description: "Виводить усі кнопки в картці, дозволяє приховати текст та показувати його на всіх кнопках без фокусу.",
