@@ -42,7 +42,7 @@
     });
   }
 
-  // --- Стилі для тексту на всіх кнопках (незалежно від showbutton) ---
+  // --- Стилі для тексту на всіх кнопках (без перезавантаження) ---
   function applyBigButtons() {
     var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
     $('#accent_color_bigbuttons').remove();
@@ -61,7 +61,7 @@
 
   // --- Налаштування ---
   function Settings() {
-    // 1️⃣ Текст на всіх кнопках (на початку, незалежно від showbutton)
+    // 1️⃣ Текст на всіх кнопках (без перезавантаження)
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -75,15 +75,12 @@
       },
       onChange: function (value) {
         Lampa.Storage.set('bigbuttons', value);
+        applyBigButtons(); // Миттєве застосування
         Lampa.Settings.update();
-        setTimeout(function () {
-          Lampa.Noty.show(Lampa.Lang.translate('reloading'));
-          location.reload();
-        }, 300);
       }
     });
 
-    // 2️⃣ Усі кнопки в картці
+    // 2️⃣ Усі кнопки в картці (з перезавантаженням)
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -105,7 +102,7 @@
       }
     });
 
-    // 3️⃣ Сховати текст — тільки якщо showbutton увімкнено
+    // 3️⃣ Сховати текст — тільки якщо showbutton увімкнено (з перезавантаженням)
     if (Lampa.Storage.get('showbutton') === true) {
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
@@ -176,6 +173,9 @@
               justifyContent: 'flex-start'
             });
 
+            // Застосувати bigbuttons до поточної картки
+            applyBigButtonsToCard(targetContainer);
+
             Lampa.Controller.toggle('full_start');
           } catch (err) {
             console.error('[ShowButtons Plugin Error]', err);
@@ -185,13 +185,23 @@
     });
   }
 
+  // --- Застосування bigbuttons до конкретної картки (для динаміки) ---
+  function applyBigButtonsToCard(container) {
+    if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
+      container.find('.full-start__button:not(.focus) span').css('display', 'inline');
+      if (window.innerWidth <= 580) {
+        container.find('.full-start__button:not(.focus) span').css('display', 'none');
+      }
+    }
+  }
+
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "1.3.1",
+    version: "1.4.0",
     author: "@chatgpt",
     name: "Show Buttons + Text in Card",
-    description: "Виводить усі кнопки в картці, дозволяє приховати текст та показувати його на всіх кнопках без фокусу.",
+    description: "Виводить усі кнопки в картці, дозволяє приховати текст та показувати його на всіх кнопках без фокусу (без перезавантаження).",
     component: "accent_color_plugin"
   };
 
@@ -199,7 +209,19 @@
   function add() {
     Lang();
     Settings();
-    applyBigButtons(); // Застосовуємо стилі одразу (працює навіть без showbutton)
+    applyBigButtons(); // Застосовуємо глобальні стилі
+
+    // Динамічне застосування при відкритті картки
+    Lampa.Listener.follow('full', function (e) {
+      if (e.type === 'complite') {
+        setTimeout(function () {
+          var fullContainer = e.object.activity.render();
+          var targetContainer = fullContainer.find('.full-start-new__buttons');
+          applyBigButtonsToCard(targetContainer);
+        }, 200);
+      }
+    });
+
     Lampa.Manifest.plugins = manifest;
 
     if (Lampa.Storage.get('showbutton') === true) {
