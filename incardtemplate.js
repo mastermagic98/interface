@@ -4,32 +4,37 @@
   // --- Локалізація ---
   function Lang() {
     Lampa.Lang.add({
-      showbutton_desc: {
-        ru: "Выводит все кнопки действий в карточке",
-        en: "Show all action buttons in card",
-        uk: "Виводить усі кнопки дій у картці"
-      },
-      showbuttonwn_desc: {
-        ru: "Показывать только иконки (работает при включении всех кнопок)",
-        en: "Show only icons (works when all buttons are enabled)",
-        uk: "Відображати тільки іконки (працює, якщо увімкнено всі кнопки)"
-      },
       showbutton_name: {
         ru: "Все кнопки в карточке",
         en: "All buttons in card",
         uk: "Усі кнопки в картці"
       },
+      showbutton_desc: {
+        ru: "Выводит все кнопки действий в карточке",
+        en: "Show all action buttons in card",
+        uk: "Виводить усі кнопки дій у картці"
+      },
       showbuttonwn_name: {
         ru: "Скрыть текст на кнопках",
         en: "Hide text on buttons",
         uk: "Сховати текст на кнопках"
+      },
+      showbuttonwn_desc: {
+        ru: "Показывает только иконки на кнопках (работает при включении всех кнопок)",
+        en: "Show only icons on buttons (works when all buttons are enabled)",
+        uk: "Показує лише іконки на кнопках (працює при ввімкненні всіх кнопок)"
+      },
+      reloading: {
+        ru: "Перезагрузка...",
+        en: "Reloading...",
+        uk: "Перезавантаження..."
       }
     });
   }
 
   // --- Налаштування ---
   function Settings() {
-    // Опція 1 — Усі кнопки в картці
+    // 1️⃣ Усі кнопки в картці
     Lampa.SettingsApi.addParam({
       component: "accent_color_plugin",
       param: {
@@ -45,34 +50,42 @@
         Lampa.Storage.set('showbutton', value);
         Lampa.Settings.update();
 
-        // 🔄 Автоматичне перезавантаження сторінки
+        // 🔄 Автоматичне перезавантаження
         setTimeout(() => {
-          Lampa.Noty.show(Lampa.Lang.translate('reloading') || 'Перезавантаження...');
+          Lampa.Noty.show(Lampa.Lang.translate('reloading'));
           location.reload();
         }, 300);
       }
     });
 
-    // Опція 2 — Сховати текст на кнопках (завжди показується)
-    Lampa.SettingsApi.addParam({
-      component: "accent_color_plugin",
-      param: {
-        name: "showbuttonwn",
-        type: "trigger",
-        default: false
-      },
-      field: {
-        name: Lampa.Lang.translate('showbuttonwn_name'),
-        description: Lampa.Lang.translate('showbuttonwn_desc')
-      },
-      onChange: function (value) {
-        Lampa.Storage.set('showbuttonwn', value);
-        Lampa.Settings.update();
-      }
-    });
+    // 2️⃣ Сховати текст на кнопках — додається лише якщо showbutton == true
+    if (Lampa.Storage.get('showbutton') === true) {
+      Lampa.SettingsApi.addParam({
+        component: "accent_color_plugin",
+        param: {
+          name: "showbuttonwn",
+          type: "trigger",
+          default: false
+        },
+        field: {
+          name: Lampa.Lang.translate('showbuttonwn_name'),
+          description: Lampa.Lang.translate('showbuttonwn_desc')
+        },
+        onChange: function (value) {
+          Lampa.Storage.set('showbuttonwn', value);
+          Lampa.Settings.update();
+
+          // 🔄 Автоматичне перезавантаження при зміні цієї опції
+          setTimeout(() => {
+            Lampa.Noty.show(Lampa.Lang.translate('reloading'));
+            location.reload();
+          }, 300);
+        }
+      });
+    }
   }
 
-  // --- Основна логіка відображення кнопок ---
+  // --- Основна логіка ---
   function ShowButtons() {
     Lampa.Listener.follow('full', function (e) {
       if (e.type === 'complite') {
@@ -100,14 +113,9 @@
               else categories.other.push($button.clone(true));
             });
 
-            const buttonSortOrder = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
-
+            const order = ['torrent', 'online', 'trailer', 'other'];
             targetContainer.empty();
-            buttonSortOrder.forEach(function (category) {
-              categories[category].forEach(function ($button) {
-                targetContainer.append($button);
-              });
-            });
+            order.forEach(c => categories[c].forEach($b => targetContainer.append($b)));
 
             if (Lampa.Storage.get('showbuttonwn') === true) {
               targetContainer.find("span").remove();
@@ -116,9 +124,8 @@
             targetContainer.css({
               display: 'flex',
               flexWrap: 'wrap',
-              justifyContent: 'flex-start',
               gap: '10px',
-              marginTop: '10px'
+              justifyContent: 'flex-start'
             });
 
             Lampa.Controller.toggle("full_start");
@@ -133,10 +140,10 @@
   // --- Маніфест ---
   const manifest = {
     type: "other",
-    version: "1.0.5",
+    version: "1.1.0",
     author: "@chatgpt",
     name: "Show Buttons in Card",
-    description: "Виводить усі кнопки дій у картці, з можливістю приховати текст, автоперезавантаження після зміни опції",
+    description: "Виводить усі кнопки дій у картці з можливістю приховати текст. Опції автоматично застосовуються після перезавантаження.",
     component: "accent_color_plugin"
   };
 
