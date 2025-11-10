@@ -15,6 +15,21 @@
           en: "Default: standard; Show: text always; Hide: icons only (size as unfocused)",
           uk: "За замовчуванням: стандартно; Показувати: текст завжди; Приховувати: тільки іконки (розмір як без фокусу)"
         },
+        textdisplay_default: {
+          ru: "За замовчуванням",
+          en: "Default",
+          uk: "За замовчуванням"
+        },
+        textdisplay_show: {
+          ru: "Показувати текст",
+          en: "Show text",
+          uk: "Показувати текст"
+        },
+        textdisplay_hide: {
+          ru: "Приховувати текст",
+          en: "Hide text",
+          uk: "Приховувати текст"
+        },
         showbutton_name: {
           ru: "Все кнопки в карточке",
           en: "All buttons in card",
@@ -43,7 +58,7 @@
       var $style = $('#accent_color_textdisplay');
       if ($style.length) $style.remove();
 
-      if (mode === 'default') return; // нічого не додаємо — використовуємо app.css
+      if (mode === 'default') return;
 
       var isMobile = window.innerWidth <= 580;
       var css = '';
@@ -55,7 +70,6 @@
         }
       } else if (mode === 'hide') {
         css += '.full-start-new__buttons .full-start__button span { display: none !important; }';
-        // Розмір кнопок як без фокусу (стандартний, не збільшений)
         css += '.full-start-new__buttons .full-start__button { min-width: auto !important; padding: 6px 8px !important; font-size: 12px !important; }';
         if (isMobile) {
           css += '.full-start-new__buttons { overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding-bottom: 10px; }';
@@ -73,35 +87,34 @@
     }
   }
 
-  // --- Оновлення налаштувань ---
-  function updateSettings() {
+  // --- Повне оновлення компонента налаштувань ---
+  function rebuildSettingsComponent() {
     try {
-      if (typeof Lampa.Settings !== 'undefined' && Lampa.Settings.main && typeof Lampa.Settings.main === 'function') {
-        var main = Lampa.Settings.main();
-        if (main && main.render) {
-          var $comp = main.render().find('[data-component="accent_color_plugin"]');
-          if ($comp.length) {
-            $comp.remove();
-            var $parent = main.render().find('[data-parent="plugins"]');
-            if ($parent.length) {
-              $parent.append(main.buildComponent('accent_color_plugin'));
-            }
-          }
-          if (typeof Lampa.Controller !== 'undefined' && Lampa.Controller.toggle) {
-            Lampa.Controller.toggle('settings_component');
-          }
-        }
+      var main = Lampa.Settings.main();
+      if (!main || !main.render) return;
+
+      var $container = main.render();
+      var $plugin = $container.find('[data-component="accent_color_plugin"]');
+      if ($plugin.length) {
+        $plugin.remove();
+      }
+
+      var $parent = $container.find('[data-parent="plugins"]');
+      if ($parent.length) {
+        $parent.append(main.buildComponent('accent_color_plugin'));
+      }
+
+      if (Lampa.Controller && Lampa.Controller.toggle) {
+        Lampa.Controller.toggle('settings_component');
       }
     } catch (e) {
-      console.error('[updateSettings] Error:', e);
+      console.error('[rebuildSettingsComponent] Error:', e);
     }
   }
 
   // --- Налаштування ---
   function Settings() {
     try {
-      var showAll = Lampa.Storage.get('showbutton', 'false') === 'true';
-
       // 1️⃣ Усі кнопки
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
@@ -109,7 +122,7 @@
         field: { name: Lampa.Lang.translate('showbutton_name'), description: Lampa.Lang.translate('showbutton_desc') },
         onChange: function (value) {
           Lampa.Storage.set('showbutton', value);
-          updateSettings();
+          rebuildSettingsComponent();
           setTimeout(function () {
             Lampa.Noty.show(Lampa.Lang.translate('reloading'));
             location.reload();
@@ -117,20 +130,23 @@
         }
       });
 
-      // 2️⃣ Відображення тексту (завжди доступно)
-      var textModes = [
-        { name: Lampa.Lang.translate('default') || 'За замовчуванням', value: 'default' },
-        { name: Lampa.Lang.translate('show') || 'Показувати текст', value: 'show' },
-        { name: Lampa.Lang.translate('hide') || 'Приховувати текст', value: 'hide' }
-      ];
+      // 2️⃣ Відображення тексту — завжди доступно
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
         param: { name: "textdisplay", type: "list", default: "default" },
-        field: { name: Lampa.Lang.translate('textdisplay_name'), description: Lampa.Lang.translate('textdisplay_desc'), values: textModes },
+        field: {
+          name: Lampa.Lang.translate('textdisplay_name'),
+          description: Lampa.Lang.translate('textdisplay_desc'),
+          values: [
+            { name: Lampa.Lang.translate('textdisplay_default'), value: 'default' },
+            { name: Lampa.Lang.translate('textdisplay_show'), value: 'show' },
+            { name: Lampa.Lang.translate('textdisplay_hide'), value: 'hide' }
+          ]
+        },
         onChange: function (value) {
           Lampa.Storage.set('textdisplay', value);
           applyTextDisplay();
-          updateSettings();
+          rebuildSettingsComponent();
         }
       });
     } catch (e) {
@@ -138,7 +154,7 @@
     }
   }
 
-  // --- Показ усіх кнопок (з вашого робочого прикладу) ---
+  // --- Показ усіх кнопок ---
   function ShowButtons() {
     try {
       Lampa.Listener.follow('full', function (e) {
@@ -201,10 +217,10 @@
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "2.1.0",
+    version: "2.2.0",
     author: "@chatgpt",
     name: "Show Buttons + Text Display",
-    description: "Усі кнопки + режим відображення тексту (завжди/ніколи/стандарт), з перевіркою мобільного екрану.",
+    description: "Усі кнопки + Відображення тексту (завжди/ніколи/стандарт). Опція завжди видима.",
     component: "accent_color_plugin"
   };
 
@@ -220,7 +236,6 @@
       Settings();
 
       applyTextDisplay();
-
       applyOnCardOpen();
 
       Lampa.Manifest.plugins = manifest;
