@@ -44,132 +44,151 @@
 
   // --- Застосування великих кнопок (миттєво) ---
   function applyBigButtons() {
-    var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
-    $('#accent_color_bigbuttons').remove();
+    try {
+      var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
+      $('#accent_color_bigbuttons').remove();
 
-    if (enabled) {
-      var style = '<style id="accent_color_bigbuttons">' +
-        '.full-start-new__buttons .full-start__button {' +
-        '  min-width: 120px !important;' +
-        '  padding: 8px 12px !important;' +
-        '  font-size: 14px !important;' +
-        '}' +
-        '.full-start-new__buttons .full-start__button:not(.focus) span {' +
-        '  display: inline !important;' +
-        '}' +
-        '@media screen and (max-width: 580px) {' +
-        '  .full-start-new__buttons {' +
-        '    overflow-x: auto;' +
-        '    overflow-y: hidden;' +
-        '    white-space: nowrap;' +
-        '    padding-bottom: 10px;' +
-        '  }' +
-        '  .full-start-new__buttons .full-start__button {' +
-        '    min-width: 80px !important;' +
-        '    padding: 6px 8px !important;' +
-        '    font-size: 12px !important;' +
-        '  }' +
-        '  .full-start-new__buttons .full-start__button:not(.focus) span {' +
-        '    display: none !important;' +
-        '  }' +
-        '}' +
-        '</style>';
-      $('body').append(style);
+      if (enabled) {
+        var style = '<style id="accent_color_bigbuttons">' +
+          '.full-start-new__buttons .full-start__button {' +
+          '  min-width: 120px !important;' +
+          '  padding: 8px 12px !important;' +
+          '  font-size: 14px !important;' +
+          '}' +
+          '.full-start-new__buttons .full-start__button:not(.focus) span {' +
+          '  display: inline !important;' +
+          '}' +
+          '@media screen and (max-width: 580px) {' +
+          '  .full-start-new__buttons {' +
+          '    overflow-x: auto;' +
+          '    overflow-y: hidden;' +
+          '    white-space: nowrap;' +
+          '    padding-bottom: 10px;' +
+          '  }' +
+          '  .full-start-new__buttons .full-start__button {' +
+          '    min-width: 80px !important;' +
+          '    padding: 6px 8px !important;' +
+          '    font-size: 12px !important;' +
+          '  }' +
+          '  .full-start-new__buttons .full-start__button:not(.focus) span {' +
+          '    display: none !important;' +
+          '  }' +
+          '}' +
+          '</style>';
+        $('body').append(style);
+      }
+    } catch (e) {
+      console.error('[BigButtons] Apply error:', e);
     }
   }
 
   // --- Приховування тексту (миттєво) ---
   function applyHideText() {
-    var hide = Lampa.Storage.get('showbuttonwn', 'false') === 'true';
-    if (hide) {
-      $('.full-start-new__buttons .full-start__button span').remove();
+    try {
+      var hide = Lampa.Storage.get('showbuttonwn', 'false') === 'true';
+      if (hide) {
+        $('.full-start-new__buttons .full-start__button span').remove();
+      }
+    } catch (e) {
+      console.error('[HideText] Apply error:', e);
     }
   }
 
-  // --- Оновлення налаштувань ---
+  // --- Оновлення налаштувань (безпечне) ---
   function updateSettings() {
-    // Перебудовуємо налаштування
-    Lampa.Settings.main().render().find('[data-component="accent_color_plugin"]').remove();
-    Lampa.Settings.main().render().find('[data-parent="plugins"]').append(
-      Lampa.Settings.main().buildComponent('accent_color_plugin')
-    );
-    Lampa.Controller.toggle('settings_component');
+    try {
+      // Перебудовуємо тільки компонент
+      var $component = Lampa.Settings.main().render().find('[data-component="accent_color_plugin"]');
+      if ($component.length) {
+        $component.remove();
+        Lampa.Settings.main().render().find('[data-parent="plugins"]').append(
+          Lampa.Settings.main().buildComponent('accent_color_plugin')
+        );
+      }
+      Lampa.Controller.toggle('settings_component');
+    } catch (e) {
+      console.error('[Settings] Update error:', e);
+    }
   }
 
   // --- Налаштування ---
   function Settings() {
-    var showAll = Lampa.Storage.get('showbutton', 'false') === 'true';
+    try {
+      var showAll = Lampa.Storage.get('showbutton', 'false') === 'true';
 
-    // 1️⃣ Усі кнопки (з перезавантаженням)
-    Lampa.SettingsApi.addParam({
-      component: "accent_color_plugin",
-      param: { name: "showbutton", type: "trigger", default: false },
-      field: {
-        name: Lampa.Lang.translate('showbutton_name'),
-        description: Lampa.Lang.translate('showbutton_desc')
-      },
-      onChange: function (value) {
-        Lampa.Storage.set('showbutton', value);
-        if (value) {
-          Lampa.Storage.set('bigbuttons', false);
-          Lampa.Storage.set('showbuttonwn', false);
+      // 1️⃣ Усі кнопки
+      Lampa.SettingsApi.addParam({
+        component: "accent_color_plugin",
+        param: { name: "showbutton", type: "trigger", default: false },
+        field: {
+          name: Lampa.Lang.translate('showbutton_name'),
+          description: Lampa.Lang.translate('showbutton_desc')
+        },
+        onChange: function (value) {
+          Lampa.Storage.set('showbutton', value);
+          if (value) {
+            Lampa.Storage.set('bigbuttons', false);
+            Lampa.Storage.set('showbuttonwn', false);
+          }
+          updateSettings();
+          setTimeout(function () {
+            Lampa.Noty.show(Lampa.Lang.translate('reloading'));
+            location.reload();
+          }, 300);
         }
-        updateSettings();
-        setTimeout(function () {
-          Lampa.Noty.show(Lampa.Lang.translate('reloading'));
-          location.reload();
-        }, 300);
+      });
+
+      // 2️⃣ Якщо showbutton = true → взаємовиключні
+      if (showAll) {
+        Lampa.SettingsApi.addParam({
+          component: "accent_color_plugin",
+          param: { name: "bigbuttons", type: "trigger", default: false },
+          field: {
+            name: Lampa.Lang.translate('bigbuttons_name'),
+            description: Lampa.Lang.translate('bigbuttons_desc')
+          },
+          onChange: function (value) {
+            Lampa.Storage.set('bigbuttons', value);
+            if (value) Lampa.Storage.set('showbuttonwn', false);
+            applyBigButtons();
+            applyHideText();
+            updateSettings();
+          }
+        });
+
+        Lampa.SettingsApi.addParam({
+          component: "accent_color_plugin",
+          param: { name: "showbuttonwn", type: "trigger", default: false },
+          field: {
+            name: Lampa.Lang.translate('showbuttonwn_name'),
+            description: Lampa.Lang.translate('showbuttonwn_desc')
+          },
+          onChange: function (value) {
+            Lampa.Storage.set('showbuttonwn', value);
+            if (value) Lampa.Storage.set('bigbuttons', false);
+            applyHideText();
+            applyBigButtons();
+            updateSettings();
+          }
+        });
+      } else {
+        // 3️⃣ Якщо showbutton = false → тільки bigbuttons
+        Lampa.SettingsApi.addParam({
+          component: "accent_color_plugin",
+          param: { name: "bigbuttons", type: "trigger", default: false },
+          field: {
+            name: Lampa.Lang.translate('bigbuttons_name'),
+            description: Lampa.Lang.translate('bigbuttons_desc')
+          },
+          onChange: function (value) {
+            Lampa.Storage.set('bigbuttons', value);
+            applyBigButtons();
+            updateSettings();
+          }
+        });
       }
-    });
-
-    // 2️⃣ Якщо showbutton = true → взаємовиключні опції
-    if (showAll) {
-      Lampa.SettingsApi.addParam({
-        component: "accent_color_plugin",
-        param: { name: "bigbuttons", type: "trigger", default: false },
-        field: {
-          name: Lampa.Lang.translate('bigbuttons_name'),
-          description: Lampa.Lang.translate('bigbuttons_desc')
-        },
-        onChange: function (value) {
-          Lampa.Storage.set('bigbuttons', value);
-          if (value) Lampa.Storage.set('showbuttonwn', false);
-          applyBigButtons();
-          applyHideText();
-          updateSettings();
-        }
-      });
-
-      Lampa.SettingsApi.addParam({
-        component: "accent_color_plugin",
-        param: { name: "showbuttonwn", type: "trigger", default: false },
-        field: {
-          name: Lampa.Lang.translate('showbuttonwn_name'),
-          description: Lampa.Lang.translate('showbuttonwn_desc')
-        },
-        onChange: function (value) {
-          Lampa.Storage.set('showbuttonwn', value);
-          if (value) Lampa.Storage.set('bigbuttons', false);
-          applyHideText();
-          applyBigButtons();
-          updateSettings();
-        }
-      });
-    } else {
-      // 3️⃣ Якщо showbutton = false → тільки bigbuttons
-      Lampa.SettingsApi.addParam({
-        component: "accent_color_plugin",
-        param: { name: "bigbuttons", type: "trigger", default: false },
-        field: {
-          name: Lampa.Lang.translate('bigbuttons_name'),
-          description: Lampa.Lang.translate('bigbuttons_desc')
-        },
-        onChange: function (value) {
-          Lampa.Storage.set('bigbuttons', value);
-          applyBigButtons();
-          updateSettings();
-        }
-      });
+    } catch (e) {
+      console.error('[Settings] Build error:', e);
     }
   }
 
@@ -183,6 +202,8 @@
 
             var fullContainer = e.object.activity.render();
             var targetContainer = fullContainer.find('.full-start-new__buttons');
+            if (!targetContainer.length) return;
+
             fullContainer.find('.button--play').remove();
 
             var allButtons = fullContainer
@@ -217,7 +238,7 @@
 
             Lampa.Controller.toggle('full_start');
           } catch (err) {
-            console.error('[ShowButtons Plugin Error]', err);
+            console.error('[ShowButtons] Error:', err);
           }
         }, 150);
       }
@@ -233,42 +254,49 @@
   }
 
   // --- Маніфест ---
+ --- 
   var manifest = {
     type: "other",
-    version: "1.7.0",
+    version: "1.8.0",
     author: "@chatgpt",
     name: "Show Buttons + Large Buttons",
-    description: "Усі кнопки + взаємовиключні опції. Великі кнопки вмикаються миттєво, за замовчуванням — вимкнено.",
+    description: "Стабільна версія: великі кнопки без помилок, динамічні опції.",
     component: "accent_color_plugin"
   };
 
   // --- Ініціалізація ---
   function add() {
-    Lang();
+    try {
+      Lang();
 
-    // 🛡️ Гарантуємо значення за замовчуванням
-    if (Lampa.Storage.get('bigbuttons') === undefined) Lampa.Storage.set('bigbuttons', false);
-    if (Lampa.Storage.get('showbuttonwn') === undefined) Lampa.Storage.set('showbuttonwn', false);
-    if (Lampa.Storage.get('showbutton') === undefined) Lampa.Storage.set('showbutton', false);
+      // Гарантуємо значення за замовчуванням
+      ['bigbuttons', 'showbuttonwn', 'showbutton'].forEach(function (key) {
+        if (Lampa.Storage.get(key) === undefined) {
+          Lampa.Storage.set(key, false);
+        }
+      });
 
-    Settings();
+      Settings();
 
-    // Застосовуємо ТІЛЬКИ якщо увімкнено
-    if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
-      applyBigButtons();
-    }
-    if (Lampa.Storage.get('showbuttonwn', 'false') === 'true') {
-      applyHideText();
-    }
+      // Застосовуємо тільки якщо увімкнено
+      if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
+        applyBigButtons();
+      }
+      if (Lampa.Storage.get('showbuttonwn', 'false') === 'true') {
+        applyHideText();
+      }
 
-    Lampa.Listener.follow('full', function (e) {
-      if (e.type === 'complite') applyToCurrentCard();
-    });
+      Lampa.Listener.follow('full', function (e) {
+        if (e.type === 'complite') applyToCurrentCard();
+      });
 
-    Lampa.Manifest.plugins = manifest;
+      Lampa.Manifest.plugins = manifest;
 
-    if (Lampa.Storage.get('showbutton') === true) {
-      ShowButtons();
+      if (Lampa.Storage.get('showbutton') === true) {
+        ShowButtons();
+      }
+    } catch (e) {
+      console.error('[Plugin Init] Error:', e);
     }
   }
 
