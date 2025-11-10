@@ -14,61 +14,66 @@
                 ru: 'Отображает все кнопки действий в карточке, включая скрытые под «Смотреть».',
                 en: 'Displays all action buttons in the card, including those hidden under "Watch".'
             },
-            show_text_buttons_name: {
-                uk: 'Показувати текст на кнопках',
-                ru: 'Показывать текст на кнопках',
-                en: 'Show text on buttons'
+            text_mode_name: {
+                uk: 'Режими відображення тексту',
+                ru: 'Режимы отображения текста',
+                en: 'Text display modes'
             },
-            show_text_buttons_desc: {
-                uk: 'Завжди показує текст на всіх кнопках, ширина адаптується під текст.',
-                ru: 'Всегда показывает текст на всех кнопках, ширина адаптируется под текст.',
-                en: 'Always show text on all buttons, width adapts to text.'
+            text_mode_desc: {
+                uk: 'За замовчуванням: стандартна поведінка; Приховувати текст: тільки іконки; Показувати текст: текст завжди видно.',
+                ru: 'По умолчанию: стандартное поведение; Скрыть текст: только иконки; Показывать текст: текст всегда виден.',
+                en: 'Default: standard behavior; Hide text: icons only; Show text: text always visible.'
             },
-            hide_text_buttons_name: {
-                uk: 'Приховати текст на кнопках',
-                ru: 'Скрыть текст на кнопках',
-                en: 'Hide text on buttons'
+            text_mode_default: {
+                uk: 'За замовчуванням',
+                ru: 'По умолчанию',
+                en: 'Default'
             },
-            hide_text_buttons_desc: {
-                uk: 'Показує тільки іконки на кнопках (без тексту навіть при наведенні).',
-                ru: 'Показывает только иконки на кнопках (без текста даже на наведении).',
-                en: 'Shows only icons on buttons (no text even on hover).'
+            text_mode_hide: {
+                uk: 'Приховувати текст',
+                ru: 'Скрыть текст',
+                en: 'Hide text'
+            },
+            text_mode_show: {
+                uk: 'Показувати текст',
+                ru: 'Показывать текст',
+                en: 'Show text'
+            },
+            reloading: {
+                uk: 'Перезавантаження...',
+                ru: 'Перезагрузка...',
+                en: 'Reloading...'
             }
         });
     }
 
-    // --- CSS стилі ---
-    function applyStyles() {
-        $('#plugin_button_styles').remove();
-        var hideText = Lampa.Storage.get('hide_text_buttons', false);
-        var showText = Lampa.Storage.get('show_text_buttons', false);
+    // --- CSS для режимів тексту ---
+    function applyTextMode() {
+        $('#plugin_text_mode_style').remove();
+        var mode = Lampa.Storage.get('text_mode', 'default');
 
         var css = '';
 
-        if (hideText) {
-            // Тільки іконки
+        if (mode === 'hide') {
             css += '.full-start__button span { display: none !important; }';
-        } else if (showText) {
-            // Текст завжди видно
+        } else if (mode === 'show') {
             css += '.full-start__button span { display: inline !important; }';
             css += '.full-start__button { min-width: auto !important; width: auto !important; }';
         } else {
-            // Стандартна поведінка
             css += '.full-start__button span { display: inline !important; opacity: 0; transition: opacity 0.2s ease; }';
             css += '.full-start__button.focus span { opacity: 1 !important; }';
             css += '.full-start__button { min-width: auto !important; width: auto !important; }';
         }
 
-        // Мобільні: прокрутка при великій кількості кнопок
         css += '@media screen and (max-width:580px) {';
         css += '.full-start-new__buttons { overflow-x:auto; overflow-y:hidden; white-space:nowrap; padding-bottom:10px; }';
         css += '.full-start__button { flex: 0 0 auto; margin-right: 5px; }';
         css += '}';
 
-        $('body').append('<style id="plugin_button_styles">' + css + '</style>');
+        $('body').append('<style id="plugin_text_mode_style">' + css + '</style>');
     }
 
-    // --- Показувати всі кнопки ---
+    // --- Показати всі кнопки ---
     function showAllButtons() {
         Lampa.Listener.follow('full', function (e) {
             if (e.type !== 'complite') return;
@@ -102,7 +107,7 @@
 
                     targetContainer.css({ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'flex-start' });
 
-                    applyStyles();
+                    applyTextMode();
                     Lampa.Controller.toggle('full_start');
                 } catch (err) {
                     console.error('[ShowAllButtons] Error:', err);
@@ -111,9 +116,9 @@
         });
     }
 
-    // --- Додавання налаштувань ---
+    // --- Налаштування ---
     function addSettings() {
-        // Показувати всі кнопки (завжди)
+        // Показувати всі кнопки
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: { name: 'show_all_buttons', type: 'trigger', default: true },
@@ -121,50 +126,44 @@
                 name: Lampa.Lang.translate('show_all_buttons_name'),
                 description: Lampa.Lang.translate('show_all_buttons_desc')
             },
-            onChange: function () {}
-        });
-
-        // Показувати текст на кнопках
-        Lampa.SettingsApi.addParam({
-            component: 'accent_color_plugin',
-            param: { name: 'show_text_buttons', type: 'trigger', default: false },
-            field: {
-                name: Lampa.Lang.translate('show_text_buttons_name'),
-                description: Lampa.Lang.translate('show_text_buttons_desc')
-            },
             onChange: function (value) {
-                Lampa.Storage.set('show_text_buttons', value);
-                if (value) Lampa.Storage.set('hide_text_buttons', false);
-                applyStyles();
-                Lampa.Settings.update();
+                Lampa.Storage.set('show_all_buttons', value);
+                setTimeout(function () {
+                    Lampa.Noty.show(Lampa.Lang.translate('reloading'));
+                    location.reload();
+                }, 200);
             }
         });
 
-        // Приховати текст на кнопках
+        // Режими відображення тексту
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
-            param: { name: 'hide_text_buttons', type: 'trigger', default: false },
+            param: { name: 'text_mode', type: 'select', default: 'default', values: ['default','hide','show'] },
             field: {
-                name: Lampa.Lang.translate('hide_text_buttons_name'),
-                description: Lampa.Lang.translate('hide_text_buttons_desc')
+                name: Lampa.Lang.translate('text_mode_name'),
+                description: Lampa.Lang.translate('text_mode_desc'),
+                options: [
+                    { value: 'default', name: Lampa.Lang.translate('text_mode_default') },
+                    { value: 'hide', name: Lampa.Lang.translate('text_mode_hide') },
+                    { value: 'show', name: Lampa.Lang.translate('text_mode_show') }
+                ]
             },
             onChange: function (value) {
-                Lampa.Storage.set('hide_text_buttons', value);
-                if (value) Lampa.Storage.set('show_text_buttons', false);
-                applyStyles();
-                Lampa.Settings.update();
+                Lampa.Storage.set('text_mode', value);
+                applyTextMode();
             }
         });
     }
 
+    // --- Ініціалізація плагіну ---
     function startPlugin() {
         initLang();
         addSettings();
         showAllButtons();
-        applyStyles();
+        applyTextMode();
 
         Lampa.Listener.follow('full', function (e) {
-            if (e.type === 'complite') applyStyles();
+            if (e.type === 'complite') applyTextMode();
         });
     }
 
