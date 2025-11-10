@@ -31,14 +31,9 @@
           uk: "Сховати текст на кнопках"
         },
         showbuttonwn_desc: {
-          ru: "Показывает только иконки (работает с \"Все кнопки\")",
-          en: "Show only icons (works with \"All buttons\")",
-          uk: "Показує лише іконки (працює з \"Усі кнопки\")"
-        },
-        reloading: {
-          ru: "Перезагрузка...",
-          en: "Reloading...",
-          uk: "Перезавантаження..."
+          ru: "Показывает только иконки (взаємовиключно з 'Великі кнопки')",
+          en: "Show only icons (mutually exclusive with 'Large buttons')",
+          uk: "Показує лише іконки (взаємовиключно з 'Великі кнопки')"
         }
       });
     } catch (e) {
@@ -46,144 +41,87 @@
     }
   }
 
-  // --- Застосування великих кнопок ---
+  // --- Допоміжні: робота з Storage (строки 'true'/'false') ---
+  function isTrue(key) {
+    try {
+      var v = Lampa.Storage.get(key);
+      return v === true || v === 'true' || v === '1' || v === 1;
+    } catch (e) {
+      return false;
+    }
+  }
+  function setBool(key, val) {
+    try {
+      Lampa.Storage.set(key, !!val ? 'true' : 'false');
+    } catch (e) {}
+  }
+
+  // --- Стилі: bigbuttons ---
   function applyBigButtons() {
     try {
-      var enabled = Lampa.Storage.get('bigbuttons', 'false') === 'true';
-      $('#accent_color_bigbuttons').remove();
+      var enabled = isTrue('bigbuttons');
+      var id = 'accent_color_bigbuttons';
+      var existing = document.getElementById(id);
+      if (existing) existing.parentNode.removeChild(existing);
+
       if (enabled) {
-        var style = '<style id="accent_color_bigbuttons">' +
-          '.full-start-new__buttons .full-start__button {min-width:120px !important;padding:8px 12px !important;font-size:14px !important;}' +
-          '.full-start-new__buttons .full-start__button:not(.focus) span {display:inline !important;}' +
+        var style = document.createElement('style');
+        style.id = id;
+        style.type = 'text/css';
+        style.innerHTML =
+          '.full-start-new__buttons .full-start__button { min-width:120px !important; padding:8px 12px !important; font-size:14px !important; }' +
+          '.full-start-new__buttons .full-start__button:not(.focus) span { display:inline !important; }' +
           '@media screen and (max-width:580px){' +
-          '.full-start-new__buttons {overflow-x:auto;overflow-y:hidden;white-space:nowrap;padding-bottom:10px;}' +
-          '.full-start-new__buttons .full-start__button {min-width:80px !important;padding:6px 8px !important;font-size:12px !important;}' +
-          '.full-start-new__buttons .full-start__button:not(.focus) span {display:none !important;}' +
-          '}' +
-          '</style>';
-        $('body').append(style);
+          '.full-start-new__buttons { overflow-x:auto; overflow-y:hidden; white-space:nowrap; padding-bottom:10px; }' +
+          '.full-start-new__buttons .full-start__button { min-width:80px !important; padding:6px 8px !important; font-size:12px !important; }' +
+          '.full-start-new__buttons .full-start__button:not(.focus) span { display:none !important; }' +
+          '}';
+        document.head.appendChild(style);
       }
     } catch (e) {
       console.error('[BigButtons] Apply error:', e);
     }
   }
 
-  // --- Приховування тексту ---
+  // --- Стилі: hide text (не видаляти DOM) ---
   function applyHideText() {
     try {
-      var hide = Lampa.Storage.get('showbuttonwn', 'false') === 'true';
-      if (hide) {
-        $('.full-start-new__buttons .full-start__button span').remove();
+      var enabled = isTrue('showbuttonwn');
+      var id = 'accent_color_hide_text';
+      var existing = document.getElementById(id);
+      if (existing) existing.parentNode.removeChild(existing);
+
+      if (enabled) {
+        var style = document.createElement('style');
+        style.id = id;
+        style.type = 'text/css';
+        style.innerHTML = '.full-start-new__buttons .full-start__button span, .buttons--container .full-start__button span { display: none !important; }';
+        document.head.appendChild(style);
       }
     } catch (e) {
       console.error('[HideText] Apply error:', e);
     }
   }
 
-  // --- Оновлення налаштувань (без render) ---
-  function updateSettings() {
-    try {
-      if (typeof Lampa.Settings !== 'undefined' && Lampa.Settings.main && typeof Lampa.Settings.main === 'function') {
-        var main = Lampa.Settings.main();
-        if (main && main.render) {
-          var $comp = main.render().find('[data-component="accent_color_plugin"]');
-          if ($comp.length) {
-            $comp.remove();
-            var $parent = main.render().find('[data-parent="plugins"]');
-            if ($parent.length) {
-              $parent.append(main.buildComponent('accent_color_plugin'));
-            }
-          }
-          if (typeof Lampa.Controller !== 'undefined' && Lampa.Controller.toggle) {
-            Lampa.Controller.toggle('settings_component');
-          }
-        }
-      }
-    } catch (e) {
-      console.error('[Settings] Update error:', e);
-    }
-  }
-
-  // --- Налаштування ---
-  function Settings() {
-    try {
-      var showAll = Lampa.Storage.get('showbutton', 'false') === 'true';
-
-      Lampa.SettingsApi.addParam({
-        component: "accent_color_plugin",
-        param: { name: "showbutton", type: "trigger", default: false },
-        field: { name: Lampa.Lang.translate('showbutton_name'), description: Lampa.Lang.translate('showbutton_desc') },
-        onChange: function (value) {
-          Lampa.Storage.set('showbutton', value);
-          if (value) {
-            Lampa.Storage.set('bigbuttons', false);
-            Lampa.Storage.set('showbuttonwn', false);
-          }
-          updateSettings();
-          setTimeout(function () {
-            Lampa.Noty.show(Lampa.Lang.translate('reloading'));
-            location.reload();
-          }, 300);
-        }
-      });
-
-      if (showAll) {
-        Lampa.SettingsApi.addParam({
-          component: "accent_color_plugin",
-          param: { name: "bigbuttons", type: "trigger", default: false },
-          field: { name: Lampa.Lang.translate('bigbuttons_name'), description: Lampa.Lang.translate('bigbuttons_desc') },
-          onChange: function (value) {
-            Lampa.Storage.set('bigbuttons', value);
-            if (value) Lampa.Storage.set('showbuttonwn', false);
-            applyBigButtons();
-            applyHideText();
-            updateSettings();
-          }
-        });
-
-        Lampa.SettingsApi.addParam({
-          component: "accent_color_plugin",
-          param: { name: "showbuttonwn", type: "trigger", default: false },
-          field: { name: Lampa.Lang.translate('showbuttonwn_name'), description: Lampa.Lang.translate('showbuttonwn_desc') },
-          onChange: function (value) {
-            Lampa.Storage.set('showbuttonwn', value);
-            if (value) Lampa.Storage.set('bigbuttons', false);
-            applyHideText();
-            applyBigButtons();
-            updateSettings();
-          }
-        });
-      } else {
-        Lampa.SettingsApi.addParam({
-          component: "accent_color_plugin",
-          param: { name: "bigbuttons", type: "trigger", default: false },
-          field: { name: Lampa.Lang.translate('bigbuttons_name'), description: Lampa.Lang.translate('bigbuttons_desc') },
-          onChange: function (value) {
-            Lampa.Storage.set('bigbuttons', value);
-            applyBigButtons();
-            updateSettings();
-          }
-        });
-      }
-    } catch (e) {
-      console.error('[Settings] Build error:', e);
-    }
-  }
-
-  // --- Показ усіх кнопок ---
+  // --- Показ усіх кнопок (логіка main$2 -> showAll) ---
   function ShowButtons() {
     try {
       Lampa.Listener.follow('full', function (e) {
         if (e.type !== 'complite') return;
+
         setTimeout(function () {
           try {
-            if (Lampa.Storage.get('showbutton') !== true) return;
+            if (!isTrue('showbutton')) return;
+
             var fullContainer = e.object.activity.render();
             var targetContainer = fullContainer.find('.full-start-new__buttons');
-            if (!targetContainer.length) return;
+            if (!targetContainer || !targetContainer.length) return;
+
             fullContainer.find('.button--play').remove();
+
             var allButtons = fullContainer.find('.buttons--container .full-start__button').add(targetContainer.find('.full-start__button'));
             var categories = { online: [], torrent: [], trailer: [], other: [] };
+
             allButtons.each(function () {
               var $b = $(this);
               var cls = $b.attr('class') || '';
@@ -192,12 +130,28 @@
               else if (cls.indexOf('trailer') !== -1) categories.trailer.push($b);
               else categories.other.push($b.clone(true));
             });
-            var order = ['torrent', 'online', 'trailer', 'other'];
+
+            var order = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
+
             targetContainer.empty();
-            order.forEach(function (c) { categories[c].forEach(function ($b) { targetContainer.append($b); }); });
+            order.forEach(function (c) {
+              if (!categories[c]) return;
+              for (var i = 0; i < categories[c].length; i++) {
+                targetContainer.append(categories[c][i]);
+              }
+            });
+
+            // Працює з hide-text опцією (так ми не видаляємо span постійно)
+            if (isTrue('showbuttonwn')) {
+              // applyHideText() встановлює CSS, тут додатково нічого не треба
+            }
+
             targetContainer.css({ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'flex-start' });
+
+            // додатково оновлюємо стилі
             applyBigButtons();
             applyHideText();
+
             Lampa.Controller.toggle('full_start');
           } catch (err) {
             console.error('[ShowButtons] Inner error:', err);
@@ -209,46 +163,133 @@
     }
   }
 
-  // --- Динамічне застосування ---
+  // --- Застосувати прямо до відкритої картки (без перезавантаження) ---
   function applyToCurrentCard() {
-    setTimeout(function () {
+    try {
+      // оновлюємо CSS-стилі
       applyBigButtons();
       applyHideText();
-    }, 200);
+
+      // якщо картка вже відкрита, застосувати на ній
+      var cont = $('.full-start-new__buttons');
+      if (cont && cont.length) {
+        // показати/сховати spans відповідно
+        if (isTrue('showbuttonwn')) cont.find('span').hide();
+        else cont.find('span').show();
+
+        // якщо showbutton увімкнений — виконаємо сортування/додавання кнопок
+        if (isTrue('showbutton')) {
+          // викличемо ту саму логіку, що і в ShowButtons (аналогічно — менш безпечно, але працює)
+          // щоб не дублювати, просто тригеримо подію render -> complite не завжди зряжено,
+          // тому виконаємо просте додавання з існуючих елементів
+          var fullContainer = $(document);
+          var targetContainer = cont;
+          var allButtons = $('.buttons--container .full-start__button').add(targetContainer.find('.full-start__button'));
+          var categories = { online: [], torrent: [], trailer: [], other: [] };
+          allButtons.each(function () {
+            var $b = $(this);
+            var cls = $b.attr('class') || '';
+            if (cls.indexOf('online') !== -1) categories.online.push($b);
+            else if (cls.indexOf('torrent') !== -1) categories.torrent.push($b);
+            else if (cls.indexOf('trailer') !== -1) categories.trailer.push($b);
+            else categories.other.push($b.clone(true));
+          });
+          var order = Lampa.Storage.get('buttonsort') || ['torrent', 'online', 'trailer', 'other'];
+          targetContainer.empty();
+          order.forEach(function (c) {
+            if (!categories[c]) return;
+            for (var i = 0; i < categories[c].length; i++) {
+              targetContainer.append(categories[c][i]);
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.error('[ApplyCurrent] Error:', e);
+    }
   }
 
-  // --- Маніфест ---
+  // --- Налаштування (додаємо всі опції в accent_color_plugin) ---
+  function Settings() {
+    try {
+      // гарантуємо дефолти (зберігаємо рядки 'true'/'false')
+      if (Lampa.Storage.get('showbutton') === undefined) setBool('showbutton', false);
+      if (Lampa.Storage.get('bigbuttons') === undefined) setBool('bigbuttons', false);
+      if (Lampa.Storage.get('showbuttonwn') === undefined) setBool('showbuttonwn', false);
+
+      // 1) showbutton — завжди додаємо
+      Lampa.SettingsApi.addParam({
+        component: "accent_color_plugin",
+        param: { name: "showbutton", type: "trigger", default: false },
+        field: { name: Lampa.Lang.translate('showbutton_name'), description: Lampa.Lang.translate('showbutton_desc') },
+        onChange: function (value) {
+          setBool('showbutton', value);
+          // якщо виключено — нічого автоматично не відключаємо
+          // при зміні застосовуємо одразу
+          applyToCurrentCard();
+        }
+      });
+
+      // 2) bigbuttons
+      Lampa.SettingsApi.addParam({
+        component: "accent_color_plugin",
+        param: { name: "bigbuttons", type: "trigger", default: false },
+        field: { name: Lampa.Lang.translate('bigbuttons_name'), description: Lampa.Lang.translate('bigbuttons_desc') },
+        onChange: function (value) {
+          // взаємовиключність: якщо вкл. bigbuttons — вимикаємо showbuttonwn
+          setBool('bigbuttons', value);
+          if (value) setBool('showbuttonwn', false);
+          applyBigButtons();
+          applyHideText(); // щоб синхронізувати
+          applyToCurrentCard();
+        }
+      });
+
+      // 3) showbuttonwn (hide text) — взаємовиключно з bigbuttons
+      Lampa.SettingsApi.addParam({
+        component: "accent_color_plugin",
+        param: { name: "showbuttonwn", type: "trigger", default: false },
+        field: { name: Lampa.Lang.translate('showbuttonwn_name'), description: Lampa.Lang.translate('showbuttonwn_desc') },
+        onChange: function (value) {
+          setBool('showbuttonwn', value);
+          if (value) setBool('bigbuttons', false);
+          applyHideText();
+          applyBigButtons();
+          applyToCurrentCard();
+        }
+      });
+    } catch (e) {
+      console.error('[Settings] Build error:', e);
+    }
+  }
+
+  // --- Маніфест (не змінює логіку) ---
   var manifest = {
     type: "other",
-    version: "1.9.0",
+    version: "1.9.1",
     author: "@chatgpt",
     name: "Show Buttons + Large Buttons",
-    description: "Суперстабільна версія без помилок при підключенні.",
+    description: "Стабільна версія. showbutton завжди доступний; bigbuttons і hide-text взаємовиключні.",
     component: "accent_color_plugin"
   };
 
-  // --- Ініціалізація ---
+  // --- Ініціалізація плагіну ---
   function add() {
     try {
       Lang();
-
-      // Значення за замовчуванням
-      ['bigbuttons', 'showbuttonwn', 'showbutton'].forEach(function (k) {
-        if (Lampa.Storage.get(k) === undefined) Lampa.Storage.set(k, false);
-      });
-
       Settings();
 
-      if (Lampa.Storage.get('bigbuttons', 'false') === 'true') applyBigButtons();
-      if (Lampa.Storage.get('showbuttonwn', 'false') === 'true') applyHideText();
+      // застосувати стани відразу
+      applyBigButtons();
+      applyHideText();
+      applyToCurrentCard();
 
-      Lampa.Listener.follow('full', function (e) {
-        if (e.type === 'complite') applyToCurrentCard();
-      });
+      // слухач для подальших відкриттів карток
+      ShowButtons();
 
-      Lampa.Manifest.plugins = manifest;
+      // реєструємо в Manifest
+      try { Lampa.Manifest.plugins = manifest; } catch (e) {}
 
-      if (Lampa.Storage.get('showbutton') === true) ShowButtons();
     } catch (e) {
       console.error('[Plugin Init] Critical error:', e);
     }
@@ -256,18 +297,14 @@
 
   function startPlugin() {
     try {
-      window.plugin_showbutton_ready = true;
-      if (window.appready) {
-        add();
-      } else {
-        Lampa.Listener.follow('app', function (e) {
-          if (e.type === 'ready') add();
-        });
-      }
+      if (window.appready) add();
+      else Lampa.Listener.follow('app', function (e) {
+        if (e.type === 'ready') add();
+      });
     } catch (e) {
       console.error('[StartPlugin] Error:', e);
     }
   }
 
-  if (!window.plugin_showbutton_ready) startPlugin();
+  startPlugin();
 })();
