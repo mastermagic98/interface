@@ -1,63 +1,66 @@
 (function () {
     'use strict';
 
+    // --- Локалізація ---
     Lampa.Lang.add({
-        uk: {
-            bigbuttons_settings_title: 'Керування кнопками у картці',
-            bigbuttons_show_all: 'Показувати всі кнопки',
-            bigbuttons_text_mode: 'Режим тексту на кнопках',
-            bigbuttons_text_mode_default: 'За замовчуванням (текст при наведенні)',
-            bigbuttons_text_mode_show: 'Показати текст',
-            bigbuttons_text_mode_hide: 'Приховати текст'
+        show_all_buttons_name: {
+            uk: 'Показувати всі кнопки',
+            ru: 'Показывать все кнопки',
+            en: 'Show all buttons'
         },
-        ru: {
-            bigbuttons_settings_title: 'Управление кнопками в карточке',
-            bigbuttons_show_all: 'Показывать все кнопки',
-            bigbuttons_text_mode: 'Режим текста на кнопках',
-            bigbuttons_text_mode_default: 'По умолчанию (текст при наведении)',
-            bigbuttons_text_mode_show: 'Показать текст',
-            bigbuttons_text_mode_hide: 'Скрыть текст'
+        text_mode_name: {
+            uk: 'Режим тексту на кнопках',
+            ru: 'Режим текста на кнопках',
+            en: 'Button text mode'
         },
-        en: {
-            bigbuttons_settings_title: 'Card button control',
-            bigbuttons_show_all: 'Show all buttons',
-            bigbuttons_text_mode: 'Button text mode',
-            bigbuttons_text_mode_default: 'Default (text on hover)',
-            bigbuttons_text_mode_show: 'Show text',
-            bigbuttons_text_mode_hide: 'Hide text'
+        text_mode_default: {
+            uk: 'За замовчуванням (текст при наведенні)',
+            ru: 'По умолчанию (текст при наведении)',
+            en: 'Default (text on hover)'
+        },
+        text_mode_show: {
+            uk: 'Показати текст',
+            ru: 'Показать текст',
+            en: 'Show text'
+        },
+        text_mode_hide: {
+            uk: 'Приховати текст',
+            ru: 'Скрыть текст',
+            en: 'Hide text'
+        },
+        buttons_control_title: {
+            uk: 'Керування кнопками у картці',
+            ru: 'Управление кнопками в карточке',
+            en: 'Card button control'
         }
     });
 
     function applyButtonSettings() {
-        const showAll = Lampa.Storage.get('bigbuttons_show_all', false);
-        const textMode = Lampa.Storage.get('bigbuttons_text_mode', 'default');
+        var showAll = Lampa.Storage.get('show_all_buttons', false);
+        var textMode = Lampa.Storage.get('text_mode', 'default');
 
-        const buttons = document.querySelectorAll('.full-start__button, .full-start__buttons .selector');
-        const hiddenButtons = document.querySelectorAll('.full-start__button--more, .full-start__button--subscribe');
+        var buttons = document.querySelectorAll('.full-start__button, .full-start__buttons .selector');
+        var hiddenButtons = document.querySelectorAll('.full-start__button--more, .full-start__button--subscribe');
 
-        // --- показ усіх кнопок ---
-        hiddenButtons.forEach(btn => {
-            btn.style.display = showAll ? 'flex' : '';
-        });
+        // показати/сховати всі кнопки
+        for (var i = 0; i < hiddenButtons.length; i++) {
+            hiddenButtons[i].style.display = showAll ? 'flex' : '';
+        }
 
-        // --- керування текстом ---
-        buttons.forEach(btn => {
-            const textEl = btn.querySelector('.full-start__text');
-
+        // керування текстом
+        for (var j = 0; j < buttons.length; j++) {
+            var btn = buttons[j];
+            var textEl = btn.querySelector('.full-start__text');
             if (textEl) {
                 btn.classList.remove('bigbuttons--show', 'bigbuttons--hide');
-
-                if (textMode === 'show') {
-                    btn.classList.add('bigbuttons--show');
-                } else if (textMode === 'hide') {
-                    btn.classList.add('bigbuttons--hide');
-                }
+                if (textMode === 'show') btn.classList.add('bigbuttons--show');
+                else if (textMode === 'hide') btn.classList.add('bigbuttons--hide');
             }
-        });
+        }
     }
 
     function addStyles() {
-        const style = document.createElement('style');
+        var style = document.createElement('style');
         style.textContent = `
             .bigbuttons--show .full-start__text {
                 display: block !important;
@@ -74,35 +77,32 @@
     }
 
     function addSettings() {
+        // Додаємо параметри до розділу accent_color_plugin
         Lampa.SettingsApi.addParam({
-            component: 'bigbuttons',
+            component: 'accent_color_plugin',
             param: {
-                name: 'bigbuttons_show_all',
+                name: 'show_all_buttons',
                 type: 'toggle',
                 default: false
             },
-            field: Lampa.Lang.translate('bigbuttons_show_all')
+            field: Lampa.Lang.translate('show_all_buttons_name'),
+            onChange: applyButtonSettings
         });
 
         Lampa.SettingsApi.addParam({
-            component: 'bigbuttons',
+            component: 'accent_color_plugin',
             param: {
-                name: 'bigbuttons_text_mode',
+                name: 'text_mode',
                 type: 'select',
                 values: ['default', 'show', 'hide'],
                 default: 'default'
             },
-            field: Lampa.Lang.translate('bigbuttons_text_mode'),
+            field: Lampa.Lang.translate('text_mode_name'),
             values: {
-                default: Lampa.Lang.translate('bigbuttons_text_mode_default'),
-                show: Lampa.Lang.translate('bigbuttons_text_mode_show'),
-                hide: Lampa.Lang.translate('bigbuttons_text_mode_hide')
-            }
-        });
-
-        Lampa.SettingsApi.addComponent({
-            component: 'bigbuttons',
-            name: Lampa.Lang.translate('bigbuttons_settings_title'),
+                'default': Lampa.Lang.translate('text_mode_default'),
+                'show': Lampa.Lang.translate('text_mode_show'),
+                'hide': Lampa.Lang.translate('text_mode_hide')
+            },
             onChange: applyButtonSettings
         });
     }
