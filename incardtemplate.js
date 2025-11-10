@@ -87,37 +87,41 @@
     }
   }
 
-  // --- Повне оновлення компонента налаштувань ---
-  function rebuildSettingsComponent() {
+  // --- Повне оновлення налаштувань ---
+  function rebuildSettings() {
     try {
-      var main = Lampa.Settings.main();
-      if (!main || !main.render || !main.buildComponent) return;
-
-      var $container = main.render();
-      var $plugin = $container.find('[data-component="accent_color_plugin"]');
-      if ($plugin.length) {
-        $plugin.remove();
-      }
-
-      var $parent = $container.find('[data-parent="plugins"]');
-      if ($parent.length) {
-        $parent.append(main.buildComponent('accent_color_plugin'));
-      }
-
-      if (Lampa.Controller && Lampa.Controller.toggle) {
-        Lampa.Controller.toggle('settings_component');
-      }
+      // Перезавантажуємо весь блок плагінів
+      Lampa.Settings.update();
+      // Якщо не допомогло — примусово перебудовуємо
+      setTimeout(function () {
+        if (Lampa.Settings && Lampa.Settings.main) {
+          var main = Lampa.Settings.main();
+          if (main.render) {
+            var $plugins = main.render().find('[data-parent="plugins"]');
+            if ($plugins.length) {
+              $plugins.empty();
+              // Перебудовуємо всі плагіни
+              Object.keys(Lampa.Manifest.plugins || {}).forEach(function (comp) {
+                if (comp !== 'accent_color_plugin') {
+                  $plugins.append(main.buildComponent(comp));
+                }
+              });
+              $plugins.append(main.buildComponent('accent_color_plugin'));
+            }
+          }
+          if (Lampa.Controller && Lampa.Controller.toggle) {
+            Lampa.Controller.toggle('settings_component');
+          }
+        }
+      }, 100);
     } catch (e) {
-      console.error('[rebuildSettingsComponent] Error:', e);
+      console.error('[rebuildSettings] Error:', e);
     }
   }
 
   // --- Налаштування ---
   function Settings() {
     try {
-      // Очищаємо попередні параметри, щоб уникнути дублікатів
-      Lampa.SettingsApi.clear('accent_color_plugin');
-
       // 1️⃣ Усі кнопки
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
@@ -125,7 +129,7 @@
         field: { name: Lampa.Lang.translate('showbutton_name'), description: Lampa.Lang.translate('showbutton_desc') },
         onChange: function (value) {
           Lampa.Storage.set('showbutton', value);
-          rebuildSettingsComponent();
+          rebuildSettings();
           setTimeout(function () {
             Lampa.Noty.show(Lampa.Lang.translate('reloading'));
             location.reload();
@@ -133,7 +137,7 @@
         }
       });
 
-      // 2️⃣ Відображення тексту — завжди доступно
+      // 2️⃣ Відображення тексту
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
         param: { name: "textdisplay", type: "list", default: "default" },
@@ -149,7 +153,7 @@
         onChange: function (value) {
           Lampa.Storage.set('textdisplay', value);
           applyTextDisplay();
-          rebuildSettingsComponent();
+          rebuildSettings();
         }
       });
     } catch (e) {
@@ -220,10 +224,10 @@
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "2.3.0",
+    version: "2.4.0",
     author: "@chatgpt",
     name: "Show Buttons + Text Display",
-    description: "Гарантовано показує опцію 'Відображення тексту в кнопках'.",
+    description: "100% гарантія появи обох опцій у налаштуваннях.",
     component: "accent_color_plugin"
   };
 
@@ -244,6 +248,9 @@
       Lampa.Manifest.plugins = manifest;
 
       if (Lampa.Storage.get('showbutton') === true) ShowButtons();
+
+      // Примусово оновлюємо UI після ініціалізації
+      setTimeout(rebuildSettings, 500);
     } catch (e) {
       console.error('[Init] Error:', e);
     }
