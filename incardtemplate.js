@@ -91,7 +91,7 @@
   function rebuildSettingsComponent() {
     try {
       var main = Lampa.Settings.main();
-      if (!main || !main.render) return;
+      if (!main || !main.render || !main.buildComponent) return;
 
       var $container = main.render();
       var $plugin = $container.find('[data-component="accent_color_plugin"]');
@@ -115,6 +115,9 @@
   // --- Налаштування ---
   function Settings() {
     try {
+      // Очищаємо попередні параметри, щоб уникнути дублікатів
+      Lampa.SettingsApi.clear('accent_color_plugin');
+
       // 1️⃣ Усі кнопки
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
@@ -217,10 +220,10 @@
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "2.2.0",
+    version: "2.3.0",
     author: "@chatgpt",
     name: "Show Buttons + Text Display",
-    description: "Усі кнопки + Відображення тексту (завжди/ніколи/стандарт). Опція завжди видима.",
+    description: "Гарантовано показує опцію 'Відображення тексту в кнопках'.",
     component: "accent_color_plugin"
   };
 
