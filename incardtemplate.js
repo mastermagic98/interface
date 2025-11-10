@@ -19,46 +19,18 @@
             en: 'Default (text on hover)'
         },
         text_mode_show: {
-            uk: 'Показати текст',
-            ru: 'Показать текст',
-            en: 'Show text'
+            uk: 'Показати текст (великі кнопки)',
+            ru: 'Показать текст (большие кнопки)',
+            en: 'Show text (large buttons)'
         },
         text_mode_hide: {
-            uk: 'Приховати текст',
-            ru: 'Скрыть текст',
-            en: 'Hide text'
-        },
-        buttons_control_title: {
-            uk: 'Керування кнопками у картці',
-            ru: 'Управление кнопками в карточке',
-            en: 'Card button control'
+            uk: 'Приховати текст (тільки іконки)',
+            ru: 'Скрыть текст (только иконки)',
+            en: 'Hide text (icons only)'
         }
     });
 
-    function applyButtonSettings() {
-        var showAll = Lampa.Storage.get('show_all_buttons', false);
-        var textMode = Lampa.Storage.get('text_mode', 'default');
-
-        var buttons = document.querySelectorAll('.full-start__button, .full-start__buttons .selector');
-        var hiddenButtons = document.querySelectorAll('.full-start__button--more, .full-start__button--subscribe');
-
-        // показати/сховати всі кнопки
-        for (var i = 0; i < hiddenButtons.length; i++) {
-            hiddenButtons[i].style.display = showAll ? 'flex' : '';
-        }
-
-        // керування текстом
-        for (var j = 0; j < buttons.length; j++) {
-            var btn = buttons[j];
-            var textEl = btn.querySelector('.full-start__text');
-            if (textEl) {
-                btn.classList.remove('bigbuttons--show', 'bigbuttons--hide');
-                if (textMode === 'show') btn.classList.add('bigbuttons--show');
-                else if (textMode === 'hide') btn.classList.add('bigbuttons--hide');
-            }
-        }
-    }
-
+    // --- Стилі ---
     function addStyles() {
         var style = document.createElement('style');
         style.textContent = `
@@ -76,8 +48,32 @@
         document.head.appendChild(style);
     }
 
+    // --- Логіка застосування змін ---
+    function applyButtonSettings() {
+        var showAll = Lampa.Storage.get('show_all_buttons', false);
+        var textMode = Lampa.Storage.get('text_mode', 'default');
+
+        var full = $('.full-start-new, .full-start');
+        if (!full.length) return;
+
+        // --- Кнопки, які зазвичай ховаються під "Дивитись" ---
+        var hiddenButtons = full.find('.full-start__button--more, .full-start__button--subscribe');
+        hiddenButtons.css('display', showAll ? 'flex' : '');
+
+        // --- Режим тексту ---
+        var buttons = full.find('.full-start__button');
+        buttons.removeClass('bigbuttons--show bigbuttons--hide');
+
+        if (textMode === 'show') {
+            buttons.addClass('bigbuttons--show');
+        } else if (textMode === 'hide') {
+            buttons.addClass('bigbuttons--hide');
+        }
+    }
+
+    // --- Додаємо опції в Налаштування кольору акценту ---
     function addSettings() {
-        // Додаємо параметри до розділу accent_color_plugin
+        // 1️⃣ Показувати всі кнопки
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: {
@@ -86,9 +82,12 @@
                 default: false
             },
             field: Lampa.Lang.translate('show_all_buttons_name'),
-            onChange: applyButtonSettings
+            onChange: function () {
+                applyButtonSettings();
+            }
         });
 
+        // 2️⃣ Режим тексту
         Lampa.SettingsApi.addParam({
             component: 'accent_color_plugin',
             param: {
@@ -103,16 +102,20 @@
                 'show': Lampa.Lang.translate('text_mode_show'),
                 'hide': Lampa.Lang.translate('text_mode_hide')
             },
-            onChange: applyButtonSettings
+            onChange: function () {
+                applyButtonSettings();
+            }
         });
     }
 
+    // --- Основна функція ---
     function main() {
         addStyles();
         addSettings();
 
+        // застосовує зміни при відкритті картки
         Lampa.Listener.follow('full', function (event) {
-            if (event.type === 'activity') {
+            if (event.type === 'activity' || event.type === 'complite') {
                 setTimeout(applyButtonSettings, 100);
             }
         });
