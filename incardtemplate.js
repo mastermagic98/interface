@@ -88,7 +88,12 @@
 
   // --- Оновлення налаштувань ---
   function updateSettings() {
-    Lampa.Settings.render();
+    // Перебудовуємо налаштування
+    Lampa.Settings.main().render().find('[data-component="accent_color_plugin"]').remove();
+    Lampa.Settings.main().render().find('[data-parent="plugins"]').append(
+      Lampa.Settings.main().buildComponent('accent_color_plugin')
+    );
+    Lampa.Controller.toggle('settings_component');
   }
 
   // --- Налаштування ---
@@ -230,10 +235,10 @@
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "1.6.1",
+    version: "1.7.0",
     author: "@chatgpt",
     name: "Show Buttons + Large Buttons",
-    description: "Усі кнопки + взаємовиключні опції: Великі кнопки або Сховати текст. За замовчуванням — вимкнено.",
+    description: "Усі кнопки + взаємовиключні опції. Великі кнопки вмикаються миттєво, за замовчуванням — вимкнено.",
     component: "accent_color_plugin"
   };
 
@@ -241,18 +246,17 @@
   function add() {
     Lang();
 
-    // 🛡️ Гарантуємо, що bigbuttons = false за замовчуванням (навіть якщо було збережено)
-    if (Lampa.Storage.get('bigbuttons') === undefined) {
-      Lampa.Storage.set('bigbuttons', false);
-    }
+    // 🛡️ Гарантуємо значення за замовчуванням
+    if (Lampa.Storage.get('bigbuttons') === undefined) Lampa.Storage.set('bigbuttons', false);
+    if (Lampa.Storage.get('showbuttonwn') === undefined) Lampa.Storage.set('showbuttonwn', false);
+    if (Lampa.Storage.get('showbutton') === undefined) Lampa.Storage.set('showbutton', false);
 
     Settings();
 
-    // НЕ застосовуємо стилі при старті, якщо вимкнено
+    // Застосовуємо ТІЛЬКИ якщо увімкнено
     if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
       applyBigButtons();
     }
-
     if (Lampa.Storage.get('showbuttonwn', 'false') === 'true') {
       applyHideText();
     }
