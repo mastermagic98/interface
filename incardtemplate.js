@@ -1,133 +1,154 @@
 (function () {
-  'use strict';
+    'use strict';
 
-  // --- Локалізація ---
-  function Lang() {
-    Lampa.Lang.add({
-      show_all_buttons_name: {
-        ru: "Показать все кнопки",
-        en: "Show all buttons",
-        uk: "Показати всі кнопки"
-      },
-      show_all_buttons_desc: {
-        ru: "Выводит все кнопки действий на карточке",
-        en: "Show all action buttons in card",
-        uk: "Показує усі кнопки дій на картці"
-      },
-      text_mode_name: {
-        ru: "Режим текста на кнопках",
-        en: "Text display mode",
-        uk: "Режими відображення тексту"
-      },
-      text_mode_desc: {
-        ru: "Выберите режим отображения текста на кнопках",
-        en: "Select mode of text display on buttons",
-        uk: "Оберіть режим відображення тексту на кнопках"
-      },
-      default: {
-        ru: "По умолчанию",
-        en: "Default",
-        uk: "За замовчуванням"
-      },
-      show: {
-        ru: "Показать текст",
-        en: "Show text",
-        uk: "Показати текст"
-      },
-      hide: {
-        ru: "Скрыть текст",
-        en: "Hide text",
-        uk: "Приховати текст"
-      },
-      reloading: {
-        ru: "Перезагрузка...",
-        en: "Reloading...",
-        uk: "Перезавантаження..."
-      }
-    });
-  }
-
-  // --- Застосування режиму тексту ---
-  function applyTextMode() {
-    var mode = Lampa.Storage.get('text_mode', 'default');
-
-    $('#accent_color_text_mode').remove();
-
-    if (mode === 'default') {
-      // Нічого не робимо, стандартні стилі Lampa
-      return;
+    // --- Локалізація ---
+    function Lang() {
+        Lampa.Lang.add({
+            show_all_buttons: {
+                ru: "Показать все кнопки",
+                en: "Show all buttons",
+                uk: "Показати всі кнопки"
+            },
+            text_mode: {
+                ru: "Режим текста на кнопках",
+                en: "Text display mode",
+                uk: "Режим відображення тексту"
+            },
+            text_mode_default: {
+                ru: "По умолчанию",
+                en: "Default",
+                uk: "За замовчуванням"
+            },
+            text_mode_show: {
+                ru: "Показать текст",
+                en: "Show text",
+                uk: "Показати текст"
+            },
+            text_mode_hide: {
+                ru: "Скрыть текст",
+                en: "Hide text",
+                uk: "Приховати текст"
+            },
+            reloading: {
+                ru: "Перезагрузка...",
+                en: "Reloading...",
+                uk: "Перезавантаження..."
+            }
+        });
     }
 
-    var style = '<style id="accent_color_text_mode">';
-    if (mode === 'show') {
-      style += '.full-start-new__buttons .full-start__button span {display:inline !important;}';
-    } else if (mode === 'hide') {
-      style += '.full-start-new__buttons .full-start__button span {display:none !important;}';
+    // --- Показ всіх кнопок ---
+    function ShowAllButtons() {
+        Lampa.Listener.follow('full', function (e) {
+            if (e.type !== 'complite') return;
+            setTimeout(function () {
+                var fullContainer = e.object.activity.render();
+                var targetContainer = fullContainer.find('.full-start-new__buttons');
+                if (!targetContainer.length) return;
+
+                // Всі кнопки з панелі та сховані під "Дивитись"
+                var allButtons = fullContainer.find('.buttons--container .full-start__button')
+                    .add(targetContainer.find('.full-start__button'));
+
+                // Категорії
+                var categories = { online: [], torrent: [], trailer: [], other: [] };
+                allButtons.each(function () {
+                    var $b = $(this);
+                    var cls = $b.attr('class') || '';
+                    if (cls.indexOf('online') !== -1) categories.online.push($b);
+                    else if (cls.indexOf('torrent') !== -1) categories.torrent.push($b);
+                    else if (cls.indexOf('trailer') !== -1) categories.trailer.push($b);
+                    else categories.other.push($b.clone(true));
+                });
+
+                // Порядок
+                var order = ['torrent','online','trailer','other'];
+                targetContainer.empty();
+                order.forEach(function(c){
+                    categories[c].forEach(function($b){
+                        targetContainer.append($b);
+                    });
+                });
+
+                targetContainer.css({ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'flex-start' });
+
+                // Перевірка режиму тексту
+                applyTextMode();
+                Lampa.Controller.toggle('full_start');
+            }, 100);
+        });
     }
-    style += '</style>';
 
-    $('body').append(style);
-  }
+    // --- Режим тексту ---
+    function applyTextMode() {
+        var mode = Lampa.Storage.get('text_mode') || 'default';
+        var $buttons = $('.full-start-new__buttons .full-start__button');
 
-  // --- Показати всі кнопки ---
-  function ShowAllButtons() {
-    Lampa.Listener.follow('full', function (e) {
-      if (e.type !== 'complite') return;
+        // Видаляємо кастомні стилі
+        $('#text-mode-style').remove();
 
-      setTimeout(function () {
-        if (Lampa.Storage.get('show_all_buttons') !== true) return;
+        if (mode === 'default') {
+            // нічого не змінюємо, стандартна Lampa логіка
+        } else if (mode === 'show') {
+            // Текст видно на всіх кнопках
+            $buttons.each(function () {
+                $(this).find('span').show();
+            });
+        } else if (mode === 'hide') {
+            // Текст прихований
+            $buttons.each(function () {
+                $(this).find('span').hide();
+            });
+        }
+    }
 
-        var fullContainer = e.object.activity.render();
-        var targetContainer = fullContainer.find('.full-start-new__buttons');
-        if (!targetContainer.length) return;
-
-        fullContainer.find('.button--play').remove();
-
-        var allButtons = fullContainer.find('.buttons--container .full-start__button')
-          .add(targetContainer.find('.full-start__button'));
-
-        var categories = { online: [], torrent: [], trailer: [], other: [] };
-        allButtons.each(function () {
-          var $b = $(this);
-          var cls = $b.attr('class') || '';
-          if (cls.indexOf('online') !== -1) categories.online.push($b);
-          else if (cls.indexOf('torrent') !== -1) categories.torrent.push($b);
-          else if (cls.indexOf('trailer') !== -1) categories.trailer.push($b);
-          else categories.other.push($b.clone(true));
+    // --- Налаштування ---
+    function Settings() {
+        // Показати всі кнопки
+        Lampa.SettingsApi.addParam({
+            component: 'accent_color_plugin',
+            param: { name: 'show_all_buttons', type: 'trigger', default: false },
+            field: { name: Lampa.Lang.translate('show_all_buttons'), description: '' },
+            onChange: function(value){
+                Lampa.Storage.set('show_all_buttons', value);
+                setTimeout(function(){
+                    Lampa.Noty.show(Lampa.Lang.translate('reloading'));
+                    location.reload();
+                }, 200);
+            }
         });
 
-        var order = ['torrent', 'online', 'trailer', 'other'];
-        targetContainer.empty();
-        order.forEach(function (c) { categories[c].forEach(function ($b) { targetContainer.append($b); }); });
+        // Режим тексту
+        Lampa.SettingsApi.addParam({
+            component: 'accent_color_plugin',
+            param: { name: 'text_mode', type: 'select', default: 'default', values: [
+                { name: Lampa.Lang.translate('text_mode_default'), value: 'default' },
+                { name: Lampa.Lang.translate('text_mode_show'), value: 'show' },
+                { name: Lampa.Lang.translate('text_mode_hide'), value: 'hide' }
+            ]},
+            field: { name: Lampa.Lang.translate('text_mode'), description: '' },
+            onChange: function(value){
+                Lampa.Storage.set('text_mode', value);
+                applyTextMode();
+            }
+        });
+    }
 
-        targetContainer.css({ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'flex-start' });
+    // --- Ініціалізація ---
+    function init() {
+        Lang();
 
-      }, 150);
+        // Значення за замовчуванням
+        if (Lampa.Storage.get('show_all_buttons') === undefined) Lampa.Storage.set('show_all_buttons', false);
+        if (Lampa.Storage.get('text_mode') === undefined) Lampa.Storage.set('text_mode', 'default');
+
+        Settings();
+        if (Lampa.Storage.get('show_all_buttons') === true) ShowAllButtons();
+        applyTextMode();
+    }
+
+    if (window.appready) init();
+    else Lampa.Listener.follow('app', function(e){
+        if (e.type==='ready') init();
     });
-  }
-
-  // --- Налаштування ---
-  function Settings() {
-    // Показати всі кнопки
-    Lampa.SettingsApi.addParam({
-      component: "accent_color_plugin",
-      param: { name: "show_all_buttons", type: "trigger", default: false },
-      field: { name: Lampa.Lang.translate('show_all_buttons_name'), description: Lampa.Lang.translate('show_all_buttons_desc') },
-      onChange: function (value) {
-        Lampa.Storage.set('show_all_buttons', value);
-        Lampa.Noty.show(Lampa.Lang.translate('reloading'));
-        setTimeout(function () { location.reload(); }, 300);
-      }
-    });
-
-    // Режим тексту
-    var textOptions = [
-      { value: 'default', name: Lampa.Lang.translate('default') },
-      { value: 'show', name: Lampa.Lang.translate('show') },
-      { value: 'hide', name: Lampa.Lang.translate('hide') }
-    ];
-
-    Lampa.SettingsApi.addParam({
-      component: "accent_color_plugin",
-      param: { name: "text_mode", type: "select", default: 'default', options: textOptions },
-      field: { name: Lampa.Lang.translate('text_mode_name'), description: Lampa.Lang.translate('text_mode_desc') },
+})();
