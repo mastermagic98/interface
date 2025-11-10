@@ -78,21 +78,17 @@
     }
   }
 
-  // --- Приховування тексту (миттєво, тільки при showbutton) ---
+  // --- Приховування тексту (миттєво) ---
   function applyHideText() {
     var hide = Lampa.Storage.get('showbuttonwn', 'false') === 'true';
-    $('.full-start-new__buttons .full-start__button span').each(function () {
-      if (hide) {
-        $(this).remove();
-      } else if (!$(this).parent().hasClass('focus')) {
-        $(this).css('display', 'inline');
-      }
-    });
+    if (hide) {
+      $('.full-start-new__buttons .full-start__button span').remove();
+    }
   }
 
-  // --- Оновлення налаштувань (динамічне) ---
+  // --- Оновлення налаштувань ---
   function updateSettings() {
-    Lampa.Settings.render(); // Перезавантажуємо блок налаштувань
+    Lampa.Settings.render();
   }
 
   // --- Налаштування ---
@@ -109,7 +105,6 @@
       },
       onChange: function (value) {
         Lampa.Storage.set('showbutton', value);
-        // Скидаємо взаємовиключні опції
         if (value) {
           Lampa.Storage.set('bigbuttons', false);
           Lampa.Storage.set('showbuttonwn', false);
@@ -122,9 +117,8 @@
       }
     });
 
-    // 2️⃣ Якщо showbutton = true → показуємо взаємовиключні опції
+    // 2️⃣ Якщо showbutton = true → взаємовиключні опції
     if (showAll) {
-      // Великі кнопки
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
         param: { name: "bigbuttons", type: "trigger", default: false },
@@ -134,14 +128,13 @@
         },
         onChange: function (value) {
           Lampa.Storage.set('bigbuttons', value);
-          if (value) Lampa.Storage.set('showbuttonwn', false); // взаємовиключно
+          if (value) Lampa.Storage.set('showbuttonwn', false);
           applyBigButtons();
           applyHideText();
           updateSettings();
         }
       });
 
-      // Сховати текст
       Lampa.SettingsApi.addParam({
         component: "accent_color_plugin",
         param: { name: "showbuttonwn", type: "trigger", default: false },
@@ -151,7 +144,7 @@
         },
         onChange: function (value) {
           Lampa.Storage.set('showbuttonwn', value);
-          if (value) Lampa.Storage.set('bigbuttons', false); // взаємовиключно
+          if (value) Lampa.Storage.set('bigbuttons', false);
           applyHideText();
           applyBigButtons();
           updateSettings();
@@ -214,7 +207,6 @@
               justifyContent: 'flex-start'
             });
 
-            // Застосовуємо bigbuttons та hide text
             applyBigButtons();
             applyHideText();
 
@@ -227,33 +219,43 @@
     });
   }
 
-  // --- Динамічне оновлення при відкритті картки ---
+  // --- Динамічне застосування при відкритті картки ---
   function applyToCurrentCard() {
     setTimeout(function () {
-      var container = $('.full-start-new__buttons');
-      if (container.length) {
-        applyBigButtons();
-        applyHideText();
-      }
+      applyBigButtons();
+      applyHideText();
     }, 200);
   }
 
   // --- Маніфест ---
   var manifest = {
     type: "other",
-    version: "1.6.0",
+    version: "1.6.1",
     author: "@chatgpt",
     name: "Show Buttons + Large Buttons",
-    description: "Усі кнопки + взаємовиключні опції: Великі кнопки або Сховати текст. Без перезавантаження для bigbuttons/showbuttonwn.",
+    description: "Усі кнопки + взаємовиключні опції: Великі кнопки або Сховати текст. За замовчуванням — вимкнено.",
     component: "accent_color_plugin"
   };
 
   // --- Ініціалізація ---
   function add() {
     Lang();
+
+    // 🛡️ Гарантуємо, що bigbuttons = false за замовчуванням (навіть якщо було збережено)
+    if (Lampa.Storage.get('bigbuttons') === undefined) {
+      Lampa.Storage.set('bigbuttons', false);
+    }
+
     Settings();
-    applyBigButtons();
-    applyHideText();
+
+    // НЕ застосовуємо стилі при старті, якщо вимкнено
+    if (Lampa.Storage.get('bigbuttons', 'false') === 'true') {
+      applyBigButtons();
+    }
+
+    if (Lampa.Storage.get('showbuttonwn', 'false') === 'true') {
+      applyHideText();
+    }
 
     Lampa.Listener.follow('full', function (e) {
       if (e.type === 'complite') applyToCurrentCard();
