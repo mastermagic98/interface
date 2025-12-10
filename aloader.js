@@ -502,3 +502,38 @@
     });
     window.changeColor = changeColor;
 })();
+// === ПЕРЕФАРБУВАННЯ ІКОНКИ ПАУЗИ У КОЛІР ТЕМИ ===
+function updatePauseIconColor() {
+    var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+    var styleId = 'pause-icon-custom-color';
+
+    $('#' + styleId).remove();
+
+    var css = '.player-video__paused svg rect {' +
+              'fill: ' + mainColor + ' !important;' +
+              '}';
+
+    $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
+}
+
+// Оновлюємо changeColor, щоб він також фарбував паузу
+function changeColor() {
+    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+        setCustomLoader(Lampa.Storage.get('ani_load'));
+        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+    } else {
+        remove_activity_loader();
+    }
+    
+    updatePauseIconColor(); // фарбуємо паузу
+}
+
+// Викликаємо при старті
+updatePauseIconColor();
+
+// При зміні кольору теми — теж оновлюємо
+Lampa.Storage.listener.follow('change', function (e) {
+    if (e.name === 'color_plugin_main_color') {
+        changeColor();
+    }
+});
