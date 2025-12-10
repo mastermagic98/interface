@@ -501,7 +501,6 @@
         }
     });
     window.changeColor = changeColor;
-})();
 // === ПЕРЕФАРБУВАННЯ ІКОНКИ ПАУЗИ У КОЛІР ТЕМИ ===
 function updatePauseIconColor() {
     var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
@@ -537,3 +536,4 @@ Lampa.Storage.listener.follow('change', function (e) {
         changeColor();
     }
 });
+})();
