@@ -48,7 +48,7 @@
         var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
                        'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
                        'body .lampac-balanser-loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
-                       'body .player-video .player-video__loader.custom, body .player-video.video--load .player-video__loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' + // backdrop-filter НЕ чіпаємо!
+                       'body .player-video .player-video__loader.custom, body .player-video.video--load .player-video__loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
                        'body .loading-layer .loading-layer__ico.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
@@ -131,13 +131,26 @@
 
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var rgb = getFilterRgb(mainColor);
+        var whiteFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
         if (!escapedUrl || escapedUrl === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
+            whiteFilterValue = '';
         }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: brightness(0) invert(1) !important; -webkit-filter: brightness(0) invert(1) !important; }' +
-                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { filter: brightness(0) invert(1) !important; }';
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
+                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
+        setTimeout(function checkPrvElement() {
+            var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
+            if (prvElement) {
+                prvElement.style.filter = whiteFilterValue;
+                prvElement.style.webkitFilter = whiteFilterValue;
+            } else {
+                setTimeout(checkPrvElement, 500);
+            }
+        }, 100);
     }
 
     function remove_activity_loader() {
@@ -215,13 +228,15 @@
         var style = document.createElement('style');
         style.id = 'aniload';
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var rgb = getFilterRgb(mainColor);
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         var focusBorderColor = mainColor.toLowerCase() === '#353535' ? '#ffffff' : 'var(--main-color)';
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
                             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
+                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
                             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
                             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
@@ -341,7 +356,7 @@
                     var leftColumn = svgContent.slice(0, midPoint).join('');
                     var rightColumn = svgContent.slice(midPoint).join('');
                     var defaultLoader = applyDefaultLoaderColor();
-                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '"></div>';
+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + defaultLoader.filter + ';"></div>';
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
                                     '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
@@ -564,21 +579,43 @@
                 var playerVideo = document.querySelector('.player-video.video--load');
                 if (playerVideo) {
                     var loader = playerVideo.querySelector('.player-video__loader');
-                    if (loader && getComputedStyle(loader).backgroundImage.includes('loader.svg')) {
-                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                    if (loader) {
+                        var computedBg = getComputedStyle(loader).backgroundImage;
+                        if (computedBg.includes('lampa-main/img/loader.svg')) {
+                            setCustomLoader(Lampa.Storage.get('ani_load'));
+                        }
                     }
                     var youtubeNeedclick = playerVideo.querySelector('.player-video__youtube-needclick > div');
-                    if (youtubeNeedclick && getComputedStyle(youtubeNeedclick).backgroundImage.includes('loader.svg')) {
-                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                    if (youtubeNeedclick) {
+                        var computedBg = getComputedStyle(youtubeNeedclick).backgroundImage;
+                        if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
+                            setCustomLoader(Lampa.Storage.get('ani_load'));
+                        }
                     }
                     var modalLoading = playerVideo.querySelector('.modal-loading');
-                    if (modalLoading && getComputedStyle(modalLoading).backgroundImage.includes('loader.svg')) {
-                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                    if (modalLoading) {
+                        var computedBg = getComputedStyle(modalLoading).backgroundImage;
+                        if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
+                            setCustomLoader(Lampa.Storage.get('ani_load'));
+                        }
                     }
+                    var allElements = document.querySelectorAll('.player-video *');
+                    allElements.forEach(function (el) {
+                        var bgImage = getComputedStyle(el).backgroundImage;
+                        if (bgImage.includes('lampa-main/img/loader.svg')) {
+                            el.classList.add('custom');
+                            el.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
+                            el.style.filter = filterValue;
+                            el.style.backgroundColor = 'transparent';
+                        }
+                    });
                 }
                 var modalLoading = document.querySelector('.modal-loading');
-                if (modalLoading && getComputedStyle(modalLoading).backgroundImage.includes('loader.svg')) {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                if (modalLoading) {
+                    var computedBg = getComputedStyle(modalLoading).backgroundImage;
+                    if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
+                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                    }
                 }
             }
         }, 100);
