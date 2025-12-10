@@ -9,7 +9,6 @@
         svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
     });
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
-
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
@@ -34,7 +33,6 @@
         return { src: encodedSvg, filter: '' };
     }
 
-    // ПЕРЕВІРКА: чи SVG вже має власний filter (наприклад, feGaussianBlur, feColorMatrix)
     function svgHasOwnFilter(url) {
         if (!url || url.indexOf('data:image/svg+xml') !== 0) return false;
         try {
@@ -48,8 +46,6 @@
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-
-        // Якщо SVG вже має вбудований фільтр — НЕ додаємо свій!
         var hasOwnFilter = svgHasOwnFilter(url);
         var filterValue = '';
         if (!hasOwnFilter) {
@@ -58,83 +54,52 @@
             filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         }
 
-        var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
-                       'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
-                       'body .lampac-balanser-loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
-                       'body .player-video .player-video__loader.custom, body .player-video.video--load .player-video__loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
-                       'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .loading-layer .loading-layer__ico.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
-                       'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .player-video { position: relative !important; width: 100% !important; height: 100vh !important; }' +
-                       'body .player-video__youtube-needclick { position: relative !important; width: 100% !important; height: 100% !important; }' +
-                       'body .player-video__youtube-needclick > div.custom { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }' +
-                       'body .modal-loading.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; display: block !important; z-index: 9999 !important; }';
+        var newStyle = 
+            'body .activity__loader { display: none !important; background-image: none !important; }' +
+            'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
+
+            // КЛЮЧОВА ПРАВКА: НЕ ЧІПАЄМО ФОН ПЛЕЄРА — додаємо свій SVG через ::before
+            'body .player-video__loader.custom::before {' +
+                'content: "" !important;' +
+                'position: absolute !important;' +
+                'left: 50% !important; top: 50% !important;' +
+                'transform: translate(-50%, -50%) !important;' +
+                'width: 80px !important; height: 80px !important;' +
+                'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
+                'filter: ' + filterValue + ' !important;' +
+                'z-index: 9999 !important;' +
+                'pointer-events: none;' +
+            '}' +
+
+            'body .player-video__loader.custom { background-image: none !important; }' +
+
+            'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .modal-loading.custom {' +
+                'background-image: url(\'' + escapedUrl + '\') !important;' +
+                'background-repeat: no-repeat !important;' +
+                'background-position: center !important;' +
+                'background-size: contain !important;' +
+                'background-color: transparent !important;' +
+                'filter: ' + filterValue + ' !important;' +
+            '}' +
+
+            'body .player-video__youtube-needclick > div.custom {' +
+                'position: absolute !important; left: 50% !important; top: 50% !important;' +
+                'transform: translate(-50%, -50%) !important; width: 8em !important; height: 8em !important;' +
+                'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
+                'filter: ' + filterValue + ' !important; text-indent: -9999px !important; z-index: 9999 !important;' +
+            '}';
 
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
-        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
-        for (var i = 0; i < playerLoaderElements.length; i++) {
-            playerLoaderElements[i].classList.add('custom');
-            playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            if (!hasOwnFilter) playerLoaderElements[i].style.filter = filterValue;
-        }
+        $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').addClass('custom');
+
         var element = document.querySelector('.activity__loader');
-        if (element) {
-            element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            if (!hasOwnFilter) element.style.filter = filterValue;
-            element.style.backgroundColor = 'transparent';
-            if (Lampa.Storage.get('ani_active')) {
-                element.classList.add('active');
-                element.style.display = 'block';
-            }
-        }
-        var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
-        for (var i = 0; i < balanserElements.length; i++) {
-            balanserElements[i].classList.add('custom');
-            balanserElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            if (!hasOwnFilter) balanserElements[i].style.filter = filterValue;
-            balanserElements[i].style.backgroundColor = 'transparent';
-        }
-        var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
-        for (var i = 0; i < loadingLayerIco.length; i++) {
-            loadingLayerIco[i].classList.add('custom');
-            loadingLayerIco[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            if (!hasOwnFilter) loadingLayerIco[i].style.filter = filterValue;
-            loadingLayerIco[i].style.backgroundColor = 'transparent';
-        }
-        var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
-        for (var i = 0; i < youtubeNeedclickElements.length; i++) {
-            youtubeNeedclickElements[i].classList.add('custom');
-            youtubeNeedclickElements[i].textContent = '';
-            youtubeNeedclickElements[i].style.textIndent = '-9999px';
-            youtubeNeedclickElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            youtubeNeedclickElements[i].style.backgroundRepeat = 'no-repeat';
-            youtubeNeedclickElements[i].style.backgroundPosition = '50% 50%';
-            youtubeNeedclickElements[i].style.backgroundSize = '80% 80%';
-            youtubeNeedclickElements[i].style.backgroundColor = 'transparent';
-            if (!hasOwnFilter) youtubeNeedclickElements[i].style.filter = filterValue;
-            youtubeNeedclickElements[i].style.zIndex = '9999';
-            youtubeNeedclickElements[i].style.width = '8em';
-            youtubeNeedclickElements[i].style.height = '8em';
-            youtubeNeedclickElements[i].style.position = 'absolute';
-            youtubeNeedclickElements[i].style.left = '50%';
-            youtubeNeedclickElements[i].style.top = '50%';
-            youtubeNeedclickElements[i].style.transform = 'translate(-50%, -50%)';
-            youtubeNeedclickElements[i].style.webkitTransform = 'translate(-50%, -50%)';
-        }
-        var modalLoadingElements = document.querySelectorAll('.modal-loading');
-        for (var i = 0; i < modalLoadingElements.length; i++) {
-            modalLoadingElements[i].classList.add('custom');
-            modalLoadingElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            modalLoadingElements[i].style.backgroundRepeat = 'no-repeat';
-            modalLoadingElements[i].style.backgroundPosition = '50% 50%';
-            modalLoadingElements[i].style.backgroundSize = 'contain';
-            modalLoadingElements[i].style.backgroundColor = 'transparent';
-            if (!hasOwnFilter) modalLoadingElements[i].style.filter = filterValue;
-            modalLoadingElements[i].style.display = 'block';
-            modalLoadingElements[i].style.zIndex = '9999';
+        if (element && Lampa.Storage.get('ani_active')) {
+            element.classList.add('active');
+            element.style.display = 'block';
         }
     }
+
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var hasOwnFilter = svgHasOwnFilter(escapedUrl);
@@ -150,10 +115,8 @@
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                if (!hasOwnFilter) {
-                    prvElement.style.filter = whiteFilterValue;
-                    prvElement.style.webkitFilter = whiteFilterValue;
-                }
+                prvElement.style.filter = whiteFilterValue;
+                prvElement.style.webkitFilter = whiteFilterValue;
             } else {
                 setTimeout(checkPrvElement, 500);
             }
@@ -164,6 +127,7 @@
         if (styleElement) styleElement.remove();
         var prvStyleElement = document.getElementById('aniload-id-prv');
         if (prvStyleElement) prvStyleElement.remove();
+        $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').removeClass('custom');
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.classList.remove('active');
@@ -171,59 +135,6 @@
             element.style.backgroundImage = '';
             element.style.filter = '';
             element.style.backgroundColor = 'transparent';
-        }
-        var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
-        for (var i = 0; i < balanserElements.length; i++) {
-            balanserElements[i].classList.remove('custom');
-            balanserElements[i].style.backgroundImage = '';
-            balanserElements[i].style.filter = '';
-            balanserElements[i].style.backgroundColor = 'transparent';
-        }
-        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
-        for (var i = 0; i < playerLoaderElements.length; i++) {
-            playerLoaderElements[i].classList.remove('custom');
-            playerLoaderElements[i].style.backgroundImage = '';
-            playerLoaderElements[i].style.filter = '';
-        }
-        var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
-        for (var i = 0; i < loadingLayerIco.length; i++) {
-            loadingLayerIco[i].classList.remove('custom');
-            loadingLayerIco[i].style.backgroundImage = '';
-            loadingLayerIco[i].style.filter = '';
-            loadingLayerIco[i].style.backgroundColor = 'transparent';
-            loadingLayerIco[i].style.display = 'none';
-        }
-        var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
-        for (var i = 0; i < youtubeNeedclickElements.length; i++) {
-            youtubeNeedclickElements[i].classList.remove('custom');
-            youtubeNeedclickElements[i].style.textIndent = '';
-            youtubeNeedclickElements[i].style.backgroundImage = '';
-            youtubeNeedclickElements[i].style.backgroundRepeat = '';
-            youtubeNeedclickElements[i].style.backgroundPosition = '';
-            youtubeNeedclickElements[i].style.backgroundSize = '';
-            youtubeNeedclickElements[i].style.backgroundColor = '';
-            youtubeNeedclickElements[i].style.filter = '';
-            youtubeNeedclickElements[i].style.zIndex = '';
-            youtubeNeedclickElements[i].style.width = '';
-            youtubeNeedclickElements[i].style.height = '';
-            youtubeNeedclickElements[i].style.position = '';
-            youtubeNeedclickElements[i].style.left = '';
-            youtubeNeedclickElements[i].style.top = '';
-            youtubeNeedclickElements[i].style.transform = '';
-            youtubeNeedclickElements[i].style.webkitTransform = '';
-            youtubeNeedclickElements[i].textContent = Lampa.Lang.translate('loading') || 'Завантаження...';
-        }
-        var modalLoadingElements = document.querySelectorAll('.modal-loading');
-        for (var i = 0; i < modalLoadingElements.length; i++) {
-            modalLoadingElements[i].classList.remove('custom');
-            modalLoadingElements[i].style.backgroundImage = 'url("../img/loader.svg")';
-            modalLoadingElements[i].style.backgroundRepeat = 'no-repeat';
-            modalLoadingElements[i].style.backgroundPosition = '50% 50%';
-            modalLoadingElements[i].style.backgroundSize = '';
-            modalLoadingElements[i].style.backgroundColor = '';
-            modalLoadingElements[i].style.filter = '';
-            modalLoadingElements[i].style.display = '';
-            modalLoadingElements[i].style.zIndex = '';
         }
         insert_activity_loader_prv('./img/loader.svg');
     }
@@ -508,44 +419,7 @@
                         if (playerLoader || youtubeNeedclick || modalLoading) {
                             if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                    var hasOwnFilter = svgHasOwnFilter(Lampa.Storage.get('ani_load'));
-                                    var filterValue = hasOwnFilter ? '' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (getFilterRgb(Lampa.Storage.get('color_plugin_main_color', '#ffffff')).r / 255) + ' 0 0 0 0 ' + (getFilterRgb(Lampa.Storage.get('color_plugin_main_color', '#ffffff')).g / 255) + ' 0 0 0 0 ' + (getFilterRgb(Lampa.Storage.get('color_plugin_main_color', '#ffffff')).b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-                                    if (playerLoader) {
-                                        playerLoader.classList.add('custom');
-                                        playerLoader.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
-                                        if (!hasOwnFilter) playerLoader.style.filter = filterValue;
-                                        playerLoader.style.display = 'block';
-                                    }
-                                    if (youtubeNeedclick) {
-                                        youtubeNeedclick.classList.add('custom');
-                                        youtubeNeedclick.textContent = '';
-                                        youtubeNeedclick.style.textIndent = '-9999px';
-                                        youtubeNeedclick.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
-                                        youtubeNeedclick.style.backgroundRepeat = 'no-repeat';
-                                        youtubeNeedclick.style.backgroundPosition = '50% 50%';
-                                        youtubeNeedclick.style.backgroundSize = '80% 80%';
-                                        youtubeNeedclick.style.backgroundColor = 'transparent';
-                                        if (!hasOwnFilter) youtubeNeedclick.style.filter = filterValue;
-                                        youtubeNeedclick.style.width = '8em';
-                                        youtubeNeedclick.style.height = '8em';
-                                        youtubeNeedclick.style.position = 'absolute';
-                                        youtubeNeedclick.style.left = '50%';
-                                        youtubeNeedclick.style.top = '50%';
-                                        youtubeNeedclick.style.transform = 'translate(-50%, -50%)';
-                                        youtubeNeedclick.style.webkitTransform = 'translate(-50%, -50%)';
-                                        youtubeNeedclick.style.display = 'block';
-                                    }
-                                    if (modalLoading) {
-                                        modalLoading.classList.add('custom');
-                                        modalLoading.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
-                                        modalLoading.style.backgroundRepeat = 'no-repeat';
-                                        modalLoading.style.backgroundPosition = '50% 50%';
-                                        modalLoading.style.backgroundSize = 'contain';
-                                        modalLoading.style.backgroundColor = 'transparent';
-                                        if (!hasOwnFilter) modalLoading.style.filter = filterValue;
-                                        modalLoading.style.display = 'block';
-                                        modalLoading.style.zIndex = '9999';
-                                    }
+                                    setCustomLoader(Lampa.Storage.get('ani_load'));
                                 }
                             } else if (e.type === 'playing' || e.type === 'loadeddata') {
                                 if (playerLoader) playerLoader.style.display = 'none';
@@ -562,96 +436,30 @@
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var playerVideo = document.querySelector('.player-video.video--load');
                 if (playerVideo) {
-                    var loader = playerVideo.querySelector('.player-video__loader');
-                    if (loader) {
-                        var computedBg = getComputedStyle(loader).backgroundImage;
-                        if (computedBg.includes('lampa-main/img/loader.svg')) {
-                            setCustomLoader(Lampa.Storage.get('ani_load'));
-                        }
-                    }
-                    var youtubeNeedclick = playerVideo.querySelector('.player-video__youtube-needclick > div');
-                    if (youtubeNeedclick) {
-                        var computedBg = getComputedStyle(youtubeNeedclick).backgroundImage;
-                        if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
-                            setCustomLoader(Lampa.Storage.get('ani_load'));
-                        }
-                    }
-                    var modalLoading = playerVideo.querySelector('.modal-loading');
-                    if (modalLoading) {
-                        var computedBg = getComputedStyle(modalLoading).backgroundImage;
-                        if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
-                            setCustomLoader(Lampa.Storage.get('ani_load'));
-                        }
-                    }
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
                 }
                 var modalLoading = document.querySelector('.modal-loading');
                 if (modalLoading) {
-                    var computedBg = getComputedStyle(modalLoading).backgroundImage;
-                    if (computedBg.includes('lampa-main/img/loader.svg') || !computedBg.includes(Lampa.Storage.get('ani_load'))) {
-                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                    }
+                    setCustomLoader(Lampa.Storage.get('ani_load'));
                 }
             }
         }, 100);
         Lampa.Listener.follow('full', function (e) {
-            var element = document.querySelector('.activity__loader');
-            if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
-                element.classList.add('active');
-                element.style.display = 'block';
-                setCustomLoader(Lampa.Storage.get('ani_load'));
-            } else if (e.type === 'complete' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-            }
             if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                }, 200);
+                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
             }
         });
         Lampa.Listener.follow('activity', function (event) {
-            var element = document.querySelector('.activity__loader');
-            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
-                element.classList.add('active');
-                element.style.display = 'block';
-                setCustomLoader(Lampa.Storage.get('ani_load'));
-            } else if (event.type === 'loaded' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-            }
-            if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                }, 200);
-            }
-        });
-        Lampa.Listener.follow('activity', function (event) {
-            var element = document.querySelector('.activity__loader');
-            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
-                element.classList.add('active');
-                element.style.display = 'block';
-                setCustomLoader(Lampa.Storage.get('ani_load'));
-            } else if (event.status === 'ready' && element) {
-                element.classList.remove('active');
-                element.style.display = 'none';
-            }
-            if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                }, 200);
+            if ((event.type === 'start' || event.status === 'active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
             }
         });
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'back') {
                 var element = document.querySelector('.activity__loader');
-                if (element) {
-                    element.classList.remove('active');
-                    element.style.display = 'none';
-                }
+                if (element) element.style.display = 'none';
                 var modalLoading = document.querySelector('.modal-loading');
-                if (modalLoading) {
-                    modalLoading.style.display = 'none';
-                }
+                if (modalLoading) modalLoading.style.display = 'none';
             }
         });
         setInterval(function () {
