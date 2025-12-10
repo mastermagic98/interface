@@ -1,165 +1,185 @@
 (function () {
     'use strict';
 
-    var plugin_name = 'Приховувати клавіатури + Українська за замовчуванням';
+    var plugin_name = 'Приховати клавіатуру';
 
-    // Налаштування за замовчуванням
-    var default_settings = {
-        hide_ua: false,   // Українську тепер НЕ ховаємо (вона головна)
-        hide_ru: true,    // Російську ховаємо
-        hide_en: true,    // Англійську ховаємо (можна змінити)
-        hide_he: true     // Іврит ховаємо
+    // Дефолтні налаштування
+    var defaults = {
+        default_lang: 'uk',    // uk, en, he, ru
+        hide_uk: false,
+        hide_en: false,
+        hide_he: false,
+        hide_ru: true
     };
 
-    function initSettings() {
-        var settings = Lampa.Storage.get('keyboard_hider_ua_settings', {});
-        if (Object.keys(settings).length === 0) {
-            Lampa.Storage.set('keyboard_hider_ua_settings', default_settings);
-            settings = default_settings;
+    function getSettings() {
+        var s = Lampa.Storage.get('keyboard_controller_settings', {});
+        if (Object.keys(s).length === 0) {
+            Lampa.Storage.set('keyboard_controller_settings', defaults);
+            return defaults;
         }
-        return settings;
+        return s;
     }
 
-    // Приховуємо вибрані мови
-    function hideKeyboards() {
-        var settings = initSettings();
+    // Приховує вибрані мови зі списку вибору клавіатур
+    function applyHiding() {
+        var s = getSettings();
 
-        if (settings.hide_ua) {
-            $('.selectbox-item.selector > div:contains("Українська")').parent('div').hide();
-        }
-        if (settings.hide_ru) {
-            $('.selectbox-item.selector > div:contains("Русский")').parent('div').hide();
-        }
-        if (settings.hide_en) {
-            $('.selectbox-item.selector > div:contains("English")').parent('div').hide();
-        }
-        if (settings.hide_he) {
-            $('.selectbox-item.selector > div:contains("עִברִית")').parent('div').hide();
-        }
+        if (s.hide_uk) $('.selectbox-item.selector > div:contains("Українська")').parent('div').hide();
+        if (s.hide_en) $('.selectbox-item.selector > div:contains("English")').parent('div').hide();
+        if (s.hide_he) $('.selectbox-item.selector > div:contains("עִברִית")').parent('div').hide();
+        if (s.hide_ru) $('.selectbox-item.selector > div:contains("Русский"), div:contains("Russian")').parent('div').hide();
     }
 
-    // Примусово встановлюємо українську мову клавіатури (аналог CultureInfo.CurrentCulture = new CultureInfo("uk-UA"))
-    function forceUkrainianKeyboard() {
-        // В Lampa віртуальна клавіатура використовує власний механізм, тому ми:
-        // 1. Встановлюємо потрібну мову в налаштуваннях Lampa
-        Lampa.Storage.set('keyboard_default_lang', 'uk');
+    // Встановлює мову за замовчуванням при кожному відкритті клавіатури
+    function setDefaultLanguage() {
+        var s = getSettings();
+        var code = s.default_lang || 'uk';
 
-        // 2. Якщо відкрита клавіатура — примусово перемикаємо на українську
+        // Встановлюємо в налаштування Lampa
+        Lampa.Storage.set('keyboard_default_lang', code);
+
+        // Додатково примусово перемикаємо, якщо клавіатура вже відкрита
         setTimeout(function () {
-            var langButton = $('.hg-button.hg-functionBtn.hg-button-LANG');
-            if (langButton.length > 0) {
-                // Імітуємо натискання кнопки зміни мови кілька разів, доки не стане українська
-                var maxAttempts = 10;
-                var attempt = 0;
-                var switchInterval = setInterval(function () {
-                    if (attempt >= maxAttempts) {
-                        clearInterval(switchInterval);
-                        return;
-                    }
-                    langButton.trigger('hover:enter');
-                    attempt++;
+            var btn = $('.hg-button.hg-functionBtn.hg-button-LANG');
+            if (btn.length === 0) return;
 
-                    // Перевіряємо, чи вже українська розкладка активна
-                    if ($('.hg-button.hg-activeButton:contains("Й")').length > 0 ||
-                        $('.hg-button.hg-activeButton:contains("Ц")').length > 0) {
-                        clearInterval(switchInterval);
-                    }
-                }, 100);
-            }
-        }, 400);
+            var needKey = '';
+            if (code === 'uk') needKey = 'ЙЦУКЕН'.split('');
+            if (code === 'en') needKey = 'QWERTY'.split('');
+            if (code === 'he') needKey = 'קראטון'.split('');
+            if (code === 'ru') needKey = 'ЙЦУКЕН'.split(''); // однакові перші літери з укр
+
+            var check = setInterval(function () {
+                var activeKeys = $('.hg-button.hg-activeButton');
+                if (activeKeys.length < 5) return;
+
+                var found = false;
+                needKey.forEach(function (k) {
+                    if (activeKeys.filter(':contains("' + k + '")').length > 0) found = true;
+                });
+
+                if (found || code === 'en') {
+                    clearInterval(check);
+                    return;
+                }
+
+                btn.trigger('hover:enter');
+            }, 80);
+
+            setTimeout(function () { clearInterval(check); }, 2000);
+        }, 300);
     }
 
-    function startPlugin() {
-        // Додаємо пункт у меню налаштувань
+    function start() {
+        var settings = getSettings();
+
+        // Додаємо пункт у головне меню налаштувань
         Lampa.Settings.main().render().find('[data-component="more"]').after(
-            '<div class="settings-folder selector" data-action="keyboard_hider_ua">' +
-                '<div class="settings-folder__icon"><div class="icon-flag-ua" style="background-image:ur[](https://flagcdn.com/28x21/ua.png)"></div></div>' +
+            '<div class="settings-folder selector" data-action="keyboard_controller">' +
+                '<div class="settings-folder__icon"><div class="icon-keyboard"></div></div>' +
                 '<div class="settings-folder__name">' + plugin_name + '</div>' +
-                '<div class="settings-folder__descr">Українська клавіатура завжди, інші — за бажанням</div>' +
             '</div>'
         );
 
-        // Підменю з налаштуваннями
-        Lampa.Settings.main().update = function () {
-            var settings = initSettings();
+        // Налаштування при натисканні
+        $(document).off('hover:enter', '[data-action="keyboard_controller"]').on('hover:enter', '[data-action="keyboard_controller"]', function () {
+            var items = [];
 
-            $('.settings-folder[data-action="keyboard_hider_ua"]').off('hover:enter').on('hover:enter', function () {
-                var items = [];
+            // Вибір мови за замовчуванням
+            items.push({ title: 'Мова за замовчуванням', separator: true });
 
-                items.push({
-                    title: 'Українська клавіатура',
-                    subtitle: 'Завжди активна та видима',
-                    selected: true,
-                    disabled: true
-                });
-
-                items.push({
-                    title: 'Приховати російську',
-                    subtitle: settings.hide_ru ? 'Прихована' : 'Видима',
-                    selected: settings.hide_ru
-                });
-
-                items.push({
-                    title: 'Приховати англійську',
-                    subtitle: settings.hide_en ? 'Прихована' : 'Видима',
-                    selected: settings.hide_en
-                });
-
-                items.push({
-                    title: 'Приховати іврит (עִברִית)',
-                    subtitle: settings.hide_he ? 'Прихована' : 'Видима',
-                    selected: settings.hide_he
-                });
-
-                Lampa.Select.show({
-                    title: plugin_name,
-                    items: items,
-                    onSelect: function (a) {
-                        var key = '';
-                        if (a.title === 'Приховати російську') key = 'hide_ru';
-                        if (a.title === 'Приховати англійську') key = 'hide_en';
-                        if (a.title === 'Приховати іврит (עִברִית)') key = 'hide_he';
-
-                        if (key) {
-                            settings[key] = !settings[key];
-                            Lampa.Storage.set('keyboard_hider_ua_settings', settings);
-                            hideKeyboards();
-                            Lampa.Settings.main().refresh();
-                        }
-                    },
-                    onBack: function () {
-                        Lampa.Controller.toggle('settings_component');
-                    }
-                });
+            items.push({
+                title: 'Українська',
+                selected: settings.default_lang === 'uk',
+                lang: 'uk'
             });
-        };
+            items.push({
+                title: 'English',
+                selected: settings.default_lang === 'en',
+                lang: 'en'
+            });
+            items.push({
+                title: 'עִברִית',
+                selected: settings.default_lang === 'he',
+                lang: 'he'
+            });
+            items.push({
+                title: 'Русский',
+                selected: settings.default_lang === 'ru',
+                lang: 'ru'
+            });
 
-        // При кожному відкритті пошуку/клавіатури
+            items.push({ title: 'Приховати зі списку', separator: true });
+
+            items.push({
+                title: 'Приховати українську',
+                selected: settings.hide_uk
+            });
+            items.push({
+                title: 'Приховати англійську',
+                selected: settings.hide_en
+            });
+            items.push({
+                title: 'Приховати іврит',
+                selected: settings.hide_he
+            });
+            items.push({
+                title: 'Приховати російську',
+                selected: settings.hide_ru
+            });
+
+            Lampa.Select.show({
+                title: plugin_name,
+                items: items,
+                onSelect: function (a) {
+                    if (a.lang) {
+                        settings.default_lang = a.lang;
+                        Lampa.Storage.set('keyboard_default_lang', a.lang);
+                    }
+                    if (a.title === 'Приховати українську') settings.hide_uk = !settings.hide_uk;
+                    if (a.title === 'Приховати англійську') settings.hide_en = !settings.hide_en;
+                    if (a.title === 'Приховати іврит') settings.hide_he = !settings.hide_he;
+                    if (a.title === 'Приховати російську') settings.hide_ru = !settings.hide_ru;
+
+                    Lampa.Storage.set('keyboard_controller_settings', settings);
+                    applyHiding();
+                    setDefaultLanguage();
+
+                    Lampa.Controller.toggle('settings_component');
+                },
+                onBack: function () {
+                    Lampa.Controller.toggle('settings_component');
+                }
+            });
+        });
+
+        // Застосовуємо при кожному відкритті пошуку/клавіатури
         Lampa.Listener.follow('full', function (e) {
-            if (e.type == 'start') {
+            if (e.type === 'start') {
                 setTimeout(function () {
-                    forceUkrainianKeyboard(); // завжди українська
-                    hideKeyboards();          // ховаємо непотрібні
+                    applyHiding();
+                    setDefaultLanguage();
                 }, 300);
             }
         });
 
-        // Якщо додаток вже запущений
+        // Якщо додаток вже готовий
         if (window.appready) {
             setTimeout(function () {
-                forceUkrainianKeyboard();
-                hideKeyboards();
+                applyHiding();
+                setDefaultLanguage();
             }, 600);
         }
     }
 
-    // Запуск
+    // Запуск плагіну
     if (window.appready) {
-        startPlugin();
+        start();
     } else {
         Lampa.Listener.follow('app', function (e) {
-            if (e.type == 'ready') {
-                startPlugin();
+            if (e.type === 'ready') {
+                start();
             }
         });
     }
