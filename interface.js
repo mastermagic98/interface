@@ -15,6 +15,7 @@
        // 'https://nb557.github.io/plugins/online_mod.js',
        // 'http://showy.online/m.js',
        // 'https://modss.tv/',
+        'https://mastermagic98.github.io/interface/cardify.js', //додати кнопку увімкнути
         'https://mastermagic98.github.io/interface/color.js',
         'https://mastermagic98.github.io/interface/aloader.js',
         'https://mastermagic98.github.io/interface/loaders.js',
