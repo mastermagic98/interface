@@ -1,6 +1,5 @@
 (function () {
     'use strict';
-
     Lampa.Lang.add({
         params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },
         params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },
@@ -9,9 +8,7 @@
         custom_svg_input: { ru: 'Введи URL SVG', en: 'Enter SVG URL', uk: 'Введи URL SVG' },
         svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
     });
-
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
-
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
@@ -19,14 +16,12 @@
         var b = parseInt(cleanHex.substring(4, 6), 16);
         return { r: r, g: g, b: b };
     }
-
     function getFilterRgb(mainColor) {
         if (mainColor.toLowerCase() === '#353535') {
             return { r: 255, g: 255, b: 255 };
         }
         return hexToRgb(mainColor);
     }
-
     function applyDefaultLoaderColor() {
         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
@@ -37,18 +32,17 @@
         var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
         return { src: encodedSvg, filter: '' };
     }
-
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var rgb = getFilterRgb(mainColor);
         var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-
         var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
                        'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
                        'body .lampac-balanser-loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
-                       'body .player-video .player-video__loader.custom, body .player-video.video--load .player-video__loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
+                       // ВИПРАВЛЕНО: НЕ ЧІПАЄМО background-color і backdrop-filter у плеєрі!
+                       'body .player-video .player-video__loader.custom, body .player-video.video--load .player-video__loader.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
                        'body .loading-layer .loading-layer__ico.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
@@ -56,17 +50,14 @@
                        'body .player-video__youtube-needclick { position: relative !important; width: 100% !important; height: 100% !important; }' +
                        'body .player-video__youtube-needclick > div.custom { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }' +
                        'body .modal-loading.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; display: block !important; z-index: 9999 !important; }';
-
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
-
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
             playerLoaderElements[i].classList.add('custom');
             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             playerLoaderElements[i].style.filter = filterValue;
-            playerLoaderElements[i].style.backgroundColor = 'transparent';
+            // НЕ чіпаємо backgroundColor і backdrop-filter!
         }
-
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
@@ -77,7 +68,6 @@
                 element.style.display = 'block';
             }
         }
-
         var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
         for (var i = 0; i < balanserElements.length; i++) {
             balanserElements[i].classList.add('custom');
@@ -85,7 +75,6 @@
             balanserElements[i].style.filter = filterValue;
             balanserElements[i].style.backgroundColor = 'transparent';
         }
-
         var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
         for (var i = 0; i < loadingLayerIco.length; i++) {
             loadingLayerIco[i].classList.add('custom');
@@ -93,7 +82,6 @@
             loadingLayerIco[i].style.filter = filterValue;
             loadingLayerIco[i].style.backgroundColor = 'transparent';
         }
-
         var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
         for (var i = 0; i < youtubeNeedclickElements.length; i++) {
             youtubeNeedclickElements[i].classList.add('custom');
@@ -114,7 +102,6 @@
             youtubeNeedclickElements[i].style.transform = 'translate(-50%, -50%)';
             youtubeNeedclickElements[i].style.webkitTransform = 'translate(-50%, -50%)';
         }
-
         var modalLoadingElements = document.querySelectorAll('.modal-loading');
         for (var i = 0; i < modalLoadingElements.length; i++) {
             modalLoadingElements[i].classList.add('custom');
@@ -128,7 +115,6 @@
             modalLoadingElements[i].style.zIndex = '9999';
         }
     }
-
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
@@ -152,7 +138,6 @@
             }
         }, 100);
     }
-
     function remove_activity_loader() {
         var styleElement = document.getElementById('aniload-id');
         if (styleElement) styleElement.remove();
@@ -178,8 +163,7 @@
             playerLoaderElements[i].classList.remove('custom');
             playerLoaderElements[i].style.backgroundImage = '';
             playerLoaderElements[i].style.filter = '';
-            playerLoaderElements[i].style.backgroundColor = 'transparent';
-            playerLoaderElements[i].style.display = 'none';
+            // НЕ чіпаємо backgroundColor і backdrop-filter при видаленні!
         }
         var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
         for (var i = 0; i < loadingLayerIco.length; i++) {
@@ -223,7 +207,6 @@
         }
         insert_activity_loader_prv('./img/loader.svg');
     }
-
     function create_ani_modal() {
         var style = document.createElement('style');
         style.id = 'aniload';
@@ -246,13 +229,11 @@
                             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
         document.head.appendChild(style);
     }
-
     function createSvgHtml(src, index) {
         var className = 'ani_loader_square selector';
         var content = '<img src="' + src + '" alt="Loader ' + index + '">';
         return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
     }
-
     function chunkArray(arr, size) {
         var result = [];
         for (var i = 0; i < arr.length; i += size) {
@@ -260,16 +241,12 @@
         }
         return result;
     }
-
     function isValidSvgUrl(url) {
         return /^https?:\/\/.*\.svg$/.test(url);
     }
-
     function addPrvFocusListener() {}
-
     function aniLoad() {
         var icon_plugin = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
-
         try {
             Lampa.SettingsApi.addComponent({
                 component: 'ani_load_menu',
@@ -277,7 +254,6 @@
                 icon: icon_plugin
             });
         } catch (e) {}
-
         try {
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
@@ -315,7 +291,6 @@
                 }
             });
         } catch (e) {}
-
         try {
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
@@ -458,7 +433,6 @@
                 }
             });
         } catch (e) {}
-
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
@@ -503,7 +477,6 @@
             });
             observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
         }, 500);
-
         setInterval(function () {
             var videoElement = document.querySelector('video');
             if (videoElement && !videoElement.dataset.listenersAdded) {
@@ -522,7 +495,7 @@
                                         playerLoader.classList.add('custom');
                                         playerLoader.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
                                         playerLoader.style.filter = filterValue;
-                                        playerLoader.style.backgroundColor = 'transparent';
+                                        // НЕ чіпаємо backgroundColor і backdrop-filter
                                         playerLoader.style.display = 'block';
                                     }
                                     if (youtubeNeedclick) {
@@ -573,7 +546,6 @@
                 videoElement.dataset.listenersAdded = true;
             }
         }, 1000);
-
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var playerVideo = document.querySelector('.player-video.video--load');
@@ -619,7 +591,6 @@
                 }
             }
         }, 100);
-
         Lampa.Listener.follow('full', function (e) {
             var element = document.querySelector('.activity__loader');
             if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
@@ -636,7 +607,6 @@
                 }, 200);
             }
         });
-
         Lampa.Listener.follow('activity', function (event) {
             var element = document.querySelector('.activity__loader');
             if (event.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
@@ -653,7 +623,6 @@
                 }, 200);
             }
         });
-
         Lampa.Listener.follow('activity', function (event) {
             var element = document.querySelector('.activity__loader');
             if (event.status === 'active' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg' && element) {
@@ -670,7 +639,6 @@
                 }, 200);
             }
         });
-
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'back') {
                 var element = document.querySelector('.activity__loader');
@@ -684,7 +652,6 @@
                 }
             }
         });
-
         setInterval(function () {
             var element = document.querySelector('.activity__loader');
             if (element && element.classList.contains('active')) {
@@ -692,7 +659,6 @@
                 element.style.display = 'none';
             }
         }, 500);
-
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -700,7 +666,6 @@
             remove_activity_loader();
         }
     }
-
     function changeColor() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
@@ -709,7 +674,6 @@
             remove_activity_loader();
         }
     }
-
     if (window.appready) {
         aniLoad();
         changeColor();
@@ -721,12 +685,10 @@
             }
         });
     }
-
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_main_color') {
             changeColor();
         }
     });
-
     window.changeColor = changeColor;
 })();
