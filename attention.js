@@ -120,7 +120,7 @@
 
                 if (component === 'lampac' && CONFIG.online.enabled && (CONFIG.online.repeat || !shown.online)) {
                     waitForElement('.explorer__files-head', function (el) {
-                        var $hint = $(createHintText(Lampa.Lang.translate(' hints_online'), CONFIG.online.id));
+                        var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
                         $(el).before($hint);
 
                         setTimeout(function () {
@@ -146,7 +146,7 @@
                 
                 if (component === 'full' && CONFIG.incard.enabled && (CONFIG.incard.repeat || !shown.incard)) {
                     waitForElement('.full-start-new__head', function (el) {
-                        var $hint = $(createHintText_incard(Lampa.Lang.translate(' hints_incard'), CONFIG.incard.id));
+                        var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
                         $(el).before($hint);
 
                         setTimeout(function () {
