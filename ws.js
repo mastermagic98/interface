@@ -76,7 +76,7 @@ function startPlugin(){
 if(!window.womens_day){
     window.womens_day = true
 
-    let date_start = '2025-03-08:00:00'
+    let date_start = '2025-12-15:00:00'
     let date_end   = '2026-03-09T23:00:00'
 
     let time_start = new Date(date_start).getTime()
