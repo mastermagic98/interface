@@ -196,6 +196,8 @@
                 name: '<div class="settings-folder__icon" style="display:inline-block;vertical-align:middle;">' + hintsSvg + '</div><span style="display:inline-block;vertical-align:middle;margin-left:0.8em;">' + Lampa.Lang.translate('hints_enabled') + '</span>',
                 description: Lampa.Lang.translate('hints_enabled_descr')
             },
+            // Виправляємо стиль контейнера на .settings-folder (замість .settings-body)
+            body: 'settings-folder',
             onChange: function (value) {
                 var val = (value === true || value === 'true' || value === 1);
                 Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
