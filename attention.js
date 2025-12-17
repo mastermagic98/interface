@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для підказок та налаштувань
+    // Додаємо переклади для текстів підказок
     Lampa.Lang.add({
         hints_torrents: {
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",
@@ -18,18 +18,22 @@
             en: "A film may appear in the catalog before it's available to watch.",
             uk: "Інформація про фільм може з’явитися раніше, ніж він стане доступним для перегляду."
         },
-        hints_enable_title: {
+        hints_enabled: {
             ru: 'Увімкнути попередження',
             en: 'Enable hints',
             uk: 'Увімкнути попередження'
         },
-        hints_enable_desc: {
-            ru: 'Відображає попередження про те, що відеоматеріал може бути ще недоступним.',
-            en: 'Displays warnings that the video material may not yet be available.',
-            uk: 'Відображає попередження про те, що відеоматеріал може бути ще недоступним.'
+        hints_enabled_descr: {
+            ru: 'Відображає попередження про те, що відеоматеріал може бути ще недоступним або гальмувати.',
+            en: 'Displays warnings that video content may not yet be available or may lag.',
+            uk: 'Відображає попередження про те, що відеоматеріал може бути ще недоступним або гальмувати.'
         }
     });
 
+    // Ключ для зберігання налаштування
+    var STORAGE_KEY = 'hints_plugin_enabled';
+
+    // Конфігурація підказок
     var CONFIG = {
         online: {
             id: 'hint-online-banner',
@@ -54,9 +58,8 @@
         }
     };
 
-    // Ключ для збереження стану та поточне значення
-    var STORAGE_KEY = 'hints_enabled';
-    var hintsEnabled = Lampa.Storage.get(STORAGE_KEY, true);
+    // Глобальна змінна для відстеження стану плагіна
+    var pluginEnabled = true;
 
     function createHintText(hintText, id) {
         return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.07); border-radius: 0.5em; margin-left: 1.2em; margin-right: 1.2em; padding: 0.8em; font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';
@@ -74,6 +77,7 @@
             overflow: 'hidden'
         });
 
+        // Force reflow
         $el[0].offsetHeight;
 
         $el.css({
@@ -116,7 +120,7 @@
     }
 
     function initializeHintFeature() {
-        if (!hintsEnabled) return;
+        if (!pluginEnabled) return;
 
         var shown = {
             online: false,
@@ -125,6 +129,8 @@
         };
 
         Lampa.Storage.listener.follow('change', function (event) {
+            if (!pluginEnabled) return;
+
             if (event.name === 'activity') {
                 var component = Lampa.Activity.active().component;
 
@@ -164,55 +170,57 @@
         });
     }
 
-    function startPlugin() {
-        function addHintToggle() {
-            // Перевіряємо наявність компонента custom_interface_plugin
-            if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addParam === 'function') {
-                Lampa.SettingsApi.addParam({
-                    component: 'custom_interface_plugin',
-                    param: {
-                        name: STORAGE_KEY,
-                        type: 'toggle',  // використовуємо toggle замість trigger для стандартного перемикача
-                        default: hintsEnabled
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('hints_enable_title'),
-                        description: Lampa.Lang.translate('hints_enable_desc')
-                    },
-                    icon: '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>',
-                    onChange: function (value) {
-                        hintsEnabled = value;
-                        Lampa.Storage.set(STORAGE_KEY, value);
-                        if (!value) {
-                            $('#hint-online-banner, #hint-torrent-banner, #hint-incard-banner').remove();
-                        }
-                        // Повторна ініціалізація для застосування змін
-                        initializeHintFeature();
-                    },
-                    onRender: function (element) {
-                        element.toggle(hintsEnabled);
-                    }
-                });
-                console.log('Пункт "Увімкнути попередження" успішно додано до custom_interface_plugin');
-            } else {
-                // Якщо API ще не готове або компонент не створено — чекаємо
-                setTimeout(addHintToggle, 500);
-            }
+    // Функція для застосування стану плагіна
+    function applyHintsState() {
+        var stored = Lampa.Storage.get(STORAGE_KEY, 'true');
+        pluginEnabled = (stored === true || stored === 'true' || stored === '1');
+
+        if (pluginEnabled) {
+            initializeHintFeature();
         }
-
-        addHintToggle();
-
-        // Ініціалізуємо функціонал підказок
-        initializeHintFeature();
+        // Якщо вимкнено — нічого не робимо (підказки не з'являтимуться)
     }
 
-    // Запуск плагіна
+    // Додаємо пункт налаштувань у розділ custom_interface_plugin
+    function addSettingsParam() {
+        var current = Lampa.Storage.get(STORAGE_KEY, 'true');
+        current = (current === true || current === 'true' || current === '1');
+
+        Lampa.SettingsApi.addParam({
+            component: 'custom_interface_plugin',
+            param: {
+                name: STORAGE_KEY,
+                type: 'trigger',
+                default: current
+            },
+            field: {
+                name: Lampa.Lang.translate('hints_enabled'),
+                description: Lampa.Lang.translate('hints_enabled_descr')
+            },
+            icon: '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>',
+            onChange: function (value) {
+                var val = (value === true || value === 'true' || value === 1);
+                Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
+                pluginEnabled = val;
+
+                // Якщо ввімкнули — ініціалізуємо (якщо ще не було)
+                if (val) {
+                    initializeHintFeature();
+                }
+                // Якщо вимкнули — просто блокуємо подальші підказки
+            }
+        });
+    }
+
+    // Запуск після готовності Lampa
     if (window.appready) {
-        startPlugin();
+        addSettingsParam();
+        applyHintsState();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
-                startPlugin();
+                addSettingsParam();
+                applyHintsState();
             }
         });
     }
