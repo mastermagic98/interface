@@ -178,7 +178,6 @@
         if (pluginEnabled) {
             initializeHintFeature();
         }
-        // Якщо вимкнено — нічого не робимо (підказки не з'являтимуться)
     }
 
     // Додаємо пункт налаштувань у розділ custom_interface_plugin
@@ -197,17 +196,16 @@
                 name: Lampa.Lang.translate('hints_enabled'),
                 description: Lampa.Lang.translate('hints_enabled_descr')
             },
+            // Виправлено: іконка тепер передається через окремий параметр icon у структурі поля
             icon: '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>',
             onChange: function (value) {
                 var val = (value === true || value === 'true' || value === 1);
                 Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
                 pluginEnabled = val;
 
-                // Якщо ввімкнули — ініціалізуємо (якщо ще не було)
                 if (val) {
                     initializeHintFeature();
                 }
-                // Якщо вимкнули — просто блокуємо подальші підказки
             }
         });
     }
