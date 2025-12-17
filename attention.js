@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для підказок
+    // Додаємо переклади для підказок та налаштувань
     Lampa.Lang.add({
         hints_torrents: {
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",
@@ -54,8 +54,9 @@
         }
     };
 
-    // Основна змінна стану увімкнення (зберігається в Lampa.Storage)
-    var hintsEnabled = Lampa.Storage.get('hints_enabled', true);
+    // Ключ для збереження стану та поточне значення
+    var STORAGE_KEY = 'hints_enabled';
+    var hintsEnabled = Lampa.Storage.get(STORAGE_KEY, true);
 
     function createHintText(hintText, id) {
         return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.07); border-radius: 0.5em; margin-left: 1.2em; margin-right: 1.2em; padding: 0.8em; font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';
@@ -73,7 +74,6 @@
             overflow: 'hidden'
         });
 
-        // Force reflow
         $el[0].offsetHeight;
 
         $el.css({
@@ -116,7 +116,7 @@
     }
 
     function initializeHintFeature() {
-        if (!hintsEnabled) return; // Якщо вимкнено — нічого не робимо
+        if (!hintsEnabled) return;
 
         var shown = {
             online: false,
@@ -165,35 +165,48 @@
     }
 
     function startPlugin() {
-        // Додаємо перемикач у розділ custom_interface_plugin
-        Lampa.SettingsApi.addParam({
-            component: 'custom_interface_plugin',
-            param: {
-                name: 'hints_enabled',
-                type: 'toggle',
-                title: Lampa.Lang.translate('hints_enable_title'),
-                description: Lampa.Lang.translate('hints_enable_desc'),
-                default: true
-            },
-            icon: '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>',
-            onChange: function (value) {
-                hintsEnabled = value;
-                Lampa.Storage.set('hints_enabled', value);
-                // Якщо вимкнули — видаляємо всі існуючі банери
-                if (!value) {
-                    $('#hint-online-banner, #hint-torrent-banner, #hint-incard-banner').remove();
-                }
-            },
-            onRender: function (element) {
-                // Встановлюємо поточне значення при рендері
-                element.toggle(hintsEnabled);
+        function addHintToggle() {
+            // Перевіряємо наявність компонента custom_interface_plugin
+            if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addParam === 'function') {
+                Lampa.SettingsApi.addParam({
+                    component: 'custom_interface_plugin',
+                    param: {
+                        name: STORAGE_KEY,
+                        type: 'toggle',  // використовуємо toggle замість trigger для стандартного перемикача
+                        default: hintsEnabled
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('hints_enable_title'),
+                        description: Lampa.Lang.translate('hints_enable_desc')
+                    },
+                    icon: '<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>',
+                    onChange: function (value) {
+                        hintsEnabled = value;
+                        Lampa.Storage.set(STORAGE_KEY, value);
+                        if (!value) {
+                            $('#hint-online-banner, #hint-torrent-banner, #hint-incard-banner').remove();
+                        }
+                        // Повторна ініціалізація для застосування змін
+                        initializeHintFeature();
+                    },
+                    onRender: function (element) {
+                        element.toggle(hintsEnabled);
+                    }
+                });
+                console.log('Пункт "Увімкнути попередження" успішно додано до custom_interface_plugin');
+            } else {
+                // Якщо API ще не готове або компонент не створено — чекаємо
+                setTimeout(addHintToggle, 500);
             }
-        });
+        }
+
+        addHintToggle();
 
         // Ініціалізуємо функціонал підказок
         initializeHintFeature();
     }
 
+    // Запуск плагіна
     if (window.appready) {
         startPlugin();
     } else {
