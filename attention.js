@@ -193,7 +193,7 @@
                 default: current
             },
             field: {
-                name: '<div class="settings-folder__icon">' + hintsSvg + '</div>' + Lampa.Lang.translate('hints_enabled'),
+                name: '<div class="settings-folder__icon" style="display:inline-block;vertical-align:middle;">' + hintsSvg + '</div><span style="display:inline-block;vertical-align:middle;margin-left:0.8em;">' + Lampa.Lang.translate('hints_enabled') + '</span>',
                 description: Lampa.Lang.translate('hints_enabled_descr')
             },
             onChange: function (value) {
