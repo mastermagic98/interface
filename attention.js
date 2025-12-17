@@ -189,7 +189,7 @@
             component: 'custom_interface_plugin',
             param: {
                 name: STORAGE_KEY,
-                type: 'bool',  // Замінено з trigger на checkbox
+                type: 'checkbox',  // Використовуємо checkbox (стандартний чекбокс з галочкою)
                 default: current
             },
             field: {
@@ -197,6 +197,9 @@
                 description: Lampa.Lang.translate('hints_enabled_descr')
             },
             body: 'settings-folder',
+            // Додаємо підтримку checkbox через властивість checkbox (як у розширеній структурі MenuItem Lampac)
+            checkbox: true,
+            checked: current,
             onChange: function (value) {
                 var val = (value === true || value === 'true' || value === 1);
                 Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
