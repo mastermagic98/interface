@@ -178,8 +178,8 @@
         }
     }
 
-    // Іконка з фіксованим розміром 2em × 2em відповідно до стилю Lampa
-    var hintsIcon = '<svg width="2em" height="2em" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>';
+    // SVG іконка попередження
+    var hintsSvg = '<svg height="28" width="28" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>';
 
     function addSettingsParam() {
         var current = Lampa.Storage.get(STORAGE_KEY, 'true');
@@ -193,7 +193,7 @@
                 default: current
             },
             field: {
-                name: hintsIcon + ' ' + Lampa.Lang.translate('hints_enabled'),
+                name: '<div class="settings-folder__icon">' + hintsSvg + '</div>' + Lampa.Lang.translate('hints_enabled'),
                 description: Lampa.Lang.translate('hints_enabled_descr')
             },
             onChange: function (value) {
