@@ -178,35 +178,54 @@
         }
     }
 
-    // SVG іконка попередження
+    // SVG іконка попередження (біла, розмір 28×28)
     var hintsSvg = '<svg height="28" width="28" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>';
+
+    // HTML з іконкою та текстом у стандартному стилі Lampa
+    var hintsTitleHtml = '<div class="settings-folder__icon" style="display:inline-block;vertical-align:middle;">' + hintsSvg + '</div>' +
+                         '<span style="display:inline-block;vertical-align:middle;margin-left:0.8em;">' + Lampa.Lang.translate('hints_enabled') + '</span>';
 
     function addSettingsParam() {
         var current = Lampa.Storage.get(STORAGE_KEY, 'true');
         current = (current === true || current === 'true' || current === '1');
 
+        // Використовуємо структуру, аналогічну прикладу з C# MenuItem (submenu)
+        // Для trigger-параметра створюємо "головний" пункт з submenu = trigger
         Lampa.SettingsApi.addParam({
             component: 'custom_interface_plugin',
             param: {
-                name: STORAGE_KEY,
-                type: 'trigger',
-                default: current
+                name: STORAGE_KEY + '_menu',  // унікальне ім'я для "категорії"
+                type: 'submenu',              // тип submenu – створює пункт з підменю
+                default: ''
             },
             field: {
-                name: '<div class="settings-folder__icon" style="display:inline-block;vertical-align:middle;">' + hintsSvg + '</div><span style="display:inline-block;vertical-align:middle;margin-left:0.8em;">' + Lampa.Lang.translate('hints_enabled') + '</span>',
-                description: Lampa.Lang.translate('hints_enabled_descr')
+                name: hintsTitleHtml,
+                description: ''  // опису немає, бо весь опис буде в підпункті
             },
-            // Виправляємо стиль контейнера на .settings-folder (замість .settings-body)
             body: 'settings-folder',
-            onChange: function (value) {
-                var val = (value === true || value === 'true' || value === 1);
-                Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
-                pluginEnabled = val;
+            submenu: [  // підменю – масив параметрів
+                {
+                    param: {
+                        name: STORAGE_KEY,
+                        type: 'trigger',
+                        default: current
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('hints_enabled'),
+                        description: Lampa.Lang.translate('hints_enabled_descr')
+                    },
+                    body: 'settings-folder',
+                    onChange: function (value) {
+                        var val = (value === true || value === 'true' || value === 1);
+                        Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
+                        pluginEnabled = val;
 
-                if (val) {
-                    initializeHintFeature();
+                        if (val) {
+                            initializeHintFeature();
+                        }
+                    }
                 }
-            }
+            ]
         });
     }
 
