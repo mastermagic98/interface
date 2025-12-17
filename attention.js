@@ -189,7 +189,7 @@
             component: 'custom_interface_plugin',
             param: {
                 name: STORAGE_KEY,
-                type: 'checkbox',  // Замінено з trigger на checkbox
+                type: 'bool',  // Замінено з trigger на checkbox
                 default: current
             },
             field: {
