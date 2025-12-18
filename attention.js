@@ -18,10 +18,15 @@
             en: "A film may appear in the catalog before it's available to watch.",
             uk: "Інформація про фільм може з’явитися раніше, ніж він стане доступним для перегляду."
         },
-        attention_enable: {
+        attention_title: {
             ru: "Предупреждения о доступности видео",
             en: "Video availability warnings",
             uk: "Попередження про доступність відео"
+        },
+        attention_enable: {
+            ru: "Показывать предупреждения",
+            en: "Show warnings",
+            uk: "Показувати попередження"
         }
     });
 
@@ -105,7 +110,7 @@
         }
     }
 
-    // Логіка показу підказок — з перевіркою на існування банера, щоб уникнути дублювання
+    // Логіка показу підказок
     function initializeHintFeature() {
         var enabled = Lampa.Storage.get('attention_warnings_enabled', true);
 
@@ -115,20 +120,18 @@
             incard: false
         };
 
-        // Слухаємо зміну налаштування
         Lampa.Storage.listener.follow('change', function (event) {
             if (event.name === 'attention_warnings_enabled') {
                 enabled = event.value;
             }
         });
 
-        // Основний слухач активності
         Lampa.Storage.listener.follow('change', function (event) {
             if (event.name === 'activity' && enabled) {
                 var component = Lampa.Activity.active().component;
 
                 if (component === 'lampac' && (CONFIG.online.repeat || !shown.online)) {
-                    if ($('#' + CONFIG.online.id).length === 0) {  // Перевірка на існування
+                    if ($('#' + CONFIG.online.id).length === 0) {
                         waitForElement('.explorer__files-head', function (el) {
                             var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
                             $(el).before($hint);
@@ -169,35 +172,38 @@
         });
     }
 
-    // Додаємо єдиний пункт з іконкою та радіокнопкою безпосередньо в розділ
-    function addDirectMenuItem() {
-        // Видаляємо попередній пункт, якщо він вже існує (запобігає дублюванню в меню)
-        Lampa.SettingsApi.removeParam('interface_customization', 'attention_warnings');
+    // Додаємо параметр-кнопку в розділ Кастомізація інтерфейсу
+    function addSettingsButton() {
+        // Уникаємо дублювання кнопки
+        Lampa.SettingsApi.removeParam('interface_customization', 'attention_warnings_button');
 
         Lampa.SettingsApi.addParam({
             component: 'interface_customization',
-            name: 'attention_warnings',  // Унікальне ім'я для видалення/уникнення дублікатів
+            name: 'attention_warnings_button',
             param: {
-                type: 'selectbox_icon'
+                type: 'button'
             },
             field: {
-                name: Lampa.Lang.translate('attention_enable')
+                name: Lampa.Lang.translate('attention_title')
             },
-            icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>',
-            picked: Lampa.Storage.get('attention_warnings_enabled', true),
-            onSelect: function () {
-                var newState = !Lampa.Storage.get('attention_warnings_enabled', true);
-                Lampa.Storage.set('attention_warnings_enabled', newState);
-
-                // Оновлюємо візуальний стан
-                var $settings = Lampa.Settings.main().render();
-                var $item = $settings.find('.settings-param[data-name="attention_warnings"]');
-
-                if (newState) {
-                    $item.addClass('selected');
-                } else {
-                    $item.removeClass('selected');
-                }
+            onChange: function () {
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('attention_title'),
+                    items: [
+                        {
+                            title: Lampa.Lang.translate('attention_enable'),
+                            checkbox: true,
+                            checked: Lampa.Storage.get('attention_warnings_enabled', true),
+                            onSelect: function (item) {
+                                Lampa.Storage.set('attention_warnings_enabled', item.checked);
+                            }
+                        }
+                    ],
+                    onBack: function () {
+                        // Правильне повернення в розділ Кастомізація інтерфейсу
+                        Lampa.Settings.main().render().find('[data-component="interface_customization"]').trigger('hover').trigger('click');
+                    }
+                });
             }
         });
     }
@@ -205,12 +211,12 @@
     // Запуск після готовності додатка
     if (window.appready) {
         initializeHintFeature();
-        addDirectMenuItem();
+        addSettingsButton();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 initializeHintFeature();
-                addDirectMenuItem();
+                addSettingsButton();
             }
         });
     }
