@@ -170,9 +170,6 @@
             param: {
                 type: 'selectbox_icon'
             },
-            field: {
-                name: Lampa.Lang.translate('attention_enable')
-            },
             icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>',
             picked: Lampa.Storage.get('attention_warnings_enabled', true),
             onSelect: function () {
