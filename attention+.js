@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для підказок
+    // Додаємо переклади для підказок та меню
     Lampa.Lang.add({
         hints_torrents: {
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",
@@ -22,6 +22,21 @@
             ru: "Підказки завантаження",
             en: "Loading hints",
             uk: "Підказки завантаження"
+        },
+        hints_online_title: {
+            ru: "Онлайн-перегляд",
+            en: "Online viewing",
+            uk: "Онлайн-перегляд"
+        },
+        hints_torrents_title: {
+            ru: "Торренти",
+            en: "Torrents",
+            uk: "Торренти"
+        },
+        hints_incard_title: {
+            ru: "В картці фільму",
+            en: "In movie card",
+            uk: "В картці фільму"
         },
         hints_online_subtitle: {
             ru: "Підказка при онлайн-перегляді",
@@ -176,56 +191,60 @@
         });
     }
 
-    // Додаємо пункт у головне меню Лампа
-    Lampa.Menu.addButton(
-        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>',
-        Lampa.Lang.translate('hints_plugin_title'),
-        function () {
-            Lampa.Select.show({
-                title: Lampa.Lang.translate('hints_plugin_title'),
-                items: [
-                    {
-                        title: Lampa.Lang.translate('hints_online'),
-                        subtitle: Lampa.Lang.translate('hints_online_subtitle'),
-                        checkbox: true,
-                        checked: Lampa.Storage.get('hints_online_enabled', true),
-                        onSelect: function (item) {
-                            Lampa.Storage.set('hints_online_enabled', item.checked);
+    // Функція додавання пункту в меню (виконується тільки після готовності app)
+    function addMenuItem() {
+        Lampa.Menu.addButton(
+            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>',
+            Lampa.Lang.translate('hints_plugin_title'),
+            function () {
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('hints_plugin_title'),
+                    items: [
+                        {
+                            title: Lampa.Lang.translate('hints_online_title'),
+                            subtitle: Lampa.Lang.translate('hints_online_subtitle'),
+                            checkbox: true,
+                            checked: Lampa.Storage.get('hints_online_enabled', true),
+                            onSelect: function (item) {
+                                Lampa.Storage.set('hints_online_enabled', item.checked);
+                            }
+                        },
+                        {
+                            title: Lampa.Lang.translate('hints_torrents_title'),
+                            subtitle: Lampa.Lang.translate('hints_torrents_subtitle'),
+                            checkbox: true,
+                            checked: Lampa.Storage.get('hints_torrents_enabled', true),
+                            onSelect: function (item) {
+                                Lampa.Storage.set('hints_torrents_enabled', item.checked);
+                            }
+                        },
+                        {
+                            title: Lampa.Lang.translate('hints_incard_title'),
+                            subtitle: Lampa.Lang.translate('hints_incard_subtitle'),
+                            checkbox: true,
+                            checked: Lampa.Storage.get('hints_incard_enabled', true),
+                            onSelect: function (item) {
+                                Lampa.Storage.set('hints_incard_enabled', item.checked);
+                            }
                         }
-                    },
-                    {
-                        title: Lampa.Lang.translate('hints_torrents'),
-                        subtitle: Lampa.Lang.translate('hints_torrents_subtitle'),
-                        checkbox: true,
-                        checked: Lampa.Storage.get('hints_torrents_enabled', true),
-                        onSelect: function (item) {
-                            Lampa.Storage.set('hints_torrents_enabled', item.checked);
-                        }
-                    },
-                    {
-                        title: Lampa.Lang.translate('hints_incard'),
-                        subtitle: Lampa.Lang.translate('hints_incard_subtitle'),
-                        checkbox: true,
-                        checked: Lampa.Storage.get('hints_incard_enabled', true),
-                        onSelect: function (item) {
-                            Lampa.Storage.set('hints_incard_enabled', item.checked);
-                        }
+                    ],
+                    onBack: function () {
+                        Lampa.Controller.toggle('menu');
                     }
-                ],
-                onBack: function () {
-                    Lampa.Controller.toggle('menu');
-                }
-            });
-        }
-    );
+                });
+            }
+        );
+    }
 
-    // Запуск плагіна після готовності додатка
+    // Запуск після готовності додатка
     if (window.appready) {
         initializeHintFeature();
+        addMenuItem();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 initializeHintFeature();
+                addMenuItem();
             }
         });
     }
