@@ -191,12 +191,25 @@
         });
     }
 
-    // Функція додавання пункту в меню (виконується тільки після готовності app)
-    function addMenuItem() {
-        Lampa.Menu.addButton(
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>',
-            Lampa.Lang.translate('hints_plugin_title'),
-            function () {
+    // Функція додавання налаштувань через SettingsApi (в розділі "Інтерфейс")
+    function addSettingsComponent() {
+        // Додаємо вкладку/компонент "Інтерфейс", якщо ще немає (Lampa сама створює при першому addParam)
+        Lampa.SettingsApi.addComponent({
+            component: 'interface',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" x2="21" y1="9" y2="9"></line><line x1="3" x2="21" y1="15" y2="15"></line><line x1="9" x2="9" y1="9" y2="21"></line><line x1="15" x2="15" y1="9" y2="21"></line></svg>',
+            name: Lampa.Lang.translate('hints_plugin_title')  // Замість стандартного "Інтерфейс" ставимо нашу назву
+        });
+
+        // Додаємо кнопку, яка відкриває підменю з чекбоксами
+        Lampa.SettingsApi.addParam({
+            component: 'interface',
+            param: {
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('hints_plugin_title')
+            },
+            onChange: function () {
                 Lampa.Select.show({
                     title: Lampa.Lang.translate('hints_plugin_title'),
                     items: [
@@ -229,22 +242,23 @@
                         }
                     ],
                     onBack: function () {
-                        Lampa.Controller.toggle('menu');
+                        // Повернення до налаштувань розділу interface
+                        Lampa.Settings.main().render().find('[data-component="interface"]').trigger('click');
                     }
                 });
             }
-        );
+        });
     }
 
     // Запуск після готовності додатка
     if (window.appready) {
         initializeHintFeature();
-        addMenuItem();
+        addSettingsComponent();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 initializeHintFeature();
-                addMenuItem();
+                addSettingsComponent();
             }
         });
     }
