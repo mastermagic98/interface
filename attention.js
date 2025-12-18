@@ -105,7 +105,7 @@
         }
     }
 
-    // Логіка показу підказок
+    // Логіка показу підказок — з перевіркою на існування банера, щоб уникнути дублювання
     function initializeHintFeature() {
         var enabled = Lampa.Storage.get('attention_warnings_enabled', true);
 
@@ -128,47 +128,60 @@
                 var component = Lampa.Activity.active().component;
 
                 if (component === 'lampac' && (CONFIG.online.repeat || !shown.online)) {
-                    waitForElement('.explorer__files-head', function (el) {
-                        var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
-                        $(el).before($hint);
-                        setTimeout(function () {
-                            fadeOutAndRemove($hint, CONFIG.online.fadeDuration);
-                        }, CONFIG.online.showDuration);
-                        shown.online = true;
-                    });
+                    if ($('#' + CONFIG.online.id).length === 0) {  // Перевірка на існування
+                        waitForElement('.explorer__files-head', function (el) {
+                            var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
+                            $(el).before($hint);
+                            setTimeout(function () {
+                                fadeOutAndRemove($hint, CONFIG.online.fadeDuration);
+                            }, CONFIG.online.showDuration);
+                            shown.online = true;
+                        });
+                    }
                 }
 
                 if (component === 'torrents' && (CONFIG.torrents.repeat || !shown.torrents)) {
-                    waitForElement('.explorer__files-head', function (el) {
-                        var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));
-                        $(el).before($hint);
-                        setTimeout(function () {
-                            fadeOutAndRemove($hint, CONFIG.torrents.fadeDuration);
-                        }, CONFIG.torrents.showDuration);
-                        shown.torrents = true;
-                    });
+                    if ($('#' + CONFIG.torrents.id).length === 0) {
+                        waitForElement('.explorer__files-head', function (el) {
+                            var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));
+                            $(el).before($hint);
+                            setTimeout(function () {
+                                fadeOutAndRemove($hint, CONFIG.torrents.fadeDuration);
+                            }, CONFIG.torrents.showDuration);
+                            shown.torrents = true;
+                        });
+                    }
                 }
 
                 if (component === 'full' && (CONFIG.incard.repeat || !shown.incard)) {
-                    waitForElement('.full-start-new__head', function (el) {
-                        var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
-                        $(el).before($hint);
-                        setTimeout(function () {
-                            fadeOutAndRemove($hint, CONFIG.incard.fadeDuration);
-                        }, CONFIG.incard.showDuration);
-                        shown.incard = true;
-                    });
+                    if ($('#' + CONFIG.incard.id).length === 0) {
+                        waitForElement('.full-start-new__head', function (el) {
+                            var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
+                            $(el).before($hint);
+                            setTimeout(function () {
+                                fadeOutAndRemove($hint, CONFIG.incard.fadeDuration);
+                            }, CONFIG.incard.showDuration);
+                            shown.incard = true;
+                        });
+                    }
                 }
             }
         });
     }
 
-    // Додаємо пункт з іконкою та радіокнопкою (кружечок з галочкою) безпосередньо в розділ
+    // Додаємо єдиний пункт з іконкою та радіокнопкою безпосередньо в розділ
     function addDirectMenuItem() {
+        // Видаляємо попередній пункт, якщо він вже існує (запобігає дублюванню в меню)
+        Lampa.SettingsApi.removeParam('interface_customization', 'attention_warnings');
+
         Lampa.SettingsApi.addParam({
             component: 'interface_customization',
+            name: 'attention_warnings',  // Унікальне ім'я для видалення/уникнення дублікатів
             param: {
                 type: 'selectbox_icon'
+            },
+            field: {
+                name: Lampa.Lang.translate('attention_enable')
             },
             icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>',
             picked: Lampa.Storage.get('attention_warnings_enabled', true),
@@ -176,11 +189,9 @@
                 var newState = !Lampa.Storage.get('attention_warnings_enabled', true);
                 Lampa.Storage.set('attention_warnings_enabled', newState);
 
-                // Оновлюємо візуальний стан елемента в налаштуваннях
+                // Оновлюємо візуальний стан
                 var $settings = Lampa.Settings.main().render();
-                var $item = $settings.find('.settings-param[data-type="selectbox_icon"]').filter(function() {
-                    return $(this).find('.settings-param-title span').text() === Lampa.Lang.translate('attention_enable');
-                });
+                var $item = $settings.find('.settings-param[data-name="attention_warnings"]');
 
                 if (newState) {
                     $item.addClass('selected');
