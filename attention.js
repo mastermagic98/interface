@@ -166,9 +166,9 @@
             param: {
                 type: 'button'
             },
-            field: {
+          /*  field: {
                 name: Lampa.Lang.translate('attention_warnings_title')
-            },
+            },*/
             onChange: function () {
                 var current = Lampa.Storage.get(STORAGE_KEY, true);
                 var newState = !current;
@@ -176,7 +176,7 @@
                 Lampa.Storage.set(STORAGE_KEY, newState);
 
                 Lampa.Select.show({
-                    title: Lampa.Lang.translate('attention_warnings_title'),
+                    // title: Lampa.Lang.translate('attention_warnings_title'),
                     items: [
                         {
                             title: Lampa.Lang.translate('attention_warnings_title'),
