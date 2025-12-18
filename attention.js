@@ -19,7 +19,7 @@
             uk: "Інформація про фільм може з’явитися раніше, ніж він стане доступним для перегляду."
         },
         attention_enable: {
-            ru: "Попередження про доступність відео",
+            ru: "Предупреждения о доступности видео",
             en: "Video availability warnings",
             uk: "Попередження про доступність відео"
         }
@@ -163,28 +163,32 @@
         });
     }
 
-    // Додаємо прямий пункт з іконкою в розділ Кастомізація інтерфейсу (без окремої кнопки)
+    // Додаємо пункт з іконкою та радіокнопкою (кружечок з галочкою) безпосередньо в розділ
     function addDirectMenuItem() {
         Lampa.SettingsApi.addParam({
             component: 'interface_customization',
             param: {
-                type: 'selectbox_icon'  // Використовуємо шаблон з іконкою
+                type: 'selectbox_icon'
             },
             field: {
                 name: Lampa.Lang.translate('attention_enable')
             },
             icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>',
             picked: Lampa.Storage.get('attention_warnings_enabled', true),
-            onSelect: function (item) {
-                var newState = !item.picked;
+            onSelect: function () {
+                var newState = !Lampa.Storage.get('attention_warnings_enabled', true);
                 Lampa.Storage.set('attention_warnings_enabled', newState);
-                item.picked = newState;
-                // Оновлюємо візуал елемента
-                var $elem = Lampa.Settings.main().render().find('.settings-param[data-type="selectbox_icon"]:contains("' + Lampa.Lang.translate('attention_enable') + '")');
+
+                // Оновлюємо візуальний стан елемента в налаштуваннях
+                var $settings = Lampa.Settings.main().render();
+                var $item = $settings.find('.settings-param[data-type="selectbox_icon"]').filter(function() {
+                    return $(this).find('.settings-param-title span').text() === Lampa.Lang.translate('attention_enable');
+                });
+
                 if (newState) {
-                    $elem.addClass('selected');
+                    $item.addClass('selected');
                 } else {
-                    $elem.removeClass('selected');
+                    $item.removeClass('selected');
                 }
             }
         });
