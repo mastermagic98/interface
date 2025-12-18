@@ -171,11 +171,11 @@ function addSettingsParam() {
         component: 'interface_customization',  
         param: {  
             name: 'attention_warnings_enabled',  
-            type: 'trigger', // Радіокнопка (Так/Ні)  
+            type: 'trigger',  
             default: true  
         },  
         field: {  
-            name: '<svg width="24" height="24" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; vertical-align: middle;"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>' + Lampa.Lang.translate('attention_warnings_title')  
+            name: '<span class="settings-folder__icon" style="display: inline-flex; margin-right: 1.5em;"><svg width="24" height="24" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg></span>' + Lampa.Lang.translate('attention_warnings_title')  
         }  
     });  
 }
