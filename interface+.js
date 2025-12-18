@@ -12,8 +12,8 @@
 
     // Список модулів для підключення
     var modules = [
-        'https://mastermagic98.github.io/interface/attention.js', // попереджає про відсутність на балансера чи на торентах
-        'https://mastermagic98.github.io/interface/cardify.js', // додати кнопку увімкнути
+        'https://mastermagic98.github.io/interface/attention.js',
+        'https://mastermagic98.github.io/interface/cardify.js',
         'https://mastermagic98.github.io/interface/color.js',
         'https://mastermagic98.github.io/interface/aloader.js',
         'https://mastermagic98.github.io/interface/loaders.js',
@@ -24,35 +24,19 @@
 
     // Асинхронне підключення модулів
     modules.forEach(function (url) {
-        Lampa.Utils.putScriptAsync([url], function () {
-            console.log('Модуль завантажено: ' + url);
-        }, function () {
-            console.error('Помилка завантаження модуля: ' + url);
-        });
+        Lampa.Utils.putScriptAsync([url], function () {}, function () {});
     });
 
     // Функція ініціалізації плагіна
     function startPlugin() {
-        console.log('Ініціалізація плагіну custom_interface_plugin');
+        // Додаємо новий розділ у Налаштуваннях
+        Lampa.SettingsApi.addComponent({
+            component: 'interface_customization',
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 14 14" fill="#000000"><g fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H1a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-8A.5.5 0 0 0 13 2m-7 9l-1 2.5M8 11l1 2.5m-5 0h6M7.5 2v9M3 5h2M3 8h1"/><path d="m7.5 7l1.21-1a2 2 0 0 1 2.55 0l2.24 2"/></g></svg>',
+            name: Lampa.Lang.translate('custom_interface_plugin')
+        });
 
-        // Додаємо шаблони для налаштувань (якщо потрібні в майбутньому)
-        Lampa.Template.add('settings', '<div class="settings"></div>');
-        Lampa.Template.add('settings_', '<div class="settings"></div>');
-
-        try {
-            // Додаємо новий розділ у Налаштуваннях згідно зі зразком
-            Lampa.SettingsApi.addComponent({
-                component: 'interface_customization',
-                icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" x2="21" y1="9" y2="9"></line><line x1="3" x2="21" y1="15" y2="15"></line><line x1="9" x2="9" y1="9" y2="21"></line><line x1="15" x2="15" y1="9" y2="21"></line></svg>',
-                name: Lampa.Lang.translate('custom_interface_plugin')
-            });
-
-            console.log('Компонент interface_customization додано до налаштувань');
-        } catch (e) {
-            console.error('Помилка додавання компонента interface_customization: ' + e.message);
-        }
-
-        // Оновлюємо відображення налаштувань (не завжди обов’язково, але корисно)
+        // Оновлюємо відображення налаштувань
         if (Lampa.Settings && Lampa.Settings.main) {
             Lampa.Settings.main().render();
         }
@@ -60,12 +44,10 @@
 
     // Запускаємо плагін після готовності програми
     if (window.appready) {
-        console.log('Lampa готова, запуск плагіну');
         startPlugin();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
-                console.log('Lampa готова, запуск плагіну');
                 startPlugin();
             }
         });
