@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади
+    // Додаємо переклади для підказок та меню
     Lampa.Lang.add({
         hints_torrents: {
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",
@@ -18,19 +18,17 @@
             en: "A film may appear in the catalog before it's available to watch.",
             uk: "Інформація про фільм може з’явитися раніше, ніж він стане доступним для перегляду."
         },
-        attention_title: {
-            ru: "Предупреждения о доступности видео",
-            en: "Video availability warnings",
+        attention_warnings_title: {
+            ru: "Попередження про доступність відео",
+            en: "Warnings about video availability",
             uk: "Попередження про доступність відео"
-        },
-        attention_enable: {
-            ru: "Показывать предупреждения",
-            en: "Show warnings",
-            uk: "Показувати попередження"
         }
     });
 
-    // Конфігурація підказок
+    // Ключ для збереження стану увімкнення/вимкнення
+    var STORAGE_KEY = 'attention_warnings_enabled';
+
+    // Конфігурація підказок (тепер керується одним загальним перемикачем)
     var CONFIG = {
         online: {
             id: 'hint-online-banner',
@@ -110,103 +108,86 @@
         }
     }
 
-    // Логіка показу підказок
+    // Основна логіка показу підказок (активується тільки якщо увімкнено)
     function initializeHintFeature() {
-        var enabled = Lampa.Storage.get('attention_warnings_enabled', true);
-
         var shown = {
             online: false,
             torrents: false,
             incard: false
         };
 
-        // Оновлюємо стан при зміні налаштування
         Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name === 'attention_warnings_enabled') {
-                enabled = event.value;
-            }
-        });
-
-        // Основний слухач
-        Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name === 'activity' && enabled) {
+            if (event.name === 'activity') {
                 var component = Lampa.Activity.active().component;
+                var enabled = Lampa.Storage.get(STORAGE_KEY, true);
+
+                if (!enabled) return;
 
                 if (component === 'lampac' && (CONFIG.online.repeat || !shown.online)) {
-                    if ($('#' + CONFIG.online.id).length === 0) {
-                        waitForElement('.explorer__files-head', function (el) {
-                            var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
-                            $(el).before($hint);
-                            setTimeout(function () {
-                                fadeOutAndRemove($hint, CONFIG.online.fadeDuration);
-                            }, CONFIG.online.showDuration);
-                            shown.online = true;
-                        });
-                    }
+                    waitForElement('.explorer__files-head', function (el) {
+                        var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
+                        $(el).before($hint);
+                        setTimeout(function () {
+                            fadeOutAndRemove($hint, CONFIG.online.fadeDuration);
+                        }, CONFIG.online.showDuration);
+                        shown.online = true;
+                    });
                 }
 
                 if (component === 'torrents' && (CONFIG.torrents.repeat || !shown.torrents)) {
-                    if ($('#' + CONFIG.torrents.id).length === 0) {
-                        waitForElement('.explorer__files-head', function (el) {
-                            var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));
-                            $(el).before($hint);
-                            setTimeout(function () {
-                                fadeOutAndRemove($hint, CONFIG.torrents.fadeDuration);
-                            }, CONFIG.torrents.showDuration);
-                            shown.torrents = true;
-                        });
-                    }
+                    waitForElement('.explorer__files-head', function (el) {
+                        var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));
+                        $(el).before($hint);
+                        setTimeout(function () {
+                            fadeOutAndRemove($hint, CONFIG.torrents.fadeDuration);
+                        }, CONFIG.torrents.showDuration);
+                        shown.torrents = true;
+                    });
                 }
 
                 if (component === 'full' && (CONFIG.incard.repeat || !shown.incard)) {
-                    if ($('#' + CONFIG.incard.id).length === 0) {
-                        waitForElement('.full-start-new__head', function (el) {
-                            var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
-                            $(el).before($hint);
-                            setTimeout(function () {
-                                fadeOutAndRemove($hint, CONFIG.incard.fadeDuration);
-                            }, CONFIG.incard.showDuration);
-                            shown.incard = true;
-                        });
-                    }
+                    waitForElement('.full-start-new__head', function (el) {
+                        var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
+                        $(el).before($hint);
+                        setTimeout(function () {
+                            fadeOutAndRemove($hint, CONFIG.incard.fadeDuration);
+                        }, CONFIG.incard.showDuration);
+                        shown.incard = true;
+                    });
                 }
             }
         });
     }
 
-    // Додаємо кнопку в розділ Кастомізація інтерфейсу
-    function addSettingsButton() {
+    // Додаємо пункт у розділ "Кастомізація інтерфейсу"
+    function addSettingsParam() {
         Lampa.SettingsApi.addParam({
             component: 'interface_customization',
             param: {
                 type: 'button'
             },
             field: {
-                name: Lampa.Lang.translate('attention_title')
+                name: Lampa.Lang.translate('attention_warnings_title')
             },
             onChange: function () {
+                var current = Lampa.Storage.get(STORAGE_KEY, true);
+                var newState = !current;
+
+                Lampa.Storage.set(STORAGE_KEY, newState);
+
                 Lampa.Select.show({
-                    title: Lampa.Lang.translate('attention_title'),
+                    title: Lampa.Lang.translate('attention_warnings_title'),
                     items: [
                         {
-                            title: Lampa.Lang.translate('attention_enable'),
-                            checkbox: true,
-                            checked: Lampa.Storage.get('attention_warnings_enabled', true),
-                            onSelect: function (item) {
-                                Lampa.Storage.set('attention_warnings_enabled', item.checked);
-                            }
+                            title: Lampa.Lang.translate('attention_warnings_title'),
+                            subtitle: newState ? 'Увімкнено' : 'Вимкнено',
+                            selected: newState,
+                            icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="#ffffff"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>'
                         }
                     ],
                     onBack: function () {
                         // Повернення до розділу Кастомізація інтерфейсу
-                        var render = Lampa.Settings.main().render();
-                        var button = render.find('[data-component="interface_customization"]');
-                        if (button.length) {
-                            button.trigger('hover');
-                            setTimeout(function () {
-                                button.trigger('click');
-                            }, 100);
-                        }
+                        Lampa.Settings.main().render().find('[data-component="interface_customization"]').trigger('hover').trigger('click');
                     }
                 });
             }
@@ -216,12 +197,12 @@
     // Запуск після готовності додатка
     if (window.appready) {
         initializeHintFeature();
-        addSettingsButton();
+        addSettingsParam();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 initializeHintFeature();
-                addSettingsButton();
+                addSettingsParam();
             }
         });
     }
