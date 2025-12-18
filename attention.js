@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для текстів підказок та налаштувань
+    // Додаємо переклади
     Lampa.Lang.add({
         hints_torrents: {
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",
@@ -18,20 +18,12 @@
             en: "A film may appear in the catalog before it's available to watch.",
             uk: "Інформація про фільм може з’явитися раніше, ніж він стане доступним для перегляду."
         },
-        hints_enabled: {
-            ru: 'Увімкнути попередження',
-            en: 'Enable hints',
-            uk: 'Увімкнути попередження'
-        },
-        hints_enabled_descr: {
-            ru: 'Відображає попередження про те, що відеоматеріал може бути ще недоступним або гальмувати.',
-            en: 'Displays warnings that video content may not yet be available or may lag.',
-            uk: 'Відображає попередження про те, що відеоматеріал може бути ще недоступним або гальмувати.'
+        attention_enable: {
+            ru: "Попередження про доступність відео",
+            en: "Video availability warnings",
+            uk: "Попередження про доступність відео"
         }
     });
-
-    // Ключ для зберігання налаштування
-    var STORAGE_KEY = 'hints_plugin_enabled';
 
     // Конфігурація підказок
     var CONFIG = {
@@ -39,27 +31,21 @@
             id: 'hint-online-banner',
             showDuration: 3000,
             fadeDuration: 500,
-            repeat: false,
-            enabled: true
+            repeat: false
         },
         torrents: {
             id: 'hint-torrent-banner',
             showDuration: 4000,
             fadeDuration: 500,
-            repeat: false,
-            enabled: true
+            repeat: false
         },
         incard: {
             id: 'hint-incard-banner',
             showDuration: 4000,
             fadeDuration: 500,
-            repeat: false,
-            enabled: true
+            repeat: false
         }
     };
-
-    // Глобальна змінна для відстеження стану плагіна
-    var pluginEnabled = true;
 
     function createHintText(hintText, id) {
         return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.07); border-radius: 0.5em; margin-left: 1.2em; margin-right: 1.2em; padding: 0.8em; font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';
@@ -102,6 +88,7 @@
             }
             return false;
         };
+
         if (typeof MutationObserver !== 'undefined') {
             if (check()) return;
             var observer = new MutationObserver(function () {
@@ -118,8 +105,9 @@
         }
     }
 
+    // Логіка показу підказок
     function initializeHintFeature() {
-        if (!pluginEnabled) return;
+        var enabled = Lampa.Storage.get('attention_warnings_enabled', true);
 
         var shown = {
             online: false,
@@ -127,13 +115,19 @@
             incard: false
         };
 
+        // Слухаємо зміну налаштування
         Lampa.Storage.listener.follow('change', function (event) {
-            if (!pluginEnabled) return;
+            if (event.name === 'attention_warnings_enabled') {
+                enabled = event.value;
+            }
+        });
 
-            if (event.name === 'activity') {
+        // Основний слухач активності
+        Lampa.Storage.listener.follow('change', function (event) {
+            if (event.name === 'activity' && enabled) {
                 var component = Lampa.Activity.active().component;
 
-                if (component === 'lampac' && CONFIG.online.enabled && (CONFIG.online.repeat || !shown.online)) {
+                if (component === 'lampac' && (CONFIG.online.repeat || !shown.online)) {
                     waitForElement('.explorer__files-head', function (el) {
                         var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
                         $(el).before($hint);
@@ -144,7 +138,7 @@
                     });
                 }
 
-                if (component === 'torrents' && CONFIG.torrents.enabled && (CONFIG.torrents.repeat || !shown.torrents)) {
+                if (component === 'torrents' && (CONFIG.torrents.repeat || !shown.torrents)) {
                     waitForElement('.explorer__files-head', function (el) {
                         var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));
                         $(el).before($hint);
@@ -155,7 +149,7 @@
                     });
                 }
 
-                if (component === 'full' && CONFIG.incard.enabled && (CONFIG.incard.repeat || !shown.incard)) {
+                if (component === 'full' && (CONFIG.incard.repeat || !shown.incard)) {
                     waitForElement('.full-start-new__head', function (el) {
                         var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
                         $(el).before($hint);
@@ -169,58 +163,42 @@
         });
     }
 
-    function applyHintsState() {
-        var stored = Lampa.Storage.get(STORAGE_KEY, 'true');
-        pluginEnabled = (stored === true || stored === 'true' || stored === '1');
-
-        if (pluginEnabled) {
-            initializeHintFeature();
-        }
-    }
-
-    // SVG іконка попередження
-    var hintsSvg = '<svg height="28" width="28" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5l-4 1l1-3v-9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1Zm3-9.5v3"/><circle cx="7.5" cy="9" r=".5"/></g></svg>';
-
-    function addSettingsParam() {
-        var current = Lampa.Storage.get(STORAGE_KEY, 'true');
-        current = (current === true || current === 'true' || current === '1');
-
+    // Додаємо прямий пункт з іконкою в розділ Кастомізація інтерфейсу (без окремої кнопки)
+    function addDirectMenuItem() {
         Lampa.SettingsApi.addParam({
-            component: 'custom_interface_plugin',
+            component: 'interface_customization',
             param: {
-                name: STORAGE_KEY,
-                type: 'checkbox',  // Використовуємо checkbox (стандартний чекбокс з галочкою)
-                default: current
+                type: 'selectbox_icon'  // Використовуємо шаблон з іконкою
             },
             field: {
-                name: '<div class="settings-folder__icon" style="display:inline-block;vertical-align:middle;">' + hintsSvg + '</div><span style="display:inline-block;vertical-align:middle;margin-left:0.8em;">' + Lampa.Lang.translate('hints_enabled') + '</span>',
-                description: Lampa.Lang.translate('hints_enabled_descr')
+                name: Lampa.Lang.translate('attention_enable')
             },
-            body: 'settings-folder',
-            // Додаємо підтримку checkbox через властивість checkbox (як у розширеній структурі MenuItem Lampac)
-            checkbox: true,
-            checked: current,
-            onChange: function (value) {
-                var val = (value === true || value === 'true' || value === 1);
-                Lampa.Storage.set(STORAGE_KEY, val ? 'true' : 'false');
-                pluginEnabled = val;
-
-                if (val) {
-                    initializeHintFeature();
+            icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>',
+            picked: Lampa.Storage.get('attention_warnings_enabled', true),
+            onSelect: function (item) {
+                var newState = !item.picked;
+                Lampa.Storage.set('attention_warnings_enabled', newState);
+                item.picked = newState;
+                // Оновлюємо візуал елемента
+                var $elem = Lampa.Settings.main().render().find('.settings-param[data-type="selectbox_icon"]:contains("' + Lampa.Lang.translate('attention_enable') + '")');
+                if (newState) {
+                    $elem.addClass('selected');
+                } else {
+                    $elem.removeClass('selected');
                 }
             }
         });
     }
 
-    // Запуск після готовності Lampa
+    // Запуск після готовності додатка
     if (window.appready) {
-        addSettingsParam();
-        applyHintsState();
+        initializeHintFeature();
+        addDirectMenuItem();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
-                addSettingsParam();
-                applyHintsState();
+                initializeHintFeature();
+                addDirectMenuItem();
             }
         });
     }
