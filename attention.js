@@ -120,12 +120,14 @@
             incard: false
         };
 
+        // Оновлюємо стан при зміні налаштування
         Lampa.Storage.listener.follow('change', function (event) {
             if (event.name === 'attention_warnings_enabled') {
                 enabled = event.value;
             }
         });
 
+        // Основний слухач
         Lampa.Storage.listener.follow('change', function (event) {
             if (event.name === 'activity' && enabled) {
                 var component = Lampa.Activity.active().component;
@@ -172,14 +174,10 @@
         });
     }
 
-    // Додаємо параметр-кнопку в розділ Кастомізація інтерфейсу
+    // Додаємо кнопку в розділ Кастомізація інтерфейсу
     function addSettingsButton() {
-        // Уникаємо дублювання кнопки
-        Lampa.SettingsApi.removeParam('interface_customization', 'attention_warnings_button');
-
         Lampa.SettingsApi.addParam({
             component: 'interface_customization',
-            name: 'attention_warnings_button',
             param: {
                 type: 'button'
             },
@@ -200,8 +198,15 @@
                         }
                     ],
                     onBack: function () {
-                        // Правильне повернення в розділ Кастомізація інтерфейсу
-                        Lampa.Settings.main().render().find('[data-component="interface_customization"]').trigger('hover').trigger('click');
+                        // Повернення до розділу Кастомізація інтерфейсу
+                        var render = Lampa.Settings.main().render();
+                        var button = render.find('[data-component="interface_customization"]');
+                        if (button.length) {
+                            button.trigger('hover');
+                            setTimeout(function () {
+                                button.trigger('click');
+                            }, 100);
+                        }
                     }
                 });
             }
