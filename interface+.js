@@ -10,62 +10,6 @@
         }  
     });  
   
-    // Додаємо стилі для радіокнопок  
-    Lampa.Template.add('interface_radio_style', `  
-        <style>  
-        .interface-radio-button {  
-            display: flex;  
-            align-items: center;  
-            height: 34px;  
-            padding: 0 1.5em;  
-            background-color: rgba(255,255,255,0.06);  
-            border-radius: 0.3em;  
-            margin-bottom: 0.8em;  
-            cursor: pointer;  
-            transition: background-color 0.2s;  
-        }  
-          
-        .interface-radio-button.focus {  
-            background-color: #fff;  
-            color: #000;  
-        }  
-          
-        .interface-radio-button__icon {  
-            width: 24px;  
-            height: 24px;  
-            margin-right: 1em;  
-            flex-shrink: 0;  
-        }  
-          
-        .interface-radio-button__text {  
-            font-size: 1.3em;  
-            flex-grow: 1;  
-        }  
-          
-        .interface-radio-button__radio {  
-            width: 20px;  
-            height: 20px;  
-            border: 2px solid currentColor;  
-            border-radius: 50%;  
-            position: relative;  
-            margin-left: auto;  
-            flex-shrink: 0;  
-        }  
-          
-        .interface-radio-button.enabled .interface-radio-button__radio::after {  
-            content: '';  
-            position: absolute;  
-            top: 50%;  
-            left: 50%;  
-            transform: translate(-50%, -50%);  
-            width: 8px;  
-            height: 8px;  
-            background-color: currentColor;  
-            border-radius: 50%;  
-        }  
-        </style>  
-    `);  
-  
     // Список модулів для підключення  
     var modules = [  
         'https://mastermagic98.github.io/interface/attention.js',  
@@ -85,9 +29,6 @@
   
     // Функція ініціалізації плагіна  
     function startPlugin() {  
-        // Додаємо стилі  
-        $('body').append(Lampa.Template.get('interface_radio_style', {}, true));  
-          
         // Додаємо новий розділ у Налаштуваннях  
         Lampa.SettingsApi.addComponent({  
             component: 'interface_customization',  
