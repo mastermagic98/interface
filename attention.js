@@ -164,7 +164,13 @@
             }  
         });  
     }  
-  
+if (typeof Lampa.Params !== 'undefined') {  
+    Lampa.Params.values['attention_warnings_enabled'] = {  
+        'true': 'Так',  
+        'false': 'Ні'  
+    };  
+    Lampa.Params.defaults['attention_warnings_enabled'] = true;  
+}  
 // Додаємо параметр до налаштувань  
 function addSettingsParam() {    
     Lampa.SettingsApi.addParam({    
