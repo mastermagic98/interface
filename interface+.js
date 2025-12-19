@@ -10,34 +10,53 @@
         }  
     });  
   
-    // Додаємо стилі для параметрів-папок  
-function addFolderParamStyles() {  
-    let style = document.createElement('style');  
-    style.textContent = `  
-        .settings-folder-param-icon {  
-            display: inline-flex;  
-            align-items: center;  
-            justify-content: center;  
-            width: 24px;  
-            height: 24px;  
-            margin-right: 10px;  
-            vertical-align: middle;  
-            flex-shrink: 0;  
-        }  
-          
-        .settings-folder-param-icon svg {  
-            width: 20px;  
-            height: 20px;  
-            stroke: currentColor;  
-            fill: none;  
-        }  
-    `;  
-    document.head.appendChild(style);  
-}
+    // Додаємо універсальний стиль для іконок  
+    function addIconStyles() {  
+        let style = document.createElement('style');  
+        style.textContent = `  
+            .settings-param-icon {  
+                box-sizing: border-box;  
+                color: rgb(255, 255, 255);  
+                cursor: pointer;  
+                font-family: "SegoeUI", sans-serif;  
+                font-size: 17.1082px;  
+                height: 34.2167px;  
+                line-height: 17.1px;  
+                outline-color: rgb(255, 255, 255);  
+                outline-style: none;  
+                outline-width: 0px;  
+                transition-behavior: normal;  
+                transition-delay: 0s;  
+                transition-duration: 0s;  
+                transition-property: none;  
+                transition-timing-function: ease;  
+                user-select: none;  
+                width: 34.2167px;  
+                display: inline-flex;  
+                align-items: center;  
+                justify-content: center;  
+                margin-right: 10px;  
+                vertical-align: middle;  
+                flex-shrink: 0;  
+            }  
+              
+            .settings-param-icon svg {  
+                width: 20px;  
+                height: 20px;  
+                stroke: currentColor;  
+                fill: none;  
+            }  
+              
+            .settings-param.focus .settings-param-icon {  
+                color: rgb(0, 0, 0);  
+            }  
+        `;  
+        document.head.appendChild(style);  
+    }  
   
     // Список модулів для підключення  
     var modules = [  
-      //  'https://mastermagic98.github.io/interface/attention.js',  
+        'https://mastermagic98.github.io/interface/attention.js',  
         'https://mastermagic98.github.io/interface/cardify.js',  
         'https://mastermagic98.github.io/interface/color.js',  
         'https://mastermagic98.github.io/interface/aloader.js',  
@@ -50,7 +69,7 @@ function addFolderParamStyles() {
     // Функція ініціалізації плагіна  
     function startPlugin() {  
         // Додаємо стилі перед завантаженням модулів  
-        addFolderParamStyles();  
+        addIconStyles();  
   
         // Асинхронне підключення модулів  
         modules.forEach(function (url) {  
