@@ -1,81 +1,109 @@
-(function () {
-    'use strict';
-
-    // Додаємо переклад для назви плагіна
-    Lampa.Lang.add({
-        accent_color_plugin: {
-            ru: 'Налаштування акцентного кольору',
-            en: 'Accent color settings',
-            uk: 'Налаштування кольору акценту'
-        }
-    });
-
-    // Список модулів для підключення
-    var modules = [
-       // 'https://nb557.github.io/plugins/online_mod.js',
-       // 'http://showy.online/m.js',
-       // 'https://modss.tv/',
-        'https://mastermagic98.github.io/interface/attention.js', //попереджає про відсутність на балансера чи на торентах
-        'https://mastermagic98.github.io/interface/cardify.js', //додати кнопку увімкнути
-        'https://mastermagic98.github.io/interface/color.js',
-        'https://mastermagic98.github.io/interface/aloader.js',
-        'https://mastermagic98.github.io/interface/loaders.js',
-        //'https://mastermagic98.github.io/interface/bigbuttons.js',
-        //'https://mastermagic98.github.io/interface/forall.js',
- 'https://mastermagic98.github.io/interface/animations.js',
-   //'https://mastermagic98.github.io/interface/translate_tv.js',
-        'https://mastermagic98.github.io/interface/incardtemplate.js',
-        'https://mastermagic98.github.io/interface/fix_lang.js'
-    ];
-
-    // Асинхронне підключення модулів
-    modules.forEach(function (url) {
-        Lampa.Utils.putScriptAsync([url], function () {
-            console.log('Модуль завантажено: ' + url);
-        }, function () {
-            console.error('Помилка завантаження модуля: ' + url);
-        });
-    });
-
-    // Функція ініціалізації плагіна
-    function startPlugin() {
-        console.log('Ініціалізація плагіну accent_color_plugin');
-        // Додаємо шаблони для налаштувань
-        Lampa.Template.add('settings', '<div class="settings"></div>');
-        Lampa.Template.add('settings_', '<div class="settings"></div>');
-        try {
-            // Додаємо компонент до меню налаштувань
-            Lampa.SettingsApi.addComponent({
-                component: 'accent_color_plugin',
-                name: Lampa.Lang.translate('accent_color_plugin'),
-                icon: '<svg height="24" viewBox="0 0 24 26" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"/></svg>'
-            });
-            console.log('Компонент accent_color_plugin додано');
-        } catch (e) {
-            console.error('Помилка додавання accent_color_plugin: ' + e.message);
-        }
-
-        // Оновлюємо налаштування
-        Lampa.Settings.render();
-    }
-
-    // Запускаємо плагін після готовності програми
-    if (window.appready) {
-        console.log('Lampa готова, запуск плагіну');
-        startPlugin();
-    } else {
-        Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'ready') {
-                console.log('Lampa готова, запуск плагіну');
-                startPlugin();
-            }
-        });
-    }
-
-    // Опис маніфесту плагіна
-    Lampa.Manifest.plugins = {
-        name: 'accent_color_plugin',
-        version: '1.0.0',
-        description: 'Accent color and loader customization'
-    };
+(function () {  
+    'use strict';  
+  
+    // Додаємо переклад для назви плагіна  
+    Lampa.Lang.add({  
+        custom_interface_plugin: {  
+            ru: 'Кастомізація інтерфейсу',  
+            en: 'Customization interface',  
+            uk: 'Кастомізація інтерфейсу'  
+        }  
+    });  
+  
+    // Додаємо універсальний стиль для іконок  
+    function addIconStyles() {  
+        let style = document.createElement('style');  
+        style.textContent = `  
+            .settings-param-icon {  
+                box-sizing: border-box;  
+                color: rgb(255, 255, 255);  
+                cursor: pointer;  
+                font-family: "SegoeUI", sans-serif;  
+                font-size: 17.1082px;  
+                height: 34.2167px;  
+                line-height: 17.1px;  
+                outline-color: rgb(255, 255, 255);  
+                outline-style: none;  
+                outline-width: 0px;  
+                transition-behavior: normal;  
+                transition-delay: 0s;  
+                transition-duration: 0s;  
+                transition-property: none;  
+                transition-timing-function: ease;  
+                user-select: none;  
+                width: 34.2167px;  
+                display: inline-flex;  
+                align-items: center;  
+                justify-content: center;  
+                margin-right: 10px;  
+                vertical-align: middle;  
+                flex-shrink: 0;  
+            }  
+              
+            .settings-param-icon svg {  
+                width: 20px;  
+                height: 20px;  
+                stroke: currentColor;  
+                fill: none;  
+            }  
+              
+            .settings-param.focus .settings-param-icon {  
+                color: rgb(0, 0, 0);  
+            }  
+        `;  
+        document.head.appendChild(style);  
+    }  
+  
+    // Список модулів для підключення  
+    var modules = [  
+        'https://mastermagic98.github.io/interface/attention.js',  
+        'https://mastermagic98.github.io/interface/cardify.js',  
+        'https://mastermagic98.github.io/interface/color.js',  
+        'https://mastermagic98.github.io/interface/aloader.js',  
+        'https://mastermagic98.github.io/interface/loaders.js',  
+        'https://mastermagic98.github.io/interface/animations.js',  
+        'https://mastermagic98.github.io/interface/incardtemplate.js',  
+        'https://mastermagic98.github.io/interface/fix_lang.js'  
+    ];  
+  
+    // Функція ініціалізації плагіна  
+    function startPlugin() {  
+        // Додаємо стилі перед завантаженням модулів  
+        addIconStyles();  
+  
+        // Асинхронне підключення модулів  
+        modules.forEach(function (url) {  
+            Lampa.Utils.putScriptAsync([url], function () {}, function () {});  
+        });  
+  
+        // Додаємо новий розділ у Налаштуваннях  
+        Lampa.SettingsApi.addComponent({  
+            component: 'interface_customization',  
+            icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 14 14" fill="none"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H1a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-8A.5.5 0 0 0 13 2m-7 9l-1 2.5M8 11l1 2.5m-5 0h6M7.5 2v9M3 5h2M3 8h1"/><path d="m7.5 7l1.21-1a2 2 0 0 1 2.55 0l2.24 2"/></g></svg>',  
+            name: Lampa.Lang.translate('custom_interface_plugin')  
+        });  
+  
+        // Оновлюємо відображення налаштувань  
+        if (Lampa.Settings && Lampa.Settings.main) {  
+            Lampa.Settings.main().render();  
+        }  
+    }  
+  
+    // Запускаємо плагін після готовності програми  
+    if (window.appready) {  
+        startPlugin();  
+    } else {  
+        Lampa.Listener.follow('app', function (event) {  
+            if (event.type === 'ready') {  
+                startPlugin();  
+            }  
+        });  
+    }  
+  
+    // Опис маніфесту плагіна  
+    Lampa.Manifest.plugins = {  
+        name: 'custom_interface_plugin',  
+        version: '1.0.0',  
+        description: 'Customization interface'  
+    };  
 })();
