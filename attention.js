@@ -164,44 +164,40 @@
             }  
         });  
     }  
-if (typeof Lampa.Params !== 'undefined') {  
-    Lampa.Params.values['attention_warnings_enabled'] = {  
-        'true': 'Так',  
-        'false': 'Ні'  
-    };  
-    Lampa.Params.defaults['attention_warnings_enabled'] = true;  
-}  
-// Додаємо параметр до налаштувань  
-function addSettingsParam() {    
-    Lampa.SettingsApi.addParam({    
-        component: 'interface_customization',    
-        param: {    
-            name: 'attention_warnings_enabled',    
-            type: 'trigger',    
-            default: true    
-        },    
-        field: {    
-            name: '<div class="settings-folder-param selector">' +  
-                  '<div class="settings-folder-param__icon">' +  
-                  '<svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">' +  
-                  '<path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/>' +  
-                  '<path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/>' +  
-                  '</svg>' +  
-                  '</div>' +  
-                  '<div class="settings-folder-param__name">' + Lampa.Lang.translate('attention_warnings_title') + '</div>' +  
-                  '</div>'  
-        }    
-    });    
-}
+// Реєструємо параметр у системі ПЕРЕД використанням  
+    if (typeof Lampa.Params !== 'undefined') {  
+        Lampa.Params.trigger('attention_warnings_enabled', true);  
+    }  
   
-    // Запуск після готовності додатка  
+    // Додаємо параметр до налаштувань  
+    function addSettingsParam() {  
+        Lampa.SettingsApi.addParam({  
+            component: 'interface_customization',  
+            param: {  
+                name: 'attention_warnings_enabled', // Повинен збігатися з зареєстрованим  
+                type: 'trigger',  
+                default: true  
+            },  
+            field: {  
+                name: '<div class="settings-folder-param selector">' +  
+                      '<div class="settings-folder-param__icon">' +  
+                      '<svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">' +  
+                      '<path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/>' +  
+                      '<path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/>' +  
+                      '</svg>' +  
+                      '</div>' +  
+                      '<div class="settings-folder-param__name">' + Lampa.Lang.translate('attention_warnings_title') + '</div>' +  
+                      '</div>'  
+            }  
+        });  
+    }  
+  
+    // Ініціалізація  
     if (window.appready) {  
-        initializeHintFeature();  
         addSettingsParam();  
     } else {  
         Lampa.Listener.follow('app', function (event) {  
             if (event.type === 'ready') {  
-                initializeHintFeature();  
                 addSettingsParam();  
             }  
         });  
