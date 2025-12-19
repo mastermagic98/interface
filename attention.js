@@ -164,13 +164,9 @@
             }  
         });  
     }  
-// Реєструємо параметр у системі ПЕРЕД використанням  
-    if (typeof Lampa.Params !== 'undefined') {  
-        Lampa.Params.trigger('attention_warnings_enabled', true);  
-    }  
   
     // Додаємо параметр до налаштувань  
-  function addSettingsParam() {    
+function addSettingsParam() {    
     Lampa.SettingsApi.addParam({    
         component: 'interface_customization',    
         param: {    
@@ -184,12 +180,14 @@
     });    
 }
   
-    // Ініціалізація  
+    // Запуск після готовності додатка  
     if (window.appready) {  
+        initializeHintFeature();  
         addSettingsParam();  
     } else {  
         Lampa.Listener.follow('app', function (event) {  
             if (event.type === 'ready') {  
+                initializeHintFeature();  
                 addSettingsParam();  
             }  
         });  
