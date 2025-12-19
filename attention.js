@@ -55,38 +55,6 @@
         }  
     };  
   
-    // Функція створення радіокнопки  
-    function createRadioButton(key, icon, text, defaultValue, description) {  
-        var enabled = Lampa.Storage.field(key, defaultValue);  
-        var button = $(`  
-            <div class="interface-radio-button selector ${enabled ? 'enabled' : ''}" data-key="${key}">  
-                <div class="interface-radio-button__icon">${icon}</div>  
-                <div class="interface-radio-button__text">${text}</div>  
-                <div class="interface-radio-button__radio"></div>  
-            </div>  
-        `);  
-          
-        var descr = $(`<div class="settings-param__descr" style="margin-top: -0.5em; margin-bottom: 1em; padding-left: 3.5em; font-size: 1.1em; opacity: 0.7;">${description}</div>`);  
-          
-        button.on('hover:enter', function() {  
-            var newState = !Lampa.Storage.field(key);  
-            Lampa.Storage.set(key, newState);  
-              
-            if (newState) {  
-                button.addClass('enabled');  
-            } else {  
-                button.removeClass('enabled');  
-            }  
-              
-            // Оновлюємо CONFIG при зміні  
-            CONFIG.online.enabled = newState;  
-            CONFIG.torrents.enabled = newState;  
-            CONFIG.incard.enabled = newState;  
-        });  
-          
-        return button.add(descr);  
-    }  
-  
     // Додаємо параметр в налаштування  
     function addSettingsParam() {  
         Lampa.SettingsApi.addParam({  
@@ -100,20 +68,11 @@
                 name: Lampa.Lang.translate('attention_enabled'),  
                 description: Lampa.Lang.translate('attention_description')  
             },  
-            onRender: function(item) {  
-                // Замінюємо стандартний рендер на нашу радіокнопку  
-                item.empty();  
-                  
-                var attentionIcon = '<svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; stroke: white; fill: none;"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></svg>';  
-                var radioButton = createRadioButton(  
-                    'attention_enabled',  
-                    attentionIcon,  
-                    Lampa.Lang.translate('attention_enabled'),  
-                    true,  
-                    Lampa.Lang.translate('attention_description')  
-                );  
-                  
-                item.append(radioButton);  
+            onChange: function(value) {  
+                // Оновлюємо CONFIG при зміні  
+                CONFIG.online.enabled = value;  
+                CONFIG.torrents.enabled = value;  
+                CONFIG.incard.enabled = value;  
             }  
         });  
   
@@ -155,7 +114,7 @@
         // Подождём чуть дольше, чем сама анимация, чтобы DOM спокойно переварил  
         setTimeout(function () {  
             $el.remove();  
-        }, duration + 50); // буфер для плавности  
+        }, duration + 50); // буфер для плавності  
     }  
   
     function waitForElement(selector, callback) {  
@@ -246,9 +205,6 @@
     }  
   
     function startPlugin() {  
-        // Додаємо параметр в налаштування  
-        addSettingsParam();  
-          
         // Ініціалізуємо функціонал  
         initializeHintFeature();  
     }  
