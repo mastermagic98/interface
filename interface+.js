@@ -85,7 +85,7 @@
   
     // Список модулів для підключення  
     var modules = [  
-        'https://mastermagic98.github.io/interface/attention.js',  
+      //  'https://mastermagic98.github.io/interface/attention.js',  
         'https://mastermagic98.github.io/interface/cardify.js',  
         'https://mastermagic98.github.io/interface/color.js',  
         'https://mastermagic98.github.io/interface/aloader.js',  
