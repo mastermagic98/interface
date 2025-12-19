@@ -11,77 +11,29 @@
     });  
   
     // Додаємо стилі для параметрів-папок  
-    function addFolderParamStyles() {  
-        let style = document.createElement('style');  
-        style.textContent = `  
-            .settings-folder-param {  
-                box-sizing: border-box;  
-                color: rgb(255, 255, 255);  
-                cursor: pointer;  
-                display: flex;  
-                font-family: "SegoeUI", sans-serif;  
-                font-size: 17.1082px;  
-                line-height: 17.1px;  
-                outline-color: rgb(255, 255, 255);  
-                outline-style: none;  
-                outline-width: 0px;  
-                padding-bottom: 25.6623px;  
-                padding-left: 34.2165px;  
-                padding-right: 34.2165px;  
-                padding-top: 25.6623px;  
-                transition-behavior: normal;  
-                transition-delay: 0s;  
-                transition-duration: 0s;  
-                transition-property: none;  
-                transition-timing-function: ease;  
-                user-select: none;  
-                will-change: transform;  
-                align-items: center;  
-            }  
-              
-            .settings-folder-param__icon {  
-                box-sizing: border-box;  
-                color: rgb(255, 255, 255);  
-                cursor: pointer;  
-                display: flex;  
-                flex-shrink: 0;  
-                font-family: "SegoeUI", sans-serif;  
-                font-size: 17.1082px;  
-                height: 34.2167px;  
-                line-height: 17.1px;  
-                margin-right: 25.6623px;  
-                outline-color: rgb(255, 255, 255);  
-                outline-style: none;  
-                outline-width: 0px;  
-                transition-behavior: normal;  
-                transition-delay: 0s;  
-                transition-duration: 0s;  
-                transition-property: none;  
-                transition-timing-function: ease;  
-                user-select: none;  
-                width: 34.2167px;  
-                align-items: center;  
-                justify-content: center;  
-            }  
-              
-            .settings-folder-param__icon svg {  
-                width: 24px;  
-                height: 24px;  
-                stroke: currentColor;  
-                fill: none;  
-            }  
-              
-            .settings-folder-param__name {  
-                font-size: 1.4em;  
-                line-height: 1.3;  
-            }  
-              
-            .settings-folder-param.focus {  
-                background-color: #353535;  
-            }  
-        `;  
-        document.head.appendChild(style);  
-    }  
+function addFolderParamStyles() {  
+    let style = document.createElement('style');  
+    style.textContent = `  
+        .settings-folder-param-icon {  
+            display: inline-flex;  
+            align-items: center;  
+            justify-content: center;  
+            width: 24px;  
+            height: 24px;  
+            margin-right: 10px;  
+            vertical-align: middle;  
+            flex-shrink: 0;  
+        }  
+          
+        .settings-folder-param-icon svg {  
+            width: 20px;  
+            height: 20px;  
+            stroke: currentColor;  
+            fill: none;  
+        }  
+    `;  
+    document.head.appendChild(style);  
+}
   
     // Список модулів для підключення  
     var modules = [  
