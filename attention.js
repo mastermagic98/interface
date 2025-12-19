@@ -116,6 +116,11 @@
                 item.append(radioButton);  
             }  
         });  
+  
+        // Примусово оновлюємо відображення налаштувань після додавання параметра  
+        if (Lampa.Settings && Lampa.Settings.main) {  
+            Lampa.Settings.main().render();  
+        }  
     }  
   
     function createHintText(hintText, id) {  
@@ -247,6 +252,9 @@
         // Ініціалізуємо функціонал  
         initializeHintFeature();  
     }  
+  
+    // Важливо: реєструємо параметр негайно, не чекаючи appready  
+    addSettingsParam();  
   
     if (window.appready) {  
         startPlugin();  
