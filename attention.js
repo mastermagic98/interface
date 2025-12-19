@@ -2,7 +2,7 @@
 (function () {  
     'use strict';  
   
-    // Додаємо переклади для підказок та меню  
+    // Додаємо переклади  
     Lampa.Lang.add({  
         hints_torrents: {  
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",  
@@ -12,39 +12,46 @@
         hints_online: {  
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другой источник или озвучку.",  
             en: "Video not loading or lagging? Try a different source or audio track.",  
-            uk: "Відео не завантажується чи гальмує? Спробуйте інше джерело або озвучення."  
+            uk: "Відео не завантажується чи гальмує? Спробуйте інше джерело або озвучення.",  
         },  
         hints_incard: {  
             ru: "Информация о фильме может появиться раньше, чем он станет доступен для просмотра.",  
             en: "A film may appear in the catalog before it's available to watch.",  
             uk: "Інформація про фільм може з'явитися раніше, ніж він стане доступним для перегляду."  
         },  
-        attention_warnings_title: {  
-            ru: "Предупреждения о доступности видео",  
-            en: "Warnings about video availability",   
-            uk: "Попередження про доступність відео"  
+        attention_enabled: {  
+            ru: 'Попередження вмикати',  
+            en: 'Enable warnings',  
+            uk: 'Попередження вмикати'  
+        },  
+        attention_description: {  
+            ru: 'Включает предупреждения о том, что видео еще недоступно для просмотра, доступна только информация о нем',  
+            en: 'Enables warnings that video is not yet available for viewing, only information about it is available',  
+            uk: 'Вмикає попередження про те, що відео ще недоступне для перегляду, доступна тільки інформація про нього'  
         }  
     });  
   
-    // Конфігурація підказок  
     var CONFIG = {  
         online: {  
             id: 'hint-online-banner',  
             showDuration: 3000,  
             fadeDuration: 500,  
-            repeat: false  
+            repeat: false,  
+            enabled: true   
         },  
         torrents: {  
             id: 'hint-torrent-banner',  
             showDuration: 4000,  
             fadeDuration: 500,  
-            repeat: false  
+            repeat: false,  
+            enabled: true   
         },  
         incard: {  
             id: 'hint-incard-banner',  
             showDuration: 4000,  
             fadeDuration: 500,  
-            repeat: false  
+            repeat: false,  
+            enabled: true   
         }  
     };  
   
@@ -53,7 +60,7 @@
     }  
       
     function createHintText_incard(hintText, id) {  
-        return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.15); border-radius: 0.5em; margin-bottom: 1.2em; padding: 0.8em; font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';  
+        return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.15); border-radius: 0.5em; margin-bottom: 1.2em; padding: 0.8em;  font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';  
     }  
       
     function fadeOutAndRemove($el, duration) {  
@@ -64,8 +71,10 @@
             overflow: 'hidden'  
         });  
       
+        // Force reflow  
         $el[0].offsetHeight;  
       
+        // Схлопывание  
         $el.css({  
             transition: 'opacity ' + duration + 'ms, max-height ' + duration + 'ms, margin-bottom ' + duration + 'ms, padding ' + duration + 'ms',  
             opacity: '0',  
@@ -75,9 +84,10 @@
             paddingBottom: '0px'  
         });  
       
+        // Подождём чуть дольше, чем сама анимация, чтобы DOM спокойно переварил  
         setTimeout(function () {  
             $el.remove();  
-        }, duration + 50);  
+        }, duration + 50); // буфер для плавности  
     }  
   
     function waitForElement(selector, callback) {  
@@ -108,7 +118,6 @@
         }  
     }  
   
-    // Основна логіка показу підказок  
     function initializeHintFeature() {  
         var shown = {  
             online: false,  
@@ -116,14 +125,26 @@
             incard: false  
         };  
   
+        // Отримуємо початковий стан з налаштувань  
+        var attentionEnabled = Lampa.Storage.field('attention_enabled', true);  
+        CONFIG.online.enabled = attentionEnabled;  
+        CONFIG.torrents.enabled = attentionEnabled;  
+        CONFIG.incard.enabled = attentionEnabled;  
+  
+        // Слухаємо зміни налаштувань  
+        Lampa.Listener.follow('attention_setting_changed', function(event) {  
+            if (event.key === 'attention_enabled') {  
+                CONFIG.online.enabled = event.enabled;  
+                CONFIG.torrents.enabled = event.enabled;  
+                CONFIG.incard.enabled = event.enabled;  
+            }  
+        });  
+  
         Lampa.Storage.listener.follow('change', function (event) {  
             if (event.name === 'activity') {  
                 var component = Lampa.Activity.active().component;  
-                var enabled = Lampa.Storage.get('attention_warnings_enabled', true);  
   
-                if (!enabled) return;  
-  
-                if (component === 'lampac' && (CONFIG.online.repeat || !shown.online)) {  
+                if (component === 'lampac' && CONFIG.online.enabled && (CONFIG.online.repeat || !shown.online)) {  
                     waitForElement('.explorer__files-head', function (el) {  
                         var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));  
                         $(el).before($hint);  
@@ -136,20 +157,20 @@
                     });  
                 }  
   
-                if (component === 'torrents' && (CONFIG.torrents.repeat || !shown.torrents)) {  
+                if (component === 'torrents' && CONFIG.torrents.enabled && (CONFIG.torrents.repeat || !shown.torrents)) {  
                     waitForElement('.explorer__files-head', function (el) {  
                         var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));  
                         $(el).before($hint);  
   
                         setTimeout(function () {  
                             fadeOutAndRemove($hint, CONFIG.torrents.fadeDuration);  
-                        }, CONFIG.online.showDuration);  
+                        }, CONFIG.torrents.showDuration);  
   
                         shown.torrents = true;  
                     });  
                 }  
                   
-                if (component === 'full' && (CONFIG.incard.repeat || !shown.incard)) {  
+                if (component === 'full' && CONFIG.incard.enabled && (CONFIG.incard.repeat || !shown.incard)) {  
                     waitForElement('.full-start-new__head', function (el) {  
                         var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));  
                         $(el).before($hint);  
@@ -165,35 +186,12 @@
         });  
     }  
   
-    // Додаємо параметр до налаштувань  
-function addSettingsParam() {    
-    Lampa.SettingsApi.addParam({    
-        component: 'interface_customization',    
-        param: {    
-            name: 'attention_warnings_enabled',    
-            type: 'trigger',    
-            default: true    
-        },    
-         field: {  
-            name: '<div class="settings-folder selector" style="box-sizing: border-box; color: rgb(255, 255, 255); cursor: pointer; display: flex; font-family: "SegoeUI", sans-serif; font-size: 17.1082px; line-height: 17.1px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; padding-bottom: 25.6623px; padding-left: 34.2165px; padding-right: 34.2165px; padding-top: 25.6623px; transition-behavior: normal; transition-delay: 0s; transition-duration: 0s; transition-property: none; transition-timing-function: ease; user-select: none; will-change: transform;">' +  
-                  '<div class="settings-folder__icon" style="box-sizing: border-box; color: rgb(255, 255, 255); cursor: pointer; display: flex; flex-shrink: 0; font-family: "SegoeUI", sans-serif; font-size: 17.1082px; height: 34.2167px; line-height: 17.1px; margin-right: 25.6623px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; transition-behavior: normal; transition-delay: 0s; transition-duration: 0s; transition-property: none; transition-timing-function: ease; user-select: none; width: 34.2167px; align-items: center; justify-content: center;">' +  
-                  '<svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; stroke: white; fill: none;"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></svg>' +  
-                  '</div>' +  
-                  '<div class="settings-folder__name" style="font-size: 1.4em; line-height: 1.3;">' + Lampa.Lang.translate('attention_warnings_title') + '</div>' +  
-                  '</div>'  
-        }     
-    });    
-}
-  
-    // Запуск після готовності додатка  
     if (window.appready) {  
         initializeHintFeature();  
-        addSettingsParam();  
     } else {  
         Lampa.Listener.follow('app', function (event) {  
             if (event.type === 'ready') {  
                 initializeHintFeature();  
-                addSettingsParam();  
             }  
         });  
     }  
