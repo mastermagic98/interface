@@ -174,9 +174,14 @@ function addSettingsParam() {
             type: 'trigger',    
             default: true    
         },    
-        field: {    
-            name: '<span class="settings-param-icon"><svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></svg></span>' + Lampa.Lang.translate('attention_warnings_title')    
-        }    
+         field: {  
+            name: '<div class="settings-folder selector" style="box-sizing: border-box; color: rgb(255, 255, 255); cursor: pointer; display: flex; font-family: "SegoeUI", sans-serif; font-size: 17.1082px; line-height: 17.1px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; padding-bottom: 25.6623px; padding-left: 34.2165px; padding-right: 34.2165px; padding-top: 25.6623px; transition-behavior: normal; transition-delay: 0s; transition-duration: 0s; transition-property: none; transition-timing-function: ease; user-select: none; will-change: transform;">' +  
+                  '<div class="settings-folder__icon" style="box-sizing: border-box; color: rgb(255, 255, 255); cursor: pointer; display: flex; flex-shrink: 0; font-family: "SegoeUI", sans-serif; font-size: 17.1082px; height: 34.2167px; line-height: 17.1px; margin-right: 25.6623px; outline-color: rgb(255, 255, 255); outline-style: none; outline-width: 0px; transition-behavior: normal; transition-delay: 0s; transition-duration: 0s; transition-property: none; transition-timing-function: ease; user-select: none; width: 34.2167px; align-items: center; justify-content: center;">' +  
+                  '<svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; stroke: white; fill: none;"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></svg>' +  
+                  '</div>' +  
+                  '<div class="settings-folder__name" style="font-size: 1.4em; line-height: 1.3;">' + Lampa.Lang.translate('attention_warnings_title') + '</div>' +  
+                  '</div>'  
+        }     
     });    
 }
   
