@@ -10,7 +10,7 @@
         }  
     });  
   
-    // Додаємо універсальний стиль для іконок  
+  /*  // Додаємо універсальний стиль для іконок  
     function addIconStyles() {  
         let style = document.createElement('style');  
         style.textContent = `  
@@ -53,7 +53,7 @@
         `;  
         document.head.appendChild(style);  
     }  
-  
+  */
     // Список модулів для підключення  
     var modules = [  
         'https://mastermagic98.github.io/interface/attention.js',  
