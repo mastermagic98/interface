@@ -44,7 +44,7 @@
     }  
   
     Lampa.SettingsApi.addParam({  
-      component: 'interface_customization',  
+      component: 'other',  
       param: {  
         name: 'showtextbuttons',  
         type: 'trigger',  
