@@ -115,58 +115,56 @@
   
     // --- Налаштування ---  
     function Settings() {  
-        // Перевіряємо, чи існує компонент  
-        if (!Lampa.SettingsApi.getComponent('interface_customization')) {  
-            Lampa.SettingsApi.addComponent({  
-                component: 'interface_customization',  
-                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 14 14" fill="none"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H1a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-8A.5.5 0 0 0 13 2m-7 9l-1 2.5M8 11l1 2.5m-5 0h6M7.5 2v9M3 5h2M3 8h1"/><path d="m7.5 7l1.21-1a2 2 0 0 1 2.55 0l2.24 2"/></g></svg>',  
-                name: 'Кастомізація інтерфейсу'  
-            });  
-        }  
-  
-        // 1. Опція: показувати всі кнопки  
-        Lampa.SettingsApi.addParam({  
-            component: 'interface_customization',  
-            param: {   
-                name: 'show_all_buttons',   
-                type: 'trigger',   
-                default: false   
-            },  
-            field: {  
-                name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; flex-shrink: 0; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px;"><g transform="scale(2.1)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M94.8,118.2H29.5c-10.8,0-19.5-8.8-19.5-19.5V33.4c0-10.8,8.8-19.5,19.5-19.5h65.3c10.8,0,19.5,8.8,19.5,19.5v65.3C114.4,109.5,105.6,118.2,94.8,118.2z M29.5,25c-4.6,0-8.4,3.8-8.4,8.4v65.3c0,4.6,3.8,8.4,8.4,8.4h65.3c4.6,0,8.4-3.8,8.4-8.4V33.4c0-4.6-3.8-8.4-8.4-8.4H29.5z"/><path d="M94.8,242.1H29.5c-10.8,0-19.5-8.8-19.5-19.5v-65.3c0-10.8,8.8-19.5,19.5-19.5h65.3c10.8,0,19.5,8.8,19.5,19.5v65.3C114.4,233.3,105.6,242.1,94.8,242.1z M29.5,148.9c-4.6,0-8.4,3.8-8.4,8.4v65.3c0,4.6,3.8,8.4,8.4,8.4h65.3c4.6,0,8.4-3.8,8.4-8.4v-65.3c0-4.6-3.8-8.4-8.4-8.4L29.5,148.9L29.5,148.9z"/><path d="M147.2,44.9H246v14.9h-98.8V44.9z"/><path d="M147.2,85.7H246v14.9h-98.8V85.7z"/><path d="M147.2,162.1H246v14.9h-98.8V162.1z"/><path d="M147.2,202.9H246v14.9h-98.8V202.9z"/></g></svg>' + Lampa.Lang.translate('show_all_buttons_name'),  
-                description: Lampa.Lang.translate('show_all_buttons_desc')  
-            },  
-            onChange: function (value) {  
-                Lampa.Storage.set('show_all_buttons', value);  
-                setTimeout(function () {  
-                    location.reload();  
-                }, 300);  
-            }  
-        });  
-  
-        // 2. Опція: режим тексту на кнопках  
-        Lampa.SettingsApi.addParam({  
-            component: 'interface_customization',  
-            param: {  
-                name: 'button_text_mode',  
-                type: 'select',  
-                values: {  
-                    'default': Lampa.Lang.translate('button_text_mode_default'),  
-                    'show': Lampa.Lang.translate('button_text_mode_show'),  
-                    'hide': Lampa.Lang.translate('button_text_mode_hide')  
-                },  
-                default: 'default'  
-            },  
-            field: {  
-                name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; flex-shrink: 0; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px;"><g transform="scale(2.1)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M94.8,118.2H29.5c-10.8,0-19.5-8.8-19.5-19.5V33.4c0-10.8,8.8-19.5,19.5-19.5h65.3c10.8,0,19.5,8.8,19.5,19.5v65.3C114.4,109.5,105.6,118.2,94.8,118.2z M29.5,25c-4.6,0-8.4,3.8-8.4,8.4v65.3c0,4.6,3.8,8.4,8.4,8.4h65.3c4.6,0,8.4-3.8,8.4-8.4V33.4c0-4.6-3.8-8.4-8.4-8.4H29.5z"/><path d="M94.8,242.1H29.5c-10.8,0-19.5-8.8-19.5-19.5v-65.3c0-10.8,8.8-19.5,19.5-19.5h65.3c10.8,0,19.5,8.8,19.5,19.5v65.3C114.4,233.3,105.6,242.1,94.8,242.1z M29.5,148.9c-4.6,0-8.4,3.8-8.4,8.4v65.3c0,4.6,3.8,8.4,8.4,8.4h65.3c4.6,0,8.4-3.8,8.4-8.4v-65.3c0-4.6-3.8-8.4-8.4-8.4L29.5,148.9L29.5,148.9z"/><path d="M147.2,44.9H246v14.9h-98.8V44.9z"/><path d="M147.2,85.7H246v14.9h-98.8V85.7z"/><path d="M147.2,162.1H246v14.9h-98.8V162.1z"/><path d="M147.2,202.9H246v14.9h-98.8V202.9z"/></g></svg>' + Lampa.Lang.translate('button_text_mode_name'),  
-                description: Lampa.Lang.translate('button_text_mode_desc')  
-            },  
-            onChange: function (value) {  
-                Lampa.Storage.set('button_text_mode', value);  
-                applyButtonTextMode();  
-            }  
-        });  
+    // Реєструємо параметри перед використанням  
+    if (typeof Lampa.Params !== 'undefined') {  
+        Lampa.Params.trigger('show_all_buttons', false);  
+        Lampa.Params.trigger('button_text_mode', 'default');  
     }  
+  
+    // 1. Опція: показувати всі кнопки  
+    Lampa.SettingsApi.addParam({  
+        component: 'interface_customization',  
+        param: {   
+            name: 'show_all_buttons',   
+            type: 'trigger',   
+            default: false   
+        },  
+        field: {  
+            name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; flex-shrink: 0; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px;"><g transform="scale(2.1)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12.387 14.713H3.813c-1.413 0 -2.563 -1.15 -2.563 -2.563V3.575C1.25 2.15 2.4 1 3.813 1h8.575c1.413 0 2.563 1.15 2.563 2.563v8.575c0 1.413 -1.15 2.575 -2.563 2.575M3.813 2.475c-0.613 0 -1.1 0.487 -1.1 1.1v8.575c0 0.613 0.487 1.1 1.1 1.1h8.575c0.613 0 1.1 -0.487 1.1 -1.1V3.575c0 -0.613 -0.487 -1.1 -1.1 -1.1zM12.387 31H3.813c-1.413 0 -2.563 -1.15 -2.563 -2.563v-8.575c0 -1.413 1.15 -2.563 2.563 -2.563h8.575c1.413 0 2.563 1.15 2.563 2.563v8.575c0 1.413 -1.15 2.563 -2.563 2.563m-8.575 -12.25c-0.613 0 -1.1 0.5 -1.1 1.1v8.575c0 0.613 0.487 1.1 1.1 1.1h8.575c0.613 0 1.1 -0.487 1.1 -1.1v-8.575c0 -0.613 -0.487 -1.1 -1.1 -1.1zm24.375 0.938h-8.575c-1.438 0 -2.563 -1.45 -2.563 -3.313V4.313c0 -1.863 1.125 -3.313 2.563 -3.313h8.575C29.625 1 30.75 2.462 30.75 4.313V16.375c0 1.85 -1.125 3.313 -2.563 3.313M19.613 2.475c-0.525 0 -1.1 0.762 -1.1 1.85V16.375c0 1.087 0.575 1.85 1.1 1.85h8.575c0.525 0 1.1 -0.762 1.1 -1.85V4.313c0 -1.087 -0.575 -1.85 -1.1 -1.85h-8.575zM28.188 31h-8.575c-1.438 0 -2.563 -0.887 -2.563 -2.013v-5.963c0 -1.125 1.125 -2.013 2.563 -2.013h8.575c1.438 0 2.563 0.887 2.563 2.013v5.963c0 1.125 -1.125 2.013 -2.563 2.013m-8.575 -8.525c-0.662 0 -1.1 0.325 -1.1 0.55v5.963c0 0.212 0.438 0.55 1.1 0.55h8.575c0.662 0 1.1 -0.325 1.1 -0.55v-5.963c0 -0.212 -0.438 -0.55 -1.1 -0.55z"/></g></svg>' + Lampa.Lang.translate('show_all_buttons_name'),  
+            description: Lampa.Lang.translate('show_all_buttons_desc')  
+        },  
+        onChange: function (value) {  
+            Lampa.Storage.set('show_all_buttons', value);  
+            setTimeout(function () {  
+                Lampa.Noty.show(Lampa.Lang.translate('reloading') || 'Перезавантаження...');  
+                location.reload();  
+            }, 300);  
+        }  
+    });  
+  
+    // 2. Опція: режим тексту на кнопках  
+    Lampa.SettingsApi.addParam({  
+        component: 'interface_customization',  
+        param: {  
+            name: 'button_text_mode',  
+            type: 'select',  
+            values: {  
+                'default': Lampa.Lang.translate('button_text_mode_default'),  
+                'show': Lampa.Lang.translate('button_text_mode_show'),  
+                'hide': Lampa.Lang.translate('button_text_mode_hide')  
+            },  
+            default: 'default'  
+        },  
+        field: {  
+            name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; flex-shrink: 0; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px;"><g transform="scale(2.1)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11.85 14.775H3.688c-1.35 0-2.438-1.1-2.438-2.438V4.175c0-1.35 1.1-2.438 2.438-2.438h8.162c1.35 0 2.438 1.1 2.438 2.438v8.162c.013 1.35-1.087 2.438-2.438 2.438M3.688 3.125c-.575 0-1.05.475-1.05 1.05v8.162c0 .575.475 1.05 1.05 1.05h8.162c.575 0 1.05-.475 1.05-1.05V4.175c0-.575-.475-1.05-1.05-1.05zm8.162 27.137H3.688c-1.35 0-2.438-1.1-2.438-2.438v-8.162c0-1.35 1.1-2.438 2.438-2.438h8.162c1.35 0 2.438 1.1 2.438 2.438v8.162c.013 1.337-1.087 2.438-2.438 2.438m-8.162-11.65c-.575 0-1.05.475-1.05 1.05v8.162c0 .575.475 1.05 1.05 1.05h8.162c.575 0 1.05-.475 1.05-1.05v-8.162c0-.575-.475-1.05-1.05-1.05zm14.713-13H30.75v1.863H18.4zm0 5.1H30.75v1.863H18.4zm0 9.55H30.75v1.863H18.4zm0 5.1H30.75v1.863H18.4z"/></g></svg>' + Lampa.Lang.translate('button_text_mode_name'),  
+            description: Lampa.Lang.translate('button_text_mode_desc')  
+        },  
+        onChange: function (value) {  
+            Lampa.Storage.set('button_text_mode', value);  
+            applyButtonTextMode();  
+        }  
+    });  
+} 
   
     // --- Ініціалізація ---  
     function init() {  
