@@ -65,7 +65,7 @@
             default: true    
         },    
         field: {    
-            name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; flex-shrink: 0;"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45zM7 5v3.25"/><path d="M7 11a.25.25 0 1 1 0-.5m0 .5a.25.25 0 1 0 0-.5"/></g></svg>' + Lampa.Lang.translate('attention_enabled') + '</div>',    
+            name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px; flex-shrink: 0; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px;"><g transform="scale(2.3)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45zM7 5v3.25"/><path d="M7 11a.25.25 0 1 1 0-.5m0 .5a.25.25 0 1 0 0-.5"/></g></svg>' + Lampa.Lang.translate('attention_enabled') + '</div>',    
             description: Lampa.Lang.translate('attention_description')    
         },    
         onChange: function(value) {    
@@ -73,7 +73,7 @@
             CONFIG.torrents.enabled = value;    
             CONFIG.incard.enabled = value;    
         }    
-    });    
+    });        
 
   
         // Примусово оновлюємо відображення налаштувань після додавання параметра  
