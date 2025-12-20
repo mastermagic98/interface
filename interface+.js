@@ -52,7 +52,35 @@
             }  
         });  
     }  
-  
+  // Створюємо новий <style> елемент
+const style = document.createElement('style');
+style.innerHTML = `
+  .settings-param {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .settings-param__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px; /* Між іконкою та текстом */
+  }
+
+  .settings-param__content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .settings-param__name,
+  .settings-param__value {
+    line-height: 1.5; /* Встановити відстань між рядками */
+  }
+`;
+
+// Додаємо стилі до <head> документа
+document.head.appendChild(style);
+    
     // Опис маніфесту плагіна  
     Lampa.Manifest.plugins = {  
         name: 'custom_interface_plugin',  
