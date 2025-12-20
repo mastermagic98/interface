@@ -52,31 +52,50 @@
             }  
         });  
     }  
-  // Створюємо новий <style> елемент
-const style = document.createElement('style');
-style.innerHTML = `
-  .settings-param {
-    display: flex;
-    align-items: flex-start;
-  }
-
-  .settings-param__icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 10px; /* Між іконкою та текстом */
-  }
-
-  .settings-param__content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .settings-param__name,
-  .settings-param__value {
-    line-height: 1.5; /* Встановити відстань між рядками */
-  }
-`;
+    // Додаємо універсальний стиль для іконок  
+    function addIconStyles() {  
+        let style = document.createElement('style');  
+        style.textContent = `  
+            .settings-param-icon {  
+                box-sizing: border-box;  
+                color: rgb(255, 255, 255);  
+                cursor: pointer;  
+                font-family: "SegoeUI", sans-serif;  
+                font-size: 17.1082px;  
+                height: 34.2167px;  
+                line-height: 17.1px;  
+                outline-color: rgb(255, 255, 255);  
+                outline-style: none;  
+                outline-width: 0px;  
+                transition-behavior: normal;  
+                transition-delay: 0s;  
+                transition-duration: 0s;  
+                transition-property: none;  
+                transition-timing-function: ease;  
+                user-select: none;  
+                width: 34.2167px;  
+                display: inline-flex;  
+                align-items: center;  
+                justify-content: center;  
+                margin-right: 10px;  
+                vertical-align: middle;  
+                flex-shrink: 0;  
+            }  
+              
+            .settings-param-icon svg {  
+                width: 20px;  
+                height: 20px;  
+                stroke: currentColor;  
+                fill: none;  
+            }  
+              
+            .settings-param.focus .settings-param-icon {  
+                color: rgb(0, 0, 0);  
+            }  
+        `;  
+        document.head.appendChild(style);  
+    }  
+  
 
 // Додаємо стилі до <head> документа
 document.head.appendChild(style);
