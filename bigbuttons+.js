@@ -39,7 +39,7 @@
   // --- Ініціалізація налаштування ---
   function initShowTextButtons() {
     Lampa.SettingsApi.addParam({
-      component: 'accent_color_plugin',
+      component: 'other',
       param: {
         name: 'showtextbuttons',
         type: 'trigger',
