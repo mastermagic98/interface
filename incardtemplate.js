@@ -9,44 +9,44 @@
   
     // --- Локалізація ---  
     function Lang() {  
-        Lampa.Lang.add({  
-            show_all_buttons_name: {  
-                ru: 'Показать все кнопки',  
-                en: 'Show all buttons',  
-                uk: 'Показувати всі кнопки'  
-            },  
-            show_all_buttons_desc: {  
-                ru: 'Отображает все кнопки действий, включая скрытые под «Смотреть»',  
-                en: 'Displays all action buttons, including those hidden under "Watch"',  
-                uk: 'Відображає всі кнопки дій, включно з тими, що сховані під «Дивитись»'  
-            },  
-            button_text_mode_name: {  
-                ru: 'Режим текста на кнопках',  
-                en: 'Button text mode',  
-                uk: 'Режим відображення тексту на кнопках'  
-            },  
-            button_text_mode_desc: {  
-                ru: 'Настройка отображения текста на кнопках',  
-                en: 'Controls how text is shown on buttons',  
-                uk: 'Керує тим, як відображається текст на кнопках'  
-            },  
-            button_text_mode_default: {  
-                ru: 'Стандартный',  
-                en: 'Default',  
-                uk: 'Стандартний'  
-            },  
-            button_text_mode_show: {  
-                ru: 'Показать текст',  
-                en: 'Show text',  
-                uk: 'Показати текст'  
-            },  
-            button_text_mode_hide: {  
-                ru: 'Скрыть текст',  
-                en: 'Hide text',  
-                uk: 'Приховати текст'  
-            }  
-        });  
-    }  
+    Lampa.Lang.add({  
+        show_all_buttons_name: {  
+            ru: 'Показать все кнопки',  
+            en: 'Show all buttons',  
+            uk: 'Показувати всі кнопки'  
+        },  
+        show_all_buttons_desc: {  
+            ru: 'Отображает все кнопки действий, включая скрытые под «Смотреть»',  
+            en: 'Displays all action buttons, including those hidden under "Watch"',  
+            uk: 'Відображає всі кнопки дій, включно з тими, що сховані під «Дивитись»'  
+        },  
+        button_text_mode_name: {  
+            ru: 'текст на кнопках',  
+            en: 'button text mode',  
+            uk: 'Текст на кнопках'  
+        },  
+        button_text_mode_desc: {  
+            ru: 'Изменение текста на кнопках',  
+            en: 'Controls how text is shown on buttons',  
+            uk: 'Змінює вигляд тексту на кнопках'  
+        },  
+        button_text_mode_default: {  
+            ru: 'по умолчанию',  
+            en: 'default',  
+            uk: 'за замовчуванням'  
+        },  
+        button_text_mode_show: {  
+            ru: 'всегда отображается',  
+            en: 'show text',  
+            uk: 'завжди відображається'  
+        },  
+        button_text_mode_hide: {  
+            ru: 'всегда скрыт',  
+            en: 'hide text',  
+            uk: 'завжди прихований'  
+        }  
+    });  
+}  
   
     // --- Показ усіх кнопок ---  
     function applyShowAllButtons() {  
