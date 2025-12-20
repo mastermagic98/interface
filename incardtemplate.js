@@ -21,8 +21,8 @@
             uk: 'Відображає всі кнопки дій, включно з тими, що сховані під «Дивитись»'  
         },  
         button_text_mode_name: {  
-            ru: 'текст на кнопках',  
-            en: 'button text mode',  
+            ru: 'Текст на кнопках',  
+            en: 'Button text mode',  
             uk: 'Текст на кнопках'  
         },  
         button_text_mode_desc: {  
