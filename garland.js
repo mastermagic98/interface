@@ -637,8 +637,8 @@ function addSettingsUI() {
         div = (Q === 'low') ? 58 : (Q === 'medium') ? 48 : 42;
         maxBulbs = (Q === 'low') ? 18 : (Q === 'medium') ? 24 : 30;
       } else if (TIZEN || TV) {
-        div = (Q === 'low') ? 120 : (Q === 'medium') ? 92 : 72;
-        maxBulbs = (Q === 'low') ? 22 : (Q === 'medium') ? 32 : 44;
+        div = (Q === 'low') ? 100 : (Q === 'medium') ? 92 : 72;
+        maxBulbs = (Q === 'low') ? 28 : (Q === 'medium') ? 32 : 44;
       } else {
         div = (Q === 'low') ? 92 : (Q === 'medium') ? 72 : 58;
         maxBulbs = (Q === 'low') ? 34 : (Q === 'medium') ? 44 : 60;
@@ -660,7 +660,7 @@ function addSettingsUI() {
       dpr = Math.min(cap, real);
 
       var w = Math.max(320, window.innerWidth || 1920);
-      var h = MOBILE ? 76 : 130;
+      var h = MOBILE ? 76 : ((TIZEN || TV) ? 96 : 130);
 
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
@@ -675,9 +675,9 @@ function addSettingsUI() {
       bulbs = [];
 
       var count = getBulbCount(w);
-      var wireY = MOBILE ? 36 : 72;
-      var sagAmp = MOBILE ? 2 : ((Q === 'low') ? 6 : 10);
-      var hang = MOBILE ? 1 : ((Q === 'low') ? 4 : 6);
+	  var wireY  = MOBILE ? 36 : ((TIZEN || TV) ? 36 : 72);
+	  var sagAmp = MOBILE ? 2  : ((TIZEN || TV) ? ((Q === 'low') ? 3 : 4) : ((Q === 'low') ? 6 : 10));
+	  var hang   = MOBILE ? 1  : ((TIZEN || TV) ? ((Q === 'low') ? 3 : 4) : ((Q === 'low') ? 4 : 6));
 
       var size = MOBILE ? 5 : 7;
       if (Q === 'high') size = MOBILE ? 6 : 8;
@@ -701,8 +701,8 @@ function addSettingsUI() {
     }
 
     function drawWire(w) {
-      var wireY = MOBILE ? 36 : 72;
-      var sagAmp = MOBILE ? 2 : ((Q === 'low') ? 6 : 10);
+	var wireY  = MOBILE ? 36 : ((TIZEN || TV) ? 36 : 72);
+	var sagAmp = MOBILE ? 2  : ((TIZEN || TV) ? ((Q === 'low') ? 3 : 4) : ((Q === 'low') ? 6 : 10));
 
       ctx.save();
       ctx.lineWidth = MOBILE ? 1.5 : 2;
@@ -740,7 +740,8 @@ function drawBulb(b, w, now) {
 
   var sag = Math.sin(b.t * Math.PI) * b.sagAmp;
   var wireY = b.wireY + sag;
-  var y = wireY + b.hang + (MOBILE ? (b.size * 2.0) : 0);
+  var offset = MOBILE ? (b.size * 2.0) : ((TIZEN || TV) ? (b.size * 1.9) : (b.size * 1.6));
+  var y = wireY + b.hang + offset;
 
   var local = (now + b.delay) % b.period;
   var p = local / b.period;
