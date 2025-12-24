@@ -126,12 +126,12 @@
 
         var menuItems = [
             { 
-                title: Lampa.Lang.get('network_popular'), // Популярні / Popular / Популярные
+                title: Lampa.Lang.translate('network_popular'), // Популярні / Popular / Популярные
                 sort: '', 
                 filter: { 'vote_count.gte': 10 } 
             },
             { 
-                title: Lampa.Lang.get('network_new'), // Нові / New / Новые
+                title: Lampa.Lang.translate('network_new'), // Нові / New / Новые
                 sort: dateField + '.desc', 
                 filter: { 
                     'vote_count.gte': 10
