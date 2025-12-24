@@ -20,7 +20,8 @@
         'https://mastermagic98.github.io/interface/animations.js',  
         'https://mastermagic98.github.io/interface/incardtemplate.js',  
         'https://mastermagic98.github.io/interface/fix_lang.js',
-        'https://mastermagic98.github.io/interface/bigbuttons.js'
+        'https://mastermagic98.github.io/interface/bigbuttons.js',
+        'https://mastermagic98.github.io/interface/studios.js'
     ];  
   
     // Асинхронне підключення модулів  
