@@ -147,12 +147,6 @@
             items: menuItems,
             onBack: function() {
                 Lampa.Controller.toggle(controller);
-                if (element) {
-                    Lampa.Controller.collectionFocus(
-                        element, 
-                        Lampa.Activity.active().activity.render()
-                    );
-                }
             },
             onSelect: function(action) {
                 var filter = { 'vote_count.gte': action.filter['vote_count.gte'] };
@@ -173,6 +167,12 @@
                 });
             }
         });
+
+        // Фокус на кнопку після закриття меню (виправлення для нових версій Lampa v3+)
+        // Focus back on the button after menu close (fix for newer Lampa v3+ versions)
+        if (element) {
+            Lampa.Controller.collectionFocus(element, Lampa.Activity.active().activity.render());
+        }
     }
 
     // Додавання кнопки студії/мережі
