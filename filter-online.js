@@ -10,7 +10,7 @@
 
   var ID = 'prestige-filter';
   var NAME = 'Prestige Filter';
-  var KEYWORDS = ['dolbyvision','украинский','грузинский','ukr','белорусский','казахский','чистый звук','mvo ua','+ua','Telesync','TS-AVC','-LQ','Camrip']; // можно добавить свои: ['дубляж','трейлер','реклама']
+  var KEYWORDS = ['dolbyvision','русский','грузинский','rus','белорусский','казахский','чистый звук','mvo ru','+ru','Telesync','TS-AVC','-LQ','Camrip']; // можно добавить свои: ['дубляж','трейлер','реклама']
 
   function lower(s){ return String(s || '').toLowerCase(); }
 
