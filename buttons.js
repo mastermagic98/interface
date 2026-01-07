@@ -5,12 +5,11 @@
 
     var EXCLUDED_CLASSES = ['button--play', 'button--edit-order'];
 
-    // Функція для отримання перекладу
+    // Функція для отримання перекладу (префікс точно відповідає тому, що бачить Lampa)
     function t(key) {
-        return Lampa.Lang.translate('custom_interface_plugin_' + key);
+        return Lampa.Utils.lang('custom_interface_plugin_' + key) || key;
     }
 
-    // Групи кнопок з локалізованими мітками
     var DEFAULT_GROUPS = [
         { name: 'online', patterns: ['online', 'lampac', 'modss', 'showy'], label: t('online') },
         { name: 'torrent', patterns: ['torrent'], label: t('torrent') },
@@ -26,60 +25,82 @@
     var allButtonsOriginal = [];
     var currentContainer = null;
 
-    // Локалізація — усі ключі з префіксом custom_interface_plugin_
+    // Локалізація з точними ключами, які відображаються в інтерфейсі
     Lampa.Lang.add({
-        custom_interface_plugin: {
-            uk: {
-                online: 'Онлайн',
-                torrent: 'Торенти',
-                trailer: 'Трейлери',
-                favorite: 'Обране',
-                subscribe: 'Підписка',
-                book: 'Закладки',
-                reaction: 'Реакції',
-                button_unknown: 'Кнопка',
-                button_order: 'Порядок кнопок',
-                button_view: 'Вигляд кнопок',
-                standard: 'Стандартний',
-                icons_only: 'Тільки іконки',
-                with_text: 'Завжди з текстом',
-                reset_default: 'Скинути за замовчуванням',
-                button_editor: 'Редактор кнопок'
-            },
-            ru: {
-                online: 'Онлайн',
-                torrent: 'Торренты',
-                trailer: 'Трейлеры',
-                favorite: 'Избранное',
-                subscribe: 'Подписка',
-                book: 'Закладки',
-                reaction: 'Реакции',
-                button_unknown: 'Кнопка',
-                button_order: 'Порядок кнопок',
-                button_view: 'Вид кнопок',
-                standard: 'Стандартный',
-                icons_only: 'Только иконки',
-                with_text: 'С текстом',
-                reset_default: 'Сбросить по умолчанию',
-                button_editor: 'Редактор кнопок'
-            },
-            en: {
-                online: 'Online',
-                torrent: 'Torrents',
-                trailer: 'Trailers',
-                favorite: 'Favorites',
-                subscribe: 'Subscriptions',
-                book: 'Bookmarks',
-                reaction: 'Reactions',
-                button_unknown: 'Button',
-                button_order: 'Buttons order',
-                button_view: 'Buttons view',
-                standard: 'Default',
-                icons_only: 'Icons only',
-                with_text: 'Always text',
-                reset_default: 'Reset to default',
-                button_editor: 'Buttons editor'
-            }
+        custom_interface_plugin_button_order: {
+            uk: 'Порядок кнопок',
+            ru: 'Порядок кнопок',
+            en: 'Buttons order'
+        },
+        custom_interface_plugin_button_view: {
+            uk: 'Вигляд кнопок',
+            ru: 'Вид кнопок',
+            en: 'Buttons view'
+        },
+        custom_interface_plugin_standard: {
+            uk: 'Стандартний',
+            ru: 'Стандартный',
+            en: 'Default'
+        },
+        custom_interface_plugin_icons_only: {
+            uk: 'Тільки іконки',
+            ru: 'Только иконки',
+            en: 'Icons only'
+        },
+        custom_interface_plugin_with_text: {
+            uk: 'Завжди з текстом',
+            ru: 'С текстом',
+            en: 'Always text'
+        },
+        custom_interface_plugin_reset_default: {
+            uk: 'Скинути за замовчуванням',
+            ru: 'Сбросить по умолчанию',
+            en: 'Reset to default'
+        },
+        custom_interface_plugin_button_editor: {
+            uk: 'Редактор кнопок',
+            ru: 'Редактор кнопок',
+            en: 'Buttons editor'
+        },
+        custom_interface_plugin_online: {
+            uk: 'Онлайн',
+            ru: 'Онлайн',
+            en: 'Online'
+        },
+        custom_interface_plugin_torrent: {
+            uk: 'Торенти',
+            ru: 'Торренты',
+            en: 'Torrents'
+        },
+        custom_interface_plugin_trailer: {
+            uk: 'Трейлери',
+            ru: 'Трейлеры',
+            en: 'Trailers'
+        },
+        custom_interface_plugin_favorite: {
+            uk: 'Обране',
+            ru: 'Избранное',
+            en: 'Favorites'
+        },
+        custom_interface_plugin_subscribe: {
+            uk: 'Підписка',
+            ru: 'Подписка',
+            en: 'Subscriptions'
+        },
+        custom_interface_plugin_book: {
+            uk: 'Закладки',
+            ru: 'Закладки',
+            en: 'Bookmarks'
+        },
+        custom_interface_plugin_reaction: {
+            uk: 'Реакції',
+            ru: 'Реакции',
+            en: 'Reactions'
+        },
+        custom_interface_plugin_button_unknown: {
+            uk: 'Кнопка',
+            ru: 'Кнопка',
+            en: 'Button'
         }
     });
 
