@@ -57,9 +57,9 @@
             en: 'Reset to default'
         },
         custom_interface_plugin_button_editor: {
-            uk: 'Редактор кнопок',
-            ru: 'Редактор кнопок',
-            en: 'Buttons editor'
+            uk: 'Показати редактор кнопок',
+            ru: 'Показать редактор кнопок',
+            en: 'Show buttons editor'
         },
         custom_interface_plugin_options: {
             uk: 'Опції',
@@ -105,6 +105,31 @@
             uk: 'Кнопка',
             ru: 'Кнопка',
             en: 'Button'
+        },
+        button_text_mode_name: {
+            uk: 'Текст на кнопках',
+            ru: 'Текст на кнопках',
+            en: 'Button text mode'
+        },
+        button_text_mode_default: {
+            uk: 'Стандартний',
+            ru: 'Стандартный',
+            en: 'Default'
+        },
+        button_text_mode_show: {
+            uk: 'Завжди показувати',
+            ru: 'Всегда показывать',
+            en: 'Always show'
+        },
+        button_text_mode_hide: {
+            uk: 'Завжди приховувати',
+            ru: 'Всегда скрывать',
+            en: 'Always hide'
+        },
+        button_text_mode_desc: {
+            uk: 'Керування відображенням тексту на головних кнопках',
+            ru: 'Управление отображением текста на главных кнопках',
+            en: 'Control text display on main buttons'
         }
     });
 
@@ -143,7 +168,6 @@
         if (classes.indexOf('showy') !== -1 || text.indexOf('Showy') !== -1) {
             return 'showy_online_button';
         }
-        // Спеціальна обробка для кнопки Options (три крапки)
         if (classes.indexOf('button--options') !== -1) {
             return 'button--options';
         }
@@ -197,7 +221,6 @@
                     svgElement.replaceWith(LAMPAC_ICON);
                 }
             }
-            // Додаємо текст "Опції" до кнопки з трьома крапками
             if ($btn.hasClass('button--options') && $btn.find('span').length === 0) {
                 $btn.append('<span>' + t('custom_interface_plugin_options') + '</span>');
             }
@@ -290,9 +313,8 @@
         btn.on('hover:enter', function() {
             openEditDialog();
         });
-        if (Lampa.Storage.get('buttons_editor_enabled') === false) {
-            btn.hide();
-        }
+        var enabled = Lampa.Storage.get('buttons_editor_enabled', true);
+        btn.toggle(enabled);
         return btn;
     }
 
@@ -360,7 +382,6 @@
         var text = btn.find('span').text().trim();
         var classes = btn.attr('class') || '';
         var subtitle = btn.attr('data-subtitle') || '';
-        // Якщо це кнопка Options — повертаємо перекладений текст
         if (classes.indexOf('button--options') !== -1) {
             return t('custom_interface_plugin_options');
         }
@@ -436,8 +457,8 @@
                 var target = currentContainer.find('.full-start-new__buttons');
                 if (target.length) {
                     target.removeClass('icons-only always-text');
-                    if (currentMode === 'icons') target.addClass('icons-only');
-                    if (currentMode === 'always') target.addClass('always-text');
+                    if (currentMode === 'icons') targetContainer.addClass('icons-only');
+                    if (currentMode === 'always') targetContainer.addClass('always-text');
                 }
             }
         });
@@ -675,18 +696,38 @@
 
     if (Lampa.SettingsApi) {
         try {
+            // Новий параметр для режиму тексту на кнопках у розділі interface_customization
             Lampa.SettingsApi.addParam({
-                component: 'interface',
+                component: 'interface_customization',
+                param: {
+                    name: 'button_text_mode',
+                    type: 'select',
+                    values: {
+                        'default': Lampa.Lang.translate('button_text_mode_default'),
+                        'show': Lampa.Lang.translate('button_text_mode_show'),
+                        'hide': Lampa.Lang.translate('button_text_mode_hide')
+                    },
+                    default: 'default'
+                },
+                field: {
+                    name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:10px;flex-shrink:0;min-width:32px;min-height:32px;max-width:32px;max-height:32px"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 9l-3 .54L5 6.5L10.73.79a1 1 0 0 1 1.42 0l1.06 1.06a1 1 0 0 1 0 1.42Z"/><path d="M12 9.5v3a1 1 0 0 1-1 1H1.5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/></g></svg>' + Lampa.Lang.translate('button_text_mode_name') + '</div>',
+                    description: Lampa.Lang.translate('button_text_mode_desc')
+                },
+                onChange: function (value) {
+                    Lampa.Storage.set('button_text_mode', value);
+                    // Тут можна додати логіку застосування режиму, якщо потрібно
+                }
+            });
+
+            // Параметр редактора кнопок тепер у розділі interface_customization з новою назвою
+            Lampa.SettingsApi.addParam({
+                component: 'interface_customization',
                 param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
                 field: { name: t('custom_interface_plugin_button_editor') },
                 onChange: function(value) {
+                    Lampa.Storage.set('buttons_editor_enabled', value);
                     setTimeout(function() {
-                        var currentValue = Lampa.Storage.get('buttons_editor_enabled', true);
-                        if (currentValue) {
-                            $('.button--edit-order').show();
-                        } else {
-                            $('.button--edit-order').hide();
-                        }
+                        $('.button--edit-order').toggle(value);
                     }, 100);
                 },
                 onRender: function(element) {
