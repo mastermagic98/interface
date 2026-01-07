@@ -5,7 +5,6 @@
 
     var EXCLUDED_CLASSES = ['button--play', 'button--edit-order'];
 
-    // Функція перекладу з fallback на ключ (щоб уникнути помилок)
     function t(key) {
         var translated = Lampa.Lang.translate(key);
         return translated && translated !== key ? translated : key.replace('custom_interface_plugin_', '');
@@ -26,128 +25,46 @@
     var allButtonsOriginal = [];
     var currentContainer = null;
 
-    // Реєстрація перекладів з точними ключами, які використовує Lampa
     Lampa.Lang.add({
-        custom_interface_plugin_button_order: {
-            uk: 'Порядок кнопок',
-            ru: 'Порядок кнопок',
-            en: 'Buttons order'
-        },
-        custom_interface_plugin_button_view: {
-            uk: 'Вигляд кнопок',
-            ru: 'Вид кнопок',
-            en: 'Buttons view'
-        },
-        custom_interface_plugin_standard: {
-            uk: 'Стандартний',
-            ru: 'Стандартный',
-            en: 'Default'
-        },
-        custom_interface_plugin_icons_only: {
-            uk: 'Тільки іконки',
-            ru: 'Только иконки',
-            en: 'Icons only'
-        },
-        custom_interface_plugin_with_text: {
-            uk: 'Завжди з текстом',
-            ru: 'С текстом',
-            en: 'Always text'
-        },
-        custom_interface_plugin_reset_default: {
-            uk: 'Скинути за замовчуванням',
-            ru: 'Сбросить по умолчанию',
-            en: 'Reset to default'
-        },
-        custom_interface_plugin_button_editor: {
-            uk: 'Редактор кнопок',
-            ru: 'Редактор кнопок',
-            en: 'Buttons editor'
-        },
-        custom_interface_plugin_online: {
-            uk: 'Онлайн',
-            ru: 'Онлайн',
-            en: 'Online'
-        },
-        custom_interface_plugin_torrent: {
-            uk: 'Торенти',
-            ru: 'Торренты',
-            en: 'Torrents'
-        },
-        custom_interface_plugin_trailer: {
-            uk: 'Трейлери',
-            ru: 'Трейлеры',
-            en: 'Trailers'
-        },
-        custom_interface_plugin_favorite: {
-            uk: 'Обране',
-            ru: 'Избранное',
-            en: 'Favorites'
-        },
-        custom_interface_plugin_subscribe: {
-            uk: 'Підписка',
-            ru: 'Подписка',
-            en: 'Subscriptions'
-        },
-        custom_interface_plugin_book: {
-            uk: 'Закладки',
-            ru: 'Закладки',
-            en: 'Bookmarks'
-        },
-        custom_interface_plugin_reaction: {
-            uk: 'Реакції',
-            ru: 'Реакции',
-            en: 'Reactions'
-        },
-        custom_interface_plugin_button_unknown: {
-            uk: 'Кнопка',
-            ru: 'Кнопка',
-            en: 'Button'
-        }
+        custom_interface_plugin_button_order: { uk: 'Порядок кнопок', ru: 'Порядок кнопок', en: 'Buttons order' },
+        custom_interface_plugin_button_view: { uk: 'Вигляд кнопок', ru: 'Вид кнопок', en: 'Buttons view' },
+        custom_interface_plugin_standard: { uk: 'Стандартний', ru: 'Стандартный', en: 'Default' },
+        custom_interface_plugin_icons_only: { uk: 'Тільки іконки', ru: 'Только иконки', en: 'Icons only' },
+        custom_interface_plugin_with_text: { uk: 'Завжди з текстом', ru: 'С текстом', en: 'Always text' },
+        custom_interface_plugin_reset_default: { uk: 'Скинути за замовчуванням', ru: 'Сбросить по умолчанию', en: 'Reset to default' },
+        custom_interface_plugin_button_editor: { uk: 'Редактор кнопок', ru: 'Редактор кнопок', en: 'Buttons editor' },
+        custom_interface_plugin_online: { uk: 'Онлайн', ru: 'Онлайн', en: 'Online' },
+        custom_interface_plugin_torrent: { uk: 'Торенти', ru: 'Торренты', en: 'Torrents' },
+        custom_interface_plugin_trailer: { uk: 'Трейлери', ru: 'Трейлеры', en: 'Trailers' },
+        custom_interface_plugin_favorite: { uk: 'Обране', ru: 'Избранное', en: 'Favorites' },
+        custom_interface_plugin_subscribe: { uk: 'Підписка', ru: 'Подписка', en: 'Subscriptions' },
+        custom_interface_plugin_book: { uk: 'Закладки', ru: 'Закладки', en: 'Bookmarks' },
+        custom_interface_plugin_reaction: { uk: 'Реакції', ru: 'Реакции', en: 'Reactions' },
+        custom_interface_plugin_button_unknown: { uk: 'Кнопка', ru: 'Кнопка', en: 'Button' }
     });
 
     function findButton(btnId) {
         var btn = allButtonsOriginal.find(function(b) { return getButtonId(b) === btnId; });
-        if (!btn) {
-            btn = allButtonsCache.find(function(b) { return getButtonId(b) === btnId; });
-        }
+        if (!btn) btn = allButtonsCache.find(function(b) { return getButtonId(b) === btnId; });
         return btn || null;
     }
 
-    function getCustomOrder() {
-        return Lampa.Storage.get('button_custom_order', []) || [];
-    }
-
-    function setCustomOrder(order) {
-        Lampa.Storage.set('button_custom_order', order || []);
-    }
-
-    function getHiddenButtons() {
-        return Lampa.Storage.get('button_hidden', []) || [];
-    }
-
-    function setHiddenButtons(hidden) {
-        Lampa.Storage.set('button_hidden', hidden || []);
-    }
+    function getCustomOrder() { return Lampa.Storage.get('button_custom_order', []) || []; }
+    function setCustomOrder(order) { Lampa.Storage.set('button_custom_order', order || []); }
+    function getHiddenButtons() { return Lampa.Storage.get('button_hidden', []) || []; }
+    function setHiddenButtons(hidden) { Lampa.Storage.set('button_hidden', hidden || []); }
 
     function getButtonId(button) {
         if (!button || !button.attr) return 'unknown';
         var classes = button.attr('class') || '';
         var text = button.find('span').text().trim().replace(/\s+/g, '_');
         var subtitle = button.attr('data-subtitle') || '';
-        if (classes.indexOf('modss') !== -1 || text.indexOf('MODS') !== -1 || text.indexOf('MOD') !== -1) {
-            return 'modss_online_button';
-        }
-        if (classes.indexOf('showy') !== -1 || text.indexOf('Showy') !== -1) {
-            return 'showy_online_button';
-        }
+        if (classes.indexOf('modss') !== -1 || text.indexOf('MODS') !== -1 || text.indexOf('MOD') !== -1) return 'modss_online_button';
+        if (classes.indexOf('showy') !== -1 || text.indexOf('Showy') !== -1) return 'showy_online_button';
         var viewClasses = classes.split(' ').filter(function(c) { return c.indexOf('view--') === 0 || c.indexOf('button--') === 0; }).join('_');
-        if (!viewClasses && !text) {
-            return 'button_unknown';
-        }
+        if (!viewClasses && !text) return 'button_unknown';
         var id = viewClasses + '_' + text;
-        if (subtitle) {
-            id = id + '_' + subtitle.replace(/\s+/g, '_').substring(0, 30);
-        }
+        if (subtitle) id += '_' + subtitle.replace(/\s+/g, '_').substring(0, 30);
         return id;
     }
 
@@ -157,9 +74,7 @@
         for (var i = 0; i < DEFAULT_GROUPS.length; i++) {
             var group = DEFAULT_GROUPS[i];
             for (var j = 0; j < group.patterns.length; j++) {
-                if (classes.indexOf(group.patterns[j]) !== -1) {
-                    return group.name;
-                }
+                if (classes.indexOf(group.patterns[j]) !== -1) return group.name;
             }
         }
         return 'other';
@@ -169,9 +84,7 @@
         if (!button) return true;
         var classes = button.attr('class') || '';
         for (var i = 0; i < EXCLUDED_CLASSES.length; i++) {
-            if (classes.indexOf(EXCLUDED_CLASSES[i]) !== -1) {
-                return true;
-            }
+            if (classes.indexOf(EXCLUDED_CLASSES[i]) !== -1) return true;
         }
         return false;
     }
@@ -186,15 +99,10 @@
             var type = getButtonType($btn);
             if (type === 'online' && $btn.hasClass('lampac--button') && !$btn.hasClass('modss--button') && !$btn.hasClass('showy--button')) {
                 var svgElement = $btn.find('svg').first();
-                if (svgElement.length && !svgElement.hasClass('modss-online-icon')) {
-                    svgElement.replaceWith(LAMPAC_ICON);
-                }
+                if (svgElement.length && !svgElement.hasClass('modss-online-icon')) svgElement.replaceWith(LAMPAC_ICON);
             }
-            if (categories[type]) {
-                categories[type].push($btn);
-            } else {
-                categories.other.push($btn);
-            }
+            if (categories[type]) categories[type].push($btn);
+            else categories.other.push($btn);
         });
         return categories;
     }
@@ -202,19 +110,14 @@
     function sortByCustomOrder(buttons) {
         if (!buttons || !Array.isArray(buttons)) return [];
         var customOrder = getCustomOrder();
-        var priority = [];
-        var regular = [];
+        var priority = [], regular = [];
         buttons.forEach(function(btn) {
             var id = getButtonId(btn);
-            if (id === 'modss_online_button' || id === 'showy_online_button') {
-                priority.push(btn);
-            } else {
-                regular.push(btn);
-            }
+            if (id === 'modss_online_button' || id === 'showy_online_button') priority.push(btn);
+            else regular.push(btn);
         });
         priority.sort(function(a, b) {
-            var idA = getButtonId(a);
-            var idB = getButtonId(b);
+            var idA = getButtonId(a), idB = getButtonId(b);
             if (idA === 'modss_online_button') return -1;
             if (idB === 'modss_online_button') return 1;
             if (idA === 'showy_online_button') return -1;
@@ -224,18 +127,14 @@
         if (!customOrder.length) {
             regular.sort(function(a, b) {
                 var typeOrder = ['online', 'torrent', 'trailer', 'favorite', 'subscribe', 'book', 'reaction', 'other'];
-                var typeA = getButtonType(a);
-                var typeB = getButtonType(b);
-                var indexA = typeOrder.indexOf(typeA);
-                var indexB = typeOrder.indexOf(typeB);
-                if (indexA === -1) indexA = 999;
-                if (indexB === -1) indexB = 999;
+                var typeA = getButtonType(a), typeB = getButtonType(b);
+                var indexA = typeOrder.indexOf(typeA); if (indexA === -1) indexA = 999;
+                var indexB = typeOrder.indexOf(typeB); if (indexB === -1) indexB = 999;
                 return indexA - indexB;
             });
             return priority.concat(regular);
         }
-        var sorted = [];
-        var remaining = regular.slice();
+        var sorted = [], remaining = regular.slice();
         customOrder.forEach(function(id) {
             for (var i = 0; i < remaining.length; i++) {
                 if (getButtonId(remaining[i]) === id) {
@@ -252,23 +151,14 @@
         if (!buttons) return;
         var hidden = getHiddenButtons();
         buttons.forEach(function(btn) {
-            if (btn) {
-                var id = getButtonId(btn);
-                btn.toggleClass('hidden', hidden.indexOf(id) !== -1);
-            }
+            if (btn) btn.toggleClass('hidden', hidden.indexOf(getButtonId(btn)) !== -1);
         });
     }
 
     function applyButtonAnimation(buttons) {
         if (!buttons) return;
         buttons.forEach(function(btn, index) {
-            if (btn) {
-                btn.css({
-                    'opacity': '0',
-                    'animation': 'button-fade-in 0.4s ease forwards',
-                    'animation-delay': (index * 0.08) + 's'
-                });
-            }
+            if (btn) btn.css({ 'opacity': '0', 'animation': 'button-fade-in 0.4s ease forwards', 'animation-delay': (index * 0.08) + 's' });
         });
     }
 
@@ -276,42 +166,26 @@
         var btn = $('<div class="full-start__button selector button--edit-order" style="order: 9999;">' +
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 29" fill="none"><use xlink:href="#sprite-edit"></use></svg>' +
             '</div>');
-        btn.on('hover:enter', function() {
-            openEditDialog();
-        });
-        if (Lampa.Storage.get('buttons_editor_enabled') === false) {
-            btn.hide();
-        }
+        btn.on('hover:enter', openEditDialog);
+        if (Lampa.Storage.get('buttons_editor_enabled') === false) btn.hide();
         return btn;
     }
 
     function saveOrder() {
         var order = [];
-        if (currentButtons) {
-            currentButtons.forEach(function(btn) {
-                if (btn) order.push(getButtonId(btn));
-            });
-        }
+        if (currentButtons) currentButtons.forEach(function(btn) { if (btn) order.push(getButtonId(btn)); });
         setCustomOrder(order);
     }
 
     function applyChanges() {
         if (!currentContainer) return;
         var categories = categorizeButtons(currentContainer);
-        var allButtons = []
-            .concat(categories.online || [])
-            .concat(categories.torrent || [])
-            .concat(categories.trailer || [])
-            .concat(categories.favorite || [])
-            .concat(categories.subscribe || [])
-            .concat(categories.book || [])
-            .concat(categories.reaction || [])
-            .concat(categories.other || []);
+        var allButtons = [].concat(categories.online || [], categories.torrent || [], categories.trailer || [], categories.favorite || [], categories.subscribe || [], categories.book || [], categories.reaction || [], categories.other || []);
         allButtons = sortByCustomOrder(allButtons);
         allButtonsCache = allButtons;
         currentButtons = allButtons;
         var targetContainer = currentContainer.find('.full-start-new__buttons');
-        if (!targetContainer || !targetContainer.length) return;
+        if (!targetContainer.length) return;
         targetContainer.find('.full-start__button').not('.button--edit-order').detach();
         var visibleButtons = [];
         currentButtons.forEach(function(btn) {
@@ -322,27 +196,17 @@
         });
         applyButtonAnimation(visibleButtons);
         var editBtn = targetContainer.find('.button--edit-order');
-        if (editBtn.length) {
-            editBtn.detach();
-            targetContainer.append(editBtn);
-        }
+        if (editBtn.length) { editBtn.detach(); targetContainer.append(editBtn); }
         applyHiddenButtons(currentButtons);
         var viewmode = Lampa.Storage.get('buttons_viewmode', 'default');
         targetContainer.removeClass('icons-only always-text');
         if (viewmode === 'icons') targetContainer.addClass('icons-only');
         if (viewmode === 'always') targetContainer.addClass('always-text');
         saveOrder();
-        setTimeout(function() {
-            if (currentContainer) {
-                setupButtonNavigation(currentContainer);
-            }
-        }, 100);
+        setTimeout(function() { if (currentContainer) setupButtonNavigation(currentContainer); }, 100);
     }
 
-    function capitalize(str) {
-        if (!str) return str;
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    function capitalize(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; }
 
     function getButtonDisplayName(btn, allButtons) {
         if (!btn) return '';
@@ -351,32 +215,15 @@
         var subtitle = btn.attr('data-subtitle') || '';
         if (!text) {
             var viewClass = classes.split(' ').find(function(c) { return c.indexOf('view--') === 0 || c.indexOf('button--') === 0; });
-            if (viewClass) {
-                text = viewClass.replace('view--', '').replace('button--', '').replace(/_/g, ' ');
-                text = capitalize(text);
-            } else {
-                text = t('custom_interface_plugin_button_unknown');
-            }
+            text = viewClass ? capitalize(viewClass.replace('view--', '').replace('button--', '').replace(/_/g, ' ')) : t('custom_interface_plugin_button_unknown');
             return text;
         }
         var sameTextCount = 0;
-        if (allButtons) {
-            allButtons.forEach(function(otherBtn) {
-                if (otherBtn && otherBtn.find('span').text().trim() === text) {
-                    sameTextCount++;
-                }
-            });
-        }
+        if (allButtons) allButtons.forEach(function(otherBtn) { if (otherBtn && otherBtn.find('span').text().trim() === text) sameTextCount++; });
         if (sameTextCount > 1) {
-            if (subtitle) {
-                return text + ' <span style="opacity:0.5">(' + subtitle.substring(0, 30) + ')</span>';
-            }
+            if (subtitle) return text + ' <span style="opacity:0.5">(' + subtitle.substring(0, 30) + ')</span>';
             var viewClass = classes.split(' ').find(function(c) { return c.indexOf('view--') === 0; });
-            if (viewClass) {
-                var identifier = viewClass.replace('view--', '').replace(/_/g, ' ');
-                identifier = capitalize(identifier);
-                return text + ' <span style="opacity:0.5">(' + identifier + ')</span>';
-            }
+            if (viewClass) return text + ' <span style="opacity:0.5">(' + capitalize(viewClass.replace('view--', '').replace(/_/g, ' ')) + ')</span>';
         }
         return text;
     }
@@ -384,15 +231,7 @@
     function openEditDialog() {
         if (currentContainer) {
             var categories = categorizeButtons(currentContainer);
-            var allButtons = []
-                .concat(categories.online || [])
-                .concat(categories.torrent || [])
-                .concat(categories.trailer || [])
-                .concat(categories.favorite || [])
-                .concat(categories.subscribe || [])
-                .concat(categories.book || [])
-                .concat(categories.reaction || [])
-                .concat(categories.other || []);
+            var allButtons = [].concat(categories.online || [], categories.torrent || [], categories.trailer || [], categories.favorite || [], categories.subscribe || [], categories.book || [], categories.reaction || [], categories.other || []);
             allButtons = sortByCustomOrder(allButtons);
             allButtonsCache = allButtons;
             currentButtons = allButtons;
@@ -403,7 +242,7 @@
         var currentMode = Lampa.Storage.get('buttons_viewmode', 'default');
 
         var modeBtn = $('<div class="selector viewmode-switch">' +
-            '<div style="text-align: center; padding: 1em;">' + t('custom_interface_plugin_button_view') + ': ' + 
+            '<div style="text-align: center; padding: 1em;">' + t('custom_interface_plugin_button_view') + ': ' +
             (currentMode === 'default' ? t('custom_interface_plugin_standard') :
              currentMode === 'icons' ? t('custom_interface_plugin_icons_only') :
              t('custom_interface_plugin_with_text')) + '</div>' +
@@ -413,7 +252,7 @@
             idx = (idx + 1) % modes.length;
             currentMode = modes[idx];
             Lampa.Storage.set('buttons_viewmode', currentMode);
-            $(this).find('div').text(t('custom_interface_plugin_button_view') + ': ' + 
+            $(this).find('div').text(t('custom_interface_plugin_button_view') + ': ' +
                 (currentMode === 'default' ? t('custom_interface_plugin_standard') :
                  currentMode === 'icons' ? t('custom_interface_plugin_icons_only') :
                  t('custom_interface_plugin_with_text')));
@@ -458,15 +297,45 @@
             item.find('.menu-edit-list__icon').append(icon);
             item.data('button', btn);
             item.data('buttonId', btnId);
-            // решта обробників без змін...
+            item.find('.move-up').on('hover:enter', function() {
+                var prev = item.prev('.menu-edit-list__item');
+                if (prev.length) {
+                    item.insertBefore(prev);
+                    var btnIndex = currentButtons.indexOf(btn);
+                    if (btnIndex > 0) {
+                        currentButtons.splice(btnIndex, 1);
+                        currentButtons.splice(btnIndex - 1, 0, btn);
+                    }
+                    saveOrder();
+                }
+            });
+            item.find('.move-down').on('hover:enter', function() {
+                var next = item.next('.menu-edit-list__item');
+                if (next.length) {
+                    item.insertAfter(next);
+                    var btnIndex = currentButtons.indexOf(btn);
+                    if (btnIndex < currentButtons.length - 1) {
+                        currentButtons.splice(btnIndex, 1);
+                        currentButtons.splice(btnIndex + 1, 0, btn);
+                    }
+                    saveOrder();
+                }
+            });
+            item.find('.toggle').on('hover:enter', function() {
+                var isNowHidden = !item.hasClass('menu-edit-list__item-hidden');
+                item.toggleClass('menu-edit-list__item-hidden', isNowHidden);
+                btn.toggleClass('hidden', isNowHidden);
+                item.find('.dot').attr('opacity', isNowHidden ? '0' : '1');
+                var hiddenList = getHiddenButtons();
+                var index = hiddenList.indexOf(btnId);
+                if (isNowHidden && index === -1) hiddenList.push(btnId);
+                else if (!isNowHidden && index !== -1) hiddenList.splice(index, 1);
+                setHiddenButtons(hiddenList);
+            });
             return item;
         }
 
-        if (currentButtons) {
-            currentButtons.forEach(function(btn) {
-                list.append(createButtonItem(btn));
-            });
-        }
+        if (currentButtons) currentButtons.forEach(function(btn) { list.append(createButtonItem(btn)); });
 
         var resetBtn = $('<div class="selector folder-reset-button">' +
             '<div style="text-align: center; padding: 1em;">' + t('custom_interface_plugin_reset_default') + '</div>' +
@@ -476,12 +345,7 @@
             Lampa.Storage.set('button_hidden', []);
             Lampa.Storage.set('buttons_viewmode', 'default');
             Lampa.Modal.close();
-            setTimeout(function() {
-                if (currentContainer) {
-                    reorderButtons(currentContainer);
-                    refreshController();
-                }
-            }, 100);
+            setTimeout(function() { if (currentContainer) reorderButtons(currentContainer); refreshController(); }, 100);
         });
         list.append(resetBtn);
 
@@ -505,22 +369,10 @@
         currentContainer = container;
         container.find('.button--play, .button--edit-order').remove();
         var categories = categorizeButtons(container);
-        var allButtons = []
-            .concat(categories.online || [])
-            .concat(categories.torrent || [])
-            .concat(categories.trailer || [])
-            .concat(categories.favorite || [])
-            .concat(categories.subscribe || [])
-            .concat(categories.book || [])
-            .concat(categories.reaction || [])
-            .concat(categories.other || []);
+        var allButtons = [].concat(categories.online || [], categories.torrent || [], categories.trailer || [], categories.favorite || [], categories.subscribe || [], categories.book || [], categories.reaction || [], categories.other || []);
         allButtons = sortByCustomOrder(allButtons);
         allButtonsCache = allButtons;
-        if (allButtonsOriginal.length === 0) {
-            allButtons.forEach(function(btn) {
-                if (btn) allButtonsOriginal.push(btn.clone(true, true));
-            });
-        }
+        if (allButtonsOriginal.length === 0) allButtons.forEach(function(btn) { if (btn) allButtonsOriginal.push(btn.clone(true, true)); });
         currentButtons = allButtons;
         targetContainer.children().detach();
         var visibleButtons = [];
@@ -539,17 +391,13 @@
         if (viewmode === 'icons') targetContainer.addClass('icons-only');
         if (viewmode === 'always') targetContainer.addClass('always-text');
         applyButtonAnimation(visibleButtons);
-        setTimeout(function() {
-            setupButtonNavigation(container);
-        }, 100);
+        setTimeout(function() { setupButtonNavigation(container); }, 100);
         return true;
     }
 
     function setupButtonNavigation(container) {
         if (Lampa.Controller && typeof Lampa.Controller.toggle === 'function') {
-            try {
-                Lampa.Controller.toggle('full_start');
-            } catch (e) {}
+            try { Lampa.Controller.toggle('full_start'); } catch (e) {}
         }
     }
 
@@ -558,11 +406,7 @@
             setTimeout(function() {
                 try {
                     Lampa.Controller.toggle('full_start');
-                    if (currentContainer) {
-                        setTimeout(function() {
-                            setupButtonNavigation(currentContainer);
-                        }, 100);
-                    }
+                    if (currentContainer) setTimeout(function() { setupButtonNavigation(currentContainer); }, 100);
                 } catch (e) {}
             }, 50);
         }
@@ -575,13 +419,18 @@
             '.full-start__button.hidden { display: none !important; }' +
             '.full-start-new__buttons { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5em !important; }' +
             '.full-start-new__buttons.buttons-loading .full-start__button { visibility: hidden !important; }' +
-            '.folder-reset-button { background: rgba(200,100,100,0.3); margin-top: 1em; border-radius: 0.3em; }' +
-            '.folder-reset-button.focus { border: 3px solid rgba(255,255,255,0.8); }' +
+
+            /* Новий стиль для кнопки "Вигляд кнопок" */ +
+            '.viewmode-switch { background: white !important; color: black !important; margin: 0.5em 0 1em 0; border-radius: 0.3em; }' +
+            '.viewmode-switch.focus { background: black !important; color: white !important; border: 3px solid rgba(255,255,255,0.8); }' +
+
+            /* Новий стиль для кнопки "Скинути за замовчуванням" */ +
+            '.folder-reset-button { background: white !important; color: black !important; margin-top: 1em; border-radius: 0.3em; }' +
+            '.folder-reset-button.focus { background: black !important; color: white !important; border: 3px solid rgba(255,255,255,0.8); }' +
+
             '.menu-edit-list__toggle.focus { border: 2px solid rgba(255,255,255,0.8); border-radius: 0.3em; }' +
             '.full-start-new__buttons.icons-only .full-start__button span { display: none; }' +
             '.full-start-new__buttons.always-text .full-start__button span { display: block !important; }' +
-            '.viewmode-switch { background: rgba(100,100,255,0.3); margin: 0.5em 0 1em 0; border-radius: 0.3em; }' +
-            '.viewmode-switch.focus { border: 3px solid rgba(255,255,255,0.8); }' +
             '.menu-edit-list__item-hidden { opacity: 0.5; }' +
             '</style>');
         $('body').append(style);
@@ -591,45 +440,34 @@
             var container = e.object && e.object.activity ? e.object.activity.render() : null;
             if (!container) return;
             var targetContainer = container.find('.full-start-new__buttons');
-            if (targetContainer.length) {
-                targetContainer.addClass('buttons-loading');
-            }
+            if (targetContainer.length) targetContainer.addClass('buttons-loading');
             setTimeout(function() {
                 try {
                     if (!container.data('buttons-processed')) {
                         container.data('buttons-processed', true);
                         if (reorderButtons(container)) {
-                            if (targetContainer.length) {
-                                targetContainer.removeClass('buttons-loading');
-                            }
+                            if (targetContainer.length) targetContainer.removeClass('buttons-loading');
                             refreshController();
                         }
                     }
                 } catch (err) {
                     console.error('Buttons editor plugin error:', err);
-                    if (targetContainer.length) {
-                        targetContainer.removeClass('buttons-loading');
-                    }
+                    if (targetContainer.length) targetContainer.removeClass('buttons-loading');
                 }
             }, 400);
         });
     }
 
-    // Додаємо параметр в налаштування тільки якщо API доступний
     if (Lampa.SettingsApi) {
         try {
             Lampa.SettingsApi.addParam({
                 component: 'interface',
                 param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
                 field: { name: t('custom_interface_plugin_button_editor') },
-                onChange: function(value) {
+                onChange: function() {
                     setTimeout(function() {
                         var currentValue = Lampa.Storage.get('buttons_editor_enabled', true);
-                        if (currentValue) {
-                            $('.button--edit-order').show();
-                        } else {
-                            $('.button--edit-order').hide();
-                        }
+                        $('.button--edit-order').toggle(currentValue);
                     }, 100);
                 },
                 onRender: function(element) {
@@ -639,19 +477,10 @@
                     }, 0);
                 }
             });
-        } catch (e) {
-            console.error('SettingsApi error:', e);
-        }
+        } catch (e) { console.error('SettingsApi error:', e); }
     }
 
-    // Запуск ініціалізації
-    try {
-        init();
-    } catch (e) {
-        console.error('Plugin init error:', e);
-    }
+    try { init(); } catch (e) { console.error('Plugin init error:', e); }
 
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = {};
-    }
+    if (typeof module !== 'undefined' && module.exports) module.exports = {};
 })();
