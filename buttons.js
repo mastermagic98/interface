@@ -61,7 +61,7 @@
             ru: 'Редактор кнопок',
             en: 'Buttons editor'
         },
-        custom_interface_plugin_option: {
+        custom_interface_plugin_options: {
             uk: 'Опції',
             ru: 'Опции',
             en: 'Options'
@@ -143,6 +143,10 @@
         if (classes.indexOf('showy') !== -1 || text.indexOf('Showy') !== -1) {
             return 'showy_online_button';
         }
+        // Спеціальна обробка для кнопки Options (три крапки)
+        if (classes.indexOf('button--options') !== -1) {
+            return 'button--options';
+        }
         var viewClasses = classes.split(' ').filter(function(c) { return c.indexOf('view--') === 0 || c.indexOf('button--') === 0; }).join('_');
         if (!viewClasses && !text) {
             return 'button_unknown';
@@ -192,6 +196,10 @@
                 if (svgElement.length && !svgElement.hasClass('modss-online-icon')) {
                     svgElement.replaceWith(LAMPAC_ICON);
                 }
+            }
+            // Додаємо текст "Опції" до кнопки з трьома крапками
+            if ($btn.hasClass('button--options') && $btn.find('span').length === 0) {
+                $btn.append('<span>' + t('custom_interface_plugin_options') + '</span>');
             }
             if (categories[type]) {
                 categories[type].push($btn);
@@ -352,6 +360,10 @@
         var text = btn.find('span').text().trim();
         var classes = btn.attr('class') || '';
         var subtitle = btn.attr('data-subtitle') || '';
+        // Якщо це кнопка Options — повертаємо перекладений текст
+        if (classes.indexOf('button--options') !== -1) {
+            return t('custom_interface_plugin_options');
+        }
         if (!text) {
             var viewClass = classes.split(' ').find(function(c) { return c.indexOf('view--') === 0 || c.indexOf('button--') === 0; });
             if (viewClass) {
@@ -405,7 +417,6 @@
         var modes = ['default', 'icons', 'always'];
         var currentMode = Lampa.Storage.get('buttons_viewmode', 'default');
 
-        // Кнопка перемикання вигляду (тепер з білим фоном)
         var modeBtn = $('<div class="selector viewmode-switch">' +
             '<div style="text-align: center; padding: 1em;">' + t('custom_interface_plugin_button_view') + ': ' + 
             (currentMode === 'default' ? t('custom_interface_plugin_standard') :
@@ -515,7 +526,6 @@
             });
         }
 
-        // Кнопка скидання (тепер з білим фоном)
         var resetBtn = $('<div class="selector folder-reset-button">' +
             '<div style="text-align: center; padding: 1em;">' + t('custom_interface_plugin_reset_default') + '</div>' +
             '</div>');
