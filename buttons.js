@@ -5,14 +5,20 @@
 
     var EXCLUDED_CLASSES = ['button--play', 'button--edit-order'];
 
+    // Функція для отримання перекладу
+    function t(key) {
+        return Lampa.Lang.translate('buttons_editor_plugin_' + key);
+    }
+
+    // Групи кнопок з локалізованими мітками
     var DEFAULT_GROUPS = [
-        { name: 'online', patterns: ['online', 'lampac', 'modss', 'showy'], label: 'Онлайн' },
-        { name: 'torrent', patterns: ['torrent'], label: 'Торренты' },
-        { name: 'trailer', patterns: ['trailer', 'rutube'], label: 'Трейлеры' },
-        { name: 'favorite', patterns: ['favorite'], label: 'Избранное' },
-        { name: 'subscribe', patterns: ['subscribe'], label: 'Подписка' },
-        { name: 'book', patterns: ['book'], label: 'Закладки' },
-        { name: 'reaction', patterns: ['reaction'], label: 'Реакции' }
+        { name: 'online', patterns: ['online', 'lampac', 'modss', 'showy'], label: t('online') },
+        { name: 'torrent', patterns: ['torrent'], label: t('torrent') },
+        { name: 'trailer', patterns: ['trailer', 'rutube'], label: t('trailer') },
+        { name: 'favorite', patterns: ['favorite'], label: t('favorite') },
+        { name: 'subscribe', patterns: ['subscribe'], label: t('subscribe') },
+        { name: 'book', patterns: ['book'], label: t('book') },
+        { name: 'reaction', patterns: ['reaction'], label: t('reaction') }
     ];
 
     var currentButtons = [];
@@ -20,7 +26,7 @@
     var allButtonsOriginal = [];
     var currentContainer = null;
 
-    // Локалізація
+    // Локалізація (всі тексти плагіну)
     Lampa.Lang.add({
         buttons_editor_plugin: {
             uk: {
@@ -31,13 +37,14 @@
                 subscribe: 'Підписка',
                 book: 'Закладки',
                 reaction: 'Реакції',
+                other: 'Інше',
                 button_unknown: 'Кнопка',
                 buttons_order: 'Порядок кнопок',
                 buttons_view: 'Вигляд кнопок',
                 view_default: 'Стандартний',
                 view_icons: 'Тільки іконки',
                 view_always_text: 'Завжди з текстом',
-                reset_default: 'Скинути за замовчуванням',
+                reset_default: 'Скинути за замовкуванням',
                 editor_title: 'Редактор кнопок'
             },
             ru: {
@@ -48,6 +55,7 @@
                 subscribe: 'Подписка',
                 book: 'Закладки',
                 reaction: 'Реакции',
+                other: 'Другое',
                 button_unknown: 'Кнопка',
                 buttons_order: 'Порядок кнопок',
                 buttons_view: 'Вид кнопок',
@@ -65,6 +73,7 @@
                 subscribe: 'Subscriptions',
                 book: 'Bookmarks',
                 reaction: 'Reactions',
+                other: 'Other',
                 button_unknown: 'Button',
                 buttons_order: 'Buttons order',
                 buttons_view: 'Buttons view',
@@ -76,8 +85,6 @@
             }
         }
     });
-
-    var lang = Lampa.Lang.get('buttons_editor_plugin', {});
 
     function findButton(btnId) {
         var btn = allButtonsOriginal.find(function(b) { return getButtonId(b) === btnId; });
@@ -313,7 +320,7 @@
                 text = viewClass.replace('view--', '').replace('button--', '').replace(/_/g, ' ');
                 text = capitalize(text);
             } else {
-                text = lang.button_unknown || 'Кнопка';
+                text = t('button_unknown');
             }
             return text;
         }
@@ -359,20 +366,20 @@
         var currentMode = Lampa.Storage.get('buttons_viewmode', 'default');
 
         var modeBtn = $('<div class="selector viewmode-switch">' +
-            '<div style="text-align: center; padding: 1em;">' + (lang.buttons_view || 'Вид кнопок') + ': ' + 
-            (currentMode === 'default' ? (lang.view_default || 'Стандартный') :
-             currentMode === 'icons' ? (lang.view_icons || 'Только иконки') :
-             (lang.view_always_text || 'С текстом')) + '</div>' +
+            '<div style="text-align: center; padding: 1em;">' + t('buttons_view') + ': ' + 
+            (currentMode === 'default' ? t('view_default') :
+             currentMode === 'icons' ? t('view_icons') :
+             t('view_always_text')) + '</div>' +
             '</div>');
         modeBtn.on('hover:enter', function() {
             var idx = modes.indexOf(currentMode);
             idx = (idx + 1) % modes.length;
             currentMode = modes[idx];
             Lampa.Storage.set('buttons_viewmode', currentMode);
-            $(this).find('div').text((lang.buttons_view || 'Вид кнопок') + ': ' + 
-                (currentMode === 'default' ? (lang.view_default || 'Стандартный') :
-                 currentMode === 'icons' ? (lang.view_icons || 'Только иконки') :
-                 (lang.view_always_text || 'С текстом')));
+            $(this).find('div').text(t('buttons_view') + ': ' + 
+                (currentMode === 'default' ? t('view_default') :
+                 currentMode === 'icons' ? t('view_icons') :
+                 t('view_always_text')));
             if (currentContainer) {
                 var target = currentContainer.find('.full-start-new__buttons');
                 target.removeClass('icons-only always-text');
@@ -463,7 +470,7 @@
         });
 
         var resetBtn = $('<div class="selector folder-reset-button">' +
-            '<div style="text-align: center; padding: 1em;">' + (lang.reset_default || 'Сбросить по умолчанию') + '</div>' +
+            '<div style="text-align: center; padding: 1em;">' + t('reset_default') + '</div>' +
             '</div>');
         resetBtn.on('hover:enter', function() {
             Lampa.Storage.set('button_custom_order', []);
@@ -499,7 +506,7 @@
         list.append(resetBtn);
 
         Lampa.Modal.open({
-            title: lang.buttons_order || 'Порядок кнопок',
+            title: t('buttons_order'),
             html: list,
             size: 'small',
             scroll_to_center: true,
@@ -631,7 +638,7 @@
         Lampa.SettingsApi.addParam({
             component: 'interface',
             param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
-            field: { name: lang.editor_title || 'Редактор кнопок' },
+            field: { name: t('editor_title') },
             onChange: function(value) {
                 setTimeout(function() {
                     var currentValue = Lampa.Storage.get('buttons_editor_enabled', true);
