@@ -1,7 +1,7 @@
 (function() {
     'use strict';
      
-    // Додаємо переклади для плагіну
+    // Додаємо переклади для плагіну (доповнено відсутніми ключами)
     Lampa.Lang.add({
         custom_interface_plugin: {
             ru: {
