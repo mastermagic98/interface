@@ -7,7 +7,7 @@
 
     // Функція для отримання перекладу
     function t(key) {
-        return Lampa.Lang.translate('buttons_editor_plugin_' + key);
+        return Lampa.Lang.translate('custom_interface_plugin_' + key);
     }
 
     // Групи кнопок з локалізованими мітками
@@ -26,9 +26,9 @@
     var allButtonsOriginal = [];
     var currentContainer = null;
 
-    // Локалізація (всі тексти плагіну)
+    // Локалізація — усі ключі з префіксом custom_interface_plugin_
     Lampa.Lang.add({
-        buttons_editor_plugin: {
+        custom_interface_plugin: {
             uk: {
                 online: 'Онлайн',
                 torrent: 'Торенти',
@@ -37,15 +37,14 @@
                 subscribe: 'Підписка',
                 book: 'Закладки',
                 reaction: 'Реакції',
-                other: 'Інше',
                 button_unknown: 'Кнопка',
-                buttons_order: 'Порядок кнопок',
-                buttons_view: 'Вигляд кнопок',
-                view_default: 'Стандартний',
-                view_icons: 'Тільки іконки',
-                view_always_text: 'Завжди з текстом',
-                reset_default: 'Скинути за замовкуванням',
-                editor_title: 'Редактор кнопок'
+                button_order: 'Порядок кнопок',
+                button_view: 'Вигляд кнопок',
+                standard: 'Стандартний',
+                icons_only: 'Тільки іконки',
+                with_text: 'Завжди з текстом',
+                reset_default: 'Скинути за замовчуванням',
+                button_editor: 'Редактор кнопок'
             },
             ru: {
                 online: 'Онлайн',
@@ -55,15 +54,14 @@
                 subscribe: 'Подписка',
                 book: 'Закладки',
                 reaction: 'Реакции',
-                other: 'Другое',
                 button_unknown: 'Кнопка',
-                buttons_order: 'Порядок кнопок',
-                buttons_view: 'Вид кнопок',
-                view_default: 'Стандартный',
-                view_icons: 'Только иконки',
-                view_always_text: 'С текстом',
+                button_order: 'Порядок кнопок',
+                button_view: 'Вид кнопок',
+                standard: 'Стандартный',
+                icons_only: 'Только иконки',
+                with_text: 'С текстом',
                 reset_default: 'Сбросить по умолчанию',
-                editor_title: 'Редактор кнопок'
+                button_editor: 'Редактор кнопок'
             },
             en: {
                 online: 'Online',
@@ -73,15 +71,14 @@
                 subscribe: 'Subscriptions',
                 book: 'Bookmarks',
                 reaction: 'Reactions',
-                other: 'Other',
                 button_unknown: 'Button',
-                buttons_order: 'Buttons order',
-                buttons_view: 'Buttons view',
-                view_default: 'Default',
-                view_icons: 'Icons only',
-                view_always_text: 'Always text',
+                button_order: 'Buttons order',
+                button_view: 'Buttons view',
+                standard: 'Default',
+                icons_only: 'Icons only',
+                with_text: 'Always text',
                 reset_default: 'Reset to default',
-                editor_title: 'Buttons editor'
+                button_editor: 'Buttons editor'
             }
         }
     });
@@ -366,20 +363,20 @@
         var currentMode = Lampa.Storage.get('buttons_viewmode', 'default');
 
         var modeBtn = $('<div class="selector viewmode-switch">' +
-            '<div style="text-align: center; padding: 1em;">' + t('buttons_view') + ': ' + 
-            (currentMode === 'default' ? t('view_default') :
-             currentMode === 'icons' ? t('view_icons') :
-             t('view_always_text')) + '</div>' +
+            '<div style="text-align: center; padding: 1em;">' + t('button_view') + ': ' + 
+            (currentMode === 'default' ? t('standard') :
+             currentMode === 'icons' ? t('icons_only') :
+             t('with_text')) + '</div>' +
             '</div>');
         modeBtn.on('hover:enter', function() {
             var idx = modes.indexOf(currentMode);
             idx = (idx + 1) % modes.length;
             currentMode = modes[idx];
             Lampa.Storage.set('buttons_viewmode', currentMode);
-            $(this).find('div').text(t('buttons_view') + ': ' + 
-                (currentMode === 'default' ? t('view_default') :
-                 currentMode === 'icons' ? t('view_icons') :
-                 t('view_always_text')));
+            $(this).find('div').text(t('button_view') + ': ' + 
+                (currentMode === 'default' ? t('standard') :
+                 currentMode === 'icons' ? t('icons_only') :
+                 t('with_text')));
             if (currentContainer) {
                 var target = currentContainer.find('.full-start-new__buttons');
                 target.removeClass('icons-only always-text');
@@ -506,7 +503,7 @@
         list.append(resetBtn);
 
         Lampa.Modal.open({
-            title: t('buttons_order'),
+            title: t('button_order'),
             html: list,
             size: 'small',
             scroll_to_center: true,
@@ -638,7 +635,7 @@
         Lampa.SettingsApi.addParam({
             component: 'interface',
             param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
-            field: { name: t('editor_title') },
+            field: { name: t('button_editor') },
             onChange: function(value) {
                 setTimeout(function() {
                     var currentValue = Lampa.Storage.get('buttons_editor_enabled', true);
