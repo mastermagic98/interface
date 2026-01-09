@@ -680,7 +680,7 @@
                 component: 'interface_customization',
                 param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
                 field: {
-                    name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:10px;flex-shrink:0;min-width:32px;min-height:32px;max-width:32px;max-height:32px"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 9l-3 .54L5 6.5L10.73.79a1 1 0 0 1 1.42 0l1.06 1.06a1 1 0 0 1 0 1.42Z"/><path d="M12 9.5v3a1 1 0 0 1-1 1H1.5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/></g></svg>' + t('custom_interface_plugin_button_editor') + '</div>',
+                    name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:10px;flex-shrink:0;min-width:32px;min-height:32px;max-width:32px;max-height:32px"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 9-3 .54L5 6.5 10.73.79a1 1 0 0 1 1.42 0l1.06 1.06a1 1 0 0 1 0 1.42Z"/><path d="M12 9.5v3a1 1 0 0 1-1 1H1.5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/></g></svg>' + t('custom_interface_plugin_button_editor') + '</div>',
                     description: t('custom_interface_plugin_button_editor_desc')
                 },
                 onChange: function(value) {
