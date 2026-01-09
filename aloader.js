@@ -207,7 +207,7 @@
     }
 
     function aniLoad() {
-        var icon_plugin = '<svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
+        var icon_plugin = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px"><circle cx="16" cy="16" r="3"/><g><circle cx="8" cy="16" r="3"/><circle cx="24" cy="16" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 16 16;180 16 16;360 16 16" repeatCount="indefinite"/></g></svg>';
 
         if (Lampa.SettingsApi) {
             try {
