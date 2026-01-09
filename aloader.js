@@ -193,25 +193,26 @@
                 field: {  
                     name:
     '<div style="display:flex;align-items:center;">' +
-  '<svg xmlns="http://www.w3.org/2000/svg" ' +
-       'width="32" height="32" viewBox="0 0 32 32" fill="currentColor" ' +
-       'style="margin-right:10px;flex-shrink:0;min-width:32px;min-height:32px;max-width:32px;max-height:32px">' +
-    '<circle cx="16" cy="16" r="3"/>' +
-    '<g>' +
-      '<circle cx="8" cy="16" r="3"/>' +
-      '<circle cx="24" cy="16" r="3"/>' +
-      '<animateTransform ' +
-        'attributeName="transform" ' +
-        'type="rotate" ' +
-        'calcMode="spline" ' +
-        'dur="1s" ' +
-        'keySplines=".36,.6,.31,1;.36,.6,.31,1" ' +
-        'values="0 16 16;180 16 16;360 16 16" ' +
-        'repeatCount="indefinite"/>' +
-    '</g>' +
-  '</svg>' +
-  Lampa.Lang.translate('params_ani_name') +
-'</div>',  
+                        '<svg xmlns="http://www.w3.org/2000/svg"'+
+                        'viewBox="0 0 16 16"'+
+                        'fill="currentColor">'+
+                        '<!-- центральна точка -->'+
+                        '<circle cx="8" cy="8" r="1.5"/>'+
+                        '<!-- обертові -->'+
+                        '<g>'+
+                            '<circle cx="4" cy="8" r="1.5"/>'+
+                            '<circle cx="12" cy="8" r="1.5"/>'+
+                            '<animateTransform'+
+                                'attributeName="transform"'+
+                                'type="rotate"'+
+                                'from="0 8 8"'+
+                                'to="360 8 8"'+
+                                'dur="1s"'+
+                        'repeatCount="indefinite"/>'+
+                        '</g>'+
+                        '</svg>'+
+                        Lampa.Lang.translate('params_ani_name') +
+                        '</div>',  
                     description: Lampa.Lang.translate('params_ani_desc')  
                 },  
                 onChange: function (value) {  
