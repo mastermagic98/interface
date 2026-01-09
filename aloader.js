@@ -251,7 +251,7 @@
                         type: 'button'
                     },
                     field: {
-                        name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('ani_load_select')
+                        name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 32px; height: 32px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('ani_load_select')
                     },
                     onRender: function (item) {
                         item.toggle(Lampa.Storage.get('ani_active', false));
