@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    // Додаємо переклади для підказок та назв у меню
+    // Додаємо переклади для підказок
     Lampa.Lang.add({
         hints_torrents: {
             ru: "Видео не загружается или тормозит? Попробуйте выбрать другую раздачу.",
@@ -18,19 +18,29 @@
             en: "A film may appear in the catalog before it's available to watch.",
             uk: "Інформація про фільм може з’явитися раніше, ніж він стане доступним для перегляду."
         },
-        attention_warnings_title: {
-            ru: "Попередження про доступність відео",
-            en: "Video availability warnings",
-            uk: "Попередження про доступність відео"
+        hints_plugin_title: {
+            ru: "Підказки завантаження",
+            en: "Loading hints",
+            uk: "Підказки завантаження"
         },
-        attention_enable: {
-            ru: "Увімкнути попередження",
-            en: "Enable warnings",
-            uk: "Увімкнути попередження"
+        hints_online_subtitle: {
+            ru: "Підказка при онлайн-перегляді",
+            en: "Hint for online viewing",
+            uk: "Підказка при онлайн-перегляді"
+        },
+        hints_torrents_subtitle: {
+            ru: "Підказка при торрентах",
+            en: "Hint for torrents",
+            uk: "Підказка при торрентах"
+        },
+        hints_incard_subtitle: {
+            ru: "Підказка в картці фільму",
+            en: "Hint in movie card",
+            uk: "Підказка в картці фільму"
         }
     });
 
-    // Конфігурація підказок (тепер керується через Storage)
+    // Конфігурація підказок
     var CONFIG = {
         online: {
             id: 'hint-online-banner',
@@ -52,14 +62,17 @@
         }
     };
 
+    // Функція створення банера підказки (для онлайн і торрентів)
     function createHintText(hintText, id) {
         return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.07); border-radius: 0.5em; margin-left: 1.2em; margin-right: 1.2em; padding: 0.8em; font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';
     }
 
+    // Функція створення банера підказки в картці фільму
     function createHintText_incard(hintText, id) {
         return '<div id="' + id + '" style="overflow: hidden; display: flex; align-items: center; background-color: rgba(0, 0, 0, 0.15); border-radius: 0.5em; margin-bottom: 1.2em; padding: 0.8em; font-size: 1.2em; transition: opacity 0.5s; line-height: 1.4;">' + hintText + '</div>';
     }
 
+    // Функція плавного зникнення та видалення елемента
     function fadeOutAndRemove($el, duration) {
         var height = $el[0].scrollHeight;
 
@@ -68,6 +81,7 @@
             overflow: 'hidden'
         });
 
+        // Примусово викликаємо reflow
         $el[0].offsetHeight;
 
         $el.css({
@@ -84,6 +98,7 @@
         }, duration + 50);
     }
 
+    // Очікування появи елемента в DOM
     function waitForElement(selector, callback) {
         var check = function () {
             var el = document.querySelector(selector);
@@ -110,10 +125,8 @@
         }
     }
 
-    // Основна логіка показу підказок
+    // Основна функція ініціалізації підказок
     function initializeHintFeature() {
-        var enabled = Lampa.Storage.get('attention_warnings_enabled', true);
-
         var shown = {
             online: false,
             torrents: false,
@@ -121,16 +134,11 @@
         };
 
         Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name === 'attention_warnings_enabled') {
-                enabled = event.value;
-            }
-        });
-
-        Lampa.Storage.listener.follow('change', function (event) {
-            if (event.name === 'activity' && enabled) {
+            if (event.name === 'activity') {
                 var component = Lampa.Activity.active().component;
 
-                if (component === 'lampac' && (CONFIG.online.repeat || !shown.online)) {
+                // Підказка для онлайн-перегляду (lampac)
+                if (component === 'lampac' && Lampa.Storage.get('hints_online_enabled', true) && (CONFIG.online.repeat || !shown.online)) {
                     waitForElement('.explorer__files-head', function (el) {
                         var $hint = $(createHintText(Lampa.Lang.translate('hints_online'), CONFIG.online.id));
                         $(el).before($hint);
@@ -141,7 +149,8 @@
                     });
                 }
 
-                if (component === 'torrents' && (CONFIG.torrents.repeat || !shown.torrents)) {
+                // Підказка для торрентів
+                if (component === 'torrents' && Lampa.Storage.get('hints_torrents_enabled', true) && (CONFIG.torrents.repeat || !shown.torrents)) {
                     waitForElement('.explorer__files-head', function (el) {
                         var $hint = $(createHintText(Lampa.Lang.translate('hints_torrents'), CONFIG.torrents.id));
                         $(el).before($hint);
@@ -152,7 +161,8 @@
                     });
                 }
 
-                if (component === 'full' && (CONFIG.incard.repeat || !shown.incard)) {
+                // Підказка в картці фільму
+                if (component === 'full' && Lampa.Storage.get('hints_incard_enabled', true) && (CONFIG.incard.repeat || !shown.incard)) {
                     waitForElement('.full-start-new__head', function (el) {
                         var $hint = $(createHintText_incard(Lampa.Lang.translate('hints_incard'), CONFIG.incard.id));
                         $(el).before($hint);
@@ -166,63 +176,56 @@
         });
     }
 
-    // Додаємо кнопку в розділ "Кастомізація інтерфейсу"
-    function addSettingsButton() {
-        Lampa.SettingsApi.addParam({
-            component: 'interface_customization',
-            param: {
-                type: 'button'
-            },
-            field: {
-                name: Lampa.Lang.translate('attention_warnings_title')
-            },
-            onChange: function () {
-                Lampa.Select.show({
-                    title: Lampa.Lang.translate('attention_warnings_title'),
-                    items: [
-                        // Варіант 1: Іконка зліва + кружечок праворуч (selected/picked стиль)
-                        {
-                            title: Lampa.Lang.translate('attention_enable'),
-                            subtitle: Lampa.Lang.translate('attention_warnings_title'),
-                            template: 'selectbox_icon',
-                            icon: '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v3"/><circle cx="7" cy="11" r=".5"/><path d="M7.89 1.05a1 1 0 0 0-1.78 0l-5.5 11a1 1 0 0 0 .89 1.45h11a1 1 0 0 0 .89-1.45Z"/></g></svg>',
-                            picked: Lampa.Storage.get('attention_warnings_enabled', true),
-                            onSelect: function (item) {
-                                var newState = !item.picked;
-                                Lampa.Storage.set('attention_warnings_enabled', newState);
-                                item.picked = newState;
-                            }
-                        },
-
-                        // Варіант 2: Тільки текст + кружечок праворуч (чистий selected стиль)
-                        {
-                            title: Lampa.Lang.translate('attention_enable'),
-                            subtitle: Lampa.Lang.translate('attention_warnings_title'),
-                            selected: Lampa.Storage.get('attention_warnings_enabled', true),
-                            onSelect: function (item) {
-                                var newState = !item.selected;
-                                Lampa.Storage.set('attention_warnings_enabled', newState);
-                                item.selected = newState;
-                            }
+    // Додаємо пункт у головне меню Лампа
+    Lampa.Menu.addButton(
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>',
+        Lampa.Lang.translate('hints_plugin_title'),
+        function () {
+            Lampa.Select.show({
+                title: Lampa.Lang.translate('hints_plugin_title'),
+                items: [
+                    {
+                        title: Lampa.Lang.translate('hints_online'),
+                        subtitle: Lampa.Lang.translate('hints_online_subtitle'),
+                        checkbox: true,
+                        checked: Lampa.Storage.get('hints_online_enabled', true),
+                        onSelect: function (item) {
+                            Lampa.Storage.set('hints_online_enabled', item.checked);
                         }
-                    ],
-                    onBack: function () {
-                        Lampa.Settings.main().render().find('[data-component="interface_customization"]').trigger('hover').trigger('click');
+                    },
+                    {
+                        title: Lampa.Lang.translate('hints_torrents'),
+                        subtitle: Lampa.Lang.translate('hints_torrents_subtitle'),
+                        checkbox: true,
+                        checked: Lampa.Storage.get('hints_torrents_enabled', true),
+                        onSelect: function (item) {
+                            Lampa.Storage.set('hints_torrents_enabled', item.checked);
+                        }
+                    },
+                    {
+                        title: Lampa.Lang.translate('hints_incard'),
+                        subtitle: Lampa.Lang.translate('hints_incard_subtitle'),
+                        checkbox: true,
+                        checked: Lampa.Storage.get('hints_incard_enabled', true),
+                        onSelect: function (item) {
+                            Lampa.Storage.set('hints_incard_enabled', item.checked);
+                        }
                     }
-                });
-            }
-        });
-    }
+                ],
+                onBack: function () {
+                    Lampa.Controller.toggle('menu');
+                }
+            });
+        }
+    );
 
-    // Запуск після готовності додатка
+    // Запуск плагіна після готовності додатка
     if (window.appready) {
         initializeHintFeature();
-        addSettingsButton();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 initializeHintFeature();
-                addSettingsButton();
             }
         });
     }
