@@ -1,14 +1,13 @@
-(function () {  
-    'use strict';  
-    Lampa.Lang.add({  
-        params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },  
-        params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },  
-        params_ani_name: { ru: 'Анимация Загрузки', en: 'Loading animation', uk: 'Анімація завантаження' }, 
-        params_ani_desc: { ru: 'Изменяет вид анимации загрузки', en: 'Changes the loading animation appearance', uk: 'Змінює вигляд анімації завантаження' },  
-        default_loader: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },  
-        custom_svg_input: { ru: 'Введи URL SVG', en: 'Enter SVG URL', uk: 'Введи URL SVG' },  
-        svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }  
-    });  
+(function () {
+    'use strict';
+    Lampa.Lang.add({
+        params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },
+        params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },
+        params_ani_name: { ru: 'Анимация Загрузки', en: 'Loading animation', uk: 'Анімація завантаження' },
+        default_loader: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
+        custom_svg_input: { ru: 'Введи URL SVG', en: 'Enter SVG URL', uk: 'Введи URL SVG' },
+        svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
+    });
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
@@ -177,70 +176,72 @@
         return /^https?:\/\/.*\.svg$/.test(url);
     }
     function addPrvFocusListener() {}
-    function aniLoad() {  
-        try {  
-            Lampa.SettingsApi.addParam({  
-                component: 'interface_customization',  
-                param: {  
-                    name: 'ani_active',  
-                    type: 'select',  
-                    values: {  
-                        'false': Lampa.Lang.translate('settings_param_no'),  
-                        'true': Lampa.Lang.translate('settings_param_yes')  
-                    },  
-                    default: 'false'  
-                },  
-                field: {  
-                    name: '<div style="display: flex; align-items: center;"><svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:10px;flex-shrink:0;min-width:32px;min-height:32px;max-width:32px;max-height:32px"><circle cx="16" cy="16" r="3"/><g><circle cx="8" cy="16" r="3"/><circle cx="24" cy="16" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 16 16;180 16 16;360 16 16" repeatCount="indefinite"/></g></svg>' + Lampa.Lang.translate('params_ani_name') + '</div>',  
-                    description: Lampa.Lang.translate('params_ani_desc')  
-                },  
-                onChange: function (value) {  
-                    Lampa.Storage.set('ani_active', value === 'true');  
-                    var selectItem = $('.settings-param[data-name="select_ani_mation"]');  
-                    if (selectItem.length) {  
-                        selectItem.css('display', value === 'true' ? 'block' : 'none');  
-                        if (value === 'true') {  
-                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {  
-                                setCustomLoader(Lampa.Storage.get('ani_load'));  
-                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));  
-                            } else {  
-                                insert_activity_loader_prv('./img/loader.svg');  
-                            }  
-                        } else {  
-                            remove_activity_loader();  
-                        }  
-                    }  
-                    if (Lampa.Settings && Lampa.Settings.render) {  
-                        Lampa.Settings.render();  
-                        setTimeout(function () {  
-                            var selectItem = $('.settings-param[data-name="select_ani_mation"]');  
-                            selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');  
-                        }, 50);  
-                    }  
-                }  
-            });  
-        } catch (e) {}  
-          
-        try {  
-            Lampa.SettingsApi.addParam({  
-                component: 'interface_customization',  
-                param: {  
-                    name: 'select_ani_mation',  
-                    type: 'button'  
-                },  
-                field: {  
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')  
-                },  
-                onRender: function (item) {  
-                    if (!Lampa.Storage.get('ani_active')) {  
-                        item.css('display', 'none');  
-                    } else {  
-                        item.css('display', 'block');  
-                        setTimeout(function () {  
-                            insert_activity_loader_prv(Lampa.Storage.get('ani_load', './img/loader.svg'));  
-                            setTimeout(addPrvFocusListener, 100);  
-                        }, 0);  
-                    }  
+    function aniLoad() {
+        var icon_plugin = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
+        try {
+            Lampa.SettingsApi.addComponent({
+                component: 'ani_load_menu',
+                name: Lampa.Lang.translate('params_ani_name'),
+                icon: icon_plugin
+            });
+        } catch (e) {}
+        try {
+            Lampa.SettingsApi.addParam({
+                component: 'ani_load_menu',
+                param: {
+                    name: 'ani_active',
+                    type: 'trigger',
+                    default: false
+                },
+                field: {
+                    name: Lampa.Lang.translate('params_ani_on')
+                },
+                onChange: function (item) {
+                    Lampa.Storage.set('ani_active', item === 'true');
+                    var selectItem = $('.settings-param[data-name="select_ani_mation"]');
+                    if (selectItem.length) {
+                        selectItem.css('display', item === 'true' ? 'block' : 'none');
+                        if (item === 'true') {
+                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                                setCustomLoader(Lampa.Storage.get('ani_load'));
+                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+                            } else {
+                                insert_activity_loader_prv('./img/loader.svg');
+                            }
+                        } else {
+                            remove_activity_loader();
+                        }
+                    }
+                    if (Lampa.Settings && Lampa.Settings.render) {
+                        Lampa.Settings.render();
+                        setTimeout(function () {
+                            var selectItem = $('.settings-param[data-name="select_ani_mation"]');
+                            selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                        }, 50);
+                    }
+                }
+            });
+        } catch (e) {}
+        try {
+            Lampa.SettingsApi.addParam({
+                component: 'ani_load_menu',
+                param: {
+                    name: 'select_ani_mation',
+                    type: 'button'
+                },
+                field: {
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
+                },
+                onRender: function (item) {
+                    if (!Lampa.Storage.get('ani_active')) {
+                        item.css('display', 'none');
+                    } else {
+                        item.css('display', 'block');
+                        setTimeout(function () {
+                            insert_activity_loader_prv(Lampa.Storage.get('ani_load', './img/loader.svg'));
+                            setTimeout(addPrvFocusListener, 100);
+                        }, 0);
+                    }
                 },
                 onChange: function () {
                     if (!window.svg_loaders || window.svg_loaders.length === 0) {
