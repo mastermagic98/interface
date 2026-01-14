@@ -72,7 +72,7 @@
             en: 'Options'
         },
         custom_interface_plugin_online: {
-            uk: 'Онлайн',
+            uk: 'Дивитись',
             ru: 'Онлайн',
             en: 'Online'
         },
