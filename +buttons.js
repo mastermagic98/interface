@@ -699,19 +699,20 @@ if (type === 'online') {
         });
     }
 
-    if (Lampa.SettingsApi) {
+        if (Lampa.SettingsApi) {
         try {
             Lampa.SettingsApi.addParam({
-                component: 'interface_customization',
+                component: 'interface',
                 param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
-                field: {
-                    name: '<div style="display: flex; align-items: center;"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px" fill="none"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 9-3 .54L5 6.5 10.73.79a1 1 0 0 1 1.42 0l1.06 1.06a1 1 0 0 1 0 1.42Z"/><path d="M12 9.5v3a1 1 0 0 1-1 1H1.5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/></g></svg>' + t('custom_interface_plugin_button_editor') + '</div>',
-                    description: t('custom_interface_plugin_button_editor_desc')
-                },
+                field: { name: t('custom_interface_plugin_button_editor') },
                 onChange: function(value) {
-                    Lampa.Storage.set('buttons_editor_enabled', value);
                     setTimeout(function() {
-                        $('.button--edit-order').toggle(value);
+                        var currentValue = Lampa.Storage.get('buttons_editor_enabled', true);
+                        if (currentValue) {
+                            $('.button--edit-order').show();
+                        } else {
+                            $('.button--edit-order').hide();
+                        }
                     }, 100);
                 },
                 onRender: function(element) {
@@ -725,13 +726,11 @@ if (type === 'online') {
             console.error('SettingsApi error:', e);
         }
     }
-
     try {
         init();
     } catch (e) {
         console.error('Plugin init error:', e);
     }
-
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = {};
     }
