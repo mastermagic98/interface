@@ -73,8 +73,8 @@
         },
         custom_interface_plugin_online: {
             uk: 'Дивитись',
-            ru: 'Онлайн',
-            en: 'Online'
+            ru: 'Смотреть',
+            en: 'Look'
         },
         custom_interface_plugin_torrent: {
             uk: 'Торенти',
@@ -112,7 +112,19 @@
             en: 'Button'
         }
     });
-
+// Примусово перекладаємо текст кнопки Online
+if (type === 'online') {
+    var span = $btn.find('span');
+    if (span.length) {
+        var currentText = span.text().trim();
+        // Якщо текст виглядає як "Online", "Онлайн", "online" тощо — міняємо на переклад
+        if (/^online$/i.test(currentText) || 
+            /^онлайн$/i.test(currentText) || 
+            /^online /i.test(currentText)) {
+            span.text(t('custom_interface_plugin_online'));
+        }
+    }
+}
     function findButton(btnId) {
         var btn = allButtonsOriginal.find(function(b) { return getButtonId(b) === btnId; });
         if (!btn) {
@@ -677,17 +689,16 @@
     if (Lampa.SettingsApi) {
         try {
             Lampa.SettingsApi.addParam({
-                component: 'interface',
+                component: 'interface_customization',
                 param: { name: 'buttons_editor_enabled', type: 'trigger', default: true },
-                field: { name: t('custom_interface_plugin_button_editor') },
+                field: {
+                    name: '<div style="display: flex; align-items: center;"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px" fill="none"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 9-3 .54L5 6.5 10.73.79a1 1 0 0 1 1.42 0l1.06 1.06a1 1 0 0 1 0 1.42Z"/><path d="M12 9.5v3a1 1 0 0 1-1 1H1.5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/></g></svg>' + t('custom_interface_plugin_button_editor') + '</div>',
+                    description: t('custom_interface_plugin_button_editor_desc')
+                },
                 onChange: function(value) {
+                    Lampa.Storage.set('buttons_editor_enabled', value);
                     setTimeout(function() {
-                        var currentValue = Lampa.Storage.get('buttons_editor_enabled', true);
-                        if (currentValue) {
-                            $('.button--edit-order').show();
-                        } else {
-                            $('.button--edit-order').hide();
-                        }
+                        $('.button--edit-order').toggle(value);
                     }, 100);
                 },
                 onRender: function(element) {
