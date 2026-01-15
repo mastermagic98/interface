@@ -112,19 +112,7 @@
             en: 'Button'
         }
     });
-// Примусово перекладаємо текст кнопки Online
-if (type === 'online') {
-    var span = $btn.find('span');
-    if (span.length) {
-        var currentText = span.text().trim();
-        // Якщо текст виглядає як "Online", "Онлайн", "online" тощо — міняємо на переклад
-        if (/^online$/i.test(currentText) || 
-            /^онлайн$/i.test(currentText) || 
-            /^online /i.test(currentText)) {
-            span.text(t('custom_interface_plugin_online'));
-        }
-    }
-}
+
     function findButton(btnId) {
         var btn = allButtonsOriginal.find(function(b) { return getButtonId(b) === btnId; });
         if (!btn) {
@@ -207,12 +195,37 @@ if (type === 'online') {
             var $btn = $(this);
             if (isExcluded($btn)) return;
             var type = getButtonType($btn);
-            if (type === 'online' && $btn.hasClass('lampac--button') && !$btn.hasClass('modss--button') && !$btn.hasClass('showy--button')) {
-                var svgElement = $btn.find('svg').first();
-                if (svgElement.length && !svgElement.hasClass('modss-online-icon')) {
-                    svgElement.replaceWith(LAMPAC_ICON);
-                }
-            }
+            var ONLINE_SVG_VIEWBOX = '0 0 392.697 392.697';
+            if (
+    type === 'online' &&
+    $btn.hasClass('lampac--button') &&
+    !$btn.hasClass('modss--button') &&
+    !$btn.hasClass('showy--button')
+) {
+    var svgElement = $btn.find('svg').first();
+
+    if (
+        svgElement.length &&
+        svgElement.attr('viewBox') === ONLINE_SVG_VIEWBOX &&
+        !svgElement.data('lampacReplaced')
+    ) {
+        svgElement.replaceWith(
+            $(LAMPAC_ICON).attr('data-lampac-icon', 'online')
+        );
+    }
+}
+
+if (type === 'online') {
+    var span = $btn.find('span');
+
+    if (span.length) {
+        span.text(t('custom_interface_plugin_online'));
+    } else {
+        $btn.append('<span>' + t('custom_interface_plugin_online') + '</span>');
+    }
+}
+
+            
             if ($btn.hasClass('button--options') && $btn.find('span').length === 0) {
                 $btn.append('<span>' + t('custom_interface_plugin_options') + '</span>');
             }
