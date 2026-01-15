@@ -72,9 +72,9 @@
             en: 'Options'
         },
         custom_interface_plugin_online: {
-            uk: 'Онлайн',
-            ru: 'Онлайн',
-            en: 'Online'
+            uk: 'Дивитись',
+            ru: 'Смотреть',
+            en: 'Look'
         },
         custom_interface_plugin_torrent: {
             uk: 'Торенти',
@@ -112,7 +112,19 @@
             en: 'Button'
         }
     });
-
+// Примусово перекладаємо текст кнопки Online
+if (type === 'online') {
+    var span = $btn.find('span');
+    if (span.length) {
+        var currentText = span.text().trim();
+        // Якщо текст виглядає як "Online", "Онлайн", "online" тощо — міняємо на переклад
+        if (/^online$/i.test(currentText) || 
+            /^онлайн$/i.test(currentText) || 
+            /^online /i.test(currentText)) {
+            span.text(t('custom_interface_plugin_online'));
+        }
+    }
+}
     function findButton(btnId) {
         var btn = allButtonsOriginal.find(function(b) { return getButtonId(b) === btnId; });
         if (!btn) {
