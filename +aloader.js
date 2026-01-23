@@ -128,10 +128,6 @@
             'body:not(.glass--style) .settings-param.focus .activity__loader_prv { ' +
                 'filter: ' + whiteFilterValue + ' !important; ' +
                 '-webkit-filter: ' + whiteFilterValue + ' !important; ' +
-            '}' +
-            'body.glass--style .settings-param.focus .settings-folder__icon { ' +
-                '-webkit-filter: none !important; ' +
-                'filter: invert(1) !important; ' +
             '}';
 
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
@@ -139,7 +135,6 @@
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                // початкове встановлення кольору (не фокус)
                 if (document.body.classList.contains('glass--style')) {
                     prvElement.style.filter = 'invert(1)';
                     prvElement.style.webkitFilter = 'invert(1)';
@@ -167,106 +162,59 @@
             element.style.filter = '';
             element.style.backgroundColor = 'transparent';
         }
+        // Явно повертаємо білий колір для прев’ю після відключення
         insert_activity_loader_prv('./img/loader.svg');
     }
 
     function create_ani_modal() {
-    var style = document.createElement('style');
-    style.id = 'aniload';
+        var style = document.createElement('style');
+        style.id = 'aniload';
 
-    var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-    var rgb = getFilterRgb(mainColor);
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var rgb = getFilterRgb(mainColor);
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
 
-    var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        // Колір рамки при фокусі — завжди білий для поля введення URL
+        var focusBorderColor = '#ffffff';
+        var glowColor = focusBorderColor + '80'; // 50% прозорості для box-shadow
 
-    // Більш надійне визначення кольору рамки при фокусі
-    var focusBorderColor;
-    if (mainColor.toLowerCase() === '#353535' || mainColor.toLowerCase() === '#000000') {
-        focusBorderColor = '#ffffff';
-    } else if (mainColor.toLowerCase() === '#ffffff' || mainColor.toLowerCase() === '#f0f0f0') {
-        focusBorderColor = '#ffffff';  // яскравий синій як контрастний запасний
-    } else {
-        focusBorderColor = 'var(--main-color)';
+        style.textContent = 
+            '.ani_modal_root { padding: 1em; }' +
+            '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
+            '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
+            '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
+            '.ani_loader_square { ' +
+                'width: 35px; height: 35px; border-radius: 4px; ' +
+                'display: flex; flex-direction: column; justify-content: center; align-items: center; ' +
+                'cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; ' +
+                'border: 2px solid transparent; transition: all 0.18s ease; ' +
+            '}' +
+            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
+            '.ani_loader_square.focus { ' +
+                'border: 3px solid ' + focusBorderColor + ' !important; ' +
+                'transform: scale(1.12); ' +
+                'box-shadow: 0 0 14px ' + glowColor + '; ' +
+            '}' +
+            '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
+            '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
+            '.svg_input { ' +
+                'width: 252px; height: 35px; border-radius: 8px; ' +
+                'border: 2px solid #555; position: relative; cursor: pointer; ' +
+                'display: flex; flex-direction: column; align-items: center; justify-content: center; ' +
+                'color: #fff !important; font-size: 12px; font-weight: bold; ' +
+                'text-shadow: 0 0 2px #000; background-color: #353535; ' +
+                'transition: all 0.18s ease; ' +
+            '}' +
+            '.svg_input.focus { ' +
+                'border: 3px solid ' + focusBorderColor + ' !important; ' +
+                'transform: scale(1.04); ' +
+                'box-shadow: 0 0 14px ' + glowColor + '; ' +
+            '}' +
+            '.svg_input .label { position: absolute; top: 2px; font-size: 10px; color: #ddd; }' +
+            '.svg_input .value { position: absolute; bottom: 2px; font-size: 10px; color: #ccc; }';
+
+        document.head.appendChild(style);
     }
-
-    style.textContent = 
-        '.ani_modal_root { padding: 1em; }' +
-        '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
-        '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
-        '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
-        '.ani_loader_square { ' +
-            'width: 35px; ' +
-            'height: 35px; ' +
-            'border-radius: 4px; ' +
-            'display: flex; ' +
-            'flex-direction: column; ' +
-            'justify-content: center; ' +
-            'align-items: center; ' +
-            'cursor: pointer; ' +
-            'color: #ffffff !important; ' +
-            'font-size: 10px; ' +
-            'text-align: center; ' +
-            'border: 2px solid transparent; ' +           // базовий стан — прозора рамка
-            'transition: all 0.15s ease; ' +
-        '}' +
-        '.ani_loader_square img { ' +
-            'max-width: 30px; ' +
-            'max-height: 30px; ' +
-            'object-fit: contain; ' +
-            'filter: ' + filterValue + '; ' +
-        '}' +
-        '.ani_loader_square.focus { ' +
-            'border: 3px solid ' + focusBorderColor + ' !important; ' +   // товща + !important для пріоритету
-            'transform: scale(1.12); ' +
-            'box-shadow: 0 0 12px ' + focusBorderColor + '80; ' +         // легке світіння для кращої видимості
-        '}' +
-        '.ani_loader_square.default { ' +
-            'width: 35px; ' +
-            'height: 35px; ' +
-            'border-radius: 4px; ' +
-        '}' +
-        '.ani_loader_square.default img { ' +
-            'max-width: 30px; ' +
-            'max-height: 30px; ' +
-            'object-fit: contain; ' +
-        '}' +
-        '.svg_input { ' +
-            'width: 252px; ' +
-            'height: 35px; ' +
-            'border-radius: 8px; ' +
-            'border: 2px solid #555; ' +                    // базова рамка темніша
-            'position: relative; ' +
-            'cursor: pointer; ' +
-            'display: flex; ' +
-            'flex-direction: column; ' +
-            'align-items: center; ' +
-            'justify-content: center; ' +
-            'color: #fff !important; ' +
-            'font-size: 12px; ' +
-            'font-weight: bold; ' +
-            'text-shadow: 0 0 2px #000; ' +
-            'background-color: #353535; ' +
-            'transition: all 0.15s ease; ' +
-        '}' +
-        '.svg_input.focus { ' +
-            'border: 3px solid ' + focusBorderColor + ' !important; ' +
-            'transform: scale(1.04); ' +
-            'box-shadow: 0 0 12px ' + focusBorderColor + '80; ' +
-        '}' +
-        '.svg_input .label { ' +
-            'position: absolute; ' +
-            'top: 1px; ' +
-            'font-size: 10px; ' +
-        '}' +
-        '.svg_input .value { ' +
-            'position: absolute; ' +
-            'bottom: 1px; ' +
-            'font-size: 10px; ' +
-            'color: #ccc; ' +
-        '}';
-
-    document.head.appendChild(style);
-}
 
     function createSvgHtml(src, index) {
         var className = 'ani_loader_square selector';
@@ -368,13 +316,10 @@
                     }
                 },
                 onChange: function () {
-                    if (!window.svg_loaders || window.svg_loaders.length === 0) {
-                        return;
-                    }
-                    if (!Lampa.Template.get('ani_modal')) {
-                        Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
-                    }
+                    if (!window.svg_loaders || window.svg_loaders.length === 0) return;
+
                     create_ani_modal();
+
                     var groupedLoaders = chunkArray(window.svg_loaders, 6);
                     var svgContent = groupedLoaders.map(function(group) {
                         var groupContent = group.map(function(loader, index) {
@@ -382,23 +327,30 @@
                         }).join('');
                         return '<div class="ani_loader_row">' + groupContent + '</div>';
                     });
+
                     var midPoint = Math.ceil(svgContent.length / 2);
                     var leftColumn = svgContent.slice(0, midPoint).join('');
                     var rightColumn = svgContent.slice(midPoint).join('');
+
                     var defaultLoader = applyDefaultLoaderColor();
                     var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + defaultLoader.filter + ';"></div>';
+
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
                                     '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                                     '<div class="value">' + svgValue + '</div>' +
                                     '</div>';
+
                     var topRowHtml = '<div style="display: flex; gap: 20px; padding: 0; justify-content: center; margin-bottom: 25px;">' +
                                      defaultButton + inputHtml + '</div>';
+
                     var modalContent = '<div class="ani_picker_container">' +
                                        '<div>' + leftColumn + '</div>' +
                                        '<div>' + rightColumn + '</div>' +
                                        '</div>';
+
                     var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
+
                     try {
                         Lampa.Modal.open({
                             title: Lampa.Lang.translate('params_ani_select'),
@@ -444,9 +396,7 @@
                                             }
                                             Lampa.Controller.toggle('settings_component');
                                             Lampa.Controller.enable('menu');
-                                            if (Lampa.Settings && Lampa.Settings.render) {
-                                                Lampa.Settings.render();
-                                            }
+                                            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                                         });
                                         return;
                                     } else if (selectedElement.classList.contains('default')) {
@@ -458,6 +408,7 @@
                                         srcValue = imgElement ? imgElement.getAttribute('src') : Lampa.Storage.get('ani_load', './img/loader.svg');
                                         Lampa.Storage.set('ani_load', srcValue);
                                     }
+
                                     if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && srcValue !== './img/loader.svg') {
                                         setCustomLoader(Lampa.Storage.get('ani_load'));
                                         insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -475,12 +426,11 @@
                                     } else {
                                         insert_activity_loader_prv('./img/loader.svg');
                                     }
+
                                     Lampa.Modal.close();
                                     Lampa.Controller.toggle('settings_component');
                                     Lampa.Controller.enable('menu');
-                                    if (Lampa.Settings && Lampa.Settings.render) {
-                                        Lampa.Settings.render();
-                                    }
+                                    if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                                 }
                             }
                         });
@@ -496,9 +446,7 @@
                         mutation.addedNodes.forEach(function (node) {
                             if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick') || node.matches('.modal-loading'))) {
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                    setTimeout(function () {
-                                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                                    }, 200);
+                                    setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
                                 }
                             }
                         });
@@ -510,23 +458,15 @@
                     } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                         if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
                             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                setTimeout(function () {
-                                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                                }, 200);
+                                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
                             }
                         } else if (mutation.target.classList.contains('player-video') && !mutation.target.classList.contains('video--load')) {
                             var playerLoader = document.querySelector('.player-video__loader');
-                            if (playerLoader) {
-                                playerLoader.style.display = 'none';
-                            }
+                            if (playerLoader) playerLoader.style.display = 'none';
                             var youtubeNeedclick = document.querySelector('.player-video__youtube-needclick > div');
-                            if (youtubeNeedclick) {
-                                youtubeNeedclick.style.display = 'none';
-                            }
+                            if (youtubeNeedclick) youtubeNeedclick.style.display = 'none';
                             var modalLoading = document.querySelector('.modal-loading');
-                            if (modalLoading) {
-                                modalLoading.style.display = 'none';
-                            }
+                            if (modalLoading) modalLoading.style.display = 'none';
                         }
                     }
                 });
@@ -562,13 +502,9 @@
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var playerVideo = document.querySelector('.player-video.video--load');
-                if (playerVideo) {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                }
+                if (playerVideo) setCustomLoader(Lampa.Storage.get('ani_load'));
                 var modalLoading = document.querySelector('.modal-loading');
-                if (modalLoading) {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                }
+                if (modalLoading) setCustomLoader(Lampa.Storage.get('ani_load'));
             }
         }, 100);
 
@@ -613,23 +549,24 @@
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var styleId = 'pause-icon-custom-color';
         $('#' + styleId).remove();
-        var css = '.player-video__paused svg rect {' +
-                  'fill: ' + mainColor + ' !important;' +
-                  '}';
+        var css = '.player-video__paused svg rect { fill: ' + mainColor + ' !important; }';
         $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
     }
 
     function changeColor() {
-        if (
-            Lampa.Storage.get('ani_load') &&
-            Lampa.Storage.get('ani_active') &&
-            Lampa.Storage.get('ani_load') !== './img/loader.svg'
-        ) {
-            setCustomLoader(Lampa.Storage.get('ani_load'));
-            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+
+        if (Lampa.Storage.get('ani_active')) {
+            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                setCustomLoader(Lampa.Storage.get('ani_load'));
+                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
+            } else {
+                insert_activity_loader_prv('./img/loader.svg');
+            }
         } else {
             remove_activity_loader();
         }
+
         updatePauseIconColor();
     }
 
@@ -648,7 +585,7 @@
     window.changeColor = changeColor;
 
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_main_color') {
+        if (e.name === 'color_plugin_main_color' || e.name === 'ani_active' || e.name === 'ani_load') {
             changeColor();
         }
     });
