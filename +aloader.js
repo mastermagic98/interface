@@ -123,10 +123,10 @@ var newStyle =
     '-webkit-filter: ' + whiteFilterValue + ' !important;' +
 '}' +
 
-/* 🔹 ФОКУС: біла іконка → чорна */
+/* === ПОВНА КОПІЯ ЛОГІКИ settings-folder__icon === */
 '.settings-param.focus .settings-param__name .activity__loader_prv {' +
-    'filter: invert(1) brightness(0) !important;' +
-    '-webkit-filter: invert(1) brightness(0) !important;' +
+    'filter: none !important;' +
+    '-webkit-filter: none !important;' +
 '}';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
