@@ -109,8 +109,25 @@
             escapedUrl = defaultLoader.src;
             whiteFilterValue = '';
         }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
-                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
+var newStyle =
+'.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
+    'display: inline-block;' +
+    'width: 23px;' +
+    'height: 24px;' +
+    'margin-right: 10px;' +
+    'vertical-align: middle;' +
+    'background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
+    'background-size: contain;' +
+    'background-color: transparent !important;' +
+    'filter: ' + whiteFilterValue + ' !important;' +
+    '-webkit-filter: ' + whiteFilterValue + ' !important;' +
+'}' +
+
+/* 🔹 ФОКУС: біла іконка → чорна */
+'.settings-param.focus .settings-param__name .activity__loader_prv {' +
+    'filter: invert(1) brightness(0) !important;' +
+    '-webkit-filter: invert(1) brightness(0) !important;' +
+'}';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
