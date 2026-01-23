@@ -178,7 +178,7 @@
     function isValidSvgUrl(url) {
         return /^https?:\/\/.*\.svg$/.test(url);
     }
-    function addPrvFocusListener() {}
+
     function aniLoad() {
         var icon_plugin = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
         try {
@@ -434,7 +434,7 @@
                 });
                 videoElement.dataset.listenersAdded = true;
             }
-        }, 1000);
+        }, 100);
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var playerVideo = document.querySelector('.player-video.video--load');
@@ -479,14 +479,7 @@
             remove_activity_loader();
         }
     }
-    function changeColor() {
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-            setCustomLoader(Lampa.Storage.get('ani_load'));
-            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-        } else {
-            remove_activity_loader();
-        }
-    }
+    
     if (window.appready) {
         aniLoad();
         changeColor();
@@ -498,11 +491,6 @@
             }
         });
     }
-    Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_main_color') {
-            changeColor();
-        }
-    });
     window.changeColor = changeColor;
 // === ПЕРЕФАРБУВАННЯ ІКОНКИ ПАУЗИ У КОЛІР ТЕМИ ===
 function updatePauseIconColor() {
