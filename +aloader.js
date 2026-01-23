@@ -109,42 +109,8 @@
             escapedUrl = defaultLoader.src;
             whiteFilterValue = '';
         }
-var escapedUrl = escapedUrl;
-function escapeCssUrl(url) {
-    if (!url) return '';
-    return url
-        .replace(/</g, '%3C')
-        .replace(/>/g, '%3E')
-        .replace(/#/g, '%23')
-        .replace(/"/g, '%22')
-        .replace(/'/g, '%27')
-        .replace(/\(/g, '%28')
-        .replace(/\)/g, '%29')
-        .replace(/\s/g, '%20');
-}
-
-escapedUrl = escapeCssUrl(escapedUrl);
-
-var newStyle =
-'.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
-    'display:inline-block;' +
-    'width:23px;' +
-    'height:24px;' +
-    'margin-right:10px;' +
-    'vertical-align:middle;' +
-    'background:url("' + escapedUrl + '") no-repeat 50% 50%;' +
-    'background-size:contain;' +
-    'background-color:transparent !important;' +
-    'filter:' + whiteFilterValue + ' !important;' +
-    '-webkit-filter:' + whiteFilterValue + ' !important;' +
-'}' +
-
-/* 🔹 ТОЧНА ПОВЕДІНКА settings-folder__icon */
-'.settings-param.focus .activity__loader_prv {' +
-    'filter:none !important;' +
-    '-webkit-filter:none !important;' +
-'}';
-
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
+                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
