@@ -184,7 +184,7 @@
     if (mainColor.toLowerCase() === '#353535' || mainColor.toLowerCase() === '#000000') {
         focusBorderColor = '#ffffff';
     } else if (mainColor.toLowerCase() === '#ffffff' || mainColor.toLowerCase() === '#f0f0f0') {
-        focusBorderColor = '#0066ff';  // яскравий синій як контрастний запасний
+        focusBorderColor = '#ffffff';  // яскравий синій як контрастний запасний
     } else {
         focusBorderColor = 'var(--main-color)';
     }
