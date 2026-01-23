@@ -505,21 +505,20 @@ function updatePauseIconColor() {
 
     $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
 }
-
-// Оновлюємо changeColor, щоб він також фарбував паузу
 function changeColor() {
-    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+    if (
+        Lampa.Storage.get('ani_load') &&
+        Lampa.Storage.get('ani_active') &&
+        Lampa.Storage.get('ani_load') !== './img/loader.svg'
+    ) {
         setCustomLoader(Lampa.Storage.get('ani_load'));
         insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
     } else {
         remove_activity_loader();
     }
-    
-    updatePauseIconColor(); // фарбуємо паузу
-}
 
-// Викликаємо при старті
-updatePauseIconColor();
+    updatePauseIconColor();
+}
 
 // При зміні кольору теми — теж оновлюємо
 Lampa.Storage.listener.follow('change', function (e) {
