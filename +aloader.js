@@ -96,26 +96,33 @@
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var hasOwnFilter = svgHasOwnFilter(escapedUrl);
-        var whiteFilterValue = hasOwnFilter ? '' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#353535');
+        var isColorEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
+        if (!isColorEnabled || !mainColor || mainColor === '' || mainColor === 'none' || mainColor === 'default') {
+            mainColor = '#ffffff';
+        }
+        var prvFilterValue = '';
+        if (!hasOwnFilter) {
+            var rgb = getFilterRgb(mainColor);
+            prvFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        }
         if (!escapedUrl || escapedUrl === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
-            whiteFilterValue = '';
+            if (!hasOwnFilter) {
+                prvFilterValue = '';
+            }
         }
-        var isColorEnabled = Lampa.Storage.get('color_plugin_enabled', 'true') === 'true';
-        if (!isColorEnabled) {
-            whiteFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
                        'body.glass--style .settings-param.focus .activity__loader_prv { -webkit-filter: invert(1) !important; filter: invert(1) !important; }' +
-                       'body:not(.glass--style) .settings-param.focus .activity__loader_prv { filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
+                       'body:not(.glass--style) .settings-param.focus .activity__loader_prv { filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
                        'body.glass--style .settings-param.focus .settings-folder__icon { -webkit-filter: none !important; filter: invert(1) !important; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                prvElement.style.filter = whiteFilterValue;
-                prvElement.style.webkitFilter = whiteFilterValue;
+                prvElement.style.filter = prvFilterValue;
+                prvElement.style.webkitFilter = prvFilterValue;
             } else {
                 setTimeout(checkPrvElement, 500);
             }
