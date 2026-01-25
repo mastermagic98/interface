@@ -269,6 +269,15 @@ function snapshotInitialState() {
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         isSaving = false;
+    
+    function syncSettingsUI() {
+    if (Lampa.Settings && Lampa.Settings.render) {
+        Lampa.Settings.render();
+    } else if (Lampa.SettingsApi && Lampa.SettingsApi.rebuild) {
+        Lampa.SettingsApi.rebuild();
+    }
+}
+updatePluginIcon();
     }
 
     // Функція для примусового чорного фону фільтрів
