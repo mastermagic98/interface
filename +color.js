@@ -235,28 +235,25 @@
     }
 
     // Функція для застосування стилів
-    function applyStyles() {
-        if (!ColorPlugin.settings.enabled) {
-    resetToDefaultColors();
-    return;
-}
-        ColorPlugin.settings.enabled = false;
-saveSettings();
-applyStyles();
+function applyStyles() {
+    if (!ColorPlugin.settings.enabled) {
+        resetToDefaultColors();
+        return;
+    }
 
+    if (!isValidHex(ColorPlugin.settings.main_color)) {
+        ColorPlugin.settings.main_color = '#353535';
+    }
 
-        if (!isValidHex(ColorPlugin.settings.main_color)) {
-            ColorPlugin.settings.main_color = '#353535';
-        }
+    var style = document.getElementById('color-plugin-styles');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'color-plugin-styles';
+        document.head.appendChild(style);
+    }
 
-        var style = document.getElementById('color-plugin-styles');
-        if (!style) {
-            style = document.createElement('style');
-            style.id = 'color-plugin-styles';
-            document.head.appendChild(style);
-        }
+    var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
 
-        var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
         // Визначаємо колір рамки для .color_square.focus
         var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
 
@@ -917,36 +914,24 @@ function resetToDefaultColors() {
                 });
 
                 // Увімкнення/вимкнення плагіна
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: {
-                        name: 'color_plugin_enabled',
-                        type: 'trigger',
-                        default: ColorPlugin.settings.enabled.toString()
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('color_plugin_enabled'),
-                        description: Lampa.Lang.translate('color_plugin_enabled_description')
-                    },
-                    onChange: function (value) {
-                        ColorPlugin.settings.enabled = value === 'true';
-                        Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
-                        localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
-                        applyStyles();
-                        forceBlackFilterBackground();
-                        updateCanvasFillStyle(window.draw_context);
-                        updateParamsVisibility();
-                        saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) {
-                            Lampa.Settings.render();
-                        }
-                    },
-                    onRender: function (item) {
-                        if (item && typeof item.css === 'function') {
-                            item.css('display', 'block');
-                        }
-                    }
-                });
+Lampa.SettingsApi.addParam({
+    component: 'color_plugin',
+    param: {
+        name: 'color_plugin_enabled',
+        type: 'toggle',
+        default: ColorPlugin.settings.enabled
+    },
+    field: {
+        name: Lampa.Lang.translate('color_plugin_enabled'),
+        description: Lampa.Lang.translate('color_plugin_enabled_description')
+    },
+    onChange: function (value) {
+        ColorPlugin.settings.enabled = value;
+        saveSettings();
+        applyStyles();
+    }
+});
+
 
                 // Колір виділення
                 Lampa.SettingsApi.addParam({
@@ -1089,6 +1074,45 @@ function resetToDefaultColors() {
             updateSvgIcons();
         }
     });
+function resetToDefaultColors() {
+    // видаляємо style плагіна
+    var style = document.getElementById('color-plugin-styles');
+    if (style) style.remove();
+
+    // скидаємо CSS-змінні
+    var root = document.documentElement;
+    root.style.removeProperty('--main-color');
+    root.style.removeProperty('--main-color-rgb');
+    root.style.removeProperty('--accent-color');
+
+    // чистимо inline-стилі
+    [
+        '.simple-button--filter > div',
+        '.full-start__rate',
+        '.reaction',
+        '.card__vote',
+        '.items-line__more',
+        '.card__icons-inner'
+    ].forEach(function (selector) {
+        document.querySelectorAll(selector).forEach(function (el) {
+            el.style.background = '';
+            el.style.backgroundColor = '';
+            el.style.boxShadow = '';
+            el.style.borderColor = '';
+            el.style.filter = '';
+        });
+    });
+
+    // SVG
+    document.querySelectorAll('svg path').forEach(function (p) {
+        p.removeAttribute('fill');
+        p.removeAttribute('stroke');
+    });
+
+    if (Lampa.Settings && Lampa.Settings.render) {
+        Lampa.Settings.render();
+    }
+}
 
     // Спостереження за мутаціями для динамічного застосування чорного фону фільтрів
     setTimeout(function () {
