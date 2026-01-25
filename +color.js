@@ -237,10 +237,13 @@
     // Функція для застосування стилів
     function applyStyles() {
         if (!ColorPlugin.settings.enabled) {
-            var oldStyle = document.getElementById('color-plugin-styles');
-            if (oldStyle) oldStyle.remove();
-            return;
-        }
+    resetToDefaultColors();
+    return;
+}
+        ColorPlugin.settings.enabled = false;
+saveSettings();
+applyStyles();
+
 
         if (!isValidHex(ColorPlugin.settings.main_color)) {
             ColorPlugin.settings.main_color = '#353535';
@@ -852,6 +855,48 @@
             }
         }
     }
+function resetToDefaultColors() {
+    // 1. Видаляємо style плагіну
+    var style = document.getElementById('color-plugin-styles');
+    if (style) style.remove();
+
+    // 2. Скидаємо CSS-змінні (ВАЖЛИВО)
+    var root = document.documentElement;
+    root.style.removeProperty('--main-color');
+    root.style.removeProperty('--main-color-rgb');
+    root.style.removeProperty('--accent-color');
+
+    // 3. Прибираємо inline-стилі, які плагін міг залишити
+    var inlineSelectors = [
+        '.simple-button--filter > div',
+        '.full-start__rate',
+        '.reaction',
+        '.card__vote',
+        '.items-line__more',
+        '.card__icons-inner'
+    ];
+
+    inlineSelectors.forEach(function (selector) {
+        document.querySelectorAll(selector).forEach(function (el) {
+            el.style.background = '';
+            el.style.backgroundColor = '';
+            el.style.boxShadow = '';
+            el.style.borderColor = '';
+            el.style.filter = '';
+        });
+    });
+
+    // 4. SVG-іконки — повертаємо стандарт
+    document.querySelectorAll('svg path').forEach(function (p) {
+        if (p.hasAttribute('fill')) p.removeAttribute('fill');
+        if (p.hasAttribute('stroke')) p.removeAttribute('stroke');
+    });
+
+    // 5. Перерендер налаштувань
+    if (Lampa.Settings && Lampa.Settings.render) {
+        Lampa.Settings.render();
+    }
+}
 
     // Функція для ініціалізації плагіна
     function initPlugin() {
