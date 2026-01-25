@@ -113,15 +113,24 @@
 ' background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
 ' background-size: contain;' +
 ' background-color: transparent !important;' +
-' filter: none !important;' +
-' -webkit-filter: none !important;' +
+
+/* 🔹 БІЛИЙ БЕЗ ФОКУСУ */
+' filter: brightness(0) invert(1) !important;' +
+' -webkit-filter: brightness(0) invert(1) !important;' +
 '}' +
 
-/* glass-режим — ТІЛЬКИ invert */
+/* 🔹 glass + focus */
 'body.glass--style .settings-param.focus .activity__loader_prv {' +
 ' filter: invert(1) !important;' +
 ' -webkit-filter: invert(1) !important;' +
+'}' +
+
+/* 🔹 non-glass + focus — без інверту */
+'body:not(.glass--style) .settings-param.focus .activity__loader_prv {' +
+' filter: none !important;' +
+' -webkit-filter: none !important;' +
 '}';
+
 
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
