@@ -277,8 +277,28 @@ function snapshotInitialState() {
         Lampa.SettingsApi.rebuild();
     }
 }
-updatePluginIcon();
-    }
+
+function saveSettings() {
+    if (isSaving) return;
+
+    isSaving = true;
+
+    Lampa.Storage.set('color_plugin_main_color', ColorPlugin.settings.main_color);
+    Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+    Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+    Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+
+    localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
+    localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+    localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+    localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+
+    isSaving = false;
+
+    syncSettingsUI();
+    updatePluginIcon();
+}
+
 
     // Функція для примусового чорного фону фільтрів
     function forceBlackFilterBackground() {
