@@ -480,44 +480,49 @@
     }
 
     // ────────────────────────────────────────────────────────────────
-    // Реєстрація в налаштуваннях
-    // ────────────────────────────────────────────────────────────────
+// Реєстрація в налаштуваннях
+// ────────────────────────────────────────────────────────────────
 
-    function initPlugin() {
-        setTimeout(function(){
+function initPlugin() {
+    setTimeout(function(){
 
-            // Завантаження з запасним варіантом
-            ColorPlugin.settings.enabled           = Lampa.Storage.get('color_plugin_enabled',           'false') === 'true';
-            ColorPlugin.settings.main_color        = Lampa.Storage.get('color_plugin_main_color',        '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
-            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true')  === 'true';
-            ColorPlugin.settings.dimming_enabled   = Lampa.Storage.get('color_plugin_dimming_enabled',   'true')  === 'true';
+        // Завантаження налаштувань (залишаємо як є)
+        ColorPlugin.settings.enabled           = Lampa.Storage.get('color_plugin_enabled',           'false') === 'true';
+        ColorPlugin.settings.main_color        = Lampa.Storage.get('color_plugin_main_color',        '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
+        ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true')  === 'true';
+        ColorPlugin.settings.dimming_enabled   = Lampa.Storage.get('color_plugin_dimming_enabled',   'true')  === 'true';
 
-            if (!Lampa.SettingsApi) return;
+        if (!Lampa.SettingsApi) return;
 
-            Lampa.SettingsApi.addComponent({
-                component: 'color_plugin',
-                name: Lampa.Lang.translate('color_plugin'),
-                icon: '<svg width="24" height="24" viewBox="0 0 16 16" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
-            });
+        Lampa.SettingsApi.addComponent({
+            component: 'color_plugin',
+            name: Lampa.Lang.translate('color_plugin'),
+            icon: '<svg width="24" height="24" viewBox="0 0 16 16" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
+        });
 
-            // Увімкнення / вимкнення
-            Lampa.SettingsApi.addParam({
-                component: 'color_plugin',
-                param: { name: 'color_plugin_enabled', type: 'trigger', default: 'false' },
-                field: {
-                    name: Lampa.Lang.translate('color_plugin_enabled'),
-                    description: Lampa.Lang.translate('color_plugin_enabled_description')
-                },
-                onChange: function(val){
-                    ColorPlugin.settings.enabled = val === 'true';
-                    saveSettings();
-                    applyStyles();
-                    updateParamsVisibility();
-                },
-                onRender: function(el){ el.css('display','block'); }
-            });
+        // ─── Головний перемикач ────────────────────────────────────────
+        Lampa.SettingsApi.addParam({
+            component: 'color_plugin',
+            param: { name: 'color_plugin_enabled', type: 'trigger', default: 'false' },
+            field: {
+                name: Lampa.Lang.translate('color_plugin_enabled'),
+                description: Lampa.Lang.translate('color_plugin_enabled_description')
+            },
+            onChange: function(val){
+                ColorPlugin.settings.enabled = val === 'true';
+                saveSettings();
+                applyStyles();
 
-            // Вибір кольору
+                // Оновлюємо видимість залежних пунктів одразу
+                updateDependentParamsVisibility();
+            }
+        });
+
+        // ─── Залежні параметри ─────────────────────────────────────────
+        var dependentParams = [];
+
+        // Колір виділення
+        dependentParams.push(
             Lampa.SettingsApi.addParam({
                 component: 'color_plugin',
                 param: { name: 'color_plugin_main_color', type: 'button' },
@@ -525,13 +530,12 @@
                     name: Lampa.Lang.translate('main_color'),
                     description: Lampa.Lang.translate('main_color_description')
                 },
-                onChange: openColorPicker,
-                onRender: function(el){
-                    el.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                }
-            });
+                onChange: openColorPicker
+            })
+        );
 
-            // Рамка при фокусі
+        // Рамка
+        dependentParams.push(
             Lampa.SettingsApi.addParam({
                 component: 'color_plugin',
                 param: { name: 'color_plugin_highlight_enabled', type: 'trigger', default: 'true' },
@@ -543,13 +547,12 @@
                     ColorPlugin.settings.highlight_enabled = val === 'true';
                     saveSettings();
                     applyStyles();
-                },
-                onRender: function(el){
-                    el.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
                 }
-            });
+            })
+        );
 
-            // Затемнення
+        // Затемнення
+        dependentParams.push(
             Lampa.SettingsApi.addParam({
                 component: 'color_plugin',
                 param: { name: 'color_plugin_dimming_enabled', type: 'trigger', default: 'true' },
@@ -561,18 +564,47 @@
                     ColorPlugin.settings.dimming_enabled = val === 'true';
                     saveSettings();
                     applyStyles();
-                },
-                onRender: function(el){
-                    el.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
                 }
+            })
+        );
+
+        // ─── Функція оновлення видимості залежних пунктів ──────────────
+        function updateDependentParamsVisibility() {
+            var shouldShow = ColorPlugin.settings.enabled;
+
+            dependentParams.forEach(function(paramItem) {
+                if (!paramItem || !paramItem.item) return;
+
+                var el = paramItem.item;  // зазвичай це jQuery-об'єкт або DOM-елемент
+                if (el.css) {
+                    el.css('display', shouldShow ? 'block' : 'none');
+                } else if (el.style) {
+                    el.style.display = shouldShow ? '' : 'none';
+                }
+
+                // Додатково шукаємо через data-name (більш надійний спосіб)
+                var name = paramItem.param.name;
+                var selectors = document.querySelectorAll('.settings-param[data-name="' + name + '"]');
+                selectors.forEach(function(node){
+                    node.style.display = shouldShow ? '' : 'none';
+                });
             });
+        }
 
-            applyStyles();
-            updateParamsVisibility();
+        // ─── Важливо: викликаємо оновлення видимості після реєстрації ───
+        setTimeout(updateDependentParamsVisibility, 50);
 
-        }, 300);
-    }
+        // Також викликаємо при кожному відкритті вкладки налаштувань
+        Lampa.Listener.follow('settings_component', function(e){
+            if (e.type === 'open') {
+                setTimeout(updateDependentParamsVisibility, 80);
+            }
+        });
 
+        applyStyles();
+
+    }, 300);
+}
     function updateParamsVisibility() {
         var show = ColorPlugin.settings.enabled;
         [
