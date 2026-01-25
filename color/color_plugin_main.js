@@ -4,8 +4,6 @@
 (function () {
     'use strict';
 
-    initPlugin();
-
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_enabled' ||
             e.name === 'color_plugin_main_color' ||
