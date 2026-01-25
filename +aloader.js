@@ -103,8 +103,10 @@
             escapedUrl = defaultLoader.src;
             filterValue = '';
         }
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', 'var(--main-color)');
+        var mainColor = (Lampa.Storage.get('color_plugin_main_color') || '').toLowerCase();
+        var isWhiteMain = mainColor === '#ffffff';
         var newStyle =
+/* 🔹 БЕЗ ФОКУСУ — ЗАВЖДИ БІЛИЙ */
 '.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
 ' display: inline-block;' +
 ' width: 23px;' +
@@ -114,26 +116,25 @@
 ' background: url(\'' + escapedUrl + '\') no-repeat 50% 50%;' +
 ' background-size: contain;' +
 ' background-color: transparent !important;' +
-
-/* 🔹 БІЛИЙ БЕЗ ФОКУСУ */
 ' filter: brightness(0) invert(1) !important;' +
 ' -webkit-filter: brightness(0) invert(1) !important;' +
 '}' +
 
-/* 🔹 glass + focus */
-'body.glass--style .settings-param.focus .activity__loader_prv {' +
-' filter: invert(1) !important;' +
-' -webkit-filter: invert(1) !important;' +
-'}' +
-
-/* 🔹 non-glass + focus — без інверту */
-'body:not(.glass--style) .settings-param.focus .activity__loader_prv {' +
+/* 🔹 ФОКУС — ЗАВЖДИ ЧОРНИЙ */
+'.settings-param.focus[data-name="select_ani_mation"] .activity__loader_prv {' +
 ' filter: none !important;' +
 ' -webkit-filter: none !important;' +
+'}' +
 
-/* 🔹 РАМКА ВИБОРУ — ЗАЛЕЖИТЬ ВІД main_color */
+/* 🔹 GLASS-STYLE: поведінка така сама */
+'body.glass--style .settings-param.focus[data-name="select_ani_mation"] .activity__loader_prv {' +
+' filter: none !important;' +
+' -webkit-filter: none !important;' +
+'}' +
+
+/* 🔹 РАМКА ФОКУСУ — від main_color */
 '.settings-param.focus[data-name="select_ani_mation"] {' +
-' outline: 2px solid ' + mainColor + ' !important;' +
+' outline: 2px solid ' + (mainColor || 'var(--main-color)') + ' !important;' +
 ' outline-offset: -2px;' +
 '}';
 
