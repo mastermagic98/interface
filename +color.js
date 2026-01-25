@@ -1,9 +1,7 @@
 (function () {
     'use strict';
 
-    // ────────────────────────────────────────────────────────────────
-    // Переклади
-    // ────────────────────────────────────────────────────────────────
+    // Додаємо переклади для назв, описів опцій і кольорів
     Lampa.Lang.add({
         color_plugin: {
             ru: 'Настройка цветов',
@@ -64,33 +62,39 @@
             ru: 'Используйте формат #FFFFFF, например #123524',
             en: 'Use the format #FFFFFF, for example #123524',
             uk: 'Використовуйте формат #FFFFFF, наприклад #123524'
-        }
+        },
+        red:    { ru: 'Красный',    en: 'Red',    uk: 'Червоний' },
+        orange: { ru: 'Оранжевый',  en: 'Orange',  uk: 'Помаранчевий' },
+        amber:  { ru: 'Янтарный',   en: 'Amber',   uk: 'Бурштиновий' },
+        yellow: { ru: 'Желтый',     en: 'Yellow',  uk: 'Жовтий' },
+        lime:   { ru: 'Лаймовый',   en: 'Lime',    uk: 'Лаймовий' },
+        green:  { ru: 'Зеленый',    en: 'Green',   uk: 'Зелений' },
+        emerald:{ ru: 'Изумрудный', en: 'Emerald', uk: 'Смарагдовий' },
+        teal:   { ru: 'Бирюзовый',  en: 'Teal',    uk: 'Бірюзовий' },
+        cyan:   { ru: 'Голубой',    en: 'Cyan',    uk: 'Блакитний' },
+        sky:    { ru: 'Небесный',   en: 'Sky',     uk: 'Небесний' },
+        blue:   { ru: 'Синий',      en: 'Blue',    uk: 'Синій' },
+        indigo: { ru: 'Индиго',     en: 'Indigo',  uk: 'Індиго' },
+        violet: { ru: 'Фиолетовый', en: 'Violet',  uk: 'Фіолетовий' },
+        purple: { ru: 'Пурпурный',  en: 'Purple',  uk: 'Пурпуровий' },
+        fuchsia:{ ru: 'Фуксия',     en: 'Fuchsia', uk: 'Фуксія' },
+        pink:   { ru: 'Розовый',    en: 'Pink',    uk: 'Рожевий' },
+        rose:   { ru: 'Розовый',    en: 'Rose',    uk: 'Трояндовий' },
+        slate:  { ru: 'Сланцевый',  en: 'Slate',   uk: 'Сланцевий' },
+        gray:   { ru: 'Серый',      en: 'Gray',    uk: 'Сірий' },
+        zinc:   { ru: 'Цинковый',   en: 'Zinc',    uk: 'Цинковий' },
+        neutral:{ ru: 'Нейтральный',en: 'Neutral', uk: 'Нейтральний' },
+        stone:  { ru: 'Каменный',   en: 'Stone',   uk: 'Кам’яний' }
     });
 
-    // Додаємо переклади назв кольорів (щоб не було помилок при виборі)
-    ['red','orange','amber','yellow','lime','green','emerald','teal','cyan','sky','blue','indigo','violet','purple','fuchsia','pink','rose','slate','gray','zinc','neutral','stone'].forEach(function(key){
-        Lampa.Lang.add({
-            [key]: {
-                ru: key.charAt(0).toUpperCase() + key.slice(1),
-                en: key.charAt(0).toUpperCase() + key.slice(1),
-                uk: key.charAt(0).toUpperCase() + key.slice(1)
-            }
-        });
-    });
-
-    // ────────────────────────────────────────────────────────────────
-    // Основний об'єкт плагіна
-    // ────────────────────────────────────────────────────────────────
+    // Об'єкт для зберігання налаштувань і палітри
     var ColorPlugin = {
-        version: '3.0-2025',
-
         settings: {
-            enabled:           false,
             main_color:        '#353535',
+            enabled:           false,                  // ← змінено на false за замовчуванням
             highlight_enabled: true,
             dimming_enabled:   true
         },
-
         colors: {
             main: {
                 'default': Lampa.Lang.translate('default_color'),
@@ -120,162 +124,437 @@
         }
     };
 
-    // ────────────────────────────────────────────────────────────────
-    // Допоміжні функції
-    // ────────────────────────────────────────────────────────────────
+    // Змінна для запобігання рекурсії при збереженні
+    var isSaving = false;
+
+    // ────────────────────────────────────────────────
+    //                  Утиліти кольорів
+    // ────────────────────────────────────────────────
 
     function hexToRgb(hex) {
-        hex = hex.replace('#','');
-        var r = parseInt(hex.substring(0,2),16);
-        var g = parseInt(hex.substring(2,4),16);
-        var b = parseInt(hex.substring(4,6),16);
-        return r + ',' + g + ',' + b;
+        var cleanHex = hex.replace('#', '');
+        var r = parseInt(cleanHex.substring(0, 2), 16);
+        var g = parseInt(cleanHex.substring(2, 4), 16);
+        var b = parseInt(cleanHex.substring(4, 6), 16);
+        return r + ', ' + g + ', ' + b;
     }
 
     function rgbToHex(rgb) {
-        var m = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-        if (!m) return rgb;
-        return '#' + [m[1],m[2],m[3]].map(n => ('0' + parseInt(n).toString(16)).slice(-2)).join('');
+        var matches = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!matches) return rgb;
+        function hex(n) {
+            return ('0' + parseInt(n).toString(16)).slice(-2);
+        }
+        return '#' + hex(matches[1]) + hex(matches[2]) + hex(matches[3]);
     }
 
-    function isValidHex(hex) {
-        return /^#[0-9A-Fa-f]{6}$/.test(hex);
+    function isValidHex(color) {
+        return /^#[0-9A-Fa-f]{6}$/.test(color);
+    }
+
+    // ────────────────────────────────────────────────
+    //                  Допоміжні функції оновлення
+    // ────────────────────────────────────────────────
+
+    function updateDateElementStyles() {
+        var elements = document.querySelectorAll('div[style*="position: absolute; left: 1em; top: 1em;"]');
+        elements.forEach(function(el) {
+            if (el.querySelector('div[style*="font-size: 2.6em"]')) {
+                el.style.background = 'none';
+                el.style.padding = '0.7em';
+                el.style.borderRadius = '0.7em';
+            }
+        });
+    }
+
+    function updateCanvasFillStyle(context) {
+        if (!context || !context.fillStyle) return;
+        var rgb = hexToRgb(ColorPlugin.settings.main_color);
+        context.fillStyle = 'rgba(' + rgb + ', 1)';
+    }
+
+    function updatePluginIcon() {
+        var ico = document.querySelector('.menu__item[data-component="color_plugin"] .menu__ico');
+        if (ico) {
+            ico.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
+        }
     }
 
     function saveSettings() {
-        Lampa.Storage.set('color_plugin_enabled',           ColorPlugin.settings.enabled + '');
+        if (isSaving) return;
+        isSaving = true;
+
         Lampa.Storage.set('color_plugin_main_color',        ColorPlugin.settings.main_color);
-        Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled + '');
-        Lampa.Storage.set('color_plugin_dimming_enabled',   ColorPlugin.settings.dimming_enabled + '');
+        Lampa.Storage.set('color_plugin_enabled',           ColorPlugin.settings.enabled.toString());
+        Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+        Lampa.Storage.set('color_plugin_dimming_enabled',   ColorPlugin.settings.dimming_enabled.toString());
+
+        localStorage.setItem('color_plugin_main_color',        ColorPlugin.settings.main_color);
+        localStorage.setItem('color_plugin_enabled',           ColorPlugin.settings.enabled.toString());
+        localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+        localStorage.setItem('color_plugin_dimming_enabled',   ColorPlugin.settings.dimming_enabled.toString());
+
+        isSaving = false;
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Скидання змін при вимкненні
-    // ────────────────────────────────────────────────────────────────
-    function resetAllChanges() {
-        var style = document.getElementById('color-plugin-styles');
-        if (style) style.remove();
-
-        document.documentElement.style.removeProperty('--main-color');
-        document.documentElement.style.removeProperty('--main-color-rgb');
-        document.documentElement.style.removeProperty('--accent-color');
+    function forceBlackFilterBackground() {
+        document.querySelectorAll('.simple-button--filter > div').forEach(function(el) {
+            var bg = window.getComputedStyle(el).backgroundColor;
+            if (bg === 'rgba(255, 255, 255, 0.3)' || bg === 'rgb(255, 255, 255)') {
+                el.style.setProperty('background-color', 'rgba(0,0,0,0.3)', 'important');
+            }
+        });
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Застосування всіх стилів
-    // ────────────────────────────────────────────────────────────────
+    function updateSvgIcons() {
+        document.querySelectorAll('path[d^="M2 1.5H19C"], path[d^="M3.81972 14.5957V"], path[d^="M8.39409 0.192139L"]').forEach(function(path) {
+            if (path.getAttribute('d').indexOf('M8.39409 0.192139') !== -1) {
+                if (path.getAttribute('fill') !== 'none') {
+                    path.setAttribute('fill', 'var(--main-color)');
+                }
+            } else {
+                path.setAttribute('fill', 'none');
+            }
+        });
+    }
+
+    // ────────────────────────────────────────────────
+    //                  Головна функція застосування стилів
+    // ────────────────────────────────────────────────
+
     function applyStyles() {
+        var oldStyle = document.getElementById('color-plugin-styles');
+
+        // Якщо плагін вимкнено — видаляємо всі стилі та виходимо
         if (!ColorPlugin.settings.enabled) {
-            resetAllChanges();
+            if (oldStyle) oldStyle.remove();
             return;
         }
 
-        var color = ColorPlugin.settings.main_color;
-        if (!isValidHex(color)) color = '#353535';
+        // Перевірка коректності кольору
+        if (!isValidHex(ColorPlugin.settings.main_color)) {
+            ColorPlugin.settings.main_color = '#353535';
+        }
 
-        var rgb = hexToRgb(color);
-        var focusBorder = (color === '#353535') ? '#ffffff' : color;
+        var style = oldStyle || document.createElement('style');
+        if (!oldStyle) {
+            style.id = 'color-plugin-styles';
+            document.head.appendChild(style);
+        }
 
-        var highlight = ColorPlugin.settings.highlight_enabled ?
-            'inset 0 0 0 0.15em #ffffff' : '';
+        var rgb = hexToRgb(ColorPlugin.settings.main_color);
+        var focusBorder = (ColorPlugin.settings.main_color === '#353535') ? '#ffffff' : 'var(--main-color)';
+
+        var highlight = ColorPlugin.settings.highlight_enabled ? 
+            'inset 0 0 0 0.15em #fff !important' : '';
 
         var dimming = ColorPlugin.settings.dimming_enabled ? `
-            .full-start__rate, .full-start__rate > div:first-child { background: rgba(${rgb}, 0.15) !important; }
-            .reaction, .full-start__button, .items-line__more { background-color: rgba(${rgb}, 0.3) !important; }
-            .card__vote, .card__icons-inner { background: rgba(${rgb}, 0.5) !important; }
-            .simple-button--filter > div { background-color: rgba(${rgb}, 0.3) !important; }
+            .full-start__rate,
+            .full-start__rate > div:first-child { background: rgba(var(--main-color-rgb), 0.15) !important; }
+            .reaction,
+            .full-start__button,
+            .items-line__more { background-color: rgba(var(--main-color-rgb), 0.3) !important; }
+            .card__vote,
+            .card__icons-inner { background: rgba(var(--main-color-rgb), 0.5) !important; }
+            .simple-button--filter > div { background-color: rgba(var(--main-color-rgb), 0.3) !important; }
         ` : '';
 
-        var css = `
+        style.innerHTML = `
             :root {
-                --main-color: ${color} !important;
+                --main-color: ${ColorPlugin.settings.main_color} !important;
                 --main-color-rgb: ${rgb} !important;
-                --accent-color: ${color} !important;
+                --accent-color: ${ColorPlugin.settings.main_color} !important;
+            }
+
+            .modal__title { font-size: 1.7em !important; }
+            .modal__head { margin-bottom: 0 !important; }
+            .modal .scroll__content { padding: 1.0em 0 !important; }
+
+            .menu__ico, .menu__ico:hover, .menu__ico.traverse,
+            .head__action, .head__action.focus, .head__action:hover,
+            .settings-param__ico {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+            }
+
+            .menu__ico.focus {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+                stroke: none !important;
+            }
+
+            .menu__item.focus .menu__ico path[fill],
+            .menu__item.focus .menu__ico rect[fill],
+            .menu__item.focus .menu__ico circle[fill],
+            .menu__item.traverse .menu__ico path[fill],
+            .menu__item.traverse .menu__ico rect[fill],
+            .menu__item.traverse .menu__ico circle[fill],
+            .menu__item:hover .menu__ico path[fill],
+            .menu__item:hover .menu__ico rect[fill],
+            .menu__item:hover .menu__ico circle[fill] {
+                fill: #ffffff !important;
+            }
+
+            .menu__item.focus .menu__ico [stroke],
+            .menu__item.traverse .menu__ico [stroke],
+            .menu__item:hover .menu__ico [stroke] {
+                stroke: #fff !important;
             }
 
             .menu__item.focus, .menu__item.traverse, .menu__item:hover,
-            .full-start__button.focus, .settings-param.focus, .settings-folder.focus,
-            .simple-button.focus, .head__action.focus, .navigation-tabs__button.focus {
+            .console__tab.focus,
+            .settings-param.focus,
+            .selectbox-item.focus, .selectbox-item:hover,
+            .full-person.focus,
+            .full-start__button.focus,
+            .full-descr__tag.focus,
+            .simple-button.focus,
+            .player-panel .button.focus,
+            .search-source.active,
+            .radio-item.focus,
+            .lang__selector-item.focus,
+            .modal__button.focus,
+            .search-history-key.focus,
+            .simple-keyboard-mic.focus,
+            .full-review-add.focus, .full-review.focus,
+            .tag-count.focus,
+            .settings-folder.focus,
+            .noty,
+            .radio-player.focus {
                 background: var(--main-color) !important;
                 color: #ffffff !important;
             }
 
-            .full-start__button.focus, .settings-param.focus, .items-line__more.focus,
-            .menu__item.focus, .settings-folder.focus, .selectbox-item.focus,
-            .console__tab.focus, .player-panel .button.focus {
-                box-shadow: ${highlight} !important;
-                -webkit-box-shadow: ${highlight} !important;
+            .console__tab { background-color: var(--main-color) !important; }
+
+            .console__tab.focus {
+                background: var(--main-color) !important;
+                color: #fff !important;
+                -webkit-box-shadow: ${highlight};
+                box-shadow: ${highlight};
             }
 
-            .console__tab.focus { background: var(--main-color) !important; color:#fff !important; }
-            .player-panel .button.focus { background-color: var(--main-color) !important; color:#fff !important; }
+            .full-start__button.focus,
+            .settings-param.focus,
+            .items-line__more.focus,
+            .menu__item.focus,
+            .settings-folder.focus,
+            .head__action.focus,
+            .selectbox-item.focus,
+            .simple-button.focus,
+            .navigation-tabs__button.focus {
+                -webkit-box-shadow: ${highlight};
+                box-shadow: ${highlight};
+            }
+
+            .timetable__item.focus::before {
+                background-color: var(--main-color) !important;
+                -webkit-box-shadow: ${highlight};
+                box-shadow: ${highlight};
+            }
+
+            .navigation-tabs__button.focus {
+                background-color: var(--main-color) !important;
+                color: #fff !important;
+                -webkit-box-shadow: ${highlight};
+                box-shadow: ${highlight};
+            }
+
+            .items-line__more.focus {
+                color: #fff !important;
+                background-color: var(--main-color) !important;
+            }
+
+            .timetable__item.focus { color: #fff !important; }
+
+            .broadcast__device.focus { background-color: var(--main-color) !important; color: #fff !important; }
+
+            .iptv-menu__list-item.focus, .iptv-program__timeline > div {
+                background-color: var(--main-color) !important;
+            }
+
             .online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }
-            .card.focus .card__view, .card:hover .card__view { border-color: var(--main-color) !important; }
-            .color_square.focus { border: 0.3em solid ${focusBorder} !important; transform: scale(1.1) !important; }
-            .hex-input.focus { border: 0.2em solid ${focusBorder} !important; transform: scale(1.1) !important; }
+
+            .online_modss.focus::after,
+            .online-prestige.focus::after,
+            .radio-item.focus .radio-item__imgbox:after,
+            .iptv-channel.focus::before,
+            .iptv-channel.last--focus::before {
+                border-color: var(--main-color) !important;
+            }
+
+            .card-more.focus .card-more__box::after {
+                border: 0.3em solid var(--main-color) !important;
+            }
+
+            .iptv-playlist-item.focus::after,
+            .iptv-playlist-item:hover::after {
+                border-color: var(--main-color) !important;
+            }
+
+            .ad-bot.focus .ad-bot__content::after,
+            .ad-bot:hover .ad-bot__content::after,
+            .card-episode.focus .full-episode::after,
+            .register.focus::after,
+            .season-episode.focus::after,
+            .full-episode.focus::after,
+            .full-review-add.focus::after,
+            .card.focus .card__view::after,
+            .card:hover .card__view::after,
+            .extensions__item.focus:after,
+            .torrent-item.focus::after,
+            .extensions__block-add.focus:after {
+                border-color: var(--main-color) !important;
+            }
+
+            .broadcast__scan > div { background-color: var(--main-color) !important; }
+
+            .card:hover .card__view,
+            .card.focus .card__view {
+                border-color: var(--main-color) !important;
+            }
+
+            .noty { background: var(--main-color) !important; }
+
+            .radio-player.focus { background-color: var(--main-color) !important; }
+
+            .explorer-card__head-img.focus::after {
+                border: 0.3em solid var(--main-color) !important;
+            }
+
+            .color_square.focus {
+                border: 0.3em solid ${focusBorder} !important;
+                transform: scale(1.1) !important;
+            }
+
+            .hex-input.focus {
+                border: 0.2em solid ${focusBorder} !important;
+                transform: scale(1.1) !important;
+            }
+
+            body.glass--style .selectbox-item.focus,
+            body.glass--style .settings-folder.focus,
+            body.glass--style .settings-param.focus {
+                background-color: var(--main-color) !important;
+            }
+
+            body.glass--style .settings-folder.focus .settings-folder__icon,
+            body.glass--style .selectbox-item.focus,
+            body.glass--style .selectbox-item.focus .selectbox-item__checkbox {
+                -webkit-filter: none !important;
+                filter: none !important;
+            }
+
+            body.glass--style .selectbox-item.focus::after {
+                border-color: #fff !important;
+            }
+
+            .player-panel__position > div::after { background-color: #fff !important; }
+            .player-panel__position { background-color: var(--main-color) !important; }
+            .time-line > div { background-color: var(--main-color) !important; }
+            .head__action.active::after { background-color: var(--main-color) !important; }
+            .card--tv .card__type { background: var(--main-color) !important; }
+            .torrent-serial__progress { background: var(--main-color) !important; }
 
             ${dimming}
 
-            .color_square {
+            .timetable__item--any::before { background-color: rgba(var(--main-color-rgb), 0.3) !important; }
+
+            .element {
+                background: none !important;
+                width: 253px !important;
+            }
+
+            .bookmarks-folder__layer { background-color: var(--main-color) !important; }
+
+            .color_square.default {
+                background-color: #fff !important;
                 width: 35px !important;
                 height: 35px !important;
                 border-radius: 4px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                cursor: pointer !important;
-                font-size: 10px !important;
-                color: #ffffff !important;
-            }
-
-            .color_square.default {
-                background: #ffffff !important;
                 position: relative !important;
             }
 
-            .color_square.default::before,
-            .color_square.default::after {
+            .color_square.default::after,
+            .color_square.default::before {
                 content: "";
                 position: absolute;
                 top: 50%;
                 left: 10%;
                 right: 10%;
                 height: 3px;
-                background: #353535 !important;
+                background-color: #353535 !important;
             }
 
-            .color_square.default::before  { transform: rotate(45deg); }
-            .color_square.default::after   { transform: rotate(-45deg); }
+            .color_square.default::after  { transform: rotate(45deg);  }
+            .color_square.default::before { transform: rotate(-45deg); }
+
+            .color_square {
+                width: 35px !important;
+                height: 35px !important;
+                border-radius: 4px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                cursor: pointer !important;
+                color: #ffffff !important;
+                font-size: 10px !important;
+                text-align: center !important;
+            }
+
+            .color-family-outline {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                gap: 10px !important;
+                border-radius: 8px !important;
+                margin-bottom: 1px !important;
+                padding: 5px !important;
+            }
 
             .color-family-name {
                 width: 80px !important;
                 height: 35px !important;
-                border: 2px solid;
+                border-width: 2px !important;
+                border-style: solid !important;
                 border-radius: 4px !important;
                 display: flex !important;
-                align-items: center !important;
+                flex-direction: column !important;
                 justify-content: center !important;
-                font-weight: bold !important;
-                font-size: 10px !important;
+                align-items: center !important;
+                cursor: default !important;
                 color: #ffffff !important;
+                font-size: 10px !important;
+                font-weight: bold !important;
+                text-align: center !important;
                 text-transform: capitalize !important;
+            }
+
+            .color_square .hex {
+                font-size: 9px !important;
+                opacity: 0.9 !important;
+                text-transform: uppercase !important;
+                z-index: 1 !important;
             }
 
             .hex-input {
                 width: 266px !important;
                 height: 35px !important;
                 border-radius: 8px !important;
-                border: 2px solid #dddddd !important;
-                background: #353535 !important;
-                color: #ffffff !important;
-                font-weight: bold !important;
-                font-size: 12px !important;
+                border: 2px solid #ddd !important;
+                position: relative !important;
+                cursor: pointer !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                cursor: pointer !important;
-                position: relative !important;
+                color: #fff !important;
+                font-size: 12px !important;
+                font-weight: bold !important;
+                text-shadow: 0 0 2px #000 !important;
+                background-color: #353535 !important;
             }
 
             .color-picker-container {
@@ -285,50 +564,65 @@
                 padding: 0 !important;
             }
 
+            .color-picker-container > div {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1px !important;
+            }
+
             @media (max-width: 768px) {
                 .color-picker-container {
                     grid-template-columns: 1fr !important;
                 }
             }
+
+            .torrent-item__viewed { color: var(--main-color) !important; }
+            .online-prestige__viewed {
+                background: rgb(255,255,255) !important;
+                color: rgba(var(--main-color-rgb), 1) !important;
+            }
+            .extensions__item-proto.protocol-https { color: var(--main-color) !important; }
+            .extensions__item-code.success { color: var(--main-color) !important; }
+            .navigation-tabs__badge { background: var(--main-color) !important; }
+            .player-info__values .value--size span { background: rgba(var(--main-color-rgb), 1) !important; }
+            .torrent-item__ffprobe > div { background: rgba(var(--main-color-rgb), 1) !important; }
+            .explorer-card__head-rate > span,
+            .explorer-card__head-rate > svg { color: var(--main-color) !important; }
+            .console__tab > span { background-color: #0009 !important; }
+            .torrent-item__size { background-color: var(--main-color) !important; color: #fff !important; }
+            .torrent-serial__size { background: var(--main-color) !important; }
+            .notice__descr b { color: var(--main-color) !important; }
+
+            circle[cx="24.1445"][cy="24.2546"][r="23.8115"] { fill-opacity: 0 !important; }
+
+            .star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] {
+                fill: var(--main-color) !important;
+            }
         `;
 
-        var styleEl = document.getElementById('color-plugin-styles');
-        if (!styleEl) {
-            styleEl = document.createElement('style');
-            styleEl.id = 'color-plugin-styles';
-            document.head.appendChild(styleEl);
-        }
-        styleEl.textContent = css;
+        // Додаткові оновлення після застосування стилів
+        updateDateElementStyles();
+        forceBlackFilterBackground();
+        updateSvgIcons();
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Оновлення видимості залежних параметрів
-    // ────────────────────────────────────────────────────────────────
-    function updateDependentParamsVisibility() {
-        var isEnabled = ColorPlugin.settings.enabled;
+    // ────────────────────────────────────────────────
+    //            Модальне вікно вибору кольору
+    // ────────────────────────────────────────────────
 
-        var paramsToToggle = [
-            'color_plugin_main_color',
-            'color_plugin_highlight_enabled',
-            'color_plugin_dimming_enabled'
-        ];
-
-        paramsToToggle.forEach(function(name) {
-            var selector = '.settings-param[data-name="' + name + '"]';
-            $(selector).css('display', isEnabled ? 'block' : 'none');
-        });
-
-        // Примусове оновлення інтерфейсу налаштувань
-        setTimeout(function() {
-            if (Lampa.Settings && Lampa.Settings.render) {
-                Lampa.Settings.render();
-            }
-        }, 60);
+    function createColorHtml(color, name) {
+        var cls = color === 'default' ? 'color_square selector default' : 'color_square selector';
+        var stl = color === 'default' ? '' : 'background-color: ' + color + ';';
+        var hex = color === 'default' ? '' : color.replace('#', '');
+        var cnt = color === 'default' ? '' : '<div class="hex">' + hex + '</div>';
+        return '<div class="' + cls + '" tabindex="0" style="' + stl + '" title="' + name + '">' + cnt + '</div>';
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Модальне вікно вибору кольору (спрощена версія)
-    // ────────────────────────────────────────────────────────────────
+    function createFamilyNameHtml(name, firstColor) {
+        return '<div class="color-family-name" style="border-color: ' + (firstColor || '#353535') + ';">' +
+               Lampa.Lang.translate(name.toLowerCase()) + '</div>';
+    }
+
     function openColorPicker() {
         var families = [
             'Red','Orange','Amber','Yellow','Lime','Green','Emerald','Teal','Cyan',
@@ -336,248 +630,340 @@
             'Slate','Gray','Zinc','Neutral','Stone'
         ];
 
-        var htmlParts = families.map(function(family) {
-            var familyColors = Object.keys(ColorPlugin.colors.main).filter(function(key){
-                return ColorPlugin.colors.main[key].indexOf(family + ' ') === 0;
+        var colorContent = families.map(function(family) {
+            var famColors = Object.keys(ColorPlugin.colors.main).filter(function(k){
+                return ColorPlugin.colors.main[k].indexOf(family) === 0 && k !== 'default';
             });
+            if (!famColors.length) return '';
 
-            if (!familyColors.length) return '';
-
-            var firstColor = familyColors[0];
-            var nameHtml = '<div class="color-family-name" style="border-color:' + firstColor + '">' +
-                           Lampa.Lang.translate(family.toLowerCase()) + '</div>';
-
-            var squares = familyColors.map(function(c) {
-                var hex = c.replace('#','');
-                return '<div class="color_square selector" tabindex="0" style="background-color:' + c + ';" title="' + ColorPlugin.colors.main[c] + '">' +
-                       '<div class="hex">' + hex + '</div></div>';
+            var first = famColors[0];
+            var nameHtml = createFamilyNameHtml(family, first);
+            var squares = famColors.map(function(c){
+                return createColorHtml(c, ColorPlugin.colors.main[c]);
             }).join('');
 
             return '<div class="color-family-outline">' + nameHtml + squares + '</div>';
-        }).join('');
+        }).filter(Boolean);
 
-        var defaultBtn = '<div class="color_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_color') + '"></div>';
+        var mid = Math.ceil(colorContent.length / 2);
+        var left  = colorContent.slice(0, mid).join('');
+        var right = colorContent.slice(mid).join('');
+
+        var defBtn = createColorHtml('default', Lampa.Lang.translate('default_color'));
 
         var customHex = Lampa.Storage.get('color_plugin_custom_hex', '#353535');
-        var inputHtml = '<div class="hex-input selector" tabindex="0" style="background-color:' + customHex + ';">' +
-                        '<div class="label">' + Lampa.Lang.translate('custom_hex_input') + '</div>' +
-                        '<div class="value">' + customHex.replace('#','') + '</div></div>';
+        var hexShow  = customHex.replace('#','');
+        var hexBlock = '<div class="color_square selector hex-input" tabindex="0" style="background-color:'+customHex+';">'+
+                       '<div class="label">'+Lampa.Lang.translate('custom_hex_input')+'</div>'+
+                       '<div class="value">'+hexShow+'</div></div>';
 
-        var topRow = '<div style="display:flex; gap:20px; justify-content:center; margin-bottom:15px;">' +
-                     defaultBtn + inputHtml + '</div>';
+        var topRow = '<div style="display:flex; gap:19px; justify-content:center; margin-bottom:10px;">'+
+                     defBtn + hexBlock + '</div>';
 
-        var columns = '<div class="color-picker-container">' +
-                      '<div>' + htmlParts.substring(0, htmlParts.length / 2 | 0) + '</div>' +
-                      '<div>' + htmlParts.substring(htmlParts.length / 2 | 0) + '</div>' +
-                      '</div>';
-
-        var content = $('<div>' + topRow + columns + '</div>');
+        var modalHtml = $(
+            '<div>' + topRow +
+            '<div class="color-picker-container">'+
+                '<div>'+left+'</div>'+
+                '<div>'+right+'</div>'+
+            '</div></div>'
+        );
 
         Lampa.Modal.open({
             title: Lampa.Lang.translate('main_color'),
-            html: content,
             size: 'medium',
             align: 'center',
+            html: modalHtml,
+            className: 'color-picker-modal',
 
-            onSelect: function(selected) {
-                if (!selected.length) return;
+            onBack: function(){
+                saveSettings();
+                Lampa.Modal.close();
+                Lampa.Controller.toggle('settings_component');
+                Lampa.Controller.enable('menu');
+            },
 
-                var el = selected[0];
-                var newColor;
+            onSelect: function(a){
+                if (!a.length || !(a[0] instanceof HTMLElement)) return;
 
-                if ($(el).hasClass('hex-input')) {
+                var el = a[0];
+
+                if (el.classList.contains('hex-input')) {
+                    Lampa.Noty.show(Lampa.Lang.translate('hex_input_hint'));
                     Lampa.Modal.close();
+
                     Lampa.Input.edit({
                         name: 'color_plugin_custom_hex',
                         value: Lampa.Storage.get('color_plugin_custom_hex', ''),
-                        placeholder: '#FFFFFF'
-                    }, function(val) {
-                        if (!val || !isValidHex(val)) {
-                            Lampa.Noty.show('Невірний HEX-код');
+                        placeholder: Lampa.Lang.translate('settings_cub_not_specified')
+                    }, function(val){
+                        if (!val) {
+                            Lampa.Noty.show('HEX-код не введено.');
                             return;
                         }
+                        val = val.trim();
+                        if (!isValidHex(val)) {
+                            Lampa.Noty.show('Невірний формат HEX-коду. Використовуйте #RRGGBB');
+                            return;
+                        }
+
                         ColorPlugin.settings.main_color = val;
                         Lampa.Storage.set('color_plugin_custom_hex', val);
+                        Lampa.Storage.set('color_plugin_main_color', val);
+                        localStorage.setItem('color_plugin_main_color', val);
+
                         applyStyles();
+                        forceBlackFilterBackground();
+                        updateCanvasFillStyle(window.draw_context);
                         saveSettings();
-                        Lampa.Modal.close();
+
+                        Lampa.Controller.toggle('settings_component');
+                        Lampa.Controller.enable('menu');
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     });
                     return;
                 }
 
-                if ($(el).hasClass('default')) {
-                    newColor = '#353535';
+                var color;
+                if (el.classList.contains('default')) {
+                    color = '#353535';
                 } else {
-                    newColor = el.style.backgroundColor;
-                    if (newColor.includes('rgb')) newColor = rgbToHex(newColor);
+                    color = el.style.backgroundColor;
+                    color = color.includes('rgb') ? rgbToHex(color) : color;
                 }
 
-                ColorPlugin.settings.main_color = newColor;
-                Lampa.Storage.set('color_plugin_main_color', newColor);
-                applyStyles();
-                saveSettings();
-                Lampa.Modal.close();
-            },
+                ColorPlugin.settings.main_color = color;
+                Lampa.Storage.set('color_plugin_main_color', color);
+                localStorage.setItem('color_plugin_main_color', color);
 
-            onBack: function() {
+                applyStyles();
+                forceBlackFilterBackground();
+                updateCanvasFillStyle(window.draw_context);
+                saveSettings();
+
                 Lampa.Modal.close();
+                Lampa.Controller.toggle('settings_component');
+                Lampa.Controller.enable('menu');
+
+                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         });
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Ініціалізація плагіна
-    // ────────────────────────────────────────────────────────────────
-    function initColorPlugin() {
-        // Завантаження збережених значень
-        ColorPlugin.settings.enabled           = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        ColorPlugin.settings.main_color        = Lampa.Storage.get('color_plugin_main_color', '#353535') || '#353535';
-        ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
-        ColorPlugin.settings.dimming_enabled   = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+    // ────────────────────────────────────────────────
+    //              Управління видимістю пунктів
+    // ────────────────────────────────────────────────
 
-        // Додаємо компонент у налаштування
+    function updateParamsVisibility(container) {
+        var cont = container || document;
+        var show = ColorPlugin.settings.enabled;
+
+        [
+            'color_plugin_main_color',
+            'color_plugin_highlight_enabled',
+            'color_plugin_dimming_enabled'
+        ].forEach(function(name){
+            var els = cont.querySelectorAll('.settings-param[data-name="'+name+'"]');
+            els.forEach(function(el){
+                el.style.display = show ? '' : 'none';
+            });
+        });
+    }
+
+    // ────────────────────────────────────────────────
+    //                     Ініціалізація
+    // ────────────────────────────────────────────────
+
+    function initPlugin() {
+        // Завантаження збережених значень (або дефолтні)
+        ColorPlugin.settings.main_color =
+            Lampa.Storage.get('color_plugin_main_color', '#353535') ||
+            localStorage.getItem('color_plugin_main_color') ||
+            '#353535';
+
+        ColorPlugin.settings.enabled =
+            Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' ||
+            localStorage.getItem('color_plugin_enabled') === 'true';
+
+        ColorPlugin.settings.highlight_enabled =
+            Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' ||
+            localStorage.getItem('color_plugin_highlight_enabled') === 'true';
+
+        ColorPlugin.settings.dimming_enabled =
+            Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' ||
+            localStorage.getItem('color_plugin_dimming_enabled') === 'true';
+
+        if (!Lampa.SettingsApi) return;
+
+        // Додаємо розділ у налаштування
         Lampa.SettingsApi.addComponent({
             component: 'color_plugin',
             name: Lampa.Lang.translate('color_plugin'),
-            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff"><circle cx="12" cy="12" r="10"/></svg>'
+            icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
         });
 
-        // ─── Перемикач увімкнення ─────────────────────────────────────
+        // Перемикач увімкнення плагіна
         Lampa.SettingsApi.addParam({
             component: 'color_plugin',
-            param: {
-                name: 'color_plugin_enabled',
-                type: 'trigger',
-                default: 'false'
-            },
+            param: { name: 'color_plugin_enabled', type: 'trigger' },
             field: {
                 name: Lampa.Lang.translate('color_plugin_enabled'),
                 description: Lampa.Lang.translate('color_plugin_enabled_description')
             },
-            onChange: function(value) {
-                ColorPlugin.settings.enabled = value === 'true';
+            onChange: function(val){
+                ColorPlugin.settings.enabled = val === 'true';
+                Lampa.Storage.set('color_plugin_enabled', val);
+                localStorage.setItem('color_plugin_enabled', val);
+
+                applyStyles();
+                forceBlackFilterBackground();
+                updateCanvasFillStyle(window.draw_context);
+                updateParamsVisibility();
                 saveSettings();
 
-                if (ColorPlugin.settings.enabled) {
-                    applyStyles();
-                } else {
-                    resetAllChanges();
-                }
-
-                var mainColorItem = $('.settings-param[data-name="color_plugin_main_color"]');
-                if (mainColorItem.length) {
-                    mainColorItem.css('display', value === 'true' ? 'block' : 'none');
-                }
-
-                updateDependentParamsVisibility();
-
-                // Як у прикладі з анімацією
-                if (Lampa.Settings && Lampa.Settings.render) {
-                    Lampa.Settings.render();
-                    setTimeout(updateDependentParamsVisibility, 80);
-                }
+                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+            },
+            onRender: function(item){
+                item.css('display','block');
             }
         });
 
-        // ─── Вибір кольору ─────────────────────────────────────────────
+        // Вибір кольору
         Lampa.SettingsApi.addParam({
             component: 'color_plugin',
-            param: {
-                name: 'color_plugin_main_color',
-                type: 'button'
-            },
+            param: { name: 'color_plugin_main_color', type: 'button' },
             field: {
                 name: Lampa.Lang.translate('main_color'),
                 description: Lampa.Lang.translate('main_color_description')
             },
-            onRender: function(item) {
-                if (Lampa.Storage.get('color_plugin_enabled', 'false') !== 'true') {
-                    item.css('display', 'none');
-                }
+            onRender: function(item){
+                item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
             },
             onChange: openColorPicker
         });
 
-        // ─── Показати рамку ────────────────────────────────────────────
+        // Рамка при фокусі
         Lampa.SettingsApi.addParam({
             component: 'color_plugin',
-            param: {
-                name: 'color_plugin_highlight_enabled',
-                type: 'trigger',
-                default: 'true'
-            },
+            param: { name: 'color_plugin_highlight_enabled', type: 'trigger' },
             field: {
                 name: Lampa.Lang.translate('enable_highlight'),
                 description: Lampa.Lang.translate('enable_highlight_description')
             },
-            onRender: function(item) {
-                if (Lampa.Storage.get('color_plugin_enabled', 'false') !== 'true') {
-                    item.css('display', 'none');
-                }
+            onRender: function(item){
+                item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
             },
-            onChange: function(value) {
-                ColorPlugin.settings.highlight_enabled = value === 'true';
-                saveSettings();
+            onChange: function(val){
+                ColorPlugin.settings.highlight_enabled = val === 'true';
+                Lampa.Storage.set('color_plugin_highlight_enabled', val);
+                localStorage.setItem('color_plugin_highlight_enabled', val);
                 applyStyles();
+                saveSettings();
+                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         });
 
-        // ─── Застосувати затемнення ────────────────────────────────────
+        // Затемнення
         Lampa.SettingsApi.addParam({
             component: 'color_plugin',
-            param: {
-                name: 'color_plugin_dimming_enabled',
-                type: 'trigger',
-                default: 'true'
-            },
+            param: { name: 'color_plugin_dimming_enabled', type: 'trigger' },
             field: {
                 name: Lampa.Lang.translate('enable_dimming'),
                 description: Lampa.Lang.translate('enable_dimming_description')
             },
-            onRender: function(item) {
-                if (Lampa.Storage.get('color_plugin_enabled', 'false') !== 'true') {
-                    item.css('display', 'none');
-                }
+            onRender: function(item){
+                item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
             },
-            onChange: function(value) {
-                ColorPlugin.settings.dimming_enabled = value === 'true';
-                saveSettings();
+            onChange: function(val){
+                ColorPlugin.settings.dimming_enabled = val === 'true';
+                Lampa.Storage.set('color_plugin_dimming_enabled', val);
+                localStorage.setItem('color_plugin_dimming_enabled', val);
                 applyStyles();
+                saveSettings();
+                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         });
 
         // Початкове застосування
         applyStyles();
-        updateDependentParamsVisibility();
-
-        // Оновлення видимості при кожному відкритті налаштувань
-        Lampa.Listener.follow('settings_component', function(e) {
-            if (e.type === 'open') {
-                setTimeout(updateDependentParamsVisibility, 100);
-            }
-        });
+        forceBlackFilterBackground();
+        updateCanvasFillStyle(window.draw_context);
+        updatePluginIcon();
+        updateParamsVisibility();
+        updateSvgIcons();
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Запуск плагіна
-    // ────────────────────────────────────────────────────────────────
-    if (window.appready) {
-        initColorPlugin();
+    // Запуск після готовності програми
+    if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
+        initPlugin();
     } else {
-        Lampa.Listener.follow('app', function(e) {
-            if (e.type === 'ready') {
-                initColorPlugin();
+        Lampa.Listener.follow('app', function(e){
+            if (e.type === 'ready' && Lampa.SettingsApi && Lampa.Storage) {
+                initPlugin();
             }
         });
     }
 
-    // Реакція на будь-які зміни параметрів плагіна
-    Lampa.Storage.listener.follow('change', function(e) {
-        if (e.name.startsWith('color_plugin_')) {
+    // Реакція на зміну будь-якого параметра в сховищі
+    Lampa.Storage.listener.follow('change', function(e){
+        if ([
+            'color_plugin_enabled',
+            'color_plugin_main_color',
+            'color_plugin_highlight_enabled',
+            'color_plugin_dimming_enabled'
+        ].indexOf(e.name) !== -1) {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
+            ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || '#353535';
+            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true';
+            ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true';
+
             applyStyles();
-            updateDependentParamsVisibility();
+            forceBlackFilterBackground();
+            updateCanvasFillStyle(window.draw_context);
+            updateParamsVisibility();
+            updateSvgIcons();
         }
     });
+
+    // Оновлення при відкритті/закритті компонента налаштувань
+    Lampa.Listener.follow('settings_component', function(e){
+        if (e.type === 'open') {
+            applyStyles();
+            forceBlackFilterBackground();
+            updateCanvasFillStyle(window.draw_context);
+            updatePluginIcon();
+            updateParamsVisibility(e.body);
+            updateSvgIcons();
+        } else if (e.type === 'close') {
+            saveSettings();
+            applyStyles();
+            forceBlackFilterBackground();
+            updateCanvasFillStyle(window.draw_context);
+            updatePluginIcon();
+            updateSvgIcons();
+        }
+    });
+
+    // Спостереження за появою фільтрів
+    setTimeout(function(){
+        if (typeof MutationObserver === 'undefined') return;
+
+        var obs = new MutationObserver(function(muts){
+            var need = false;
+            muts.forEach(function(m){
+                if (m.addedNodes) {
+                    for (var i = 0; i < m.addedNodes.length; i++) {
+                        var n = m.addedNodes[i];
+                        if (n.nodeType === 1 && n.querySelector && n.querySelector('.simple-button--filter')) {
+                            need = true;
+                            break;
+                        }
+                    }
+                }
+            });
+            if (need) setTimeout(forceBlackFilterBackground, 120);
+        });
+
+        obs.observe(document.body, { childList: true, subtree: true });
+    }, 800);
 
 })();
