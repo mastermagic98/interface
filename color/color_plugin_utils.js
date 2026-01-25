@@ -1,7 +1,8 @@
 // color_plugin_utils.js
-// Утилітарні функції
+// Утилітарні функції + нові функції для скасування змін та керування observer
 
 var isSaving = false;
+var filterObserver = null;
 
 function hexToRgb(hex) {
     var cleanHex = hex.replace('#', '');
@@ -69,7 +70,6 @@ function saveSettings() {
     Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
     Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
     Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-    // Резервне збереження через localStorage
     localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
     localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
     localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
@@ -98,5 +98,62 @@ function updateSvgIcons() {
         } else {
             path.setAttribute('fill', 'none');
         }
+    }
+}
+
+// НОВА ФУНКЦІЯ: скасування всіх inline-зміни та атрибутів
+function revertChanges() {
+    // Скасування стилів дати
+    var dateElements = document.querySelectorAll('div[style*="position: absolute; left: 1em; top: 1em;"]');
+    dateElements.forEach(function(element) {
+        if (element.querySelector('div[style*="font-size: 2.6em"]')) {
+            element.style.background = '';
+            element.style.padding = '';
+            element.style.borderRadius = '';
+        }
+    });
+
+    // Скасування чорного фону фільтрів
+    var filterElements = document.querySelectorAll('.simple-button--filter > div');
+    filterElements.forEach(function(element) {
+        element.style.backgroundColor = '';
+    });
+
+    // Скасування змін SVG-іконок
+    var svgPaths = document.querySelectorAll('path[d^="M2 1.5H19C"], path[d^="M3.81972 14.5957V"], path[d^="M8.39409 0.192139L"]');
+    svgPaths.forEach(function(path) {
+        path.removeAttribute('fill');
+    });
+}
+
+// НОВА ФУНКЦІЯ: налаштування MutationObserver для фільтрів
+function setupFilterObserver() {
+    if (filterObserver || typeof MutationObserver === 'undefined') return;
+
+    filterObserver = new MutationObserver(function (mutations) {
+        var hasFilter = false;
+        mutations.forEach(function (mutation) {
+            if (mutation.addedNodes) {
+                for (var i = 0; i < mutation.addedNodes.length; i++) {
+                    var node = mutation.addedNodes[i];
+                    if (node.nodeType === 1 && node.querySelector && node.querySelector('.simple-button--filter')) {
+                        hasFilter = true;
+                        break;
+                    }
+                }
+            }
+        });
+        if (hasFilter && ColorPlugin.settings.enabled) {
+            setTimeout(forceBlackFilterBackground, 100);
+        }
+    });
+    filterObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+// НОВА ФУНКЦІЯ: відключення observer
+function disconnectFilterObserver() {
+    if (filterObserver) {
+        filterObserver.disconnect();
+        filterObserver = null;
     }
 }
