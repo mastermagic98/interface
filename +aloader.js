@@ -103,6 +103,7 @@
             escapedUrl = defaultLoader.src;
             filterValue = '';
         }
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', 'var(--main-color)');
         var newStyle =
 '.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
 ' display: inline-block;' +
@@ -129,6 +130,11 @@
 'body:not(.glass--style) .settings-param.focus .activity__loader_prv {' +
 ' filter: none !important;' +
 ' -webkit-filter: none !important;' +
+
+/* 🔹 РАМКА ВИБОРУ — ЗАЛЕЖИТЬ ВІД main_color */
+'.settings-param.focus[data-name="select_ani_mation"] {' +
+' outline: 2px solid ' + mainColor + ' !important;' +
+' outline-offset: -2px;' +
 '}';
 
 
