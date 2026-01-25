@@ -502,21 +502,23 @@
 
             // Увімкнення / вимкнення
             Lampa.SettingsApi.addParam({
-                component: 'color_plugin',
-                param: { name: 'color_plugin_enabled', type: 'trigger', default: 'false' },
-                field: {
-                    name: Lampa.Lang.translate('color_plugin_enabled'),
-                    description: Lampa.Lang.translate('color_plugin_enabled_description')
-                },
-                onRender: function (el) {
-                    el.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');}
-                onChange: function(val){
-                    ColorPlugin.settings.enabled = val === 'true';
-                    saveSettings();
-                    applyStyles();
-                },
-                onRender: function(el){ el.css('display','block'); }
-            });
+    component: 'color_plugin',
+    param: { name: 'color_plugin_enabled', type: 'trigger', default: 'false' },
+    field: {
+        name: Lampa.Lang.translate('color_plugin_enabled'),
+        description: Lampa.Lang.translate('color_plugin_enabled_description')
+    },
+    onChange: function (val) {
+        ColorPlugin.settings.enabled = val === 'true';
+        saveSettings();
+        applyStyles();
+    },
+    onRender: function (el) {
+        el.css('display', 'block');
+    }
+});
+
+
 
             // Вибір кольору
             Lampa.SettingsApi.addParam({
