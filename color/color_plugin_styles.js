@@ -1,30 +1,39 @@
 // color_plugin_styles.js
-// Функція для застосування стилів
+// Оновлена функція applyStyles з повним скасуванням змін при вимкненні
 
 function applyStyles() {
+    // При вимкненні — повністю скасовуємо всі зміни без перевантаження
     if (!ColorPlugin.settings.enabled) {
         var oldStyle = document.getElementById('color-plugin-styles');
         if (oldStyle) oldStyle.remove();
-        // Повернення до стандартних параметрів (основний колір #353535)
-        ColorPlugin.settings.main_color = '#353535';
+
+        revertChanges();
+        disconnectFilterObserver();
+
+        // НЕ скидаємо збережений колір — при повторному увімкненні користувач отримає свій останній вибір
         return;
     }
+
+    // Валідація кольору
     if (!isValidHex(ColorPlugin.settings.main_color)) {
         ColorPlugin.settings.main_color = '#353535';
     }
+
     var style = document.getElementById('color-plugin-styles');
     if (!style) {
         style = document.createElement('style');
         style.id = 'color-plugin-styles';
         document.head.appendChild(style);
     }
+
     var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
-    // Визначаємо колір рамки для .color_square.focus
     var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
+
     var highlightStyles = ColorPlugin.settings.highlight_enabled ? (
         '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
         'box-shadow: inset 0 0 0 0.15em #fff !important;'
     ) : '';
+
     var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
         '.full-start__rate {' +
             'background: rgba(var(--main-color-rgb), 0.15) !important;' +
@@ -51,6 +60,7 @@ function applyStyles() {
             'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
         '}'
     ) : '';
+
     style.innerHTML = [
         ':root {' +
             '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
@@ -412,7 +422,12 @@ function applyStyles() {
             'fill: var(--main-color) !important;' +
         '}'
     ].join('');
+
+    // Застосовуємо зміни, які не покриваються CSS
     updateDateElementStyles();
     forceBlackFilterBackground();
     updateSvgIcons();
+
+    // Активуємо observer для нових елементів
+    setupFilterObserver();
 }
