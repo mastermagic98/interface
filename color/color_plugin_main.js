@@ -1,16 +1,11 @@
 // color_plugin_main.js
-// Головний файл плагіну, який ініціалізує все та підключає інші частини
+// ВИДАЛЕНО старий setTimeout з MutationObserver — тепер керування в utils + styles
 
 (function () {
     'use strict';
 
-    // Підключення інших файлів (у Lampa це може бути через послідовне завантаження скриптів)
-    // Припустимо, що інші файли завантажуються перед цим або через Lampa.Manifest.plugins
-
-    // Ініціалізація плагіну
     initPlugin();
 
-    // Слухачі подій
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_enabled' ||
             e.name === 'color_plugin_main_color' ||
@@ -49,28 +44,4 @@
             updateSvgIcons();
         }
     });
-
-    // Спостереження за мутаціями для динамічного застосування чорного фону фільтрів
-    setTimeout(function () {
-        if (typeof MutationObserver !== 'undefined') {
-            var observer = new MutationObserver(function (mutations) {
-                var hasFilter = false;
-                mutations.forEach(function (mutation) {
-                    if (mutation.addedNodes) {
-                        for (var i = 0; i < mutation.addedNodes.length; i++) {
-                            var node = mutation.addedNodes[i];
-                            if (node.nodeType === 1 && node.querySelector && node.querySelector('.simple-button--filter')) {
-                                hasFilter = true;
-                                break;
-                            }
-                        }
-                    }
-                });
-                if (hasFilter) {
-                    setTimeout(forceBlackFilterBackground, 100);
-                }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
-    }, 500);
 })();
