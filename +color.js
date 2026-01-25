@@ -509,10 +509,14 @@
         description: Lampa.Lang.translate('color_plugin_enabled_description')
     },
     onChange: function (val) {
-        ColorPlugin.settings.enabled = val === 'true';
-        saveSettings();
-        applyStyles();
-    },
+    ColorPlugin.settings.enabled = val === 'true';
+    saveSettings();
+    applyStyles();
+
+    // 🔴 ВАЖЛИВО: примусовий ререндер Settings
+    Lampa.Controller.toggle('settings_component');
+    Lampa.Controller.toggle('settings_component');
+},
     onRender: function (el) {
         el.css('display', 'block');
     }
