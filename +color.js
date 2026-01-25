@@ -1,29 +1,25 @@
 (function () {
     'use strict';
 
-    // ===================== Локалізація =====================
+    /**
+     * ================================
+     * Переклади для плагіна кольорів
+     * ================================
+     */
     Lampa.Lang.add({
         color_plugin: { ru: 'Настройка цветов', en: 'Color settings', uk: 'Налаштування кольорів' },
         color_plugin_enabled: { ru: 'Включить плагин', en: 'Enable plugin', uk: 'Увімкнути плагін' },
-        color_plugin_enabled_description: {
-            ru: 'Изменяет вид некоторых элементов интерфейса Lampa',
-            en: 'Changes the appearance of some Lampa interface elements',
-            uk: 'Змінює вигляд деяких елементів інтерфейсу Lampa'
+        color_plugin_enabled_description: { 
+            ru: 'Изменяет вид некоторых элементов интерфейса Lampa', 
+            en: 'Changes the appearance of some Lampa interface elements', 
+            uk: 'Змінює вигляд деяких елементів інтерфейсу Lampa' 
         },
         main_color: { ru: 'Цвет выделения', en: 'Highlight color', uk: 'Колір виділення' },
         main_color_description: { ru: 'Выберите или укажите цвет', en: 'Select or specify a color', uk: 'Виберіть чи вкажіть колір' },
         enable_highlight: { ru: 'Показать рамку', en: 'Show border', uk: 'Показати рамку' },
-        enable_highlight_description: {
-            ru: 'Включает белую рамку вокруг некоторых выделенных элементов интерфейса',
-            en: 'Enables a white border around some highlighted interface elements',
-            uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу'
-        },
+        enable_highlight_description: { ru: 'Включает белую рамку вокруг некоторых выделенных элементов интерфейса', en: 'Enables a white border around some highlighted interface elements', uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу' },
         enable_dimming: { ru: 'Применить цвет затемнения', en: 'Apply dimming color', uk: 'Застосувати колір затемнення' },
-        enable_dimming_description: {
-            ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения',
-            en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color',
-            uk: 'Змінює колір затемнених елементів інтерфейсу на темний відтінок вибраного кольору виділення'
-        },
+        enable_dimming_description: { ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения', en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color', uk: 'Змінює колір затемнених елементів інтерфейсу на темний відтінок вибраного кольору виділення' },
         default_color: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
         custom_hex_input: { ru: 'Введи HEX-код цвета', en: 'Enter HEX color code', uk: 'Введи HEX-код кольору' },
         hex_input_hint: { ru: 'Используйте формат #FFFFFF, например #123524', en: 'Use the format #FFFFFF, for example #123524', uk: 'Використовуйте формат #FFFFFF, наприклад #123524' },
@@ -51,11 +47,15 @@
         stone: { ru: 'Каменный', en: 'Stone', uk: 'Кам’яний' }
     });
 
-    // ===================== Об'єкт плагіна =====================
+    /**
+     * ================================
+     * Основні налаштування плагіна
+     * ================================
+     */
     var ColorPlugin = {
         settings: {
             main_color: Lampa.Storage.get('color_plugin_main_color', '#353535'),
-            enabled: Lampa.Storage.get('color_plugin_enabled', 'true') === 'true',
+            enabled: Lampa.Storage.get('color_plugin_enabled', 'false') === 'true', // за замовчуванням вимкнено
             highlight_enabled: Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true',
             dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true'
         },
@@ -88,10 +88,14 @@
         }
     };
 
-    // ===================== Внутрішні змінні =====================
+    /**
+     * ================================
+     * Внутрішні допоміжні функції
+     * ================================
+     */
+
     var isSaving = false;
 
-    // ===================== Функції конвертації =====================
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
@@ -111,36 +115,32 @@
         return /^#[0-9A-Fa-f]{6}$/.test(color);
     }
 
-    // ===================== Збереження налаштувань =====================
     function saveSettings() {
         if (isSaving) return;
         isSaving = true;
-
         Lampa.Storage.set('color_plugin_main_color', ColorPlugin.settings.main_color);
         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-
         isSaving = false;
+        applyStyles();
     }
 
-    // ===================== Оновлення стилів =====================
     function applyStyles() {
+        var oldStyle = document.getElementById('color-plugin-styles');
+        if (oldStyle) oldStyle.remove();
+
         if (!ColorPlugin.settings.enabled) return;
 
         if (!isValidHex(ColorPlugin.settings.main_color)) ColorPlugin.settings.main_color = '#353535';
 
-        var style = document.getElementById('color-plugin-styles');
-        if (!style) {
-            style = document.createElement('style');
-            style.id = 'color-plugin-styles';
-            document.head.appendChild(style);
-        }
+        var style = document.createElement('style');
+        style.id = 'color-plugin-styles';
+        document.head.appendChild(style);
 
         var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
         var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
@@ -151,124 +151,76 @@
         ) : '';
 
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
-            '.full-start__rate {' +
-                'background: rgba(var(--main-color-rgb), 0.15) !important;' +
-            '}' +
-            '.full-start__rate > div:first-child {' +
-                'background: rgba(var(--main-color-rgb), 0.15) !important;' +
-            '}' +
-            '.reaction {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}' +
-            '.full-start__button {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}' +
-            '.card__vote {' +
-                'background: rgba(var(--main-color-rgb), 0.5) !important;' +
-            '}' +
-            '.items-line__more {' +
-                'background: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}' +
-            '.card__icons-inner {' +
-                'background: rgba(var(--main-color-rgb), 0.5) !important;' +
-            '}' +
-            '.simple-button--filter > div {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}'
+            '.full-start__rate { background: rgba(' + rgbColor + ', 0.15) !important; }' +
+            '.reaction { background-color: rgba(' + rgbColor + ', 0.3) !important; }' +
+            '.full-start__button { background-color: rgba(' + rgbColor + ', 0.3) !important; }' +
+            '.card__vote { background: rgba(' + rgbColor + ', 0.5) !important; }'
         ) : '';
 
-        style.innerHTML = `
-:root {
-    --main-color: ${ColorPlugin.settings.main_color} !important;
-    --main-color-rgb: ${rgbColor} !important;
-    --accent-color: ${ColorPlugin.settings.main_color} !important;
-}
-.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .head__action.focus, .head__action:hover, .settings-param__ico {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-}
-/* ... повний список стилів понад 400 рядків ... */
-.color_square.focus {
-    border: 0.3em solid ${focusBorderColor} !important;
-    transform: scale(1.1) !important;
-}
-/* Тут йде весь масив .color-square, .hex-input, .color-picker-container, .torrent-item, .card, .modal і інші стилі */
-${dimmingStyles}
-        `;
-
+        style.innerHTML = ':root { --main-color: ' + ColorPlugin.settings.main_color + ' !important; --main-color-rgb: ' + rgbColor + ' !important; }' +
+                          highlightStyles + dimmingStyles;
     }
 
-    // ===================== Оновлення іконки плагіна =====================
-    function updatePluginIcon() {
-        if (!Lampa.SettingsApi || !Lampa.SettingsApi.components) return;
-
-        var component = Lampa.SettingsApi.components.find(c => c.component === 'color_plugin');
-        if (component) {
-            component.icon = '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c1.09 1.09.81 2.91-.7 3H8a7 7 0 0 0 0-14z"/></svg>';
-        }
-    }
-
-    // ===================== Ініціалізація =====================
+    /**
+     * ================================
+     * Ініціалізація плагіна
+     * ================================
+     */
     function initPlugin() {
+        applyStyles();
         Lampa.SettingsApi.add({
             component: 'color_plugin',
             title: Lampa.Lang.translate('color_plugin'),
-            icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c1.09 1.09.81 2.91-.7 3H8a7 7 0 0 0 0-14z"/></svg>',
+            icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04z"/></svg>',
             params: [
                 {
-                    type: 'toggle',
-                    key: 'enabled',
-                    title: Lampa.Lang.translate('color_plugin_enabled'),
+                    id: 'enabled',
+                    name: Lampa.Lang.translate('color_plugin_enabled'),
                     description: Lampa.Lang.translate('color_plugin_enabled_description'),
+                    type: 'bool',
                     value: ColorPlugin.settings.enabled,
-                    onChange: function (val) {
-                        ColorPlugin.settings.enabled = val;
+                    onChange: function (v) {
+                        ColorPlugin.settings.enabled = v;
                         saveSettings();
-                        applyStyles();
                     }
                 },
                 {
-                    type: 'color',
-                    key: 'main_color',
-                    title: Lampa.Lang.translate('main_color'),
+                    id: 'main_color',
+                    name: Lampa.Lang.translate('main_color'),
                     description: Lampa.Lang.translate('main_color_description'),
+                    type: 'color',
                     value: ColorPlugin.settings.main_color,
-                    onChange: function (val) {
-                        ColorPlugin.settings.main_color = val;
+                    onChange: function (v) {
+                        ColorPlugin.settings.main_color = v;
                         saveSettings();
-                        applyStyles();
                     }
                 },
                 {
-                    type: 'toggle',
-                    key: 'highlight_enabled',
-                    title: Lampa.Lang.translate('enable_highlight'),
+                    id: 'highlight_enabled',
+                    name: Lampa.Lang.translate('enable_highlight'),
                     description: Lampa.Lang.translate('enable_highlight_description'),
+                    type: 'bool',
                     value: ColorPlugin.settings.highlight_enabled,
-                    onChange: function (val) {
-                        ColorPlugin.settings.highlight_enabled = val;
+                    onChange: function (v) {
+                        ColorPlugin.settings.highlight_enabled = v;
                         saveSettings();
-                        applyStyles();
                     }
                 },
                 {
-                    type: 'toggle',
-                    key: 'dimming_enabled',
-                    title: Lampa.Lang.translate('enable_dimming'),
+                    id: 'dimming_enabled',
+                    name: Lampa.Lang.translate('enable_dimming'),
                     description: Lampa.Lang.translate('enable_dimming_description'),
+                    type: 'bool',
                     value: ColorPlugin.settings.dimming_enabled,
-                    onChange: function (val) {
-                        ColorPlugin.settings.dimming_enabled = val;
+                    onChange: function (v) {
+                        ColorPlugin.settings.dimming_enabled = v;
                         saveSettings();
-                        applyStyles();
                     }
                 }
             ]
         });
-
-        applyStyles();
-        updatePluginIcon();
     }
 
     document.addEventListener('DOMContentLoaded', initPlugin);
+
 })();
