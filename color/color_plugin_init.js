@@ -133,14 +133,3 @@ function initPlugin() {
         }
     }, 100); // Затримка для забезпечення готовності Lampa.Storage
 }
-
-// Запускаємо плагін після готовності програми
-if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
-    initPlugin();
-} else {
-    Lampa.Listener.follow('app', function (event) {
-        if (event.type === 'ready' && Lampa.SettingsApi && Lampa.Storage) {
-            initPlugin();
-        }
-    });
-}
