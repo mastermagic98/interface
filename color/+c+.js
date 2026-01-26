@@ -19,7 +19,7 @@
         'https://mastermagic98.github.io/interface/color/color_plugin_styles.js',
         'https://mastermagic98.github.io/interface/color/color_plugin_ui.js',
         'https://mastermagic98.github.io/interface/color/color_plugin_visibility.js',
-        'https://mastermagic98.github.io/interface/color/color_plugin_init.js',
+    //    'https://mastermagic98.github.io/interface/color/color_plugin_init.js',
         'https://mastermagic98.github.io/interface/color/color_plugin_main.js'
     ];
 
