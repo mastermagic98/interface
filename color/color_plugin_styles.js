@@ -29,38 +29,7 @@ function applyStyles() {
     var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
     var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
 
-    var highlightStyles = ColorPlugin.settings.highlight_enabled ? (
-        '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
-        'box-shadow: inset 0 0 0 0.15em #fff !important;'
-    ) : '';
-
-    var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
-        '.full-start__rate {' +
-            'background: rgba(var(--main-color-rgb), 0.15) !important;' +
-        '}' +
-        '.full-start__rate > div:first-child {' +
-            'background: rgba(var(--main-color-rgb), 0.15) !important;' +
-        '}' +
-        '.reaction {' +
-            'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-        '}' +
-        '.full-start__button {' +
-            'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-        '}' +
-        '.card__vote {' +
-            'background: rgba(var(--main-color-rgb), 0.5) !important;' +
-        '}' +
-        '.items-line__more {' +
-            'background: rgba(var(--main-color-rgb), 0.3) !important;' +
-        '}' +
-        '.card__icons-inner {' +
-            'background: rgba(var(--main-color-rgb), 0.5) !important;' +
-        '}' +
-        '.simple-button--filter > div {' +
-            'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-        '}'
-    ) : '';
-
+   
     style.innerHTML = [
         ':root {' +
             '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
@@ -125,7 +94,6 @@ function applyStyles() {
         '.console__tab.focus {' +
             'background: var(--main-color) !important;' +
             'color: #fff !important;' +
-            highlightStyles +
         '}',
         '.menu__item.focus, .menu__item.traverse, .menu__item:hover, ' +
         '.full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
@@ -140,16 +108,13 @@ function applyStyles() {
         '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
         '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
         '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
-            highlightStyles +
         '}',
         '.timetable__item.focus::before {' +
             'background-color: var(--main-color) !important;' +
-            highlightStyles +
         '}',
         '.navigation-tabs__button.focus {' +
             'background-color: var(--main-color) !important;' +
             'color: #fff !important;' +
-            highlightStyles +
         '}',
         '.items-line__more.focus {' +
             'color: #fff !important;' +
@@ -253,7 +218,7 @@ function applyStyles() {
         '.torrent-serial__progress {' +
             'background: var(--main-color) !important;' +
         '}',
-        dimmingStyles,
+        ,
         '.timetable__item--any::before {' +
             'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
         '}',
@@ -422,7 +387,10 @@ function applyStyles() {
             'fill: var(--main-color) !important;' +
         '}'
     ].join('');
-
+// Застосовуємо стилі рамки та заокруглення з окремого модуля
+if (window.ColorPluginHighlight && typeof window.ColorPluginHighlight.apply === 'function') {
+    window.ColorPluginHighlight.apply(style);
+}
     // Застосовуємо зміни, які не покриваються CSS
     updateDateElementStyles();
     forceBlackFilterBackground();
