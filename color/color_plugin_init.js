@@ -123,6 +123,34 @@ function initPlugin() {
                     }
                 }
             });
+            // Заокруглені кути виділення (як у меню зліва)
+Lampa.SettingsApi.addParam({
+    component: 'color_plugin',
+    param: {
+        name: 'color_plugin_round_highlight',
+        type: 'trigger',
+        default: ColorPlugin.settings.round_highlight_enabled.toString()
+    },
+    field: {
+        name: 'Заокруглені кути виділення',
+        description: 'Робить виділені елементи (фокус) заокругленими, як пункти меню зліва'
+    },
+    onRender: function (item) {
+        if (item && typeof item.css === 'function') {
+            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+        }
+    },
+    onChange: function (value) {
+        ColorPlugin.settings.round_highlight_enabled = value === 'true';
+        Lampa.Storage.set('color_plugin_round_highlight', ColorPlugin.settings.round_highlight_enabled.toString());
+        localStorage.setItem('color_plugin_round_highlight', ColorPlugin.settings.round_highlight_enabled.toString());
+        applyStyles();
+        saveSettings();
+        if (Lampa.Settings && Lampa.Settings.render) {
+            Lampa.Settings.render();
+        }
+    }
+});
             // Застосовуємо стилі при ініціалізації
             applyStyles();
             forceBlackFilterBackground();
