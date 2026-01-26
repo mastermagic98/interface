@@ -23,9 +23,9 @@
             uk: 'Колір виділення'
         },
         main_color_description: {
-            ru: 'Выберите или укажите цвет выделения',
-            en: 'Select or specify a highlight color',
-            uk: 'Виберіть чи вкажіть колір виділення'
+            ru: 'Выберите или укажите цвет',
+            en: 'Select or specify a color',
+            uk: 'Виберіть чи вкажіть колір'
         },
         enable_highlight: {
             ru: 'Показать рамку',
@@ -38,9 +38,9 @@
             uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу'
         },
         enable_dimming: {
-            ru: 'Колір затемнення',
-            en: 'Dimming color',
-            uk: 'Колір затемнення'
+            ru: 'Применить цвет затемнения',
+            en: 'Apply dimming color',
+            uk: 'Застосувати колір затемнення'
         },
         enable_dimming_description: {
             ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения',
@@ -83,37 +83,7 @@
         gray: { ru: 'Серый', en: 'Gray', uk: 'Сірий' },
         zinc: { ru: 'Цинковый', en: 'Zinc', uk: 'Цинковий' },
         neutral: { ru: 'Нейтральный', en: 'Neutral', uk: 'Нейтральний' },
-        stone: { ru: 'Каменный', en: 'Stone', uk: 'Кам’яний' },
-        border_title: {
-            ru: 'РАМКА',
-            en: 'BORDER',
-            uk: 'РАМКА'
-        },
-        border_radius: {
-            ru: 'Заокругление рамки',
-            en: 'Border radius',
-            uk: 'Заокруглення рамки'
-        },
-        border_radius_description: {
-            ru: 'Выберите степень заокругления рамки',
-            en: 'Select the degree of border rounding',
-            uk: 'Виберіть ступінь заокруглення рамки'
-        },
-        none: {
-            ru: 'Без заокругления',
-            en: 'No rounding',
-            uk: 'Без заокруглення'
-        },
-        medium: {
-            ru: 'Среднее заокругление',
-            en: 'Medium rounding',
-            uk: 'Середнє заокруглення'
-        },
-        strong: {
-            ru: 'Сильное заокругление',
-            en: 'Strong rounding',
-            uk: 'Сильне заокруглення'
-        }
+        stone: { ru: 'Каменный', en: 'Stone', uk: 'Кам’яний' }
     });
     // Об'єкт для зберігання налаштувань і палітри
     var ColorPlugin = {
@@ -121,8 +91,7 @@
             main_color: Lampa.Storage.get('color_plugin_main_color', '#353535'),
             enabled: Lampa.Storage.get('color_plugin_enabled', 'false') === 'true',
             highlight_enabled: Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true',
-            dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true',
-            border_radius: Lampa.Storage.get('color_plugin_border_radius', 'medium')
+            dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true'
         },
         colors: {
             main: {
@@ -221,13 +190,11 @@
         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-        Lampa.Storage.set('color_plugin_border_radius', ColorPlugin.settings.border_radius);
         // Резервне збереження через localStorage
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-        localStorage.setItem('color_plugin_border_radius', ColorPlugin.settings.border_radius);
         isSaving = false;
     }
     // Функція для примусового чорного фону фільтрів
@@ -274,17 +241,6 @@
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? (
             '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
             'box-shadow: inset 0 0 0 0.15em #fff !important;'
-        ) : '';
-        var radius = ColorPlugin.settings.border_radius === 'none' ? '0' : ColorPlugin.settings.border_radius === 'medium' ? '0.5em' : '1em';
-        var borderRadiusStyles = ColorPlugin.settings.highlight_enabled ? (
-            '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
-            '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
-            '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
-                'border-radius: ' + radius + ' !important;' +
-            '}' +
-            '.timetable__item.focus::before {' +
-                'border-radius: ' + radius + ' !important;' +
-            '}'
         ) : '';
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
             '.full-start__rate {' +
@@ -672,7 +628,9 @@
             '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] {' +
                 'fill: var(--main-color) !important;' +
             '}',
-            borderRadiusStyles
+            '.settings-param.focus, .settings-folder.focus {' +
+                'border-radius: 0.5em !important;' +
+            '}'
         ].join('');
         updateDateElementStyles();
         forceBlackFilterBackground();
@@ -826,9 +784,8 @@
     function updateParamsVisibility(body) {
         var params = [
             'color_plugin_main_color',
-            'color_plugin_dimming_enabled',
-            'color_plugin_border_radius',
-            'color_plugin_highlight_enabled'
+            'color_plugin_highlight_enabled',
+            'color_plugin_dimming_enabled'
         ];
         var container = body || document;
         for (var i = 0; i < params.length; i++) {
@@ -853,7 +810,7 @@
             });
             for (var k = 0; k < componentParams.length; k++) {
                 var param = componentParams[k];
-                if (param.param.name !== 'color_plugin_enabled' && param.param.name !== 'border_title') {
+                if (param.param.name !== 'color_plugin_enabled') {
                     var paramElement = document.querySelector('.settings-param[data-name="' + param.param.name + '"]');
                     if (paramElement && paramElement.style) {
                         paramElement.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
@@ -871,7 +828,6 @@
             ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
             ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
             ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'medium') || localStorage.getItem('color_plugin_border_radius') || 'medium';
             // Додаємо компонент до меню налаштувань
             if (Lampa.SettingsApi) {
                 Lampa.SettingsApi.addComponent({
@@ -930,83 +886,6 @@
                         openColorPicker();
                     }
                 });
-                // Колір затемнення
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: {
-                        name: 'color_plugin_dimming_enabled',
-                        type: 'trigger',
-                        default: ColorPlugin.settings.dimming_enabled.toString()
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('enable_dimming'),
-                        description: Lampa.Lang.translate('enable_dimming_description')
-                    },
-                    onRender: function (item) {
-                        if (item && typeof item.css === 'function') {
-                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                        }
-                    },
-                    onChange: function (value) {
-                        ColorPlugin.settings.dimming_enabled = value === 'true';
-                        Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-                        localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
-                        applyStyles();
-                        saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) {
-                            Lampa.Settings.render();
-                        }
-                    }
-                });
-                // Заголовок РАМКА
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: {
-                        name: 'border_title',
-                        type: 'title'
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('border_title')
-                    },
-                    onRender: function (item) {
-                        if (item && typeof item.css === 'function') {
-                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                        }
-                    }
-                });
-                // Заокруглення рамки
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: {
-                        name: 'color_plugin_border_radius',
-                        type: 'select',
-                        values: [
-                            { value: 'none', name: Lampa.Lang.translate('none') },
-                            { value: 'medium', name: Lampa.Lang.translate('medium') },
-                            { value: 'strong', name: Lampa.Lang.translate('strong') }
-                        ],
-                        default: ColorPlugin.settings.border_radius
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('border_radius'),
-                        description: Lampa.Lang.translate('border_radius_description')
-                    },
-                    onRender: function (item) {
-                        if (item && typeof item.css === 'function') {
-                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                        }
-                    },
-                    onChange: function (value) {
-                        ColorPlugin.settings.border_radius = value;
-                        Lampa.Storage.set('color_plugin_border_radius', value);
-                        localStorage.setItem('color_plugin_border_radius', value);
-                        applyStyles();
-                        saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) {
-                            Lampa.Settings.render();
-                        }
-                    }
-                });
                 // Показати рамку
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
@@ -1028,6 +907,34 @@
                         ColorPlugin.settings.highlight_enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
                         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                    }
+                });
+                // Застосувати колір затемнення
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_dimming_enabled',
+                        type: 'trigger',
+                        default: ColorPlugin.settings.dimming_enabled.toString()
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('enable_dimming'),
+                        description: Lampa.Lang.translate('enable_dimming_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.dimming_enabled = value === 'true';
+                        Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
+                        localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
                         applyStyles();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) {
@@ -1060,13 +967,11 @@
         if (e.name === 'color_plugin_enabled' ||
             e.name === 'color_plugin_main_color' ||
             e.name === 'color_plugin_highlight_enabled' ||
-            e.name === 'color_plugin_dimming_enabled' ||
-            e.name === 'color_plugin_border_radius') {
+            e.name === 'color_plugin_dimming_enabled') {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'medium') || localStorage.getItem('color_plugin_border_radius') || 'medium';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
@@ -1081,7 +986,6 @@
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'medium') || localStorage.getItem('color_plugin_border_radius') || 'medium';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
