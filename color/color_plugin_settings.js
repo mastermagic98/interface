@@ -6,8 +6,7 @@ var ColorPlugin = {
         main_color: Lampa.Storage.get('color_plugin_main_color', '#353535'),
         enabled: Lampa.Storage.get('color_plugin_enabled', 'true') === 'true',
         highlight_enabled: Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true',
-        dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true',
-        round_highlight_enabled: Lampa.Storage.get('color_plugin_round_highlight', 'false') === 'true'  // нова
+        dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true'
     },
     colors: {
         main: {
