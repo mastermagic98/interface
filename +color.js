@@ -627,6 +627,9 @@
             '}',
             '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] {' +
                 'fill: var(--main-color) !important;' +
+            '}',
+            '.settings-param.focus, .settings-folder.focus {' +
+                'border-radius: 0.5em !important;' +
             '}'
         ].join('');
         updateDateElementStyles();
