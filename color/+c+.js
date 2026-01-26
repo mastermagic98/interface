@@ -13,6 +13,7 @@
         'https://mastermagic98.github.io/interface/color/color_plugin_visibility.js',
         'https://mastermagic98.github.io/interface/color/color_plugin_init.js',    // тут addParam і базова ініціалізація
         'https://mastermagic98.github.io/interface/color/color_plugin_main.js'     // тут тільки слухачі (без власного initPlugin)
+        'https://mastermagic98.github.io/interface/color/color_plugin_highlight.js'
     ];
 
     // Послідовне асинхронне завантаження модулів (щоб уникнути гонок і дублювання)
