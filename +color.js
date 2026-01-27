@@ -99,20 +99,30 @@
             en: 'Select the degree of border rounding',
             uk: 'Виберіть ступінь заокруглення рамки'
         },
-        none: {
-            ru: 'Без заокругления',
-            en: 'No rounding',
-            uk: 'Без заокруглення'
+        border_radius_square: {
+            ru: 'Квадратная',
+            en: 'Square',
+            uk: 'Квадратна'
         },
-        medium: {
-            ru: 'Среднее заокругление',
-            en: 'Medium rounding',
-            uk: 'Середнє заокруглення'
+        border_radius_rounded: {
+            ru: 'Заокругленная',
+            en: 'Rounded',
+            uk: 'Заокруглена'
         },
-        strong: {
-            ru: 'Сильное заокругление',
-            en: 'Strong rounding',
-            uk: 'Сильне заокруглення'
+        border_radius_circle: {
+            ru: 'Круглая',
+            en: 'Round',
+            uk: 'Кругла'
+        },
+        no_change_head_border: {
+            ru: 'Не изменять форму рамки шапки',
+            en: 'Do not change header border shape',
+            uk: 'Не змінювати форму рамки шапки'
+        },
+        no_change_head_border_description: {
+            ru: 'Отключает модификацию формы рамки для иконок в заголовке.',
+            en: 'Disables modification of the border shape for icons in the header.',
+            uk: 'Вимикає модифікацію форми рамки для іконок у заголовку.'
         }
     });
     // Об'єкт для зберігання налаштувань і палітри
@@ -122,7 +132,8 @@
             enabled: Lampa.Storage.get('color_plugin_enabled', 'false') === 'true',
             highlight_enabled: Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true',
             dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true',
-            border_radius: Lampa.Storage.get('color_plugin_border_radius', 'medium')
+            border_radius: Lampa.Storage.get('color_plugin_border_radius', 'rounded'),
+            no_head_border_change: Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true'
         },
         colors: {
             main: {
@@ -222,12 +233,14 @@
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         Lampa.Storage.set('color_plugin_border_radius', ColorPlugin.settings.border_radius);
+        Lampa.Storage.set('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
         // Резервне збереження через localStorage
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         localStorage.setItem('color_plugin_border_radius', ColorPlugin.settings.border_radius);
+        localStorage.setItem('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
         isSaving = false;
     }
     // Функція для примусового чорного фону фільтрів
@@ -275,12 +288,15 @@
             '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
             'box-shadow: inset 0 0 0 0.15em #fff !important;'
         ) : '';
-        var radius = ColorPlugin.settings.border_radius === 'none' ? '0' : ColorPlugin.settings.border_radius === 'medium' ? '0.5em' : '1em';
+        var radius = ColorPlugin.settings.border_radius === 'square' ? '0' : ColorPlugin.settings.border_radius === 'rounded' ? '0.5em' : '1em';
         var borderRadiusStyles = ColorPlugin.settings.highlight_enabled ? (
             '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
-            '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
+            '.menu__item.focus, .settings-folder.focus, ' +
             '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
                 'border-radius: ' + radius + ' !important;' +
+            '}' +
+            '.head__action.focus {' +
+                (ColorPlugin.settings.no_head_border_change ? '' : 'border-radius: ' + radius + ' !important;') +
             '}' +
             '.timetable__item.focus::before {' +
                 'border-radius: ' + radius + ' !important;' +
@@ -828,6 +844,7 @@
             'color_plugin_main_color',
             'color_plugin_dimming_enabled',
             'color_plugin_border_radius',
+            'color_plugin_no_head_border_change',
             'color_plugin_highlight_enabled'
         ];
         var container = body || document;
@@ -871,7 +888,8 @@
             ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
             ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
             ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'medium') || localStorage.getItem('color_plugin_border_radius') || 'medium';
+            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
+            ColorPlugin.settings.no_head_border_change = (Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true' || localStorage.getItem('color_plugin_no_head_border_change') === 'true');
             // Додаємо компонент до меню налаштувань
             if (Lampa.SettingsApi) {
                 Lampa.SettingsApi.addComponent({
@@ -981,9 +999,9 @@
                         name: 'color_plugin_border_radius',
                         type: 'select',
                         values: [
-                            { value: 'none', name: Lampa.Lang.translate('none') },
-                            { value: 'medium', name: Lampa.Lang.translate('medium') },
-                            { value: 'strong', name: Lampa.Lang.translate('strong') }
+                            { value: 'square', name: Lampa.Lang.translate('border_radius_square') },
+                            { value: 'rounded', name: Lampa.Lang.translate('border_radius_rounded') },
+                            { value: 'circle', name: Lampa.Lang.translate('border_radius_circle') }
                         ],
                         default: ColorPlugin.settings.border_radius
                     },
@@ -1000,6 +1018,34 @@
                         ColorPlugin.settings.border_radius = value;
                         Lampa.Storage.set('color_plugin_border_radius', value);
                         localStorage.setItem('color_plugin_border_radius', value);
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                    }
+                });
+                // Не змінювати форму рамки шапки
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_no_head_border_change',
+                        type: 'trigger',
+                        default: ColorPlugin.settings.no_head_border_change.toString()
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('no_change_head_border'),
+                        description: Lampa.Lang.translate('no_change_head_border_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.no_head_border_change = value === 'true';
+                        Lampa.Storage.set('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
+                        localStorage.setItem('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
                         applyStyles();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) {
@@ -1061,12 +1107,14 @@
             e.name === 'color_plugin_main_color' ||
             e.name === 'color_plugin_highlight_enabled' ||
             e.name === 'color_plugin_dimming_enabled' ||
-            e.name === 'color_plugin_border_radius') {
+            e.name === 'color_plugin_border_radius' ||
+            e.name === 'color_plugin_no_head_border_change') {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'medium') || localStorage.getItem('color_plugin_border_radius') || 'medium';
+            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
+            ColorPlugin.settings.no_head_border_change = Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true' || localStorage.getItem('color_plugin_no_head_border_change') === 'true';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
@@ -1081,7 +1129,8 @@
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'medium') || localStorage.getItem('color_plugin_border_radius') || 'medium';
+            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
+            ColorPlugin.settings.no_head_border_change = Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true' || localStorage.getItem('color_plugin_no_head_border_change') === 'true';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
