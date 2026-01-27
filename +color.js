@@ -125,6 +125,22 @@
             uk: 'Вимикає модифікацію форми рамки для іконок у заголовку.'
         }
     });
+    // Допоміжна функція для отримання перекладу (виправляє [object Object])
+    function getLang(key) {
+        try {
+            var trans = Lampa.Lang.translate(key);
+            if (typeof trans === 'string') return trans;
+
+            var obj = Lampa.Lang.get(key) || trans;
+            if (typeof obj === 'object' && obj !== null) {
+                var locale = Lampa.Lang.locale || 'uk';
+                return obj[locale] || obj.uk || obj.ru || obj.en || key;
+            }
+            return key;
+        } catch (e) {
+            return key;
+        }
+    }
     // Об'єкт для зберігання налаштувань і палітри
     var ColorPlugin = {
         settings: {
@@ -999,15 +1015,15 @@
                         name: 'color_plugin_border_radius',
                         type: 'select',
                         values: [
-                            { value: 'square', name: Lampa.Lang.translate('border_radius_square') },
-                            { value: 'rounded', name: Lampa.Lang.translate('border_radius_rounded') },
-                            { value: 'circle', name: Lampa.Lang.translate('border_radius_circle') }
+                            { value: 'square', name: getLang('border_radius_square') },
+                            { value: 'rounded', name: getLang('border_radius_rounded') },
+                            { value: 'circle', name: getLang('border_radius_circle') }
                         ],
                         default: ColorPlugin.settings.border_radius
                     },
                     field: {
                         name: Lampa.Lang.translate('border_radius'),
-                        description: Lampa.Lang.translate('border_radius_description')
+                        description: 'Квадратна — прямі кути (0)\nЗаокруглена — м’які кути (0.5em)\nКругла — максимальне заокруглення (1em, майже кругла)'
                     },
                     onRender: function (item) {
                         if (item && typeof item.css === 'function') {
