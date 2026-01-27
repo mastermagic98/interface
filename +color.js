@@ -23,8 +23,8 @@
             uk: 'Колір виділення'
         },
         main_color_description: {
-            ru: 'Выберите или укажите цвет выделения',
-            en: 'Select or specify a highlight color',
+            ru: 'Выберите или укажите цвет',
+            en: 'Select or specify a color',
             uk: 'Виберіть чи вкажіть колір виділення'
         },
         enable_highlight: {
@@ -38,7 +38,7 @@
             uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу'
         },
         enable_dimming: {
-            ru: 'Колір затемнення',
+            ru: 'Колір затемнения',
             en: 'Dimming color',
             uk: 'Колір затемнення'
         },
@@ -84,11 +84,6 @@
         zinc: { ru: 'Цинковый', en: 'Zinc', uk: 'Цинковий' },
         neutral: { ru: 'Нейтральный', en: 'Neutral', uk: 'Нейтральний' },
         stone: { ru: 'Каменный', en: 'Stone', uk: 'Кам’яний' },
-        border_title: {
-            ru: 'РАМКА',
-            en: 'BORDER',
-            uk: 'РАМКА'
-        },
         border_radius: {
             ru: 'Заокругление рамки',
             en: 'Border radius',
@@ -125,22 +120,6 @@
             uk: 'Вимикає модифікацію форми рамки для іконок у заголовку.'
         }
     });
-    // Допоміжна функція для отримання перекладу (виправляє [object Object])
-    function getLang(key) {
-        try {
-            var trans = Lampa.Lang.translate(key);
-            if (typeof trans === 'string') return trans;
-
-            var obj = Lampa.Lang.get(key) || trans;
-            if (typeof obj === 'object' && obj !== null) {
-                var locale = Lampa.Lang.locale || 'uk';
-                return obj[locale] || obj.uk || obj.ru || obj.en || key;
-            }
-            return key;
-        } catch (e) {
-            return key;
-        }
-    }
     // Об'єкт для зберігання налаштувань і палітри
     var ColorPlugin = {
         settings: {
@@ -149,7 +128,7 @@
             highlight_enabled: Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true',
             dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true',
             border_radius: Lampa.Storage.get('color_plugin_border_radius', 'rounded'),
-            no_head_border_change: Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true'
+            no_change_head_border: Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true'
         },
         colors: {
             main: {
@@ -249,14 +228,14 @@
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         Lampa.Storage.set('color_plugin_border_radius', ColorPlugin.settings.border_radius);
-        Lampa.Storage.set('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
+        Lampa.Storage.set('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
         // Резервне збереження через localStorage
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         localStorage.setItem('color_plugin_border_radius', ColorPlugin.settings.border_radius);
-        localStorage.setItem('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
+        localStorage.setItem('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
         isSaving = false;
     }
     // Функція для примусового чорного фону фільтрів
@@ -304,20 +283,6 @@
             '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
             'box-shadow: inset 0 0 0 0.15em #fff !important;'
         ) : '';
-        var radius = ColorPlugin.settings.border_radius === 'square' ? '0' : ColorPlugin.settings.border_radius === 'rounded' ? '0.5em' : '1em';
-        var borderRadiusStyles = ColorPlugin.settings.highlight_enabled ? (
-            '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
-            '.menu__item.focus, .settings-folder.focus, ' +
-            '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
-                'border-radius: ' + radius + ' !important;' +
-            '}' +
-            '.head__action.focus {' +
-                (ColorPlugin.settings.no_head_border_change ? '' : 'border-radius: ' + radius + ' !important;') +
-            '}' +
-            '.timetable__item.focus::before {' +
-                'border-radius: ' + radius + ' !important;' +
-            '}'
-        ) : '';
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
             '.full-start__rate {' +
                 'background: rgba(var(--main-color-rgb), 0.15) !important;' +
@@ -344,6 +309,17 @@
                 'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
             '}'
         ) : '';
+        var borderRadiusValue;
+        if (ColorPlugin.settings.border_radius === 'square') {
+            borderRadiusValue = '0 !important;';
+        } else if (ColorPlugin.settings.border_radius === 'rounded') {
+            borderRadiusValue = '0.5em !important;';
+        } else if (ColorPlugin.settings.border_radius === 'circle') {
+            borderRadiusValue = '50% !important;';
+        } else {
+            borderRadiusValue = '0.5em !important;';
+        }
+        var headBorderRadius = ColorPlugin.settings.no_change_head_border ? '' : 'border-radius: ' + borderRadiusValue;
         style.innerHTML = [
             ':root {' +
                 '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
@@ -424,19 +400,26 @@
             '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
             '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
                 highlightStyles +
+                'border-radius: ' + borderRadiusValue +
+            '}',
+            '.head__action.focus {' +
+                headBorderRadius +
             '}',
             '.timetable__item.focus::before {' +
                 'background-color: var(--main-color) !important;' +
                 highlightStyles +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.navigation-tabs__button.focus {' +
                 'background-color: var(--main-color) !important;' +
                 'color: #fff !important;' +
                 highlightStyles +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.items-line__more.focus {' +
                 'color: #fff !important;' +
                 'background-color: var(--main-color) !important;' +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.timetable__item.focus {' +
                 'color: #fff !important;' +
@@ -444,9 +427,11 @@
             '.broadcast__device.focus {' +
                 'background-color: var(--main-color) !important;' +
                 'color: #fff !important;' +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.iptv-menu__list-item.focus, .iptv-program__timeline>div {' +
                 'background-color: var(--main-color) !important;' +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, ' +
             '.modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, ' +
@@ -454,6 +439,7 @@
             '.tag-count.focus, .settings-folder.focus, .settings-param.focus, ' +
             '.selectbox-item.focus, .selectbox-item:hover {' +
                 'background: var(--main-color) !important;' +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.online.focus {' +
                 'box-shadow: 0 0 0 0.2em var(--main-color) !important;' +
@@ -703,8 +689,7 @@
             '}',
             '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] {' +
                 'fill: var(--main-color) !important;' +
-            '}',
-            borderRadiusStyles
+            '}'
         ].join('');
         updateDateElementStyles();
         forceBlackFilterBackground();
@@ -859,9 +844,9 @@
         var params = [
             'color_plugin_main_color',
             'color_plugin_dimming_enabled',
+            'color_plugin_highlight_enabled',
             'color_plugin_border_radius',
-            'color_plugin_no_head_border_change',
-            'color_plugin_highlight_enabled'
+            'color_plugin_no_change_head_border'
         ];
         var container = body || document;
         for (var i = 0; i < params.length; i++) {
@@ -886,7 +871,7 @@
             });
             for (var k = 0; k < componentParams.length; k++) {
                 var param = componentParams[k];
-                if (param.param.name !== 'color_plugin_enabled' && param.param.name !== 'border_title') {
+                if (param.param.name !== 'color_plugin_enabled') {
                     var paramElement = document.querySelector('.settings-param[data-name="' + param.param.name + '"]');
                     if (paramElement && paramElement.style) {
                         paramElement.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
@@ -905,7 +890,7 @@
             ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
             ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
             ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
-            ColorPlugin.settings.no_head_border_change = (Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true' || localStorage.getItem('color_plugin_no_head_border_change') === 'true');
+            ColorPlugin.settings.no_change_head_border = (Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_no_change_head_border') === 'true');
             // Додаємо компонент до меню налаштувань
             if (Lampa.SettingsApi) {
                 Lampa.SettingsApi.addComponent({
@@ -1000,72 +985,11 @@
                         type: 'title'
                     },
                     field: {
-                        name: Lampa.Lang.translate('border_title')
+                        name: 'РАМКА'
                     },
                     onRender: function (item) {
                         if (item && typeof item.css === 'function') {
                             item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                        }
-                    }
-                });
-                // Заокруглення рамки
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: {
-                        name: 'color_plugin_border_radius',
-                        type: 'select',
-                        values: [
-                            { value: 'square', name: getLang('border_radius_square') },
-                            { value: 'rounded', name: getLang('border_radius_rounded') },
-                            { value: 'circle', name: getLang('border_radius_circle') }
-                        ],
-                        default: ColorPlugin.settings.border_radius
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('border_radius'),
-                        description: 'Квадратна — прямі кути (0)\nЗаокруглена — м’які кути (0.5em)\nКругла — максимальне заокруглення (1em, майже кругла)'
-                    },
-                    onRender: function (item) {
-                        if (item && typeof item.css === 'function') {
-                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                        }
-                    },
-                    onChange: function (value) {
-                        ColorPlugin.settings.border_radius = value;
-                        Lampa.Storage.set('color_plugin_border_radius', value);
-                        localStorage.setItem('color_plugin_border_radius', value);
-                        applyStyles();
-                        saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) {
-                            Lampa.Settings.render();
-                        }
-                    }
-                });
-                // Не змінювати форму рамки шапки
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: {
-                        name: 'color_plugin_no_head_border_change',
-                        type: 'trigger',
-                        default: ColorPlugin.settings.no_head_border_change.toString()
-                    },
-                    field: {
-                        name: Lampa.Lang.translate('no_change_head_border'),
-                        description: Lampa.Lang.translate('no_change_head_border_description')
-                    },
-                    onRender: function (item) {
-                        if (item && typeof item.css === 'function') {
-                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
-                        }
-                    },
-                    onChange: function (value) {
-                        ColorPlugin.settings.no_head_border_change = value === 'true';
-                        Lampa.Storage.set('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
-                        localStorage.setItem('color_plugin_no_head_border_change', ColorPlugin.settings.no_head_border_change.toString());
-                        applyStyles();
-                        saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) {
-                            Lampa.Settings.render();
                         }
                     }
                 });
@@ -1090,6 +1014,67 @@
                         ColorPlugin.settings.highlight_enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
                         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                    }
+                });
+                // Заокруглення рамки
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_border_radius',
+                        type: 'select',
+                        values: {
+                            'square': Lampa.Lang.translate('border_radius_square'),
+                            'rounded': Lampa.Lang.translate('border_radius_rounded'),
+                            'circle': Lampa.Lang.translate('border_radius_circle')
+                        },
+                        default: ColorPlugin.settings.border_radius
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('border_radius'),
+                        description: Lampa.Lang.translate('border_radius_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.border_radius = value;
+                        Lampa.Storage.set('color_plugin_border_radius', value);
+                        localStorage.setItem('color_plugin_border_radius', value);
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) {
+                            Lampa.Settings.render();
+                        }
+                    }
+                });
+                // Не змінювати форму рамки шапки
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: {
+                        name: 'color_plugin_no_change_head_border',
+                        type: 'trigger',
+                        default: ColorPlugin.settings.no_change_head_border.toString()
+                    },
+                    field: {
+                        name: Lampa.Lang.translate('no_change_head_border'),
+                        description: Lampa.Lang.translate('no_change_head_border_description')
+                    },
+                    onRender: function (item) {
+                        if (item && typeof item.css === 'function') {
+                            item.css('display', ColorPlugin.settings.enabled ? 'block' : 'none');
+                        }
+                    },
+                    onChange: function (value) {
+                        ColorPlugin.settings.no_change_head_border = value === 'true';
+                        Lampa.Storage.set('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
+                        localStorage.setItem('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
                         applyStyles();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) {
@@ -1124,13 +1109,13 @@
             e.name === 'color_plugin_highlight_enabled' ||
             e.name === 'color_plugin_dimming_enabled' ||
             e.name === 'color_plugin_border_radius' ||
-            e.name === 'color_plugin_no_head_border_change') {
+            e.name === 'color_plugin_no_change_head_border') {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
             ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
-            ColorPlugin.settings.no_head_border_change = Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true' || localStorage.getItem('color_plugin_no_head_border_change') === 'true';
+            ColorPlugin.settings.no_change_head_border = Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_no_change_head_border') === 'true';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
@@ -1146,7 +1131,7 @@
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
             ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
-            ColorPlugin.settings.no_head_border_change = Lampa.Storage.get('color_plugin_no_head_border_change', 'false') === 'true' || localStorage.getItem('color_plugin_no_head_border_change') === 'true';
+            ColorPlugin.settings.no_change_head_border = Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_no_change_head_border') === 'true';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
