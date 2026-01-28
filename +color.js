@@ -23,7 +23,30 @@
         change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
         change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
         change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
-        change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' }
+        change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
+        // Переклади для назв сімейств кольорів
+        red: { ru: 'Червоний', en: 'Red', uk: 'Червоний' },
+        orange: { ru: 'Помаранчевий', en: 'Orange', uk: 'Помаранчевий' },
+        amber: { ru: 'Бурштиновий', en: 'Amber', uk: 'Бурштиновий' },
+        yellow: { ru: 'Жовтий', en: 'Yellow', uk: 'Жовтий' },
+        lime: { ru: 'Лаймовий', en: 'Lime', uk: 'Лаймовий' },
+        green: { ru: 'Зелений', en: 'Green', uk: 'Зелений' },
+        emerald: { ru: 'Смарагдовий', en: 'Emerald', uk: 'Смарагдовий' },
+        teal: { ru: 'Бірюзовий', en: 'Teal', uk: 'Бірюзовий' },
+        cyan: { ru: 'Блакитний', en: 'Cyan', uk: 'Блакитний' },
+        sky: { ru: 'Небесний', en: 'Sky', uk: 'Небесний' },
+        blue: { ru: 'Синій', en: 'Blue', uk: 'Синій' },
+        indigo: { ru: 'Індиго', en: 'Indigo', uk: 'Індиго' },
+        violet: { ru: 'Фіолетовий', en: 'Violet', uk: 'Фіолетовий' },
+        purple: { ru: 'Пурпуровий', en: 'Purple', uk: 'Пурпуровий' },
+        fuchsia: { ru: 'Фуксія', en: 'Fuchsia', uk: 'Фуксія' },
+        pink: { ru: 'Рожевий', en: 'Pink', uk: 'Рожевий' },
+        rose: { ru: 'Трояндовий', en: 'Rose', uk: 'Трояндовий' },
+        slate: { ru: 'Сланцевий', en: 'Slate', uk: 'Сланцевий' },
+        gray: { ru: 'Сірий', en: 'Gray', uk: 'Сірий' },
+        zinc: { ru: 'Цинковий', en: 'Zinc', uk: 'Цинковий' },
+        neutral: { ru: 'Нейтральний', en: 'Neutral', uk: 'Нейтральний' },
+        stone: { ru: 'Кам’яний', en: 'Stone', uk: 'Кам’яний' }
     });
 
     // Налаштування та палітра
@@ -42,7 +65,7 @@
                 'default': Lampa.Lang.translate('default_color'),
                 '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
                 '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
-                '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'ınar Amber 6',
+                '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
                 '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
                 '#7ccf00': 'Lime 1', '#5ea500': 'Lime 2', '#497d00': 'Lime 3', '#3c6300': 'Lime 4', '#35530e': 'Lime 5', '#192e03': 'Lime 6',
                 '#00c950': 'Green 1', '#00a63e': 'Green 2', '#008236': 'Green 3', '#016630': 'Green 4', '#0d542b': 'Green 5', '#032e15': 'Green 6',
@@ -169,7 +192,7 @@
         const radius = `border-radius: ${radiusValue} !important;`;
 
         // Шапка
-        const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; }';
+        const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; }';
         const headRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
 
         // Плеєр
@@ -204,7 +227,7 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Фокус без шапки і плеєра (radius для всіх інших)
+            // Фокус без шапки і плеєра
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
@@ -239,7 +262,8 @@
             '.color_square.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
             '.hex-input.focus { border: 0.2em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
             '.color_square.default { background-color: #fff !important; width: 35px !important; height: 35px !important; border-radius: 4px !important; position: relative !important; }',
-            '.color_square.default::after, .color_square.default::before { content: "" !important; position: absolute !important; top: 50% !important; left: 10% !important; right: 10% !important; height: 3px !important; background-color: #353535 !important; }',
+            '.color_square.default::after, .color_square.default::before { content: "" !important; position: absolute !important; top 
+            50% !important; left: 10% !important; right: 10% !important; height: 3px !important; background-color: #353535 !important; }',
             '.color_square.default::after { transform: rotate(45deg) !important; }',
             '.color_square.default::before { transform: rotate(-45deg) !important; }',
             '.color_square { width: 35px !important; height: 35px !important; border-radius: 4px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; cursor: pointer !important; color: #ffffff !important; font-size: 10px !important; text-align: center !important; }',
@@ -273,7 +297,7 @@
 
     const openColorPicker = () => {
         const colorKeys = Object.keys(ColorPlugin.colors.main);
-        const families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral', 'Stone'];
+        const families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral"', 'Stone'];
         const colorsByFamily = families.map(family => {
             const familyColors = colorKeys.filter(key => ColorPlugin.colors.main[key].startsWith(family) && key !== 'default');
             return familyColors.length ? { name: family, colors: familyColors } : null;
