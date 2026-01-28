@@ -11,7 +11,7 @@
         enable_highlight: { ru: 'Показать рамку', en: 'Show border', uk: 'Показати рамку' },
         enable_highlight_description: { ru: 'Включает белую рамку вокруг некоторых выделенных элементов интерфейса', en: 'Enables a white border around some highlighted interface elements', uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу' },
         enable_dimming: { ru: 'Колір затемнения', en: 'Dimming color', uk: 'Колір затемнення' },
-        enable_dimming_description: { ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения', en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color', uk: 'Змінює колір затемнених елементів інтерфейсу на темний [{' },
+        enable_dimming_description: { ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения', en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color', uk: 'Змінює колір затемнених елементів інтерфейсу на темний відтінок вибраного кольору виділення' },
         default_color: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
         custom_hex_input: { ru: 'Введи HEX-код цвета', en: 'Enter HEX color code', uk: 'Введи HEX-код кольору' },
         hex_input_hint: { ru: 'Используйте формат #FFFFFF, например #123524', en: 'Use the format #FFFFFF, for example #123524', uk: 'Використовуйте формат #FFFFFF, наприклад #123524' },
@@ -37,7 +37,7 @@
         colors: {
             main: {
                 'default': Lampa.Lang.translate('default_color'),
-                '#fb2c36': 'Red 1', '#e7000b': ' preoccup Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
+                '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
                 '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
                 '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
                 '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
@@ -71,6 +71,13 @@
         const g = parseInt(clean.substring(2, 4), 16);
         const b = parseInt(clean.substring(4, 6), 16);
         return `${r}, ${g}, ${b}`;
+    };
+
+    const rgbToHex = (rgb) => {
+        const matches = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!matches) return rgb;
+        const hex = n => ('0' + parseInt(n).toString(16)).slice(-2);
+        return '#' + hex(matches[1]) + hex(matches[2]) + hex(matches[3]).toUpperCase();
     };
 
     const isValidHex = (color) => /^#[0-9A-Fa-f]{6}$/.test(color);
@@ -308,14 +315,10 @@
                             Lampa.Input.edit(inputOptions, (value) => {
                                 if (!value) {
                                     Lampa.Noty.show('HEX-код не введено.');
-                                    Lampa.Controller.toggle('settings_component');
-                                    Lampa.Controller.enable('menu');
                                     return;
                                 }
                                 if (!isValidHex(value)) {
                                     Lampa.Noty.show('Невірний формат HEX-коду. Використовуйте формат #FFFFFF.');
-                                    Lampa.Controller.toggle('settings_component');
-                                    Lampa.Controller.enable('menu');
                                     return;
                                 }
                                 Lampa.Storage.set('color_plugin_custom_hex', value);
@@ -326,8 +329,6 @@
                                 forceBlackFilterBackground();
                                 updateCanvasFillStyle(window.draw_context);
                                 saveSettings();
-                                Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
                                 if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                             });
                             return;
@@ -335,7 +336,9 @@
                             color = '#353535';
                         } else {
                             color = selectedElement.style.backgroundColor || ColorPlugin.settings.main_color;
-                            color = color.includes('rgb') ? rgbToHex(color) : color;
+                            if (color.includes('rgb')) {
+                                color = rgbToHex(color);
+                            }
                         }
                         ColorPlugin.settings.main_color = color;
                         Lampa.Storage.set('color_plugin_main_color', color);
@@ -345,13 +348,13 @@
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         Lampa.Modal.close();
-                        Lampa.Controller.toggle('settings_component');
-                        Lampa.Controller.enable('menu');
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 }
             });
-        } catch (e) {}
+        } catch (e) {
+            console.error('ColorPlugin openColorPicker error:', e);
+        }
     };
 
     const updateParamsVisibility = (body = document) => {
