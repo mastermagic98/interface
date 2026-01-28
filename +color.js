@@ -11,95 +11,7 @@
         enable_highlight: { ru: 'Показать рамку', en: 'Show border', uk: 'Показати рамку' },
         enable_highlight_description: { ru: 'Включает белую рамку вокруг некоторых выделенных элементов интерфейса', en: 'Enables a white border around some highlighted interface elements', uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу' },
         enable_dimming: { ru: 'Колір затемнения', en: 'Dimming color', uk: 'Колір затемнення' },
-        enable_dimming_description: { ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения', en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color', uk: 'Змінює колір затемнених елементів інтерфейсу на темний відтінок вибраного кольору виділення' },
-        default_color: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
-        custom_hex_input: { ru: 'Введи HEX-код цвета', en: 'Enter HEX color code', uk: 'Введи HEX-код кольору' },
-        hex_input_hint: { ru: 'Используйте формат #FFFFFF, например #123524', en: 'Use the format #FFFFFF, for example #123524', uk: 'Використовуйте формат #FFFFFF, наприклад #123524' },
-        border_radius: { ru: 'Заокругление рамки', en: 'Border radius', uk: 'Заокруглення рамки' },
-        border_radius_description: { ru: 'Выберите степень заокругления рамки', en: 'Select the degree of border rounding', uk: 'Виберіть ступінь заокруглення рамки' },
-        border_radius_rect: { ru: 'Прямокутний', en: 'Rectangular', uk: 'Прямокутний' },
-        border_radius_card: { ru: 'Картковий', en: 'Card', uk: 'Картковий' },
-        border_radius_capsule: { ru: 'Капсульний', en: 'Capsule', uk: 'Капсульний' },
-        change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
-        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' }
-    });
-
-    // Налаштування плагіну
-    const ColorPlugin = {
-        settings: {
-            main_color: '#353535',
-            enabled: false,
-            highlight_enabled: true,
-            dimming_enabled: true,
-            border_radius: 'card',
-            change_head_border: false
-        },
-        colors: {
-            main: {
-                'default': Lampa.Lang.translate('default_color'),
-                '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
-                '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
-                '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
-                '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
-                '#7ccf00': 'Lime 1', '#5ea500': 'Lime 2', '#497d00': 'Lime 3', '#'... (весь список кольорів без змін)
-            }
-        }
-    };
-
-    let isSaving = false;
-
-    // Допоміжні функції
-    const hexToRgb = (hex) => {
-        const clean = hex.replace('#', '');
-        const r = parseInt(clean.substring(0, 2), 16);
-        const g = parseInt(clean.substring(2, 4), 16);
-        const b = parseInt(clean.substring(4, 6), 16);
-        return `${r}, ${g}, ${b}`;
-    };
-
-    const isValidHex = (color) => /^#[0-9A-Fa-f]{6}$/.test(color);
-
-    const loadSettings = () => {
-        ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
-        ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
-        ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
-        ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
-        ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
-        ColorPlugin.settings.change_head_border = (Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true');
-    };
-
-    const saveSettings = () => {
-        if (isSaving) return;
-        isSaving = true;
-        const keys = ['main_color', 'enabled', 'highlight_enabled', 'dimming_enabled', 'border_radius', 'change_head_border'];
-        keys.forEach(key => {
-            const storageKey = 'color_plugin_' + key;
-            const value = ColorPlugin.settings[key];
-            Lampa.Storage.set(storageKey, typeof value === 'boolean' ? value.toString() : value);
-            localStorage.setItem(storageKey, typeof value === 'boolean' ? value.toString() : value);
-        });
-        isSaving = false;
-    };
-
-Маємо виправити всі знайдені помилки та оптимізувати код.
-
-Ось повний виправлений та оптимізовано чистий варіант плагіну:
-
-```javascript
-(function () {
-    'use strict';
-
-    // Переклади
-    Lampa.Lang.add({
-        color_plugin: { ru: 'Настройка цветов', en: 'Color settings', uk: 'Налаштування кольорів' },
-        color_plugin_enabled: { ru: 'Включить плагин', en: 'Enable plugin', uk: 'Увімкнути плагін' },
-        color_plugin_enabled_description: { ru: 'Изменяет вид некоторых элементов интерфейса Lampa', en: 'Changes the appearance of some Lampa interface elements', uk: 'Змінює вигляд деяких елементів інтерфейсу Lampa' },
-        main_color: { ru: 'Цвет выделения', en: 'Highlight color', uk: 'Колір виділення' },
-        main_color_description: { ru: 'Выберите или укажите цвет выделения', en: 'Select or specify a highlight color', uk: 'Виберіть чи вкажіть колір виділення' },
-        enable_highlight: { ru: 'Показать рамку', en: 'Show border', uk: 'Показати рамку' },
-        enable_highlight_description: { ru: 'Включает белую рамку вокруг некоторых выделенных элементов интерфейса', en: 'Enables a white border around some highlighted interface elements', uk: 'Вмикає білу рамку навколо деяких виділених елементів інтерфейсу' },
-        enable_dimming: { ru: 'Колір затемнения', en: 'Dimming color', uk: 'Колір затемнення' },
-        enable_dimming_description: { ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения', en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color', uk: 'Змінює колір затемнених елементів інтерфейсу на темний відтінок вибраного кольору виділення' },
+        enable_dimming_description: { ru: 'Изменяет цвет затемненных элементов интерфейса на темный оттенок выбранного цвета выделения', en: 'Changes the color of dimmed interface elements to a dark shade of the selected highlight color', uk: 'Змінює колір затемнених елементів інтерфейсу на темний [{' },
         default_color: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
         custom_hex_input: { ru: 'Введи HEX-код цвета', en: 'Enter HEX color code', uk: 'Введи HEX-код кольору' },
         hex_input_hint: { ru: 'Используйте формат #FFFFFF, например #123524', en: 'Use the format #FFFFFF, for example #123524', uk: 'Використовуйте формат #FFFFFF, наприклад #123524' },
@@ -125,7 +37,7 @@
         colors: {
             main: {
                 'default': Lampa.Lang.translate('default_color'),
-                '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
+                '#fb2c36': 'Red 1', '#e7000b': ' preoccup Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
                 '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
                 '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
                 '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
@@ -335,9 +247,7 @@
         return `<div class="${className}" tabindex="0" style="${style}" title="${name}">${content}</div>`;
     };
 
-    const createFamilyNameHtml = (name, color) => {
-        return `<div class="color-family-name" style="border-color: ${color || '#353535'};">${Lampa.Lang.translate(name.toLowerCase())}</div>`;
-    };
+    const createFamilyNameHtml = (name, color) => `<div class="color-family-name" style="border-color: ${color || '#353535'};">${Lampa.Lang.translate(name.toLowerCase())}</div>`;
 
     const openColorPicker = () => {
         const colorKeys = Object.keys(ColorPlugin.colors.main);
@@ -447,8 +357,7 @@
     const updateParamsVisibility = (body = document) => {
         const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border'];
         params.forEach(name => {
-            const selector = `.settings-param[data-name="${name}"]`;
-            document.querySelectorAll(selector).forEach(el => {
+            document.querySelectorAll(`.settings-param[data-name="${name}"]`).forEach(el => {
                 el.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
             });
         });
@@ -465,7 +374,6 @@
                     icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
                 });
 
-                // Увімкнення плагіну
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString() },
@@ -484,7 +392,6 @@
                     onRender: item => item.css?.('display', 'block')
                 });
 
-                // Колір виділення
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'color_plugin_main_color', type: 'button' },
@@ -493,7 +400,6 @@
                     onChange: openColorPicker
                 });
 
-                // Колір затемнення
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'color_plugin_dimming_enabled', type: 'trigger', default: ColorPlugin.settings.dimming_enabled.toString() },
@@ -509,7 +415,6 @@
                     }
                 });
 
-                // Заголовок РАМКА
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'border_title', type: 'title' },
@@ -517,7 +422,6 @@
                     onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none')
                 });
 
-                // Показати рамку
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString() },
@@ -533,7 +437,6 @@
                     }
                 });
 
-                // Заокруглення рамки
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -558,7 +461,6 @@
                     }
                 });
 
-                // Змінювати форму рамки шапки
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'color_plugin_change_head_border', type: 'trigger', default: ColorPlugin.settings.change_head_border.toString() },
@@ -583,14 +485,12 @@
         }, 100);
     };
 
-    // Запуск плагіну
     if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
         initPlugin();
     } else {
         Lampa.Listener.follow('app', e => e.type === 'ready' && initPlugin());
     }
 
-    // Слухачі змін налаштувань
     Lampa.Storage.listener.follow('change', e => {
         if (e.name.startsWith('color_plugin_')) {
             loadSettings();
@@ -619,7 +519,6 @@
         }
     });
 
-    // MutationObserver для фільтрів
     setTimeout(() => {
         if (typeof MutationObserver !== 'undefined') {
             const observer = new MutationObserver(mutations => {
