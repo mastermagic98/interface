@@ -134,7 +134,7 @@
             main: {
                 'default': Lampa.Lang.translate('default_color'),
                 '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
-                '#ff6900价值观': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
+                '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
                 '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
                 '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
                 '#7ccf00': 'Lime 1', '#5ea500': 'Lime 2', '#497d00': 'Lime 3', '#3c6300': 'Lime 4', '#35530e': 'Lime 5', '#192e03': 'Lime 6',
@@ -146,7 +146,7 @@
                 '#2b7fff': 'Blue 1', '#155dfc': 'Blue 2', '#1447e6': 'Blue 3', '#193cb8': 'Blue 4', '#1c398e': 'Blue 5', '#162456': 'Blue 6',
                 '#615fff': 'Indigo 1', '#4f39f6': 'Indigo 2', '#432dd7': 'Indigo 3', '#372aac': 'Indigo 4', '#312c85': 'Indigo 5', '#1e1a4d': 'Indigo 6',
                 '#8e51ff': 'Violet 1', '#7f22fe': 'Violet 2', '#7008e7': 'Violet 3', '#5d0ec0': 'Violet 4', '#4d179a': 'Violet 5', '#2f0d68': 'Violet 6',
-                '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#8200db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#3c0366': 'Purple 6',
+                '#ad46ff': 'Purple 1', '#9810fa': 'Purple 2', '#8200db': 'Purple 3', '#6e11b0': 'Purple 4', '#59168b': 'Purple 5', '#592c66': 'Purple 6',
                 '#e12afb': 'Fuchsia 1', '#c800de': 'Fuchsia 2', '#a800b7': 'Fuchsia 3', '#8a0194': 'Fuchsia 4', '#721378': 'Fuchsia 5', '#4b004f': 'Fuchsia 6',
                 '#f6339a': 'Pink 1', '#e60076': 'Pink 2', '#c6005c': 'Pink 3', '#a3004c': 'Pink 4', '#861043': 'Pink 5', '#510424': 'Pink 6',
                 '#ff2056': 'Rose 1', '#ec003f': 'Rose 2', '#c70036': 'Rose 3', '#a50036': 'Rose 4', '#8b0836': 'Rose 5', '#4d0218': 'Rose 6',
@@ -164,7 +164,7 @@
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
-        var g = parseInt(cleanHex.substring(2, Court's 4), 16);
+        var g = parseInt(cleanHex.substring(2, 4), 16);
         var b = parseInt(cleanHex.substring(4, 6), 16);
         return r + ', ' + g + ', ' + b;
     }
@@ -266,7 +266,6 @@
         var oldStyle = document.getElementById('color-plugin-styles');
         if (oldStyle) oldStyle.remove();
         if (!ColorPlugin.settings.enabled) {
-            ColorPlugin.settings.main_color = '#353535';
             return;
         }
         if (!isValidHex(ColorPlugin.settings.main_color)) {
@@ -282,30 +281,14 @@
             'box-shadow: inset 0 0 0 0.15em #fff !important;'
         ) : '';
         var dimmingStyles = ColorPlugin.settings.dimming_enabled ? (
-            '.full-start__rate {' +
-                'background: rgba(var(--main-color-rgb), 0.15) !important;' +
-            '}' +
-            '.full-start__rate > div:first-child {' +
-                'background: rgba(var(--main-color-rgb), 0.15) !important;' +
-            '}' +
-            '.reaction {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}' +
-            '.full-start__button {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}' +
-            '.card__vote {' +
-                'background: rgba(var(--main-color-rgb), 0.5) !important;' +
-            '}' +
-            '.items-line__more {' +
-                'background: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}' +
-            '.card__icons-inner {' +
-                'background: rgba(var(--main-color-rgb), 0.5) !important;' +
-            '}' +
-            '.simple-button--filter > div {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}'
+            '.full-start__rate { background: rgba(var(--main-color-rgb), 0.15) !important; }' +
+            '.full-start__rate > div:first-child { background: rgba(var(--main-color-rgb), 0.15) !important; }' +
+            '.reaction { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' +
+            '.full-start__button { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' +
+            '.card__vote { background: rgba(var(--main-color-rgb), 0.5) !important; }' +
+            '.items-line__more { background: rgba(var(--main-color-rgb), 0.3) !important; }' +
+            '.card__icons-inner { background: rgba(var(--main-color-rgb), 0.5) !important; }' +
+            '.simple-button--filter > div { background-color: rgba(var(--main-color-rgb), 0.3) !important; }'
         ) : '';
         var borderRadiusValue;
         if (ColorPlugin.settings.border_radius === 'rect') {
@@ -324,84 +307,34 @@
         }
 
         style.innerHTML = [
-            ':root {' +
-                '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
-                '--main-color-rgb: ' + rgbColor + ' !important;' +
-                '--accent-color: ' + ColorPlugin.settings.main_color + ' !important;' +
-            '}',
+            ':root { --main-color: ' + ColorPlugin.settings.main_color + ' !important; --main-color-rgb: ' + rgbColor + ' !important; --accent-color: ' + ColorPlugin.settings.main_color + ' !important; }',
             '.modal__title { font-size: 1.7em !important; }',
             '.modal__head { margin-bottom: 0 !important; }',
             '.modal .scroll__content { padding: 1.0em 0 !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, ' +
-            '.head__action, .head__action.focus, .head__action:hover, .settings-param__ico {' +
-                'color: #ffffff !important;' +
-                'fill: #ffffff !important;' +
-            '}',
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .head__action.focus, .head__action:hover, .settings-param__ico { color: #ffffff !important; fill: #ffffff !important; }',
             '.menu__ico.focus { color: #ffffff !important; fill: #ffffff !important; stroke: none !important; }',
-            '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], ' +
-            '.menu__item.focus .menu__ico circle[fill], .menu__item.traverse .menu__ico path[fill], ' +
-            '.menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], ' +
-            '.menu__item:hover .menu__ico path[fill], .menu__item:hover .menu__ico rect[fill], ' +
-            '.menu__item:hover .menu__ico circle[fill] { fill: #ffffff !important; }',
+            '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], .menu__item.focus .menu__ico circle[fill], .menu__item.traverse .menu__ico path[fill], .menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], .menu__item:hover .menu__ico path[fill], .menu__item:hover .menu__ico rect[fill], .menu__item:hover .menu__ico circle[fill] { fill: #ffffff !important; }',
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
-            '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, ' +
-            '.console__tab, .console__tab.focus, ' +
-            '.settings-param, .settings-param.focus, ' +
-            '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, ' +
-            '.full-person, .full-person.focus, ' +
-            '.full-start__button, .full-start__button.focus, ' +
-            '.full-descr__tag, .full-descr__tag.focus, ' +
-            '.simple-button, .simple-button.focus, ' +
-            '.player-panel .button, .player-panel .button.focus, ' +
-            '.search-source, .search-source.active, ' +
-            '.radio-item, .radio-item.focus, ' +
-            '.lang__selector-item, .lang__selector-item.focus, ' +
-            '.modal__button, .modal__button.focus, ' +
-            '.search-history-key, .search-history-key.focus, ' +
-            '.simple-keyboard-mic, .simple-keyboard-mic.focus, ' +
-            '.full-review-add, .full-review-add.focus, ' +
-            '.full-review, .full-review.focus, ' +
-            '.tag-count, .tag-count.focus, ' +
-            '.settings-folder, .settings-folder.focus, ' +
-            '.noty, ' +
-            '.radio-player, .radio-player.focus { color: #ffffff !important; }',
+            '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, .selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, .full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .player-panel .button, .player-panel .button.focus, .search-source, .search-source.active, .radio-item, .radio-item.focus, .lang__selector-item, .lang__selector-item.focus, .modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, .full-review-add, .full-review-add.focus, .full-review, .full-review.focus, .tag-count, .tag-count.focus, .settings-folder, .settings-folder.focus, .noty, .radio-player, .radio-player.focus { color: #ffffff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
-            '.console__tab.focus { background: var(--main-color) !important; color: #fff !important;' + highlightStyles + ' }',
-            '.menu__item.focus, .menu__item.traverse, .menu__item:hover, ' +
-            '.full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
-            '.simple-button.focus, .head__action.focus, .head__action:hover, ' +
-            '.player-panel .button.focus, .search-source.active { background: var(--main-color) !important; }',
+            '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlightStyles + ' }',
+            '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, .simple-button.focus, .head__action.focus, .head__action:hover, .player-panel .button.focus, .search-source.active { background: var(--main-color) !important; }',
             '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; }',
             '.full-start__button, .full-start__button.focus { border-radius: ' + borderRadiusValue + ' }',
-            '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
-            '.menu__item.focus, .settings-folder.focus, ' +
-            '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
-                highlightStyles + 'border-radius: ' + borderRadiusValue +
-            '}',
+            '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, .menu__item.focus, .settings-folder.focus, .selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus { ' + highlightStyles + ' border-radius: ' + borderRadiusValue + ' }',
             headBorderStyles,
-            '.timetable__item.focus::before { background-color: var(--main-color) !important;' + highlightStyles + 'border-radius: ' + borderRadiusValue + ' }',
-            '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important;' + highlightStyles + 'border-radius: ' + borderRadiusValue + ' }',
+            '.timetable__item.focus::before { background-color: var(--main-color) !important; ' + highlightStyles + ' border-radius: ' + borderRadiusValue + ' }',
+            '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlightStyles + ' border-radius: ' + borderRadiusValue + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
             '.timetable__item.focus { color: #fff !important; }',
             '.broadcast__device.focus { background-color: var(--main-color) !important; color: #fff !important; border-radius: ' + borderRadiusValue + ' }',
             '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
-            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, ' +
-            '.modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, ' +
-            '.full-review-add.focus, .full-review.focus, ' +
-            '.tag-count.focus, .settings-folder.focus, .settings-param.focus, ' +
-            '.selectbox-item.focus, .selectbox-item:hover { background: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
+            '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .selectbox-item:hover { background: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
-            '.online_modss.focus::after, .online-prestige.focus::after, ' +
-            '.radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, ' +
-            '.iptv-channel.last--focus::before { border-color: var(--main-color) !important; }',
+            '.online_modss.focus::after, .online-prestige.focus::after, .radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, .iptv-channel.last--focus::before { border-color: var(--main-color) !important; }',
             '.card-more.focus .card-more__box::after { border: 0.3em solid var(--main-color) !important; }',
             '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after { border-color: var(--main-color) !important; }',
-            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, ' +
-            '.card-episode.focus .full-episode::after, .register.focus::after, ' +
-            '.season-episode.focus::after, .full-episode.focus::after, ' +
-            '.full-review-add.focus::after, .card.focus .card__view::after, ' +
-            '.card:hover .card__view::after, .extensions__item.focus:after, ' +
-            '.torrent-item.focus::after, .extensions__block-add.focus:after { border-color: var(--main-color) !important; }',
+            '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, .card-episode.focus .full-episode::after, .register.focus::after, .season-episode.focus::after, .full-episode.focus::after, .full-review-add.focus::after, .card.focus .card__view::after, .card:hover .card__view::after, .extensions__item.focus:after, .torrent-item.focus::after, .extensions__block-add.focus:after { border-color: var(--main-color) !important; }',
             '.broadcast__scan > div { background-color: var(--main-color) !important; }',
             '.card:hover .card__view, .card.focus .card__view { border-color: var(--main-color) !important; }',
             '.noty { background: var(--main-color) !important; }',
@@ -409,9 +342,7 @@
             '.explorer-card__head-img.focus::after { border: 0.3em solid var(--main-color) !important; }',
             '.color_square.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
             '.hex-input.focus { border: 0.2em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
-            'body.glass--style .selectbox-item.focus, ' +
-            'body.glass--style .settings-folder.focus, ' +
-            'body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
+            'body.glass--style .selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
             'body.glass--style .settings-folder.focus .settings-folder__icon { -webkit-filter: none !important; filter: none !important; }',
             'body.glass--style .selectbox-item.focus::after { border-color: #fff !important; }',
             'body.glass--style .selectbox-item.focus { filter: none !important; }',
@@ -452,7 +383,7 @@
             '.torrent-serial__size { background: var(--main-color) !important; }',
             '.notice__descr b { color: var(--main-color) !important; }',
             'circle[cx="24.1445"][cy="24.2546"][r="23.8115"] { fill-opacity: 0 !important; }',
-            '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192@p139Z"] { fill: var(--main-color) !important; }'
+            '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] { fill: var(--main-color) !important; }'
         ].join('');
         updateDateElementStyles();
         forceBlackFilterBackground();
@@ -575,6 +506,7 @@
                             color = selectedElement.style.backgroundColor || ColorPlugin.settings.main_color;
                             color = color.includes('rgb') ? rgbToHex(color) : color;
                         }
+                        ColorPlugin.settings.change_head_border = false; // за замовчуванням "Ні" при виборі кольору
                         ColorPlugin.settings.main_color = color;
                         Lampa.Storage.set('color_plugin_main_color', color);
                         localStorage.setItem('color_plugin_main_color', color);
@@ -598,6 +530,7 @@
         var params = [
             'color_plugin_main_color',
             'color_plugin_dimming_enabled',
+            'border_title',
             'color_plugin_highlight_enabled',
             'color_plugin_border_radius',
             'color_plugin_change_head_border'
@@ -822,7 +755,7 @@
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) {
                             Lampa.Settings.render();
- boast                        }
+                        }
                     }
                 });
                 applyStyles();
@@ -844,18 +777,13 @@
         });
     }
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_enabled' ||
-            e.name === 'color_plugin_main_color' ||
-            e.name === 'color_plugin_highlight_enabled' ||
-            e.name === 'color_plugin_dimming_enabled' ||
-            e.name === 'color_plugin_border_radius' ||
-            e.name === 'color_plugin_change_head_border') {
-            ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
+        if (e.name.startsWith('color_plugin_')) {
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
-            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
-            ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
+            ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
+            ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
+            ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
             ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
-            ColorPlugin.settings.change_head_border = Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true';
+            ColorPlugin.settings.change_head_border = (Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true');
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
@@ -865,12 +793,12 @@
     });
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
-            ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
-            ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
-            ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
+            ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
+            ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
+            ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
             ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
-            ColorPlugin.settings.change_head_border = Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true';
+            ColorPlugin.settings.change_head_border = (Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true');
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
