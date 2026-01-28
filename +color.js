@@ -24,7 +24,6 @@
         change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
         change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
         change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
-        // Переклади для назв сімейств кольорів
         red: { ru: 'Червоний', en: 'Red', uk: 'Червоний' },
         orange: { ru: 'Помаранчевий', en: 'Orange', uk: 'Помаранчевий' },
         amber: { ru: 'Бурштиновий', en: 'Amber', uk: 'Бурштиновий' },
@@ -191,9 +190,13 @@
         const radiusValue = radiusMap[ColorPlugin.settings.border_radius] || '0.5em';
         const radius = `border-radius: ${radiusValue} !important;`;
 
-        // Шапка
+        // Шапка: фокус
         const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; }';
-        const headRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
+        const headFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
+
+        // Шапка: нефокус
+        const headNonFocusDimming = ColorPlugin.settings.dimming_enabled ? '.head__action { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' : '';
+        const headNonFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action { ${radius} }` : '';
 
         // Плеєр
         const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + ' }';
@@ -211,7 +214,7 @@
             '.modal__title { font-size: 1.7em !important; }',
             '.modal__head { margin-bottom: 0 !important; }',
             '.modal .scroll__content { padding: 1.0em 0 !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico, ' +
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico, ' +
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, ' +
             '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, ' +
             '.full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .search-source, .search-source.active, ' +
@@ -219,7 +222,7 @@
             '.modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, ' +
             '.full-review-add, .full-review-add.focus, .full-review, .full-review.focus, .tag-count, .tag-count.focus, .settings-folder, .settings-folder.focus, ' +
             '.noty, .radio-player, .radio-player.focus { color: #ffffff !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico { fill: #ffffff !important; }',
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico { fill: #ffffff !important; }',
             '.menu__ico.focus { stroke: none !important; }',
             '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], .menu__item.focus .menu__ico circle[fill], ' +
             '.menu__item.traverse .menu__ico path[fill], .menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], ' +
@@ -237,12 +240,16 @@
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
-            // Шапка окремо
+            // Шапка фокус
             headFocus,
-            headRadius,
-            // Плеєр окремо
+            headFocusRadius,
+            // Шапка нефокус
+            headNonFocusDimming,
+            headNonFocusRadius,
+            // Плеєр
             playerFocus,
             playerRadius,
+            // Кнопки карточки
             '.full-start__button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             dimming,
@@ -262,8 +269,7 @@
             '.color_square.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
             '.hex-input.focus { border: 0.2em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
             '.color_square.default { background-color: #fff !important; width: 35px !important; height: 35px !important; border-radius: 4px !important; position: relative !important; }',
-            '.color_square.default::after, .color_square.default::before { content: "" !important; position: absolute !important; top 
-            50% !important; left: 10% !important; right: 10% !important; height: 3px !important; background-color: #353535 !important; }',
+            '.color_square.default::after, .color_square.default::before { content: "" !important; position: absolute !important; top: 50% !important; left: 10% !important; right: 10% !important; height: 3px !important; background-color: #353535 !important; }',
             '.color_square.default::after { transform: rotate(45deg) !important; }',
             '.color_square.default::before { transform: rotate(-45deg) !important; }',
             '.color_square { width: 35px !important; height: 35px !important; border-radius: 4px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; cursor: pointer !important; color: #ffffff !important; font-size: 10px !important; text-align: center !important; }',
@@ -297,7 +303,7 @@
 
     const openColorPicker = () => {
         const colorKeys = Object.keys(ColorPlugin.colors.main);
-        const families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral"', 'Stone'];
+        const families = ['Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Emerald', 'Teal', 'Cyan', 'Sky', 'Blue', 'Indigo', 'Violet', 'Purple', 'Fuchsia', 'Pink', 'Rose', 'Slate', 'Gray', 'Zinc', 'Neutral', 'Stone'];
         const colorsByFamily = families.map(family => {
             const familyColors = colorKeys.filter(key => ColorPlugin.colors.main[key].startsWith(family) && key !== 'default');
             return familyColors.length ? { name: family, colors: familyColors } : null;
