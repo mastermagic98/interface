@@ -21,7 +21,9 @@
         border_radius_card: { ru: 'Картковий', en: 'Card', uk: 'Картковий' },
         border_radius_capsule: { ru: 'Капсульний', en: 'Capsule', uk: 'Капсульний' },
         change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
-        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' }
+        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
+        change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
+        change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' }
     });
 
     // Налаштування та палітра
@@ -32,14 +34,15 @@
             highlight_enabled: true,
             dimming_enabled: true,
             border_radius: 'card',
-            change_head_border: false
+            change_head_border: false,
+            change_player_border: false
         },
         colors: {
             main: {
                 'default': Lampa.Lang.translate('default_color'),
                 '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
                 '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
-                '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
+                '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'ınar Amber 6',
                 '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
                 '#7ccf00': 'Lime 1', '#5ea500': 'Lime 2', '#497d00': 'Lime 3', '#3c6300': 'Lime 4', '#35530e': 'Lime 5', '#192e03': 'Lime 6',
                 '#00c950': 'Green 1', '#00a63e': 'Green 2', '#008236': 'Green 3', '#016630': 'Green 4', '#0d542b': 'Green 5', '#032e15': 'Green 6',
@@ -76,8 +79,8 @@
     const rgbToHex = (rgb) => {
         const matches = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
         if (!matches) return rgb;
-        const hex = n => ('0' + parseInt(n).toString(16)).slice(-2);
-        return '#' + hex(matches[1]) + hex(matches[2]) + hex(matches[3]).toUpperCase();
+        const hex = n => ('0' + parseInt(n).toString(16)).slice(-2).toUpperCase();
+        return '#' + hex(matches[1]) + hex(matches[2]) + hex(matches[3]);
     };
 
     const isValidHex = (color) => /^#[0-9A-Fa-f]{6}$/.test(color);
@@ -89,12 +92,13 @@
         ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
         ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
         ColorPlugin.settings.change_head_border = (Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true');
+        ColorPlugin.settings.change_player_border = (Lampa.Storage.get('color_plugin_change_player_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_player_border') === 'true');
     };
 
     const saveSettings = () => {
         if (isSaving) return;
         isSaving = true;
-        const keys = ['main_color', 'enabled', 'highlight_enabled', 'dimming_enabled', 'border_radius', 'change_head_border'];
+        const keys = ['main_color', 'enabled', 'highlight_enabled', 'dimming_enabled', 'border_radius', 'change_head_border', 'change_player_border'];
         keys.forEach(key => {
             const storageKey = 'color_plugin_' + key;
             const value = ColorPlugin.settings[key];
@@ -164,7 +168,13 @@
         const radiusValue = radiusMap[ColorPlugin.settings.border_radius] || '0.5em';
         const radius = `border-radius: ${radiusValue} !important;`;
 
+        // Шапка
+        const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; }';
         const headRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
+
+        // Плеєр
+        const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + ' }';
+        const playerRadius = ColorPlugin.settings.change_player_border ? `.player-panel .button.focus { ${radius} }` : '';
 
         const dimming = ColorPlugin.settings.dimming_enabled ? [
             '.full-start__rate, .full-start__rate > div:first-child { background: rgba(var(--main-color-rgb), 0.15) !important; }',
@@ -178,15 +188,15 @@
             '.modal__title { font-size: 1.7em !important; }',
             '.modal__head { margin-bottom: 0 !important; }',
             '.modal .scroll__content { padding: 1.0em 0 !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .head__action.focus, .head__action:hover, .settings-param__ico, ' +
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico, ' +
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, ' +
             '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, ' +
-            '.full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .player-panel .button, .player-panel .button.focus, ' +
-            '.search-source, .search-source.active, .radio-item, .radio-item.focus, .lang__selector-item, .lang__selector-item.focus, ' +
+            '.full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .search-source, .search-source.active, ' +
+            '.radio-item, .radio-item.focus, .lang__selector-item, .lang__selector-item.focus, ' +
             '.modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, ' +
             '.full-review-add, .full-review-add.focus, .full-review, .full-review.focus, .tag-count, .tag-count.focus, .settings-folder, .settings-folder.focus, ' +
             '.noty, .radio-player, .radio-player.focus { color: #ffffff !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .head__action.focus, .head__action:hover, .settings-param__ico { fill: #ffffff !important; }',
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico { fill: #ffffff !important; }',
             '.menu__ico.focus { stroke: none !important; }',
             '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], .menu__item.focus .menu__ico circle[fill], ' +
             '.menu__item.traverse .menu__ico path[fill], .menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], ' +
@@ -194,17 +204,22 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
+            // Фокус без шапки і плеєра (radius для всіх інших)
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
-            '.simple-button.focus, .head__action.focus, .head__action:hover, .player-panel .button.focus, .search-source.active, ' +
+            '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
             '.timetable__item.focus::before, .broadcast__device.focus, .iptv-menu__list-item.focus, .iptv-program__timeline>div, ' +
             '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, ' +
             '.simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus { background: var(--main-color) !important; ' + highlight + radius + ' }',
-            '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; }',
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
+            // Шапка окремо
+            headFocus,
             headRadius,
+            // Плеєр окремо
+            playerFocus,
+            playerRadius,
             '.full-start__button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             dimming,
@@ -358,7 +373,7 @@
     };
 
     const updateParamsVisibility = (body = document) => {
-        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border'];
+        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border', 'color_plugin_change_player_border'];
         params.forEach(name => {
             document.querySelectorAll(`.settings-param[data-name="${name}"]`).forEach(el => {
                 el.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
@@ -374,7 +389,7 @@
                 Lampa.SettingsApi.addComponent({
                     component: 'color_plugin',
                     name: Lampa.Lang.translate('color_plugin'),
-                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
+                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 1 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
                 });
 
                 Lampa.SettingsApi.addParam({
@@ -473,6 +488,21 @@
                         ColorPlugin.settings.change_head_border = value === 'true';
                         Lampa.Storage.set('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
                         localStorage.setItem('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    }
+                });
+
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: { name: 'color_plugin_change_player_border', type: 'trigger', default: ColorPlugin.settings.change_player_border.toString() },
+                    field: { name: Lampa.Lang.translate('change_player_border'), description: Lampa.Lang.translate('change_player_border_description') },
+                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
+                    onChange: value => {
+                        ColorPlugin.settings.change_player_border = value === 'true';
+                        Lampa.Storage.set('color_plugin_change_player_border', ColorPlugin.settings.change_player_border.toString());
+                        localStorage.setItem('color_plugin_change_player_border', ColorPlugin.settings.change_player_border.toString());
                         applyStyles();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
