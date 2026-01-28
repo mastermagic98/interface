@@ -134,7 +134,7 @@
             main: {
                 'default': Lampa.Lang.translate('default_color'),
                 '#fb2c36': 'Red 1', '#e7000b': 'Red 2', '#c10007': 'Red 3', '#9f0712': 'Red 4', '#82181a': 'Red 5', '#460809': 'Red 6',
-                '#ff6900': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
+                '#ff6900价值观': 'Orange 1', '#f54900': 'Orange 2', '#ca3500': 'Orange 3', '#9f2d00': 'Orange 4', '#7e2a0c': 'Orange 5', '#441306': 'Orange 6',
                 '#fe9a00': 'Amber 1', '#e17100': 'Amber 2', '#bb4d00': 'Amber 3', '#973c00': 'Amber 4', '#7b3306': 'Amber 5', '#461901': 'Amber 6',
                 '#f0b100': 'Yellow 1', '#d08700': 'Yellow 2', '#a65f00': 'Yellow 3', '#894b00': 'Yellow 4', '#733e0a': 'Yellow 5', '#432004': 'Yellow 6',
                 '#7ccf00': 'Lime 1', '#5ea500': 'Lime 2', '#497d00': 'Lime 3', '#3c6300': 'Lime 4', '#35530e': 'Lime 5', '#192e03': 'Lime 6',
@@ -164,7 +164,7 @@
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
-        var g = parseInt(cleanHex.substring(2, 4), 16);
+        var g = parseInt(cleanHex.substring(2, Court's 4), 16);
         var b = parseInt(cleanHex.substring(4, 6), 16);
         return r + ', ' + g + ', ' + b;
     }
@@ -229,7 +229,6 @@
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         Lampa.Storage.set('color_plugin_border_radius', ColorPlugin.settings.border_radius);
         Lampa.Storage.set('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
-        // Резервне збереження через localStorage
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
@@ -318,42 +317,33 @@
         } else {
             borderRadiusValue = '0.5em !important;';
         }
-        var headBorderRadius = ColorPlugin.settings.change_head_border ? 'border-radius: ' + borderRadiusValue : '';
+
+        var headBorderStyles = '';
+        if (ColorPlugin.settings.change_head_border) {
+            headBorderStyles = '.head__action.focus { border-radius: ' + borderRadiusValue + ' }';
+        }
+
         style.innerHTML = [
             ':root {' +
                 '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
                 '--main-color-rgb: ' + rgbColor + ' !important;' +
                 '--accent-color: ' + ColorPlugin.settings.main_color + ' !important;' +
             '}',
-            '.modal__title {' +
-                'font-size: 1.7em !important;' +
-            '}',
-            '.modal__head {' +
-                'margin-bottom: 0 !important;' +
-            '}',
-            '.modal .scroll__content {' +
-                'padding: 1.0em 0 !important;' +
-            '}',
+            '.modal__title { font-size: 1.7em !important; }',
+            '.modal__head { margin-bottom: 0 !important; }',
+            '.modal .scroll__content { padding: 1.0em 0 !important; }',
             '.menu__ico, .menu__ico:hover, .menu__ico.traverse, ' +
             '.head__action, .head__action.focus, .head__action:hover, .settings-param__ico {' +
                 'color: #ffffff !important;' +
                 'fill: #ffffff !important;' +
             '}',
-            '.menu__ico.focus {' +
-                'color: #ffffff !important;' +
-                'fill: #ffffff !important;' +
-                'stroke: none !important;' +
-            '}',
+            '.menu__ico.focus { color: #ffffff !important; fill: #ffffff !important; stroke: none !important; }',
             '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], ' +
             '.menu__item.focus .menu__ico circle[fill], .menu__item.traverse .menu__ico path[fill], ' +
             '.menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], ' +
             '.menu__item:hover .menu__ico path[fill], .menu__item:hover .menu__ico rect[fill], ' +
-            '.menu__item:hover .menu__ico circle[fill] {' +
-                'fill: #ffffff !important;' +
-            '}',
-            '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] {' +
-                'stroke: #fff !important;' +
-            '}',
+            '.menu__item:hover .menu__ico circle[fill] { fill: #ffffff !important; }',
+            '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, ' +
             '.console__tab, .console__tab.focus, ' +
             '.settings-param, .settings-param.focus, ' +
@@ -374,324 +364,95 @@
             '.tag-count, .tag-count.focus, ' +
             '.settings-folder, .settings-folder.focus, ' +
             '.noty, ' +
-            '.radio-player, .radio-player.focus {' +
-                'color: #ffffff !important;' +
-            '}',
-            '.console__tab {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.console__tab.focus {' +
-                'background: var(--main-color) !important;' +
-                'color: #fff !important;' +
-                highlightStyles +
-            '}',
+            '.radio-player, .radio-player.focus { color: #ffffff !important; }',
+            '.console__tab { background-color: var(--main-color) !important; }',
+            '.console__tab.focus { background: var(--main-color) !important; color: #fff !important;' + highlightStyles + ' }',
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, ' +
             '.full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .head__action.focus, .head__action:hover, ' +
-            '.player-panel .button.focus, .search-source.active {' +
-                'background: var(--main-color) !important;' +
-            '}',
-            '.player-panel .button.focus {' +
-                'background-color: var(--main-color) !important;' +
-                'color: #fff !important;' +
-            '}',
-            '.full-start__button, .full-start__button.focus {' +
-                'border-radius: ' + borderRadiusValue +
-            '}',
+            '.player-panel .button.focus, .search-source.active { background: var(--main-color) !important; }',
+            '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; }',
+            '.full-start__button, .full-start__button.focus { border-radius: ' + borderRadiusValue + ' }',
             '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
-            '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
+            '.menu__item.focus, .settings-folder.focus, ' +
             '.selectbox-item.focus, .simple-button.focus, .navigation-tabs__button.focus {' +
-                highlightStyles +
-                'border-radius: ' + borderRadiusValue +
+                highlightStyles + 'border-radius: ' + borderRadiusValue +
             '}',
-            '.head__action.focus {' +
-                headBorderRadius +
-            '}',
-            '.timetable__item.focus::before {' +
-                'background-color: var(--main-color) !important;' +
-                highlightStyles +
-                'border-radius: ' + borderRadiusValue +
-            '}',
-            '.navigation-tabs__button.focus {' +
-                'background-color: var(--main-color) !important;' +
-                'color: #fff !important;' +
-                highlightStyles +
-                'border-radius: ' + borderRadiusValue +
-            '}',
-            '.items-line__more.focus {' +
-                'color: #fff !important;' +
-                'background-color: var(--main-color) !important;' +
-                'border-radius: ' + borderRadiusValue +
-            '}',
-            '.timetable__item.focus {' +
-                'color: #fff !important;' +
-            '}',
-            '.broadcast__device.focus {' +
-                'background-color: var(--main-color) !important;' +
-                'color: #fff !important;' +
-                'border-radius: ' + borderRadiusValue +
-            '}',
-            '.iptv-menu__list-item.focus, .iptv-program__timeline>div {' +
-                'background-color: var(--main-color) !important;' +
-                'border-radius: ' + borderRadiusValue +
-            '}',
+            headBorderStyles,
+            '.timetable__item.focus::before { background-color: var(--main-color) !important;' + highlightStyles + 'border-radius: ' + borderRadiusValue + ' }',
+            '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important;' + highlightStyles + 'border-radius: ' + borderRadiusValue + ' }',
+            '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
+            '.timetable__item.focus { color: #fff !important; }',
+            '.broadcast__device.focus { background-color: var(--main-color) !important; color: #fff !important; border-radius: ' + borderRadiusValue + ' }',
+            '.iptv-menu__list-item.focus, .iptv-program__timeline>div { background-color: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
             '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, ' +
             '.modal__button.focus, .search-history-key.focus, .simple-keyboard-mic.focus, ' +
             '.full-review-add.focus, .full-review.focus, ' +
             '.tag-count.focus, .settings-folder.focus, .settings-param.focus, ' +
-            '.selectbox-item.focus, .selectbox-item:hover {' +
-                'background: var(--main-color) !important;' +
-                'border-radius: ' + borderRadiusValue +
-            '}',
-            '.online.focus {' +
-                'box-shadow: 0 0 0 0.2em var(--main-color) !important;' +
-            '}',
+            '.selectbox-item.focus, .selectbox-item:hover { background: var(--main-color) !important; border-radius: ' + borderRadiusValue + ' }',
+            '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             '.online_modss.focus::after, .online-prestige.focus::after, ' +
             '.radio-item.focus .radio-item__imgbox:after, .iptv-channel.focus::before, ' +
-            '.iptv-channel.last--focus::before {' +
-                'border-color: var(--main-color) !important;' +
-            '}',
-            '.card-more.focus .card-more__box::after {' +
-                'border: 0.3em solid var(--main-color) !important;' +
-            '}',
-            '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after {' +
-                'border-color: var(--main-color) !important;' +
-            '}',
+            '.iptv-channel.last--focus::before { border-color: var(--main-color) !important; }',
+            '.card-more.focus .card-more__box::after { border: 0.3em solid var(--main-color) !important; }',
+            '.iptv-playlist-item.focus::after, .iptv-playlist-item:hover::after { border-color: var(--main-color) !important; }',
             '.ad-bot.focus .ad-bot__content::after, .ad-bot:hover .ad-bot__content::after, ' +
             '.card-episode.focus .full-episode::after, .register.focus::after, ' +
             '.season-episode.focus::after, .full-episode.focus::after, ' +
             '.full-review-add.focus::after, .card.focus .card__view::after, ' +
             '.card:hover .card__view::after, .extensions__item.focus:after, ' +
-            '.torrent-item.focus::after, .extensions__block-add.focus:after {' +
-                'border-color: var(--main-color) !important;' +
-            '}',
-            '.broadcast__scan > div {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.card:hover .card__view, .card.focus .card__view {' +
-                'border-color: var(--main-color) !important;' +
-            '}',
-            '.noty {' +
-                'background: var(--main-color) !important;' +
-            '}',
-            '.radio-player.focus {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.explorer-card__head-img.focus::after {' +
-                'border: 0.3em solid var(--main-color) !important;' +
-            '}',
-            '.color_square.focus {' +
-                'border: 0.3em solid ' + focusBorderColor + ' !important;' +
-                'transform: scale(1.1) !important;' +
-            '}',
-            '.hex-input.focus {' +
-                'border: 0.2em solid ' + focusBorderColor + ' !important;' +
-                'transform: scale(1.1) !important;' +
-            '}',
+            '.torrent-item.focus::after, .extensions__block-add.focus:after { border-color: var(--main-color) !important; }',
+            '.broadcast__scan > div { background-color: var(--main-color) !important; }',
+            '.card:hover .card__view, .card.focus .card__view { border-color: var(--main-color) !important; }',
+            '.noty { background: var(--main-color) !important; }',
+            '.radio-player.focus { background-color: var(--main-color) !important; }',
+            '.explorer-card__head-img.focus::after { border: 0.3em solid var(--main-color) !important; }',
+            '.color_square.focus { border: 0.3em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
+            '.hex-input.focus { border: 0.2em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
             'body.glass--style .selectbox-item.focus, ' +
             'body.glass--style .settings-folder.focus, ' +
-            'body.glass--style .settings-param.focus {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            'body.glass--style .settings-folder.focus .settings-folder__icon {' +
-                '-webkit-filter: none !important;' +
-                'filter: none !important;' +
-            '}',
-            'body.glass--style .selectbox-item.focus::after {' +
-                'border-color: #fff !important;' +
-            '}',
-            'body.glass--style .selectbox-item.focus {' +
-                'filter: none !important;' +
-            '}',
-            'body.glass--style .selectbox-item.focus .selectbox-item__checkbox {' +
-                'filter: none !important;' +
-            '}',
-            '.player-panel__position > div::after {' +
-                'background-color: #fff !important;' +
-            '}',
-            '.player-panel__position {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.time-line > div {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.head__action.active::after {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.card--tv .card__type {' +
-                'background: var(--main-color) !important;' +
-            '}',
-            '.torrent-serial__progress {' +
-                'background: var(--main-color) !important;' +
-            '}',
+            'body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
+            'body.glass--style .settings-folder.focus .settings-folder__icon { -webkit-filter: none !important; filter: none !important; }',
+            'body.glass--style .selectbox-item.focus::after { border-color: #fff !important; }',
+            'body.glass--style .selectbox-item.focus { filter: none !important; }',
+            'body.glass--style .selectbox-item.focus .selectbox-item__checkbox { filter: none !important; }',
+            '.player-panel__position > div::after { background-color: #fff !important; }',
+            '.player-panel__position { background-color: var(--main-color) !important; }',
+            '.time-line > div { background-color: var(--main-color) !important; }',
+            '.head__action.active::after { background-color: var(--main-color) !important; }',
+            '.card--tv .card__type { background: var(--main-color) !important; }',
+            '.torrent-serial__progress { background: var(--main-color) !important; }',
             dimmingStyles,
-            '.timetable__item--any::before {' +
-                'background-color: rgba(var(--main-color-rgb), 0.3) !important;' +
-            '}',
-            '.element {' +
-                'background: none !important;' +
-                'width: 253px !important;' +
-            '}',
-            '.bookmarks-folder__layer {' +
-                'background-color: var(--main-color) !important;' +
-            '}',
-            '.color_square.default {' +
-                'background-color: #fff !important;' +
-                'width: 35px !important;' +
-                'height: 35px !important;' +
-                'border-radius: 4px !important;' +
-                'position: relative !important;' +
-            '}',
-            '.color_square.default::after {' +
-                'content: "" !important;' +
-                'position: absolute !important;' +
-                'top: 50% !important;' +
-                'left: 10% !important;' +
-                'right: 10% !important;' +
-                'height: 3px !important;' +
-                'background-color: #353535 !important;' +
-                'transform: rotate(45deg) !important;' +
-            '}',
-            '.color_square.default::before {' +
-                'content: "" !important;' +
-                'position: absolute !important;' +
-                'top: 50% !important;' +
-                'left: 10% !important;' +
-                'right: 10% !important;' +
-                'height: 3px !important;' +
-                'background-color: #353535 !important;' +
-                'transform: rotate(-45deg) !important;' +
-            '}',
-            '.color_square {' +
-                'width: 35px !important;' +
-                'height: 35px !important;' +
-                'border-radius: 4px !important;' +
-                'display: flex !important;' +
-                'flex-direction: column !important;' +
-                'justify-content: center !important;' +
-                'align-items: center !important;' +
-                'cursor: pointer !important;' +
-                'color: #ffffff !important;' +
-                'font-size: 10px !important;' +
-                'text-align: center !important;' +
-            '}',
-            '.color-family-outline {' +
-                'display: flex !important;' +
-                'flex-direction: row !important;' +
-                'flex-wrap: nowrap !important;' +
-                'overflow-x: auto !important;' +
-                'gap: 10px !important;' +
-                'border-radius: 8px !important;' +
-                'margin-bottom: 1px !important;' +
-                'padding: 5px !important;' +
-            '}',
-            '.color-family-name {' +
-                'width: 80px !important;' +
-                'height: 35px !important;' +
-                'border-width: 2px !important;' +
-                'border-style: solid !important;' +
-                'border-radius: 4px !important;' +
-                'display: flex !important;' +
-                'flex-direction: column !important;' +
-                'justify-content: center !important;' +
-                'align-items: center !important;' +
-                'cursor: default !important;' +
-                'color: #ffffff !important;' +
-                'font-size: 10px !important;' +
-                'font-weight: bold !important;' +
-                'text-align: center !important;' +
-                'text-transform: capitalize !important;' +
-            '}',
-            '.color_square .hex {' +
-                'font-size: 9px !important;' +
-                'opacity: 0.9 !important;' +
-                'text-transform: uppercase !important;' +
-                'z-index: 1 !important;' +
-            '}',
-            '.hex-input {' +
-                'width: 266px !important;' +
-                'height: 35px !important;' +
-                'border-radius: 8px !important;' +
-                'border: 2px solid #ddd !important;' +
-                'position: relative !important;' +
-                'cursor: pointer !important;' +
-                'display: flex !important;' +
-                'flex-direction: column !important;' +
-                'align-items: center !important;' +
-                'justify-content: center !important;' +
-                'color: #fff !important;' +
-                'font-size: 12px !important;' +
-                'font-weight: bold !important;' +
-                'text-shadow: 0 0 2px #000 !important;' +
-                'background-color: #353535 !important;' +
-            '}',
-            '.hex-input.focus {' +
-                'border: 0.2em solid ' + focusBorderColor + ' !important;' +
-                'transform: scale(1.1) !important;' +
-            '}',
-            '.color-picker-container {' +
-                'display: grid !important;' +
-                'grid-template-columns: 1fr 1fr !important;' +
-                'gap: 10px !important;' +
-                'padding: 0 !important;' +
-            '}',
-            '.color-picker-container > div {' +
-                'display: flex !important;' +
-                'flex-direction: column !important;' +
-                'gap: 1px !important;' +
-            '}',
-            '@media (max-width: 768px) {' +
-                '.color-picker-container {' +
-                    'grid-template-columns: 1fr !important;' +
-                '}' +
-            '}',
-            '.torrent-item__viewed {' +
-                'color: var(--main-color) !important;' +
-            '}',
-            '.online-prestige__viewed {' +
-                'background: rgb(255,255,255) !important;' +
-                'color: rgba(var(--main-color-rgb), 1) !important;' +
-            '}',
-            '.extensions__item-proto.protocol-https {' +
-                'color: var(--main-color) !important;' +
-            '}',
-            '.extensions__item-code.success {' +
-                'color: var(--main-color) !important;' +
-            '}',
-            '.navigation-tabs__badge {' +
-                'background: var(--main-color) !important;' +
-            '}',
-            '.player-info__values .value--size span {' +
-                'background: rgba(var(--main-color-rgb), 1) !important;' +
-            '}',
-            '.torrent-item__ffprobe > div {' +
-                'background: rgba(var(--main-color-rgb), 1) !important;' +
-            '}',
-            '.explorer-card__head-rate > span {' +
-                'color: var(--main-color) !important;' +
-            '}',
-            '.explorer-card__head-rate > svg {' +
-                'color: var(--main-color) !important;' +
-            '}',
-            '.console__tab > span {' +
-                'background-color: #0009 !important;' +
-            '}',
-            '.torrent-item__size {' +
-                'background-color: var(--main-color) !important;' +
-                'color: #fff !important;' +
-            '}',
-            '.torrent-serial__size {' +
-                'background: var(--main-color) !important;' +
-            '}',
-            '.notice__descr b {' +
-                'color: var(--main-color) !important;' +
-            '}',
-            'circle[cx="24.1445"][cy="24.2546"][r="23.8115"] {' +
-                'fill-opacity: 0 !important;' +
-            '}',
-            '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192139Z"] {' +
-                'fill: var(--main-color) !important;' +
-            '}'
+            '.timetable__item--any::before { background-color: rgba(var(--main-color-rgb), 0.3) !important; }',
+            '.element { background: none !important; width: 253px !important; }',
+            '.bookmarks-folder__layer { background-color: var(--main-color) !important; }',
+            '.color_square.default { background-color: #fff !important; width: 35px !important; height: 35px !important; border-radius: 4px !important; position: relative !important; }',
+            '.color_square.default::after { content: "" !important; position: absolute !important; top: 50% !important; left: 10% !important; right: 10% !important; height: 3px !important; background-color: #353535 !important; transform: rotate(45deg) !important; }',
+            '.color_square.default::before { content: "" !important; position: absolute !important; top: 50% !important; left: 10% !important; right: 10% !important; height: 3px !important; background-color: #353535 !important; transform: rotate(-45deg) !important; }',
+            '.color_square { width: 35px !important; height: 35px !important; border-radius: 4px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; cursor: pointer !important; color: #ffffff !important; font-size: 10px !important; text-align: center !important; }',
+            '.color-family-outline { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 10px !important; border-radius: 8px !important; margin-bottom: 1px !important; padding: 5px !important; }',
+            '.color-family-name { width: 80px !important; height: 35px !important; border-width: 2px !important; border-style: solid !important; border-radius: 4px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; cursor: default !important; color: #ffffff !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; text-transform: capitalize !important; }',
+            '.color_square .hex { font-size: 9px !important; opacity: 0.9 !important; text-transform: uppercase !important; z-index: 1 !important; }',
+            '.hex-input { width: 266px !important; height: 35px !important; border-radius: 8px !important; border: 2px solid #ddd !important; position: relative !important; cursor: pointer !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; color: #fff !important; font-size: 12px !important; font-weight: bold !important; text-shadow: 0 0 2px #000 !important; background-color: #353535 !important; }',
+            '.hex-input.focus { border: 0.2em solid ' + focusBorderColor + ' !important; transform: scale(1.1) !important; }',
+            '.color-picker-container { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 0 !important; }',
+            '.color-picker-container > div { display: flex !important; flex-direction: column !important; gap: 1px !important; }',
+            '@media (max-width: 768px) { .color-picker-container { grid-template-columns: 1fr !important; } }',
+            '.torrent-item__viewed { color: var(--main-color) !important; }',
+            '.online-prestige__viewed { background: rgb(255,255,255) !important; color: rgba(var(--main-color-rgb), 1) !important; }',
+            '.extensions__item-proto.protocol-https { color: var(--main-color) !important; }',
+            '.extensions__item-code.success { color: var(--main-color) !important; }',
+            '.navigation-tabs__badge { background: var(--main-color) !important; }',
+            '.player-info__values .value--size span { background: rgba(var(--main-color-rgb), 1) !important; }',
+            '.torrent-item__ffprobe > div { background: rgba(var(--main-color-rgb), 1) !important; }',
+            '.explorer-card__head-rate > span { color: var(--main-color) !important; }',
+            '.explorer-card__head-rate > svg { color: var(--main-color) !important; }',
+            '.console__tab > span { background-color: #0009 !important; }',
+            '.torrent-item__size { background-color: var(--main-color) !important; color: #fff !important; }',
+            '.torrent-serial__size { background: var(--main-color) !important; }',
+            '.notice__descr b { color: var(--main-color) !important; }',
+            'circle[cx="24.1445"][cy="24.2546"][r="23.8115"] { fill-opacity: 0 !important; }',
+            '.star-rating path[d="M8.39409 0.192139L10.99 5.30994L16.7882 6.20387L12.5475 10.4277L13.5819 15.9311L8.39409 13.2425L3.20626 15.9311L4.24065 10.4277L0 6.20387L5.79819 5.30994L8.39409 0.192@p139Z"] { fill: var(--main-color) !important; }'
         ].join('');
         updateDateElementStyles();
         forceBlackFilterBackground();
@@ -872,7 +633,7 @@
             }
         }
     }
-    // Функція для ініціалізації плагіна
+    // Функція для ініціалізації плагіну
     function initPlugin() {
         setTimeout(function() {
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
@@ -1061,7 +822,7 @@
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) {
                             Lampa.Settings.render();
-                        }
+ boast                        }
                     }
                 });
                 applyStyles();
