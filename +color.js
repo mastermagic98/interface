@@ -23,8 +23,8 @@
             uk: 'Колір виділення'
         },
         main_color_description: {
-            ru: 'Выберите или укажите цвет',
-            en: 'Select or specify a color',
+            ru: 'Выберите или укажите цвет выделения',
+            en: 'Select or specify a highlight color',
             uk: 'Виберіть чи вкажіть колір виділення'
         },
         enable_highlight: {
@@ -94,30 +94,30 @@
             en: 'Select the degree of border rounding',
             uk: 'Виберіть ступінь заокруглення рамки'
         },
-        border_radius_square: {
-            ru: 'Квадратная',
-            en: 'Square',
-            uk: 'Квадратна'
+        border_radius_rect: {
+            ru: 'Прямокутний',
+            en: 'Rectangular',
+            uk: 'Прямокутний'
         },
-        border_radius_rounded: {
-            ru: 'Заокругленная',
-            en: 'Rounded',
-            uk: 'Заокруглена'
+        border_radius_card: {
+            ru: 'Картковий',
+            en: 'Card',
+            uk: 'Картковий'
         },
-        border_radius_circle: {
-            ru: 'Круглая',
-            en: 'Round',
-            uk: 'Кругла'
+        border_radius_capsule: {
+            ru: 'Капсульний',
+            en: 'Capsule',
+            uk: 'Капсульний'
         },
-        no_change_head_border: {
-            ru: 'Не изменять форму рамки шапки',
-            en: 'Do not change header border shape',
-            uk: 'Не змінювати форму рамки шапки'
+        change_head_border: {
+            ru: 'Змінювати форму рамки шапки',
+            en: 'Change header border shape',
+            uk: 'Змінювати форму рамки шапки'
         },
-        no_change_head_border_description: {
-            ru: 'Отключает модификацию формы рамки для иконок в заголовке.',
-            en: 'Disables modification of the border shape for icons in the header.',
-            uk: 'Вимикає модифікацію форми рамки для іконок у заголовку.'
+        change_head_border_description: {
+            ru: 'Вмикає модифікацію форми рамки для іконок у заголовку',
+            en: 'Enables modification of the border shape for icons in the header',
+            uk: 'Вмикає модифікацію форми рамки для іконок у заголовку'
         }
     });
     // Об'єкт для зберігання налаштувань і палітри
@@ -127,8 +127,8 @@
             enabled: Lampa.Storage.get('color_plugin_enabled', 'false') === 'true',
             highlight_enabled: Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true',
             dimming_enabled: Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true',
-            border_radius: Lampa.Storage.get('color_plugin_border_radius', 'rounded'),
-            no_change_head_border: Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true'
+            border_radius: Lampa.Storage.get('color_plugin_border_radius', 'card'),
+            change_head_border: Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true'
         },
         colors: {
             main: {
@@ -228,14 +228,14 @@
         Lampa.Storage.set('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         Lampa.Storage.set('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         Lampa.Storage.set('color_plugin_border_radius', ColorPlugin.settings.border_radius);
-        Lampa.Storage.set('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
+        Lampa.Storage.set('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
         // Резервне збереження через localStorage
         localStorage.setItem('color_plugin_main_color', ColorPlugin.settings.main_color);
         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
         localStorage.setItem('color_plugin_highlight_enabled', ColorPlugin.settings.highlight_enabled.toString());
         localStorage.setItem('color_plugin_dimming_enabled', ColorPlugin.settings.dimming_enabled.toString());
         localStorage.setItem('color_plugin_border_radius', ColorPlugin.settings.border_radius);
-        localStorage.setItem('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
+        localStorage.setItem('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
         isSaving = false;
     }
     // Функція для примусового чорного фону фільтрів
@@ -277,7 +277,6 @@
         style.id = 'color-plugin-styles';
         document.head.appendChild(style);
         var rgbColor = hexToRgb(ColorPlugin.settings.main_color);
-        // Визначаємо колір рамки для .color_square.focus
         var focusBorderColor = ColorPlugin.settings.main_color === '#353535' ? '#ffffff' : 'var(--main-color)';
         var highlightStyles = ColorPlugin.settings.highlight_enabled ? (
             '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important;' +
@@ -310,16 +309,16 @@
             '}'
         ) : '';
         var borderRadiusValue;
-        if (ColorPlugin.settings.border_radius === 'square') {
+        if (ColorPlugin.settings.border_radius === 'rect') {
             borderRadiusValue = '0 !important;';
-        } else if (ColorPlugin.settings.border_radius === 'rounded') {
+        } else if (ColorPlugin.settings.border_radius === 'card') {
             borderRadiusValue = '0.5em !important;';
-        } else if (ColorPlugin.settings.border_radius === 'circle') {
-            borderRadiusValue = '50% !important;';
+        } else if (ColorPlugin.settings.border_radius === 'capsule') {
+            borderRadiusValue = '1em !important;';
         } else {
             borderRadiusValue = '0.5em !important;';
         }
-        var headBorderRadius = ColorPlugin.settings.no_change_head_border ? '' : 'border-radius: ' + borderRadiusValue;
+        var headBorderRadius = ColorPlugin.settings.change_head_border ? 'border-radius: ' + borderRadiusValue : '';
         style.innerHTML = [
             ':root {' +
                 '--main-color: ' + ColorPlugin.settings.main_color + ' !important;' +
@@ -395,6 +394,9 @@
             '.player-panel .button.focus {' +
                 'background-color: var(--main-color) !important;' +
                 'color: #fff !important;' +
+            '}',
+            '.full-start__button, .full-start__button.focus {' +
+                'border-radius: ' + borderRadiusValue +
             '}',
             '.full-start__button.focus, .settings-param.focus, .items-line__more.focus, ' +
             '.menu__item.focus, .settings-folder.focus, .head__action.focus, ' +
@@ -707,14 +709,6 @@
     function createFamilyNameHtml(name, color) {
         return '<div class="color-family-name" style="border-color: ' + (color || '#353535') + ';">' + Lampa.Lang.translate(name.toLowerCase()) + '</div>';
     }
-    // Функція для розбиття масиву кольорів на групи по 6
-    function chunkArray(arr, size) {
-        var result = [];
-        for (var i = 0; i < arr.length; i += size) {
-            result.push(arr.slice(i, i + size));
-        }
-        return result;
-    }
     // Функція для створення модального вікна вибору кольору
     function openColorPicker() {
         var colorKeys = Object.keys(ColorPlugin.colors.main);
@@ -744,7 +738,6 @@
             }).join('');
             return '<div class="color-family-outline">' + familyNameHtml + groupContent + '</div>';
         });
-        // Розподіляємо кольори між двома колонками
         var midPoint = Math.ceil(colorContent.length / 2);
         var leftColumn = colorContent.slice(0, midPoint).join('');
         var rightColumn = colorContent.slice(midPoint).join('');
@@ -846,7 +839,7 @@
             'color_plugin_dimming_enabled',
             'color_plugin_highlight_enabled',
             'color_plugin_border_radius',
-            'color_plugin_no_change_head_border'
+            'color_plugin_change_head_border'
         ];
         var container = body || document;
         for (var i = 0; i < params.length; i++) {
@@ -864,7 +857,6 @@
                 }
             }
         }
-        // Альтернативне оновлення через Lampa.SettingsApi
         if (Lampa.SettingsApi && Lampa.SettingsApi.params) {
             var componentParams = Lampa.SettingsApi.params.filter(function(p) {
                 return p.component === 'color_plugin';
@@ -882,23 +874,19 @@
     }
     // Функція для ініціалізації плагіна
     function initPlugin() {
-        // Завантажуємо збережені налаштування
         setTimeout(function() {
-            // Спроба завантаження з localStorage, якщо Lampa.Storage недоступний
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.enabled = (Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true');
             ColorPlugin.settings.highlight_enabled = (Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true');
             ColorPlugin.settings.dimming_enabled = (Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true');
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
-            ColorPlugin.settings.no_change_head_border = (Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_no_change_head_border') === 'true');
-            // Додаємо компонент до меню налаштувань
+            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
+            ColorPlugin.settings.change_head_border = (Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true');
             if (Lampa.SettingsApi) {
                 Lampa.SettingsApi.addComponent({
                     component: 'color_plugin',
                     name: Lampa.Lang.translate('color_plugin'),
-                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.9.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
+                    icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
                 });
-                // Увімкнення/вимкнення плагіна
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -929,7 +917,6 @@
                         }
                     }
                 });
-                // Колір виділення
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -949,7 +936,6 @@
                         openColorPicker();
                     }
                 });
-                // Колір затемнення
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -977,7 +963,6 @@
                         }
                     }
                 });
-                // Заголовок РАМКА
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -993,7 +978,6 @@
                         }
                     }
                 });
-                // Показати рамку
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
@@ -1021,16 +1005,15 @@
                         }
                     }
                 });
-                // Заокруглення рамки
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
                         name: 'color_plugin_border_radius',
                         type: 'select',
                         values: {
-                            'square': Lampa.Lang.translate('border_radius_square'),
-                            'rounded': Lampa.Lang.translate('border_radius_rounded'),
-                            'circle': Lampa.Lang.translate('border_radius_circle')
+                            'rect': Lampa.Lang.translate('border_radius_rect'),
+                            'card': Lampa.Lang.translate('border_radius_card'),
+                            'capsule': Lampa.Lang.translate('border_radius_capsule')
                         },
                         default: ColorPlugin.settings.border_radius
                     },
@@ -1054,17 +1037,16 @@
                         }
                     }
                 });
-                // Не змінювати форму рамки шапки
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: {
-                        name: 'color_plugin_no_change_head_border',
+                        name: 'color_plugin_change_head_border',
                         type: 'trigger',
-                        default: ColorPlugin.settings.no_change_head_border.toString()
+                        default: ColorPlugin.settings.change_head_border.toString()
                     },
                     field: {
-                        name: Lampa.Lang.translate('no_change_head_border'),
-                        description: Lampa.Lang.translate('no_change_head_border_description')
+                        name: Lampa.Lang.translate('change_head_border'),
+                        description: Lampa.Lang.translate('change_head_border_description')
                     },
                     onRender: function (item) {
                         if (item && typeof item.css === 'function') {
@@ -1072,9 +1054,9 @@
                         }
                     },
                     onChange: function (value) {
-                        ColorPlugin.settings.no_change_head_border = value === 'true';
-                        Lampa.Storage.set('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
-                        localStorage.setItem('color_plugin_no_change_head_border', ColorPlugin.settings.no_change_head_border.toString());
+                        ColorPlugin.settings.change_head_border = value === 'true';
+                        Lampa.Storage.set('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
+                        localStorage.setItem('color_plugin_change_head_border', ColorPlugin.settings.change_head_border.toString());
                         applyStyles();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) {
@@ -1082,7 +1064,6 @@
                         }
                     }
                 });
-                // Застосовуємо стилі при ініціалізації
                 applyStyles();
                 forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
@@ -1090,9 +1071,8 @@
                 updateParamsVisibility();
                 updateSvgIcons();
             }
-        }, 100); // Затримка для забезпечення готовності Lampa.Storage
+        }, 100);
     }
-    // Запускаємо плагін після готовності програми
     if (window.appready && Lampa.SettingsApi && Lampa.Storage) {
         initPlugin();
     } else {
@@ -1102,20 +1082,19 @@
             }
         });
     }
-    // Оновлюємо стилі та видимість параметрів при зміні налаштувань
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_enabled' ||
             e.name === 'color_plugin_main_color' ||
             e.name === 'color_plugin_highlight_enabled' ||
             e.name === 'color_plugin_dimming_enabled' ||
             e.name === 'color_plugin_border_radius' ||
-            e.name === 'color_plugin_no_change_head_border') {
+            e.name === 'color_plugin_change_head_border') {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
-            ColorPlugin.settings.no_change_head_border = Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_no_change_head_border') === 'true';
+            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
+            ColorPlugin.settings.change_head_border = Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
@@ -1123,15 +1102,14 @@
             updateSvgIcons();
         }
     });
-    // Оновлюємо стилі та видимість при взаємодії з меню
     Lampa.Listener.follow('settings_component', function (event) {
         if (event.type === 'open') {
             ColorPlugin.settings.enabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true' || localStorage.getItem('color_plugin_enabled') === 'true';
             ColorPlugin.settings.main_color = Lampa.Storage.get('color_plugin_main_color', '#353535') || localStorage.getItem('color_plugin_main_color') || '#353535';
             ColorPlugin.settings.highlight_enabled = Lampa.Storage.get('color_plugin_highlight_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_highlight_enabled') === 'true';
             ColorPlugin.settings.dimming_enabled = Lampa.Storage.get('color_plugin_dimming_enabled', 'true') === 'true' || localStorage.getItem('color_plugin_dimming_enabled') === 'true';
-            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'rounded') || localStorage.getItem('color_plugin_border_radius') || 'rounded';
-            ColorPlugin.settings.no_change_head_border = Lampa.Storage.get('color_plugin_no_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_no_change_head_border') === 'true';
+            ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
+            ColorPlugin.settings.change_head_border = Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true';
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
@@ -1147,7 +1125,6 @@
             updateSvgIcons();
         }
     });
-    // Спостереження за мутаціями для динамічного застосування чорного фону фільтрів
     setTimeout(function () {
         if (typeof MutationObserver !== 'undefined') {
             var observer = new MutationObserver(function (mutations) {
