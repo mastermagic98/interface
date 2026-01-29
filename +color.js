@@ -194,17 +194,16 @@
         const radiusValue = radiusMap[ColorPlugin.settings.border_radius] || '0.5em';
         const radius = `border-radius: ${radiusValue} !important;`;
 
-        // Шапка
+        // Шапка і плеєр — виділення тільки фоном (без білої рамки)
         const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; }';
         const headFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
         const headNonFocusDimming = ColorPlugin.settings.dimming_enabled ? '.head__action { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' : '';
         const headNonFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action { ${radius} }` : '';
 
-        // Плеєр
-        const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + ' }';
+        const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; }';
         const playerRadius = ColorPlugin.settings.change_player_border ? `.player-panel .button.focus { ${radius} }` : '';
 
-        // Картки — видаляємо фон, рамка кольорова
+        // Картки
         const cardNoBackground = '.card.focus .card__view, .card:hover .card__view { background-color: transparent !important; }';
         const cardBorderColor = '.card.focus .card__view::after, .card:hover .card__view::after { border-color: var(--main-color) !important; }';
         const cardRadiusImg = ColorPlugin.settings.change_card_border ? `.card__img { ${radius} }` : '';
@@ -238,7 +237,7 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Фокус без шапки, плеєра і карток
+            // Основний фокус (з білою рамкою, якщо опція увімкнена)
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
@@ -248,12 +247,12 @@
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
-            // Шапка
+            // Шапка (тільки фон, без білої рамки)
             headFocus,
             headFocusRadius,
             headNonFocusDimming,
             headNonFocusRadius,
-            // Плеєр
+            // Плеєр (тільки фон, без білої рамки)
             playerFocus,
             playerRadius,
             // Картки
@@ -302,8 +301,6 @@
         forceBlackFilterBackground();
         updateSvgIcons();
     };
-
-    // Решта функцій (openColorPicker, updateParamsVisibility, initPlugin тощо) залишаються без змін з попередньої версії
 
     const createColorHtml = (color, name) => {
         const className = color === 'default' ? 'color_square selector default' : 'color_square selector';
