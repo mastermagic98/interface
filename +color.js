@@ -24,9 +24,12 @@
         change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
         change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
         change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
+        change_card_border: { ru: 'Змінювати форму картки та рамки', en: 'Change card and border shape', uk: 'Змінювати форму картки та рамки' },
+        change_card_border_description: { ru: 'Вмикає модифікацію форми картки та її рамки виділення', en: 'Enables modification of the card shape and its highlight border', uk: 'Вмикає модифікацію форми картки та її рамки виділення' },
         red: { ru: 'Червоний', en: 'Red', uk: 'Червоний' },
         orange: { ru: 'Помаранчевий', en: 'Orange', uk: 'Помаранчевий' },
         amber: { ru: 'Бурштиновий', en: 'Amber', uk: 'Бурштиновий' },
+ (true) },
         yellow: { ru: 'Жовтий', en: 'Yellow', uk: 'Жовтий' },
         lime: { ru: 'Лаймовий', en: 'Lime', uk: 'Лаймовий' },
         green: { ru: 'Зелений', en: 'Green', uk: 'Зелений' },
@@ -57,7 +60,8 @@
             dimming_enabled: true,
             border_radius: 'card',
             change_head_border: false,
-            change_player_border: false
+            change_player_border: false,
+            change_card_border: false
         },
         colors: {
             main: {
@@ -115,12 +119,13 @@
         ColorPlugin.settings.border_radius = Lampa.Storage.get('color_plugin_border_radius', 'card') || localStorage.getItem('color_plugin_border_radius') || 'card';
         ColorPlugin.settings.change_head_border = (Lampa.Storage.get('color_plugin_change_head_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_head_border') === 'true');
         ColorPlugin.settings.change_player_border = (Lampa.Storage.get('color_plugin_change_player_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_player_border') === 'true');
+        ColorPlugin.settings.change_card_border = (Lampa.Storage.get('color_plugin_change_card_border', 'false') === 'true' || localStorage.getItem('color_plugin_change_card_border') === 'true');
     };
 
     const saveSettings = () => {
         if (isSaving) return;
         isSaving = true;
-        const keys = ['main_color', 'enabled', 'highlight_enabled', 'dimming_enabled', 'border_radius', 'change_head_border', 'change_player_border'];
+        const keys = ['main_color', 'enabled', 'highlight_enabled', 'dimming_enabled', 'border_radius', 'change_head_border', 'change_player_border', 'change_card_border'];
         keys.forEach(key => {
             const storageKey = 'color_plugin_' + key;
             const value = ColorPlugin.settings[key];
@@ -190,17 +195,20 @@
         const radiusValue = radiusMap[ColorPlugin.settings.border_radius] || '0.5em';
         const radius = `border-radius: ${radiusValue} !important;`;
 
-        // Шапка: фокус
+        // Шапка
         const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; }';
         const headFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
-
-        // Шапка: нефокус
         const headNonFocusDimming = ColorPlugin.settings.dimming_enabled ? '.head__action { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' : '';
         const headNonFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action { ${radius} }` : '';
 
         // Плеєр
         const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + ' }';
         const playerRadius = ColorPlugin.settings.change_player_border ? `.player-panel .button.focus { ${radius} }` : '';
+
+        // Картки
+        const cardBorderColor = '.card.focus .card__view::after, .card:hover .card__view::after { border-color: var(--main-color) !important; }';
+        const cardRadiusImg = ColorPlugin.settings.change_card_border ? `.card__img { ${radius} }` : '';
+        const cardRadiusBorder = ColorPlugin.settings.change_card_border ? `.card.focus .card__view::after, .card:hover .card__view::after { ${radius} }` : '';
 
         const dimming = ColorPlugin.settings.dimming_enabled ? [
             '.full-start__rate, .full-start__rate > div:first-child { background: rgba(var(--main-color-rgb), 0.15) !important; }',
@@ -214,7 +222,7 @@
             '.modal__title { font-size: 1.7em !important; }',
             '.modal__head { margin-bottom: 0 !important; }',
             '.modal .scroll__content { padding: 1.0em 0 !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico, ' +
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico, ' +
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, ' +
             '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, ' +
             '.full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .search-source, .search-source.active, ' +
@@ -222,7 +230,7 @@
             '.modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, ' +
             '.full-review-add, .full-review-add.focus, .full-review, .full-review.focus, .tag-count, .tag-count.focus, .settings-folder, .settings-folder.focus, ' +
             '.noty, .radio-player, .radio-player.focus { color: #ffffff !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico { fill: #ffffff !important; }',
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico { fill: #ffffff !important; }',
             '.menu__ico.focus { stroke: none !important; }',
             '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], .menu__item.focus .menu__ico circle[fill], ' +
             '.menu__item.traverse .menu__ico path[fill], .menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], ' +
@@ -230,7 +238,7 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Фокус без шапки і плеєра
+            // Фокус без шапки, плеєра і карток
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
@@ -240,15 +248,18 @@
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
-            // Шапка фокус
+            // Шапка
             headFocus,
             headFocusRadius,
-            // Шапка нефокус
             headNonFocusDimming,
             headNonFocusRadius,
             // Плеєр
             playerFocus,
             playerRadius,
+            // Картки
+            cardBorderColor,
+            cardRadiusImg,
+            cardRadiusBorder,
             // Кнопки карточки
             '.full-start__button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
@@ -257,7 +268,7 @@
             '.element { background: none !important; width: 253px !important; }',
             '.player-panel__position, .time-line > div, .head__action.active::after, .card--tv .card__type, .torrent-serial__progress, ' +
             '.bookmarks-folder__layer, .torrent-item__size, .torrent-serial__size, .navigation-tabs__badge, .broadcast__scan > div, ' +
-            '.card:hover .card__view, .card.focus .card__view, .noty, .radio-player.focus { background-color: var(--main-color) !important; }',
+            '.noty, .radio-player.focus { background-color: var(--main-color) !important; }',
             '.player-panel__position > div::after { background-color: #fff !important; }',
             '.notice__descr b, .torrent-item__viewed, .extensions__item-proto.protocol-https, .extensions__item-code.success, ' +
             '.explorer-card__head-rate > span, .explorer-card__head-rate > svg { color: var(--main-color) !important; }',
@@ -403,7 +414,7 @@
     };
 
     const updateParamsVisibility = (body = document) => {
-        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border', 'color_plugin_change_player_border'];
+        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border', 'color_plugin_change_player_border', 'color_plugin_change_card_border'];
         params.forEach(name => {
             document.querySelectorAll(`.settings-param[data-name="${name}"]`).forEach(el => {
                 el.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
@@ -533,6 +544,21 @@
                         ColorPlugin.settings.change_player_border = value === 'true';
                         Lampa.Storage.set('color_plugin_change_player_border', ColorPlugin.settings.change_player_border.toString());
                         localStorage.setItem('color_plugin_change_player_border', ColorPlugin.settings.change_player_border.toString());
+                        applyStyles();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    }
+                });
+
+                Lampa.SettingsApi.addParam({
+                    component: 'color_plugin',
+                    param: { name: 'color_plugin_change_card_border', type: 'trigger', default: ColorPlugin.settings.change_card_border.toString() },
+                    field: { name: Lampa.Lang.translate('change_card_border'), description: Lampa.Lang.translate('change_card_border_description') },
+                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
+                    onChange: value => {
+                        ColorPlugin.settings.change_card_border = value === 'true';
+                        Lampa.Storage.set('color_plugin_change_card_border', ColorPlugin.settings.change_card_border.toString());
+                        localStorage.setItem('color_plugin_change_card_border', ColorPlugin.settings.change_card_border.toString());
                         applyStyles();
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
