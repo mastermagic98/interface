@@ -190,17 +190,20 @@
             ? '-webkit-box-shadow: inset 0 0 0 0.15em #fff !important; box-shadow: inset 0 0 0 0.15em #fff !important;'
             : '';
 
+        const noHighlight = '-webkit-box-shadow: none !important; box-shadow: none !important;';
+
         const radiusMap = { rect: '0', card: '0.5em', capsule: '1em' };
         const radiusValue = radiusMap[ColorPlugin.settings.border_radius] || '0.5em';
         const radius = `border-radius: ${radiusValue} !important;`;
 
-        // Шапка і плеєр — виділення тільки фоном (без білої рамки)
-        const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; }';
+        // Шапка — тільки фон, без білої рамки
+        const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; ' + noHighlight + ' }';
         const headFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
         const headNonFocusDimming = ColorPlugin.settings.dimming_enabled ? '.head__action { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' : '';
         const headNonFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action { ${radius} }` : '';
 
-        const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; }';
+        // Плеєр — тільки фон, без білої рамки
+        const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + noHighlight + ' }';
         const playerRadius = ColorPlugin.settings.change_player_border ? `.player-panel .button.focus { ${radius} }` : '';
 
         // Картки
@@ -237,7 +240,7 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Основний фокус (з білою рамкою, якщо опція увімкнена)
+            // Основний фокус — з білою рамкою (якщо опція увімкнена)
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
@@ -247,12 +250,12 @@
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
-            // Шапка (тільки фон, без білої рамки)
+            // Шапка — тільки фон, без рамки
             headFocus,
             headFocusRadius,
             headNonFocusDimming,
             headNonFocusRadius,
-            // Плеєр (тільки фон, без білої рамки)
+            // Плеєр — тільки фон, без рамки
             playerFocus,
             playerRadius,
             // Картки
