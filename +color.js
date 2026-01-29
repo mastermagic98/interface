@@ -29,7 +29,6 @@
         red: { ru: 'Червоний', en: 'Red', uk: 'Червоний' },
         orange: { ru: 'Помаранчевий', en: 'Orange', uk: 'Помаранчевий' },
         amber: { ru: 'Бурштиновий', en: 'Amber', uk: 'Бурштиновий' },
- (true) },
         yellow: { ru: 'Жовтий', en: 'Yellow', uk: 'Жовтий' },
         lime: { ru: 'Лаймовий', en: 'Lime', uk: 'Лаймовий' },
         green: { ru: 'Зелений', en: 'Green', uk: 'Зелений' },
@@ -205,7 +204,8 @@
         const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + ' }';
         const playerRadius = ColorPlugin.settings.change_player_border ? `.player-panel .button.focus { ${radius} }` : '';
 
-        // Картки
+        // Картки — видаляємо фон, рамка кольорова
+        const cardNoBackground = '.card.focus .card__view, .card:hover .card__view { background-color: transparent !important; }';
         const cardBorderColor = '.card.focus .card__view::after, .card:hover .card__view::after { border-color: var(--main-color) !important; }';
         const cardRadiusImg = ColorPlugin.settings.change_card_border ? `.card__img { ${radius} }` : '';
         const cardRadiusBorder = ColorPlugin.settings.change_card_border ? `.card.focus .card__view::after, .card:hover .card__view::after { ${radius} }` : '';
@@ -222,7 +222,7 @@
             '.modal__title { font-size: 1.7em !important; }',
             '.modal__head { margin-bottom: 0 !important; }',
             '.modal .scroll__content { padding: 1.0em 0 !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico, ' +
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico, ' +
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, ' +
             '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, ' +
             '.full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .search-source, .search-source.active, ' +
@@ -230,7 +230,7 @@
             '.modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, ' +
             '.full-review-add, .full-review-add.focus, .full-review, .full-review.focus, .tag-count, .tag-count.focus, .settings-folder, .settings-folder.focus, ' +
             '.noty, .radio-player, .radio-player.focus { color: #ffffff !important; }',
-            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .settings-param__ico { fill: #ffffff !important; }',
+            '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico { fill: #ffffff !important; }',
             '.menu__ico.focus { stroke: none !important; }',
             '.menu__item.focus .menu__ico path[fill], .menu__item.focus .menu__ico rect[fill], .menu__item.focus .menu__ico circle[fill], ' +
             '.menu__item.traverse .menu__ico path[fill], .menu__item.traverse .menu__ico rect[fill], .menu__item.traverse .menu__ico circle[fill], ' +
@@ -257,6 +257,7 @@
             playerFocus,
             playerRadius,
             // Картки
+            cardNoBackground,
             cardBorderColor,
             cardRadiusImg,
             cardRadiusBorder,
@@ -301,6 +302,8 @@
         forceBlackFilterBackground();
         updateSvgIcons();
     };
+
+    // Решта функцій (openColorPicker, updateParamsVisibility, initPlugin тощо) залишаються без змін з попередньої версії
 
     const createColorHtml = (color, name) => {
         const className = color === 'default' ? 'color_square selector default' : 'color_square selector';
