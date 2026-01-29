@@ -238,7 +238,7 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Основний фокус — з білою рамкою якщо опція увімкнена
+            // Основний фокус
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
@@ -414,15 +414,6 @@
         }
     };
 
-    const updateParamsVisibility = (body = document) => {
-        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border', 'color_plugin_change_player_border', 'color_plugin_change_card_border'];
-        params.forEach(name => {
-            document.querySelectorAll(`.settings-param[data-name="${name}"]`).forEach(el => {
-                el.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
-            });
-        });
-    };
-
     const initPlugin = () => {
         setTimeout(() => {
             loadSettings();
@@ -431,7 +422,10 @@
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString() },
-                    field: { name: '<div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px" viewBox="0 0 24 24"><path d="M2.216 4.913C5.724.053 12.99-1.36 18.16 1.985c5.107 3.3 6.985 9.65 4.892 15.606-1.975 5.624-7.178 7.852-10.928 5.023-1.404-1.06-1.95-2.389-2.212-4.547l-.127-1.225-.053-.493c-.147-1.16-.371-1.678-.841-1.951-.639-.37-1.065-.378-1.903-.041l-.42.181-.213.097c-1.21.546-2.014.738-3.032.516l-.238-.058-.196-.058C-.438 13.962-.93 9.268 2.216 4.913m1.174 8.333.147.046.16.038c.523.108.97.018 1.714-.3l.718-.32c1.435-.611 2.369-.67 3.635.062 1.094.636 1.521 1.611 1.738 3.301l.063.57.066.66.056.523c.205 1.69.579 2.594 1.49 3.281 2.714 2.048 6.602.384 8.196-4.155 1.809-5.152.208-10.565-4.157-13.388C12.831.73 6.598 1.944 3.646 6.03c-2.475 3.428-2.171 6.551-.256 7.216m13.393-2.474a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803m.59 4.328a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803m-2.95-8.054a1.491 1.551 0 1 1 2.881-.803 1.491 1.551 0 0 1-2.881.803m-.033 11.165a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803M10.217 5.84a1.491 1.551 0 1 1 2.882-.802 1.491 1.551 0 0 1-2.882.802" fill="currentColor"/></svg>' + Lampa.Lang.translate('color_plugin_enabled') + '</div>', description: Lampa.Lang.translate('color_plugin_enabled_description') },
+                    field: { 
+                        name: '<div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px" viewBox="0 0 24 24"><path d="M2.216 4.913C5.724.053 12.99-1.36 18.16 1.985c5.107 3.3 6.985 9.65 4.892 15.606-1.975 5.624-7.178 7.852-10.928 5.023-1.404-1.06-1.95-2.389-2.212-4.547l-.127-1.225-.053-.493c-.147-1.16-.371-1.678-.841-1.951-.639-.37-1.065-.378-1.903-.041l-.42.181-.213.097c-1.21.546-2.014.738-3.032.516l-.238-.058-.196-.058C-.438 13.962-.93 9.268 2.216 4.913m1.174 8.333.147.046.16.038c.523.108.97.018 1.714-.3l.718-.32c1.435-.611 2.369-.67 3.635.062 1.094.636 1.521 1.611 1.738 3.301l.063.57.066.66.056.523c.205 1.69.579 2.594 1.49 3.281 2.714 2.048 6.602.384 8.196-4.155 1.809-5.152.208-10.565-4.157-13.388C12.831.73 6.598 1.944 3.646 6.03c-2.475 3.428-2.171 6.551-.256 7.216m13.393-2.474a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803m.59 4.328a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803m-2.95-8.054a1.491 1.551 0 1 1 2.881-.803 1.491 1.551 0 0 1-2.881.803m-.033 11.165a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803M10.217 5.84a1.491 1.551 0 1 1 2.882-.802 1.491 1.551 0 0 1-2.882.802" fill="currentColor"/></svg>' + Lampa.Lang.translate('color_plugin_enabled') + '</div>', 
+                        description: Lampa.Lang.translate('color_plugin_enabled_description') 
+                    },
                     onChange: value => {
                         ColorPlugin.settings.enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_enabled', value.toString());
@@ -439,9 +433,8 @@
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
-                        updateParamsVisibility();
-                        saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                        saveSettings();
                     },
                     onRender: item => item.css?.('display', 'block')
                 });
@@ -563,7 +556,6 @@
                 applyStyles();
                 forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
-                updateParamsVisibility();
                 updateSvgIcons();
             }
         }, 100);
@@ -581,7 +573,6 @@
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
-            updateParamsVisibility();
             updateSvgIcons();
         }
     });
@@ -592,7 +583,6 @@
             applyStyles();
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
-            updateParamsVisibility(e.body);
             updateSvgIcons();
         } else if (e.type === 'close') {
             saveSettings();
