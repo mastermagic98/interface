@@ -21,14 +21,14 @@
         border_radius_card: { ru: 'Картковий', en: 'Card', uk: 'Картковий' },
         border_radius_capsule: { ru: 'Капсульний', en: 'Capsule', uk: 'Капсульний' },
         change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
-        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the Noah header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
+        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
         change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
         change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
         change_card_border: { ru: 'Змінювати форму картки та рамки', en: 'Change card and border shape', uk: 'Змінювати форму картки та рамки' },
         change_card_border_description: { ru: 'Вмикає модифікацію форми картки та її рамки виділення', en: 'Enables modification of the card shape and its highlight border', uk: 'Вмикає модифікацію форми картки та її рамки виділення' },
         red: { ru: 'Червоний', en: 'Red', uk: 'Червоний' },
         orange: { ru: 'Помаранчевий', en: 'Orange', uk: 'Помаранчевий' },
-        amber: { ru: 'Бурштиновий', en: 'Amber', uk: 'Бурштиновий' },
+        amber: { ru: 'Бурштиновий', en: 'Amber',roring: 'Amber', uk: 'Бурштиновий' },
         yellow: { ru: 'Жовтий', en: 'Yellow', uk: 'Жовтий' },
         lime: { ru: 'Лаймовий', en: 'Lime', uk: 'Лаймовий' },
         green: { ru: 'Зелений', en: 'Green', uk: 'Зелений' },
@@ -93,7 +93,7 @@
 
     let isSaving = false;
 
-    const hexToRgb = (hex the => {
+    const hexToRgb = (hex) => {
         const clean = hex.replace('#', '');
         const r = parseInt(clean.substring(0, 2), 16);
         const g = parseInt(clean.substring(2, 4), 16);
@@ -452,8 +452,6 @@
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
-
-                // Видалено параметр border_title (заголовок "РАМКА")
 
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
