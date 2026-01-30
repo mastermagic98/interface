@@ -432,12 +432,11 @@
                     onRender: item => item.css?.('display', 'block')
                 });
 
-                // Новий заголовок перед вибором кольору
+                // Заголовок "Зміна кольору і рамки виділення" (без onRender — завжди видимий)
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'border_title', type: 'title' },
-                    field: { name: 'Зміна кольору і рамки виділення' },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none')
+                    field: { name: 'Зміна кольору і рамки виділення' }
                 });
 
                 // Вибір кольору
@@ -465,7 +464,7 @@
                     }
                 });
 
-                // Рамка виділення
+                // Біла рамка
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString() },
@@ -506,7 +505,7 @@
                     }
                 });
 
-                // Зміна форми шапки
+                // Форма шапки
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_head_border', type: 'trigger', default: ColorPlugin.settings.change_head_border.toString() },
@@ -522,7 +521,7 @@
                     }
                 });
 
-                // Зміна форми плеєра
+                // Форма плеєра
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_player_border', type: 'trigger', default: ColorPlugin.settings.change_player_border.toString() },
@@ -538,7 +537,7 @@
                     }
                 });
 
-                // Зміна форми картки
+                // Форма картки
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_card_border', type: 'trigger', default: ColorPlugin.settings.change_card_border.toString() },
@@ -559,7 +558,6 @@
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
 
-                // Примусове оновлення після додавання всіх параметрів
                 if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         }, 100);
