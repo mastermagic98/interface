@@ -251,7 +251,7 @@
             playerFocus,
             playerRadius,
             cardNoBackground,
-            card,cardBorderColor,
+            cardBorderColor,
             cardRadiusImg,
             cardRadiusBorder,
             '.full-start__button, .full-start__button.focus { ' + radius + ' }',
@@ -284,7 +284,7 @@
             '.color-picker-container { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 0 !important; }',
             '.color-picker-container > div { display: flex !important; flex-direction: column !important; gap: 1px !important; }',
             '@media (max-width: 768px) { .color-picker-container { grid-template-columns: 1fr !important; } }',
-            'body.glass--style .刀selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
+            'body.glass--style .selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
             'body.glass--style .settings-folder.focus .settings-folder__icon { -webkit-filter: none !important; filter: none !important; }',
             'body.glass--style .selectbox-item.focus::after { border-color: #fff !important; }',
             'body.glass--style .selectbox-item.focus, body.glass--style .selectbox-item.focus .selectbox-item__checkbox { filter: none !important; }'
@@ -349,7 +349,7 @@
                     Lampa.Controller.toggle('settings_component');
                     Lampa.Controller.enable('menu');
                 },
-                onSelect: ((a) => {
+                onSelect: (a) => {
                     if (a.length > 0 && a[0] instanceof HTMLElement) {
                         const selectedElement = a[0];
                         let color;
@@ -411,6 +411,7 @@
             loadSettings();
 
             if (Lampa.SettingsApi) {
+                // Головний тригер
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString() },
@@ -427,18 +428,28 @@
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
-                    }
+                    },
+                    onRender: item => item.css?.('display', 'block')
                 });
 
-                // Груповий заголовок — тепер це параметр вибору кольору
+                // Новий заголовок перед вибором кольору
+                Lampa.SettingsApi.addParam({
+                    component: 'interface_customization',
+                    param: { name: 'border_title', type: 'title' },
+                    field: { name: 'Зміна кольору і рамки виділення' },
+                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none')
+                });
+
+                // Вибір кольору
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_main_color', type: 'button' },
-                    field: { name: 'Зміна кольору і рамки виділення', description: Lampa.Lang.translate('main_color_description') },
+                    field: { name: Lampa.Lang.translate('main_color'), description: Lampa.Lang.translate('main_color_description') },
                     onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: openColorPicker
                 });
 
+                // Затемнення
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_dimming_enabled', type: 'trigger', default: ColorPlugin.settings.dimming_enabled.toString() },
@@ -454,6 +465,7 @@
                     }
                 });
 
+                // Рамка виділення
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString() },
@@ -469,6 +481,7 @@
                     }
                 });
 
+                // Заокруглення
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: {
@@ -493,6 +506,7 @@
                     }
                 });
 
+                // Зміна форми шапки
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_head_border', type: 'trigger', default: ColorPlugin.settings.change_head_border.toString() },
@@ -508,6 +522,7 @@
                     }
                 });
 
+                // Зміна форми плеєра
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_player_border', type: 'trigger', default: ColorPlugin.settings.change_player_border.toString() },
@@ -523,6 +538,7 @@
                     }
                 });
 
+                // Зміна форми картки
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_card_border', type: 'trigger', default: ColorPlugin.settings.change_card_border.toString() },
@@ -543,6 +559,7 @@
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
 
+                // Примусове оновлення після додавання всіх параметрів
                 if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         }, 100);
