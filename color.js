@@ -4,8 +4,8 @@
     // Переклади
     Lampa.Lang.add({
         color_plugin: { ru: 'Настройка цветов', en: 'Color settings', uk: 'Налаштування кольорів' },
-        color_plugin_enabled: { ru: 'Включить плагин', en: 'Enable plugin', uk: 'Увімкнути плагін' },
-        color_plugin_enabled_description: { ru: 'Изменяет вид некоторых элементов интерфейса Lampa', en: 'Changes the appearance of some Lampa interface elements', uk: 'Змінює вигляд деяких елементів інтерфейсу Lampa' },
+        color_plugin_enabled: { ru: 'Изменить цвет и форму рамки', en: 'Change highlight color and border shape', uk: 'Змінити колір і форму рамки' },
+        color_plugin_enabled_description: { ru: 'Дозволяє змінювати колір виділення та форму рамок елементів інтерфейсу Lampa', en: 'Allows changing the highlight color and border shape of Lampa interface elements', uk: 'Дозволяє змінювати колір виділення та форму рамок елементів інтерфейсу Lampa' },
         main_color: { ru: 'Цвет выделения', en: 'Highlight color', uk: 'Колір виділення' },
         main_color_description: { ru: 'Выберите или укажите цвет выделения', en: 'Select or specify a highlight color', uk: 'Виберіть чи вкажіть колір виділення' },
         enable_highlight: { ru: 'Показать рамку', en: 'Show border', uk: 'Показати рамку' },
@@ -21,7 +21,7 @@
         border_radius_card: { ru: 'Картковий', en: 'Card', uk: 'Картковий' },
         border_radius_capsule: { ru: 'Капсульний', en: 'Capsule', uk: 'Капсульний' },
         change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
-        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
+        change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the Noah header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
         change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
         change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
         change_card_border: { ru: 'Змінювати форму картки та рамки', en: 'Change card and border shape', uk: 'Змінювати форму картки та рамки' },
@@ -93,7 +93,7 @@
 
     let isSaving = false;
 
-    const hexToRgb = (hex) => {
+    const hexToRgb = (hex the => {
         const clean = hex.replace('#', '');
         const r = parseInt(clean.substring(0, 2), 16);
         const g = parseInt(clean.substring(2, 4), 16);
@@ -411,7 +411,6 @@
             loadSettings();
 
             if (Lampa.SettingsApi) {
-                // Головний тригер
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString() },
@@ -428,18 +427,9 @@
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
-                    },
-                    onRender: item => item.css?.('display', 'block')
+                    }
                 });
 
-                // Заголовок "Зміна кольору і рамки виділення" (без onRender — завжди видимий)
-                Lampa.SettingsApi.addParam({
-                    component: 'interface_customization',
-                    param: { name: 'border_title', type: 'title' },
-                    field: { name: 'Зміна кольору і рамки виділення' }
-                });
-
-                // Вибір кольору
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_main_color', type: 'button' },
@@ -448,7 +438,6 @@
                     onChange: openColorPicker
                 });
 
-                // Затемнення
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_dimming_enabled', type: 'trigger', default: ColorPlugin.settings.dimming_enabled.toString() },
@@ -464,7 +453,8 @@
                     }
                 });
 
-                // Біла рамка
+                // Видалено параметр border_title (заголовок "РАМКА")
+
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString() },
@@ -480,7 +470,6 @@
                     }
                 });
 
-                // Заокруглення
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: {
@@ -505,7 +494,6 @@
                     }
                 });
 
-                // Форма шапки
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_head_border', type: 'trigger', default: ColorPlugin.settings.change_head_border.toString() },
@@ -521,7 +509,6 @@
                     }
                 });
 
-                // Форма плеєра
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_player_border', type: 'trigger', default: ColorPlugin.settings.change_player_border.toString() },
@@ -537,7 +524,6 @@
                     }
                 });
 
-                // Форма картки
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_card_border', type: 'trigger', default: ColorPlugin.settings.change_card_border.toString() },
