@@ -251,10 +251,10 @@
             playerFocus,
             playerRadius,
             cardNoBackground,
-            cardBorderColor,
+            card,cardBorderColor,
             cardRadiusImg,
             cardRadiusBorder,
-.Z            '.full-start__button, .full-start__button.focus { ' + radius + ' }',
+            '.full-start__button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             dimming,
             '.timetable__item--any::before { background-color: rgba(var(--main-color-rgb), 0.3) !important; }',
@@ -284,7 +284,7 @@
             '.color-picker-container { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 0 !important; }',
             '.color-picker-container > div { display: flex !important; flex-direction: column !important; gap: 1px !important; }',
             '@media (max-width: 768px) { .color-picker-container { grid-template-columns: 1fr !important; } }',
-            'body.glass--style .selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
+            'body.glass--style .刀selectbox-item.focus, body.glass--style .settings-folder.focus, body.glass--style .settings-param.focus { background-color: var(--main-color) !important; }',
             'body.glass--style .settings-folder.focus .settings-folder__icon { -webkit-filter: none !important; filter: none !important; }',
             'body.glass--style .selectbox-item.focus::after { border-color: #fff !important; }',
             'body.glass--style .selectbox-item.focus, body.glass--style .selectbox-item.focus .selectbox-item__checkbox { filter: none !important; }'
@@ -322,7 +322,7 @@
 
         const midPoint = Math.ceil(colorContent.length / 2);
         const leftColumn = colorContent.slice(0, midPoint).join('');
-        const restrColumn = colorContent.slice(midPoint).join('');
+        const rightColumn = colorContent.slice(midPoint).join('');
 
         const defaultButton = createColorHtml('default', Lampa.Lang.translate('default_color'));
         const hexValue = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
@@ -349,7 +349,7 @@
                     Lampa.Controller.toggle('settings_component');
                     Lampa.Controller.enable('menu');
                 },
-                onSelect: (a) => {
+                onSelect: ((a) => {
                     if (a.length > 0 && a[0] instanceof HTMLElement) {
                         const selectedElement = a[0];
                         let color;
@@ -427,14 +427,14 @@
                         updateCanvasFillStyle(window.draw_context);
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
-                    },
-                    onRender: item => item.css?.('display', 'block')
+                    }
                 });
 
+                // Груповий заголовок — тепер це параметр вибору кольору
                 Lampa.SettingsApi.addParam({
                     component: 'interface_customization',
                     param: { name: 'color_plugin_main_color', type: 'button' },
-                    field: { name: Lampa.Lang.translate('main_color'), description: Lampa.Lang.translate('main_color_description') },
+                    field: { name: 'Зміна кольору і рамки виділення', description: Lampa.Lang.translate('main_color_description') },
                     onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: openColorPicker
                 });
@@ -452,13 +452,6 @@
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
-                });
-
-                Lampa.SettingsApi.addParam({
-                    component: 'interface_customization',
-                    param: { name: 'border_title', type: 'title' },
-                    field: { name: 'РАМКА' },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ?  'block' : 'none')
                 });
 
                 Lampa.SettingsApi.addParam({
@@ -550,7 +543,6 @@
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
 
-                // Примусове оновлення відображення всіх параметрів після додавання
                 if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         }, 100);
