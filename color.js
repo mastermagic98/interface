@@ -169,11 +169,36 @@
         }
     };
 
+    // Функція для негайного приховування/відображення всіх залежних параметрів і заголовків
+    const updateParamsVisibility = () => {
+        const params = [
+            'color_plugin_main_color',
+            'color_plugin_dimming_enabled',
+            'border_title',
+            'color_plugin_highlight_enabled',
+            'color_plugin_border_radius',
+            'color_plugin_change_head_border',
+            'color_plugin_change_player_border',
+            'color_plugin_change_card_border'
+        ];
+        const display = ColorPlugin.settings.enabled ? 'block' : 'none';
+        params.forEach(name => {
+            document.querySelectorAll(`.settings-param[data-name="${name}"], .settings-param-title[data-name="${name}"]`).forEach(el => {
+                if (el && el.style) {
+                    el.style.display = display;
+                }
+            });
+        });
+    };
+
     const applyStyles = () => {
         const oldStyle = document.getElementById('color-plugin-styles');
         if (oldStyle) oldStyle.remove();
 
-        if (!ColorPlugin.settings.enabled) return;
+        if (!ColorPlugin.settings.enabled) {
+            updateParamsVisibility();
+            return;
+        }
 
         if (!isValidHex(ColorPlugin.settings.main_color)) {
             ColorPlugin.settings.main_color = '#353535';
@@ -415,7 +440,7 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString() },
                     field: { 
-                        name: '<div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px" viewBox="0 0 24 24"><path d="M2.216 4.913C5.724.053 12.99-1.36 18.16 1.985c5.107 3.3 6.985 9.65 4.892 15.606-1.975 5.624-7.178 7.852-10.928 5.023-1.404-1.06-1.95-2.389-2.212-4.547l-.127-1.225-.053-.493c-.147-1.16-.371-1.678-.841-1.951-.639-.37-1.065-.378-1.903-.041l-.42.181-.213.097c-1.21.546-2.014.738-3.032.516l-.238-.058-.196-.058C-.438 13.962-.93 9.268 2.216 4.913m1.174 8.333.147.046.16.038c.523.108.97.018 1.714-.3l.718-.32c1.435-.611 2.369-.67 3.635.062 1.094.636 1.521 1.611 1.738 3.301l.063.57.066.66.056.523c.205 1.69.579 2.594 1.49 3.281 2.714 2.048 6.602.384 8.196-4.155 1.809-5.152.208-10.565-4.157-13.388C12.831.73 6.598 1.944 3.646 6.03c-2.475 3.428-2.171 6.551-.256 7.216m13.393-2.474a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803m.59 4.328a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803m-2.95-8.054a1.491 1.551 0 1 1 2.881-.803 1.491 1.551 0 0 1-2.881.803m-.033 11.165a1.491 1.551 0 1 1 2.88-.803 1.491 1.551 0 0 1-2.88.803M10.217 5.84a1.491 1.551 0 1 1 2.882-.802 1.491 1.551 0 0 1-2.882.802" fill="currentColor"/></svg>' + Lampa.Lang.translate('color_plugin_enabled') + '</div>', 
+                        name: '<div style="display: flex; align-items: center;"><svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 1 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>' + Lampa.Lang.translate('color_plugin_enabled') + '</div>', 
                         description: Lampa.Lang.translate('color_plugin_enabled_description') 
                     },
                     onChange: value => {
@@ -425,9 +450,11 @@
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
+                        updateParamsVisibility(); // Негайне оновлення
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
-                    }
+                    },
+                    onRender: item => item.css?.('display', 'block')
                 });
 
                 Lampa.SettingsApi.addParam({
@@ -548,9 +575,7 @@
                 forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
-
-                // Примусове оновлення після додавання всіх параметрів
-                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                updateParamsVisibility(); // Початкове оновлення після додавання всіх параметрів
             }
         }, 100);
     };
@@ -568,7 +593,7 @@
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateSvgIcons();
-            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+            updateParamsVisibility();
         }
     });
 
@@ -579,7 +604,7 @@
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateSvgIcons();
-            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+            updateParamsVisibility();
         } else if (e.type === 'close') {
             saveSettings();
             applyStyles();
