@@ -169,36 +169,11 @@
         }
     };
 
-    // Функція для негайного приховування/відображення всіх залежних параметрів і заголовків
-    const updateParamsVisibility = () => {
-        const params = [
-            'color_plugin_main_color',
-            'color_plugin_dimming_enabled',
-            'border_title',
-            'color_plugin_highlight_enabled',
-            'color_plugin_border_radius',
-            'color_plugin_change_head_border',
-            'color_plugin_change_player_border',
-            'color_plugin_change_card_border'
-        ];
-        const display = ColorPlugin.settings.enabled ? 'block' : 'none';
-        params.forEach(name => {
-            document.querySelectorAll(`.settings-param[data-name="${name}"], .settings-param-title[data-name="${name}"]`).forEach(el => {
-                if (el && el.style) {
-                    el.style.display = display;
-                }
-            });
-        });
-    };
-
     const applyStyles = () => {
         const oldStyle = document.getElementById('color-plugin-styles');
         if (oldStyle) oldStyle.remove();
 
-        if (!ColorPlugin.settings.enabled) {
-            updateParamsVisibility();
-            return;
-        }
+        if (!ColorPlugin.settings.enabled) return;
 
         if (!isValidHex(ColorPlugin.settings.main_color)) {
             ColorPlugin.settings.main_color = '#353535';
@@ -279,7 +254,7 @@
             cardBorderColor,
             cardRadiusImg,
             cardRadiusBorder,
-            '.full-start__button, .full-start__button.focus { ' + radius + ' }',
+.Z            '.full-start__button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             dimming,
             '.timetable__item--any::before { background-color: rgba(var(--main-color-rgb), 0.3) !important; }',
@@ -347,7 +322,7 @@
 
         const midPoint = Math.ceil(colorContent.length / 2);
         const leftColumn = colorContent.slice(0, midPoint).join('');
-        const rightColumn = colorContent.slice(midPoint).join('');
+        const restrColumn = colorContent.slice(midPoint).join('');
 
         const defaultButton = createColorHtml('default', Lampa.Lang.translate('default_color'));
         const hexValue = Lampa.Storage.get('color_plugin_custom_hex', '') || '#353535';
@@ -450,7 +425,6 @@
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
-                        updateParamsVisibility(); // Негайне оновлення
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     },
@@ -484,7 +458,7 @@
                     component: 'interface_customization',
                     param: { name: 'border_title', type: 'title' },
                     field: { name: 'РАМКА' },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none')
+                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ?  'block' : 'none')
                 });
 
                 Lampa.SettingsApi.addParam({
@@ -575,7 +549,9 @@
                 forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
-                updateParamsVisibility(); // Початкове оновлення після додавання всіх параметрів
+
+                // Примусове оновлення відображення всіх параметрів після додавання
+                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
             }
         }, 100);
     };
@@ -593,7 +569,7 @@
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateSvgIcons();
-            updateParamsVisibility();
+            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
         }
     });
 
@@ -604,7 +580,7 @@
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateSvgIcons();
-            updateParamsVisibility();
+            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
         } else if (e.type === 'close') {
             saveSettings();
             applyStyles();
