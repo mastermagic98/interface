@@ -22,7 +22,7 @@
         border_radius_capsule: { ru: 'Капсульний', en: 'Capsule', uk: 'Капсульний' },
         change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
         change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
-        change_player_border: { ru: 'Змінювати電源 форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
+        change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
         change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
         change_card_border: { ru: 'Змінювати форму картки та рамки', en: 'Change card and border shape', uk: 'Змінювати форму картки та рамки' },
         change_card_border_description: { ru: 'Вмикає модифікацію форми картки та її рамки виділення', en: 'Enables modification of the card shape and its highlight border', uk: 'Вмикає модифікацію форми картки та її рамки виділення' },
@@ -32,8 +32,7 @@
         yellow: { ru: 'Жовтий', en: 'Yellow', uk: 'Жовтий' },
         lime: { ru: 'Лаймовий', en: 'Lime', uk: 'Лаймовий' },
         green: { ru: 'Зелений', en: 'Green', uk: 'Зелений' },
-        emerald: { ru: 'С 
-марагдовий', en: 'Emerald', uk: 'Смарагдовий' },
+        emerald: { ru: 'Смарагдовий', en: 'Emerald', uk: 'Смарагдовий' },
         teal: { ru: 'Бірюзовий', en: 'Teal', uk: 'Бірюзовий' },
         cyan: { ru: 'Блакитний', en: 'Cyan', uk: 'Блакитний' },
         sky: { ru: 'Небесний', en: 'Sky', uk: 'Небесний' },
@@ -170,7 +169,7 @@
         }
     };
 
-    // Функція для негайного приховування/відображення залежних параметрів
+    // Миттєве приховування/відображення всіх залежних параметрів
     const updateParamsVisibility = () => {
         const display = ColorPlugin.settings.enabled ? 'block' : 'none';
         const params = [
@@ -448,9 +447,8 @@
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
-                        updateParamsVisibility(); // Негайне оновлення
+                        updateParamsVisibility(); // Миттєве оновлення видимості
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -458,7 +456,6 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_main_color', type: 'button' },
                     field: { name: Lampa.Lang.translate('main_color'), description: Lampa.Lang.translate('main_color_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: openColorPicker
                 });
 
@@ -466,14 +463,12 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_dimming_enabled', type: 'trigger', default: ColorPlugin.settings.dimming_enabled.toString() },
                     field: { name: Lampa.Lang.translate('enable_dimming'), description: Lampa.Lang.translate('enable_dimming_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: value => {
                         ColorPlugin.settings.dimming_enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_dimming_enabled', value.toString());
                         localStorage.setItem('color_plugin_dimming_enabled', value.toString());
                         applyStyles();
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -481,14 +476,12 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_highlight_enabled', type: 'trigger', default: ColorPlugin.settings.highlight_enabled.toString() },
                     field: { name: Lampa.Lang.translate('enable_highlight'), description: Lampa.Lang.translate('enable_highlight_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: value => {
                         ColorPlugin.settings.highlight_enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_highlight_enabled', value.toString());
                         localStorage.setItem('color_plugin_highlight_enabled', value.toString());
                         applyStyles();
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -505,14 +498,12 @@
                         default: ColorPlugin.settings.border_radius
                     },
                     field: { name: Lampa.Lang.translate('border_radius'), description: Lampa.Lang.translate('border_radius_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: value => {
                         ColorPlugin.settings.border_radius = value;
                         Lampa.Storage.set('color_plugin_border_radius', value);
                         localStorage.setItem('color_plugin_border_radius', value);
                         applyStyles();
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -520,14 +511,12 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_head_border', type: 'trigger', default: ColorPlugin.settings.change_head_border.toString() },
                     field: { name: Lampa.Lang.translate('change_head_border'), description: Lampa.Lang.translate('change_head_border_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: value => {
                         ColorPlugin.settings.change_head_border = value === 'true';
                         Lampa.Storage.set('color_plugin_change_head_border', value.toString());
                         localStorage.setItem('color_plugin_change_head_border', value.toString());
                         applyStyles();
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -535,14 +524,12 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_player_border', type: 'trigger', default: ColorPlugin.settings.change_player_border.toString() },
                     field: { name: Lampa.Lang.translate('change_player_border'), description: Lampa.Lang.translate('change_player_border_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: value => {
                         ColorPlugin.settings.change_player_border = value === 'true';
                         Lampa.Storage.set('color_plugin_change_player_border', value.toString());
                         localStorage.setItem('color_plugin_change_player_border', value.toString());
                         applyStyles();
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -550,14 +537,12 @@
                     component: 'interface_customization',
                     param: { name: 'color_plugin_change_card_border', type: 'trigger', default: ColorPlugin.settings.change_card_border.toString() },
                     field: { name: Lampa.Lang.translate('change_card_border'), description: Lampa.Lang.translate('change_card_border_description') },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none'),
                     onChange: value => {
                         ColorPlugin.settings.change_card_border = value === 'true';
                         Lampa.Storage.set('color_plugin_change_card_border', value.toString());
                         localStorage.setItem('color_plugin_change_card_border', value.toString());
                         applyStyles();
                         saveSettings();
-                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
                 });
 
@@ -565,7 +550,7 @@
                 forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
-                updateParamsVisibility(); // Початкове оновлення
+                updateParamsVisibility(); // Початкове оновлення після додавання всіх параметрів
             }
         }, 100);
     };
