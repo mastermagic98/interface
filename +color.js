@@ -4,7 +4,6 @@
     // Переклади
     Lampa.Lang.add({
         color_plugin: { ru: 'Настройка цветов', en: 'Color settings', uk: 'Налаштування кольорів' },
-        color_plugin_enabled: { ru: 'Включить плагин', en: 'Enable plugin', uk: 'Увімкнути плагін' },
         color_plugin_enabled_description: { ru: 'Изменяет вид некоторых элементов интерфейса Lampa', en: 'Changes the appearance of some Lampa interface elements', uk: 'Змінює вигляд деяких елементів інтерфейсу Lampa' },
         main_color: { ru: 'Цвет выделения', en: 'Highlight color', uk: 'Колір виділення' },
         main_color_description: { ru: 'Выберите или укажите цвет выделения', en: 'Select or specify a highlight color', uk: 'Виберіть чи вкажіть колір виділення' },
@@ -194,13 +193,13 @@
         const radiusValue = radiusMap[ColorPlugin.settings.border_radius] || '0.5em';
         const radius = `border-radius: ${radiusValue} !important;`;
 
-        // Шапка — фон + біла рамка (якщо опція увімкнена)
+        // Шапка
         const headFocus = '.head__action.focus, .head__action:hover { background: var(--main-color) !important; color: #ffffff !important; fill: #ffffff !important; ' + highlight + ' }';
         const headFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action.focus { ${radius} }` : '';
         const headNonFocusDimming = ColorPlugin.settings.dimming_enabled ? '.head__action { background-color: rgba(var(--main-color-rgb), 0.3) !important; }' : '';
         const headNonFocusRadius = ColorPlugin.settings.change_head_border ? `.head__action { ${radius} }` : '';
 
-        // Плеєр — фон + біла рамка (якщо опція увімкнена)
+        // Плеєр
         const playerFocus = '.player-panel .button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + ' }';
         const playerRadius = ColorPlugin.settings.change_player_border ? `.player-panel .button.focus { ${radius} }` : '';
 
@@ -238,13 +237,14 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Основний фокус
+            // Основний фокус (з доданими елементами menu-edit-list)
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
             '.timetable__item.focus::before, .broadcast__device.focus, .iptv-menu__list-item.focus, .iptv-program__timeline>div, ' +
             '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, ' +
-            '.simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus { background: var(--main-color) !important; ' + highlight + radius + ' }',
+            '.simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, ' +
+            '.menu-edit-list__move.focus, .menu-edit-list__toggle.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
@@ -415,7 +415,7 @@
     };
 
     const updateParamsVisibility = (body = document) => {
-        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'border_title', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border', 'color_plugin_change_player_border', 'color_plugin_change_card_border'];
+        const params = ['color_plugin_main_color', 'color_plugin_dimming_enabled', 'color_plugin_highlight_enabled', 'color_plugin_border_radius', 'color_plugin_change_head_border', 'color_plugin_change_player_border', 'color_plugin_change_card_border'];
         params.forEach(name => {
             document.querySelectorAll(`.settings-param[data-name="${name}"]`).forEach(el => {
                 el.style.display = ColorPlugin.settings.enabled ? 'block' : 'none';
@@ -434,10 +434,11 @@
                     icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.003a7 7 0 0 0-7 7v.43c.09 1.51 1.91 1.79 3 .7a1.87 1.87 0 0 1 2.64 2.64c-1.1 1.16-.79 3.07.8 3.2h.6a7 7 0 1 0 0-14l-.04.03zm0 13h-.52a.58.58 0 0 1-.36-.14.56.56 0 0 1-.15-.3 1.24 1.24 0 0 1 .35-1.08 2.87 2.87 0 0 0 0-4 2.87 2.87 0 0 0-4.06 0 1 1 0 0 1-.90.34.41.41 0 0 1-.22-.12.42.42 0 0 1-.1-.29v-.37a6 6 0 1 1 6 6l-.04-.04zM9 3.997a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 7.007a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-7-5a1 1 0 1 1 0-2 1 1 0 0 0 0 2zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>'
                 });
 
+                // Головний перемикач
                 Lampa.SettingsApi.addParam({
                     component: 'color_plugin',
                     param: { name: 'color_plugin_enabled', type: 'trigger', default: ColorPlugin.settings.enabled.toString() },
-                    field: { name: Lampa.Lang.translate('color_plugin_enabled'), description: Lampa.Lang.translate('color_plugin_enabled_description') },
+                    field: { name: 'Змінити колір і форму рамки', description: Lampa.Lang.translate('color_plugin_enabled_description') },
                     onChange: value => {
                         ColorPlugin.settings.enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
@@ -473,13 +474,6 @@
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
-                });
-
-                Lampa.SettingsApi.addParam({
-                    component: 'color_plugin',
-                    param: { name: 'border_title', type: 'title' },
-                    field: { name: 'РАМКА' },
-                    onRender: item => item.css?.('display', ColorPlugin.settings.enabled ? 'block' : 'none')
                 });
 
                 Lampa.SettingsApi.addParam({
