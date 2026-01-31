@@ -22,17 +22,18 @@
         border_radius_capsule: { ru: 'Капсульний', en: 'Capsule', uk: 'Капсульний' },
         change_head_border: { ru: 'Змінювати форму рамки шапки', en: 'Change header border shape', uk: 'Змінювати форму рамки шапки' },
         change_head_border_description: { ru: 'Вмикає модифікацію форми рамки для іконок у заголовку', en: 'Enables modification of the border shape for icons in the header', uk: 'Вмикає модифікацію форми рамки для іконок у заголовку' },
-        change_player_border: { ru: 'Змінювати форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
+        change_player_border: { ru: 'Змінювати電源 форму рамки іконок плеєра', en: 'Change player buttons border shape', uk: 'Змінювати форму рамки іконок плеєра' },
         change_player_border_description: { ru: 'Вмикає модифікацію форми рамок кнопок в плеєрі', en: 'Enables modification of the border shape for buttons in the player', uk: 'Вмикає модифікацію форми рамок кнопок в плеєрі' },
         change_card_border: { ru: 'Змінювати форму картки та рамки', en: 'Change card and border shape', uk: 'Змінювати форму картки та рамки' },
         change_card_border_description: { ru: 'Вмикає модифікацію форми картки та її рамки виділення', en: 'Enables modification of the card shape and its highlight border', uk: 'Вмикає модифікацію форми картки та її рамки виділення' },
         red: { ru: 'Червоний', en: 'Red', uk: 'Червоний' },
         orange: { ru: 'Помаранчевий', en: 'Orange', uk: 'Помаранчевий' },
-        amber: { ru: 'Бурштиновий', en: 'Amber',roring: 'Amber', uk: 'Бурштиновий' },
+        amber: { ru: 'Бурштиновий', en: 'Amber', uk: 'Бурштиновий' },
         yellow: { ru: 'Жовтий', en: 'Yellow', uk: 'Жовтий' },
         lime: { ru: 'Лаймовий', en: 'Lime', uk: 'Лаймовий' },
         green: { ru: 'Зелений', en: 'Green', uk: 'Зелений' },
-        emerald: { ru: 'Смарагдовий', en: 'Emerald', uk: 'Смарагдовий' },
+        emerald: { ru: 'С 
+марагдовий', en: 'Emerald', uk: 'Смарагдовий' },
         teal: { ru: 'Бірюзовий', en: 'Teal', uk: 'Бірюзовий' },
         cyan: { ru: 'Блакитний', en: 'Cyan', uk: 'Блакитний' },
         sky: { ru: 'Небесний', en: 'Sky', uk: 'Небесний' },
@@ -169,11 +170,33 @@
         }
     };
 
+    // Функція для негайного приховування/відображення залежних параметрів
+    const updateParamsVisibility = () => {
+        const display = ColorPlugin.settings.enabled ? 'block' : 'none';
+        const params = [
+            'color_plugin_main_color',
+            'color_plugin_dimming_enabled',
+            'color_plugin_highlight_enabled',
+            'color_plugin_border_radius',
+            'color_plugin_change_head_border',
+            'color_plugin_change_player_border',
+            'color_plugin_change_card_border'
+        ];
+        params.forEach(name => {
+            document.querySelectorAll(`.settings-param[data-name="${name}"]`).forEach(el => {
+                if (el && el.style) el.style.display = display;
+            });
+        });
+    };
+
     const applyStyles = () => {
         const oldStyle = document.getElementById('color-plugin-styles');
         if (oldStyle) oldStyle.remove();
 
-        if (!ColorPlugin.settings.enabled) return;
+        if (!ColorPlugin.settings.enabled) {
+            updateParamsVisibility();
+            return;
+        }
 
         if (!isValidHex(ColorPlugin.settings.main_color)) {
             ColorPlugin.settings.main_color = '#353535';
@@ -425,6 +448,7 @@
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
+                        updateParamsVisibility(); // Негайне оновлення
                         saveSettings();
                         if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                     }
@@ -541,8 +565,7 @@
                 forceBlackFilterBackground();
                 updateCanvasFillStyle(window.draw_context);
                 updateSvgIcons();
-
-                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                updateParamsVisibility(); // Початкове оновлення
             }
         }, 100);
     };
@@ -560,7 +583,7 @@
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateSvgIcons();
-            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+            updateParamsVisibility();
         }
     });
 
@@ -571,7 +594,7 @@
             forceBlackFilterBackground();
             updateCanvasFillStyle(window.draw_context);
             updateSvgIcons();
-            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+            updateParamsVisibility();
         } else if (e.type === 'close') {
             saveSettings();
             applyStyles();
