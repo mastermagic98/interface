@@ -236,13 +236,14 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Основний фокус
+            // Основний фокус (включаючи нові елементи menu-edit-list)
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
             '.timetable__item.focus::before, .broadcast__device.focus, .iptv-menu__list-item.focus, .iptv-program__timeline>div, ' +
             '.radio-item.focus, .lang__selector-item.focus, .simple-keyboard .hg-button.focus, .modal__button.focus, .search-history-key.focus, ' +
-            '.simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus { background: var(--main-color) !important; ' + highlight + radius + ' }',
+            '.simple-keyboard-mic.focus, .full-review-add.focus, .full-review.focus, .tag-count.focus, ' +
+            '.menu-edit-list__move.focus, .menu-edit-list__toggle.focus { background: var(--main-color) !important; ' + highlight + radius + ' }',
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
