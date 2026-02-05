@@ -210,7 +210,7 @@
 
         const dimming = ColorPlugin.settings.dimming_enabled ? [
             '.full-start__rate, .full-start__rate > div:first-child { background: rgba(var(--main-color-rgb), 0.15) !important; }',
-            '.reaction, .full-start__button, .items-line__more { background-color: rgba(var(--main-color-rgb), 0.3) !important; }',
+            '.reaction, .full-start__button, .simple-button, .items-line__more { background-color: rgba(var(--main-color-rgb), 0.3) !important; }',
             '.card__vote, .card__icons-inner { background: rgba(var(--main-color-rgb), 0.5) !important; }',
             '.simple-button--filter > div { background-color: rgba(var(--main-color-rgb), 0.3) !important; }'
         ].join('') : '';
@@ -222,7 +222,7 @@
             '.modal .scroll__content { padding: 1.0em 0 !important; }',
             '.menu__ico, .menu__ico:hover, .menu__ico.traverse, .head__action, .settings-param__ico, ' +
             '.menu__item, .menu__item.focus, .menu__item.traverse, .menu__item:hover, .console__tab, .console__tab.focus, .settings-param, .settings-param.focus, ' +
-            '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .full-start__button.focus, ' +
+            '.selectbox-item, .selectbox-item.focus, .selectbox-item:hover, .full-person, .full-person.focus, .full-start__button, .simple-button, .full-start__button.focus, ' +
             '.full-descr__tag, .full-descr__tag.focus, .simple-button, .simple-button.focus, .search-source, .search-source.active, ' +
             '.radio-item, .radio-item.focus, .lang__selector-item, .lang__selector-item.focus, ' +
             '.modal__button, .modal__button.focus, .search-history-key, .search-history-key.focus, .simple-keyboard-mic, .simple-keyboard-mic.focus, ' +
@@ -261,7 +261,7 @@
             cardRadiusImg,
             cardRadiusBorder,
             // Кнопки карточки
-            '.full-start__button, .full-start__button.focus { ' + radius + ' }',
+            '.full-start__button, .simple-button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             dimming,
             '.timetable__item--any::before { background-color: rgba(var(--main-color-rgb), 0.3) !important; }',
