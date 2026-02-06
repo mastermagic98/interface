@@ -65,7 +65,7 @@
         }
 
         var newStyle =
-            // Приховуємо оригінальні фони та текст
+            // Приховуємо оригінальні фони та текст у всіх завантажувачах
             'body .activity__loader, body .player-video__loader, body .modal-loading, body .lampac-balanser-loader, body .loading-layer__ico, body .player-video__youtube-needclick > div {' +
                 'background-image: none !important; color: transparent !important;' +
             '}' +
@@ -104,7 +104,7 @@
 
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
-        // Примусово додаємо клас custom до всіх завантажувачів (на випадок, якщо вони вже існують)
+        // Примусово додаємо клас custom до всіх існуючих завантажувачів
         $('.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div').addClass('custom');
 
         var element = document.querySelector('.activity__loader');
@@ -143,6 +143,14 @@
                        '-webkit-filter: none !important; filter: none !important; }';
 
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
+
+        setTimeout(function () {
+            var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
+            if (prvElement) {
+                prvElement.style.filter = filterValue;
+                prvElement.style.webkitFilter = filterValue;
+            }
+        }, 100);
     }
 
     function remove_activity_loader() {
