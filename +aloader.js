@@ -2,11 +2,6 @@
     'use strict';
 
     Lampa.Lang.add({
-         diff --git a/+aloader.js b/+aloader.js
-index f0f5c31e3cc6c248efb50834d3dc640385aa506d..9d74e43a07cedee0f49e8838c89b8d1b1b68d08b 100644
---- a/+aloader.js
-+++ b/+aloader.js
-@@ -5,76 +5,87 @@
          params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },
          params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },
          params_ani_name: { ru: 'Анимация Загрузки', en: 'Loading animation', uk: 'Анімація завантаження' },
