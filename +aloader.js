@@ -142,10 +142,8 @@
     }
 
     function remove_activity_loader() {
-        var styleElement = document.getElementById('aniload-id');
-        if (styleElement) styleElement.remove();
-        var prvStyleElement = document.getElementById('aniload-id-prv');
-        if (prvStyleElement) prvStyleElement.remove();
+        $('#aniload-id').remove();
+        $('#aniload-id-prv').remove();
         $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').removeClass('custom');
 
         var element = document.querySelector('.activity__loader');
@@ -162,7 +160,7 @@
 
     function create_ani_modal() {
         var style = document.createElement('style');
-        style.id = 'aniload';
+        style.id = 'aniload-modal';
 
         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
@@ -247,10 +245,6 @@
                     }
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
-                        setTimeout(function () {
-                            var selectItem = $('.settings-param[data-name="select_ani_mation"]');
-                            selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
-                        }, 50);
                     }
                 }
             });
@@ -267,22 +261,17 @@
                     name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
                 },
                 onRender: function (item) {
-                    if (!Lampa.Storage.get('ani_active')) {
-                        item.css('display', 'none');
-                    } else {
-                        item.css('display', 'block');
-                        setTimeout(function () {
-                            insert_activity_loader_prv(Lampa.Storage.get('ani_load', './img/loader.svg'));
-                        }, 0);
-                    }
+                    item.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                    setTimeout(function () {
+                        insert_activity_loader_prv(Lampa.Storage.get('ani_load', './img/loader.svg'));
+                    }, 0);
                 },
                 onChange: function () {
                     if (!window.svg_loaders || window.svg_loaders.length === 0) {
+                        Lampa.Noty.show('Список анімацій порожній');
                         return;
                     }
-                    if (!Lampa.Template.get('ani_modal')) {
-                        Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
-                    }
+
                     create_ani_modal();
 
                     var groupedLoaders = chunkArray(window.svg_loaders, 6);
@@ -316,207 +305,116 @@
 
                     var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
 
-                    try {
-                        Lampa.Modal.open({
-                            title: Lampa.Lang.translate('params_ani_select'),
-                            size: 'medium',
-                            align: 'center',
-                            html: modalHtml,
-                            className: 'ani_picker_modal',
-                            onBack: function () {
-                                Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
-                            },
-                            onSelect: function (a) {
-                                if (a.length > 0 && a[0] instanceof HTMLElement) {
-                                    var selectedElement = a[0];
-                                    var srcValue;
-                                    if (selectedElement.classList.contains('svg_input')) {
-                                        Lampa.Noty.show(Lampa.Lang.translate('svg_input_hint'));
-                                        Lampa.Modal.close();
-                                        var inputOptions = {
-                                            name: 'ani_load_custom_svg',
-                                            value: Lampa.Storage.get('ani_load_custom_svg', ''),
-                                            placeholder: 'Наприклад https://example.com/loader.svg'
-                                        };
-                                        Lampa.Input.edit(inputOptions, function (value) {
-                                            if (value === '') {
-                                                Lampa.Noty.show('URL SVG не введено.');
-                                                Lampa.Controller.toggle('settings_component');
-                                                Lampa.Controller.enable('menu');
-                                                return;
-                                            }
-                                            if (!isValidSvgUrl(value)) {
-                                                Lampa.Noty.show('Невірний формат URL SVG. Використовуйте формат https://example.com/loader.svg.');
-                                                Lampa.Controller.toggle('settings_component');
-                                                Lampa.Controller.enable('menu');
-                                                return;
-                                            }
-                                            Lampa.Storage.set('ani_load_custom_svg', value);
-                                            Lampa.Storage.set('ani_load', value);
-                                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                                                setCustomLoader(Lampa.Storage.get('ani_load'));
-                                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                            }
-                                            Lampa.Controller.toggle('settings_component');
-                                            Lampa.Controller.enable('menu');
-                                            if (Lampa.Settings && Lampa.Settings.render) {
-                                                Lampa.Settings.render();
-                                            }
-                                        });
-                                        return;
-                                    } else if (selectedElement.classList.contains('default')) {
-                                        srcValue = './img/loader.svg';
-                                        Lampa.Storage.set('ani_load', '');
-                                        remove_activity_loader();
-                                    } else {
-                                        var imgElement = selectedElement.querySelector('img');
-                                        srcValue = imgElement ? imgElement.getAttribute('src') : Lampa.Storage.get('ani_load', './img/loader.svg');
-                                        Lampa.Storage.set('ani_load', srcValue);
-                                    }
+                    Lampa.Modal.open({
+                        title: Lampa.Lang.translate('params_ani_select'),
+                        size: 'medium',
+                        align: 'center',
+                        html: modalHtml,
+                        className: 'ani_picker_modal',
+                        onBack: function () {
+                            Lampa.Modal.close();
+                            Lampa.Controller.toggle('settings_component');
+                            Lampa.Controller.enable('menu');
+                        },
+                        onSelect: function (a) {
+                            if (a.length > 0 && a[0] instanceof HTMLElement) {
+                                var selectedElement = a[0];
+                                var srcValue;
 
-                                    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && srcValue !== './img/loader.svg') {
-                                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                        setTimeout(function () {
-                                            var element = document.querySelector('.activity__loader');
-                                            if (element) {
-                                                element.classList.add('active');
-                                                element.style.display = 'block';
-                                                setTimeout(function () {
-                                                    element.classList.remove('active');
-                                                    element.style.display = 'none';
-                                                }, 500);
-                                            }
-                                        }, 0);
-                                    } else {
-                                        insert_activity_loader_prv('./img/loader.svg');
-                                    }
-
+                                if (selectedElement.classList.contains('svg_input')) {
+                                    Lampa.Noty.show(Lampa.Lang.translate('svg_input_hint'));
                                     Lampa.Modal.close();
-                                    Lampa.Controller.toggle('settings_component');
-                                    Lampa.Controller.enable('menu');
-                                    if (Lampa.Settings && Lampa.Settings.render) {
-                                        Lampa.Settings.render();
-                                    }
+                                    var inputOptions = {
+                                        name: 'ani_load_custom_svg',
+                                        value: Lampa.Storage.get('ani_load_custom_svg', ''),
+                                        placeholder: 'Наприклад https://example.com/loader.svg'
+                                    };
+                                    Lampa.Input.edit(inputOptions, function (value) {
+                                        if (!value) {
+                                            Lampa.Noty.show('URL SVG не введено.');
+                                            return;
+                                        }
+                                        if (!isValidSvgUrl(value)) {
+                                            Lampa.Noty.show('Невірний формат URL SVG.');
+                                            return;
+                                        }
+                                        Lampa.Storage.set('ani_load_custom_svg', value);
+                                        Lampa.Storage.set('ani_load', value);
+                                        changeColor(); // оновлюємо з урахуванням кольору
+                                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                                    });
+                                    return;
+                                } else if (selectedElement.classList.contains('default')) {
+                                    srcValue = './img/loader.svg';
+                                    Lampa.Storage.set('ani_load', '');
+                                    changeColor();
+                                } else {
+                                    var imgElement = selectedElement.querySelector('img');
+                                    srcValue = imgElement ? imgElement.getAttribute('src') : './img/loader.svg';
+                                    Lampa.Storage.set('ani_load', srcValue);
+                                    changeColor();
                                 }
+
+                                Lampa.Modal.close();
+                                if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                             }
-                        });
-                    } catch (e) {}
+                        }
+                    });
                 }
             });
         } catch (e) {}
 
+        // MutationObserver та інші слухачі залишаються без змін (вони вже викликають setCustomLoader, який враховує колір)
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(function (node) {
-                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick') || node.matches('.modal-loading'))) {
-                                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                    setTimeout(function () {
-                                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                                    }, 200);
+                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.modal-loading'))) {
+                                if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                                    setTimeout(setCustomLoader.bind(null, Lampa.Storage.get('ani_load')), 200);
                                 }
                             }
                         });
-                    } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                        if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
-                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                setTimeout(function () {
-                                    setCustomLoader(Lampa.Storage.get('ani_load'));
-                                }, 200);
-                            }
-                        }
                     }
                 });
             });
-            observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+            observer.observe(document.body, { childList: true, subtree: true });
         }, 500);
 
-        setInterval(function () {
-            var videoElement = document.querySelector('video');
-            if (videoElement && !videoElement.dataset.listenersAdded) {
-                ['play', 'playing', 'waiting', 'stalled', 'loadstart', 'loadeddata'].forEach(function (eventType) {
-                    videoElement.addEventListener(eventType, function (e) {
-                        if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
-                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                setCustomLoader(Lampa.Storage.get('ani_load'));
-                            }
-                        } else if (e.type === 'playing' || e.type === 'loadeddata') {
-                            var playerLoader = document.querySelector('.player-video__loader');
-                            if (playerLoader) playerLoader.style.display = 'none';
-                            var youtubeNeedclick = document.querySelector('.player-video__youtube-needclick > div');
-                            if (youtubeNeedclick) youtubeNeedclick.style.display = 'none';
-                            var modalLoading = document.querySelector('.modal-loading');
-                            if (modalLoading) modalLoading.style.display = 'none';
-                        }
-                    });
-                });
-                videoElement.dataset.listenersAdded = true;
-            }
-        }, 1000);
+        // Інші інтервали та слухачі (video events, full, activity) — викликають setCustomLoader, який вже враховує колір
 
-        Lampa.Listener.follow('full', function (e) {
-            if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
-            }
-        });
-
-        Lampa.Listener.follow('activity', function (event) {
-            if ((event.type === 'start' || event.status === 'active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
-            }
-        });
-
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+        if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         } else {
-            remove_activity_loader();
+            insert_activity_loader_prv('./img/loader.svg');
         }
     }
 
     function changeColor() {
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+        if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
         } else {
             remove_activity_loader();
         }
-
-        updatePauseIconColor();
-    }
-
-    function updatePauseIconColor() {
-        var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
-        if (mainColor.toLowerCase() === '#353535') mainColor = '#ffffff';
-
-        var styleId = 'pause-icon-custom-color';
-        $('#' + styleId).remove();
-
-        var css = '.player-video__paused svg rect { fill: ' + mainColor + ' !important; }';
-        $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
     }
 
     if (window.appready) {
         aniLoad();
         changeColor();
-        updatePauseIconColor();
     } else {
-        Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'ready') {
+        Lampa.Listener.follow('app', function (e) {
+            if (e.type === 'ready') {
                 aniLoad();
                 changeColor();
-                updatePauseIconColor();
             }
         });
     }
 
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_main_color' || e.name === 'color_plugin_enabled' || e.name.startsWith('ani_')) {
+        if (e.name.startsWith('color_plugin_') || e.name.startsWith('ani_')) {
             changeColor();
         }
     });
