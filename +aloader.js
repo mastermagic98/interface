@@ -61,50 +61,50 @@
 
         var filterValue = '';
         if (!hasOwnFilter && colorEnabled) {
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color") !important';
         }
 
         var newStyle =
-            // Приховуємо оригінальні фони та текст у всіх завантажувачах
+            // Приховуємо оригінальні фони та текст
             'body .activity__loader, body .player-video__loader, body .modal-loading, body .lampac-balanser-loader, body .loading-layer__ico, body .player-video__youtube-needclick > div {' +
                 'background-image: none !important; color: transparent !important;' +
             '}' +
 
-            // Головний activity__loader (центральний великий)
+            // Головний activity__loader
             'body .activity__loader.active {' +
                 'display: block !important; position: fixed !important; left: 50% !important; top: 50% !important;' +
                 'transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important;' +
                 'background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important;' +
                 'background-position: center !important; background-size: contain !important;' +
-                'filter: ' + filterValue + ' !important; z-index: 9999 !important;' +
+                'filter: ' + filterValue + '; z-index: 9999 !important;' +
             '}' +
 
-            // Плеєр (overlay через ::before)
+            // Плеєр ::before
             'body .player-video__loader.custom::before {' +
                 'content: "" !important; position: absolute !important; left: 50% !important; top: 50% !important;' +
                 'transform: translate(-50%, -50%) !important; width: 80px !important; height: 80px !important;' +
                 'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
-                'filter: ' + filterValue + ' !important; z-index: 9999 !important; pointer-events: none;' +
+                'filter: ' + filterValue + '; z-index: 9999 !important; pointer-events: none;' +
             '}' +
 
-            // Модальне завантаження (overlay через ::before + приховуємо текст)
+            // Модальне ::before
             'body .modal-loading.custom::before {' +
                 'content: "" !important; position: absolute !important; left: 50% !important; top: 50% !important;' +
                 'transform: translate(-50%, -50%) !important; width: 80px !important; height: 80px !important;' +
                 'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
-                'filter: ' + filterValue + ' !important; z-index: 9999 !important; pointer-events: none;' +
+                'filter: ' + filterValue + '; z-index: 9999 !important; pointer-events: none;' +
             '}' +
 
-            // Інші (balanser, layer, youtube)
+            // Інші background-image
             'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .player-video__youtube-needclick > div.custom {' +
                 'background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important;' +
                 'background-position: center !important; background-size: contain !important;' +
-                'filter: ' + filterValue + ' !important;' +
+                'filter: ' + filterValue + ';' +
             '}';
 
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
-        // Додаємо клас custom усім завантажувачам (поточним і майбутнім через observer)
+        // Примусово додаємо клас custom до всіх завантажувачів (на випадок, якщо вони вже існують)
         $('.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div').addClass('custom');
 
         var element = document.querySelector('.activity__loader');
@@ -125,7 +125,7 @@
         if (colorEnabled) {
             var hasOwnFilter = svgHasOwnFilter(escapedUrl);
             if (!hasOwnFilter) {
-                filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+                filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color") !important';
             }
         }
 
@@ -138,19 +138,11 @@
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
                        'display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle;' +
                        'background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain;' +
-                       'background-color: transparent !important; filter: ' + filterValue + ' !important; -webkit-filter: ' + filterValue + ' !important; }' +
+                       'background-color: transparent !important; filter: ' + filterValue + '; -webkit-filter: ' + filterValue + '; }' +
                        'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv {' +
                        '-webkit-filter: none !important; filter: none !important; }';
 
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
-
-        setTimeout(function () {
-            var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
-            if (prvElement) {
-                prvElement.style.filter = filterValue;
-                prvElement.style.webkitFilter = filterValue;
-            }
-        }, 100);
     }
 
     function remove_activity_loader() {
@@ -238,10 +230,6 @@
                 },
                 onChange: function (item) {
                     Lampa.Storage.set('ani_active', item === 'true');
-                    var selectItem = $('.settings-param[data-name="select_ani_mation"]');
-                    if (selectItem.length) {
-                        selectItem.css('display', item === 'true' ? 'block' : 'none');
-                    }
                     changeColor();
                     if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                 }
@@ -358,39 +346,43 @@
             });
         } catch (e) {}
 
-        // MutationObserver для додавання класу custom та застосування стилів при появі завантажувачів
+        // MutationObserver для динамічного оновлення
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
+                var needUpdate = false;
                 mutations.forEach(function (mutation) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(function (node) {
                             if (node.nodeType === 1) {
-                                var loaders = node.querySelectorAll || function () { return []; };
-                                loaders = Array.from(loaders.call(node, '.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div'));
-                                if (node.matches && node.matches('.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div')) {
-                                    loaders.push(node);
+                                if (node.matches('.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div')) {
+                                    node.classList.add('custom');
+                                    needUpdate = true;
                                 }
-                                if (loaders.length && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                    loaders.forEach(function (el) {
-                                        el.classList.add('custom');
-                                    });
-                                    setTimeout(function () {
-                                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                                    }, 100);
-                                }
+                                var loaders = node.querySelectorAll('.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div');
+                                loaders.forEach(function (el) {
+                                    el.classList.add('custom');
+                                    needUpdate = true;
+                                });
                             }
                         });
                     }
                 });
+                if (needUpdate && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                    setTimeout(function () {
+                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                    }, 100);
+                }
             });
             observer.observe(document.body, { childList: true, subtree: true });
         }, 500);
 
-        // Ініціалізація при старті
         changeColor();
     }
 
     function changeColor() {
+        // Примусово додаємо клас custom до всіх можливих завантажувачів
+        $('.activity__loader, .player-video__loader, .modal-loading, .lampac-balanser-loader, .loading-layer__ico, .player-video__youtube-needclick > div').addClass('custom');
+
         if (Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
