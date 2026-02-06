@@ -240,7 +240,10 @@
  
                      var defaultLoader = applyDefaultLoaderColor();
 -                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + defaultLoader.filter + ';"></div>';
-+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + filterValue + ';"></div>';
++                   var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
+                    var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+                    var previewFilterValue = buildFilterValue(colorEnabled, mainColor);
+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + previewFilterValue + ';"></div>';
                      var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                      var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
                                      '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
