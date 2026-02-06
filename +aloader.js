@@ -2,295 +2,223 @@
     'use strict';
 
     Lampa.Lang.add({
-        params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },
-        params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },
-        params_ani_name: { ru: 'Анимация Загрузки', en: 'Loading animation', uk: 'Анімація завантаження' },
-        default_loader: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
-        custom_svg_input: { ru: 'Введи URL SVG', en: 'Enter SVG URL', uk: 'Введи URL SVG' },
-        svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
-    });
+        diff --git a/+aloader.js b/+aloader.js
+index f0f5c31e3cc6c248efb50834d3dc640385aa506d..dbd62d327be84549e63b1090a3d760f042f88d5c 100644
+--- a/+aloader.js
++++ b/+aloader.js
+@@ -5,76 +5,87 @@
+         params_ani_on: { ru: 'Включить', en: 'Enable', uk: 'Увімкнути' },
+         params_ani_select: { ru: 'Выбор анимации', en: 'Select loading animation', uk: 'Вибір анімації завантаження' },
+         params_ani_name: { ru: 'Анимация Загрузки', en: 'Loading animation', uk: 'Анімація завантаження' },
+         default_loader: { ru: 'По умолчанию', en: 'Default', uk: 'За замовчуванням' },
+         custom_svg_input: { ru: 'Введи URL SVG', en: 'Enter SVG URL', uk: 'Введи URL SVG' },
+         svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
+     });
+ 
+     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
+ 
+     function hexToRgb(hex) {
+         var cleanHex = hex.replace('#', '');
+         var r = parseInt(cleanHex.substring(0, 2), 16);
+         var g = parseInt(cleanHex.substring(2, 4), 16);
+         var b = parseInt(cleanHex.substring(4, 6), 16);
+         return { r: r, g: g, b: b };
+     }
+ 
+     function getFilterRgb(mainColor) {
+         if (mainColor.toLowerCase() === '#353535') {
+             return { r: 255, g: 255, b: 255 };
+         }
+         return hexToRgb(mainColor);
+     }
+ 
++    function buildColorFilter(rgb) {
++        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
++    }
++
++    function buildWhiteFilter() {
++        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
++    }
++
++    function buildFilterValue(colorEnabled, mainColor) {
++        if (colorEnabled) {
++            var rgb = getFilterRgb(mainColor);
++            return buildColorFilter(rgb);
++        }
++        return buildWhiteFilter();
++    }
++
+     function applyDefaultLoaderColor() {
+         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
+                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
+                          '<circle cx="50" cy="50" fill="none" stroke="#ffffff" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
+                          '  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
+                          '</circle>' +
+                          '</svg>';
+         var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
+         return { src: encodedSvg, filter: '' };
+     }
+ 
+     function setCustomLoader(url) {
+         console.log('setCustomLoader called with URL:', url);
+         $('#aniload-id').remove();
+ 
+         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
+         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+-        var rgb = getFilterRgb(mainColor);
++        var filterValue = buildFilterValue(colorEnabled, mainColor);
+ 
+         var escapedUrl = url.replace(/'/g, "\\'");
+ 
+-        var filterValue = '';
+-        if (colorEnabled) {
+-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+-        }
+-
+         var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
+                        'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }' +
+                        'body .lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
+                        'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
+                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
+                        'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
+                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
+                        'body .player-video { position: relative !important; width: 100% !important; height: 100vh !important; }' +
+                        'body .player-video__youtube-needclick { position: relative !important; width: 100% !important; height: 100% !important; }' +
+                        'body .player-video__youtube-needclick > div { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }' +
+                        'body .modal-loading { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; display: block !important; z-index: 9999 !important; }';
+ 
+         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
+ 
+         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
+         for (var i = 0; i < playerLoaderElements.length; i++) {
+             playerLoaderElements[i].classList.add('custom');
+             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+             playerLoaderElements[i].style.filter = filterValue;
+             playerLoaderElements[i].style.backgroundColor = 'transparent';
+         }
+ 
+         var element = document.querySelector('.activity__loader');
+         if (element) {
+             element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+@@ -121,58 +132,51 @@
+             youtubeNeedclickElements[i].style.top = '50%';
+             youtubeNeedclickElements[i].style.transform = 'translate(-50%, -50%)';
+             youtubeNeedclickElements[i].style.webkitTransform = 'translate(-50%, -50%)';
+         }
+ 
+         var modalLoadingElements = document.querySelectorAll('.modal-loading');
+         for (var i = 0; i < modalLoadingElements.length; i++) {
+             modalLoadingElements[i].classList.add('custom');
+             modalLoadingElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
+             modalLoadingElements[i].style.backgroundRepeat = 'no-repeat';
+             modalLoadingElements[i].style.backgroundPosition = '50% 50%';
+             modalLoadingElements[i].style.backgroundSize = 'contain';
+             modalLoadingElements[i].style.backgroundColor = 'transparent';
+             modalLoadingElements[i].style.filter = filterValue;
+             modalLoadingElements[i].style.display = 'block';
+             modalLoadingElements[i].style.zIndex = '9999';
+             console.log('Applied custom loader to .modal-loading:', modalLoadingElements[i], 'URL:', escapedUrl);
+         }
+     }
+ 
+     function insert_activity_loader_prv(escapedUrl) {
+         $('#aniload-id-prv').remove();
+ 
+         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
+         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+-        var rgb = getFilterRgb(mainColor);
+-
+-        var filterValue = '';
+-        if (colorEnabled) {
+-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+-        } else {
+-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
+-        }
++        var filterValue = buildFilterValue(colorEnabled, mainColor);
+ 
+         if (!escapedUrl || escapedUrl === './img/loader.svg') {
+             var defaultLoader = applyDefaultLoaderColor();
+             escapedUrl = defaultLoader.src;
+             filterValue = '';
+         }
+ 
+         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + filterValue + ' !important; -webkit-filter: ' + filterValue + ' !important; }' +
+                        'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
+ 
+         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
+ 
+         setTimeout(function checkPrvElement() {
+             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
+             if (prvElement) {
+                 prvElement.style.filter = filterValue;
+                 prvElement.style.webkitFilter = filterValue;
+             } else {
+                 setTimeout(checkPrvElement, 500);
+             }
+         }, 100);
+     }
+ 
+     function remove_activity_loader() {
+         console.log('remove_activity_loader called');
+@@ -238,56 +242,51 @@
+         }
+ 
+         var modalLoadingElements = document.querySelectorAll('.modal-loading');
+         for (var i = 0; i < modalLoadingElements.length; i++) {
+             modalLoadingElements[i].classList.remove('custom');
+             modalLoadingElements[i].style.backgroundImage = 'url("../img/loader.svg")';
+             modalLoadingElements[i].style.backgroundRepeat = 'no-repeat';
+             modalLoadingElements[i].style.backgroundPosition = '50% 50%';
+             modalLoadingElements[i].style.backgroundSize = '';
+             modalLoadingElements[i].style.backgroundColor = '';
+             modalLoadingElements[i].style.filter = '';
+             modalLoadingElements[i].style.display = '';
+             modalLoadingElements[i].style.zIndex = '';
+             console.log('Reset .modal-loading to default:', modalLoadingElements[i]);
+         }
+ 
+         insert_activity_loader_prv('./img/loader.svg');
+     }
+ 
+     function create_ani_modal() {
+         var style = document.createElement('style');
+         style.id = 'aniload';
+ 
+         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
+         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+-        var rgb = getFilterRgb(mainColor);
+-
+-        var filterValue = '';
+-        if (colorEnabled) {
+-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+-        }
++        var filterValue = buildFilterValue(colorEnabled, mainColor);
+ 
+         var focusBorderColor = colorEnabled ? (mainColor.toLowerCase() === '#353535' ? '#ffffff' : mainColor) : '#ffffff';
+ 
+         style.textContent = '.ani_modal_root { padding: 1em; }' +
+                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
+                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
+                             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
+                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
+                             '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
+                             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
+                             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
+                             '.svg_input { width: 252px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
+                             '.svg_input.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+                             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
+                             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
+ 
+         document.head.appendChild(style);
+     }
+ 
+     function createSvgHtml(src, index) {
+         var className = 'ani_loader_square selector';
+         var content = '<img src="' + src + '" alt="Loader ' + index + '">';
+         return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
+     }
 
-    Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
-
-    function hexToRgb(hex) {
-        var cleanHex = hex.replace('#', '');
-        var r = parseInt(cleanHex.substring(0, 2), 16);
-        var g = parseInt(cleanHex.substring(2, 4), 16);
-        var b = parseInt(cleanHex.substring(4, 6), 16);
-        return { r: r, g: g, b: b };
-    }
-
-    function getFilterRgb(mainColor) {
-        if (mainColor.toLowerCase() === '#353535') {
-            return { r: 255, g: 255, b: 255 };
-        }
-        return hexToRgb(mainColor);
-    }
-
-    function applyDefaultLoaderColor() {
-        var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
-                         '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
-                         '<circle cx="50" cy="50" fill="none" stroke="#ffffff" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
-                         '  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
-                         '</circle>' +
-                         '</svg>';
-        var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
-        return { src: encodedSvg, filter: '' };
-    }
-
-    function setCustomLoader(url) {
-        console.log('setCustomLoader called with URL:', url);
-        $('#aniload-id').remove();
-
-        var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
-        var rgb = getFilterRgb(mainColor);
-
-        var escapedUrl = url.replace(/'/g, "\\'");
-
-        var filterValue = '';
-        if (colorEnabled) {
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        }
-
-        var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
-                       'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }' +
-                       'body .lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
-                       'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
-                       'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
-                       'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .player-video { position: relative !important; width: 100% !important; height: 100vh !important; }' +
-                       'body .player-video__youtube-needclick { position: relative !important; width: 100% !important; height: 100% !important; }' +
-                       'body .player-video__youtube-needclick > div { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }' +
-                       'body .modal-loading { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; display: block !important; z-index: 9999 !important; }';
-
-        $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
-
-        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
-        for (var i = 0; i < playerLoaderElements.length; i++) {
-            playerLoaderElements[i].classList.add('custom');
-            playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            playerLoaderElements[i].style.filter = filterValue;
-            playerLoaderElements[i].style.backgroundColor = 'transparent';
-        }
-
-        var element = document.querySelector('.activity__loader');
-        if (element) {
-            element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            element.style.filter = filterValue;
-            element.style.backgroundColor = 'transparent';
-            if (Lampa.Storage.get('ani_active')) {
-                element.classList.add('active');
-                element.style.display = 'block';
-            }
-        }
-
-        var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
-        for (var i = 0; i < balanserElements.length; i++) {
-            balanserElements[i].classList.add('custom');
-            balanserElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            balanserElements[i].style.filter = filterValue;
-            balanserElements[i].style.backgroundColor = 'transparent';
-        }
-
-        var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
-        for (var i = 0; i < loadingLayerIco.length; i++) {
-            loadingLayerIco[i].classList.add('custom');
-            loadingLayerIco[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            loadingLayerIco[i].style.filter = filterValue;
-            loadingLayerIco[i].style.backgroundColor = 'transparent';
-        }
-
-        var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
-        for (var i = 0; i < youtubeNeedclickElements.length; i++) {
-            youtubeNeedclickElements[i].classList.add('custom');
-            youtubeNeedclickElements[i].textContent = '';
-            youtubeNeedclickElements[i].style.textIndent = '-9999px';
-            youtubeNeedclickElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            youtubeNeedclickElements[i].style.backgroundRepeat = 'no-repeat';
-            youtubeNeedclickElements[i].style.backgroundPosition = '50% 50%';
-            youtubeNeedclickElements[i].style.backgroundSize = '80% 80%';
-            youtubeNeedclickElements[i].style.backgroundColor = 'transparent';
-            youtubeNeedclickElements[i].style.filter = filterValue;
-            youtubeNeedclickElements[i].style.zIndex = '9999';
-            youtubeNeedclickElements[i].style.width = '8em';
-            youtubeNeedclickElements[i].style.height = '8em';
-            youtubeNeedclickElements[i].style.position = 'absolute';
-            youtubeNeedclickElements[i].style.left = '50%';
-            youtubeNeedclickElements[i].style.top = '50%';
-            youtubeNeedclickElements[i].style.transform = 'translate(-50%, -50%)';
-            youtubeNeedclickElements[i].style.webkitTransform = 'translate(-50%, -50%)';
-        }
-
-        var modalLoadingElements = document.querySelectorAll('.modal-loading');
-        for (var i = 0; i < modalLoadingElements.length; i++) {
-            modalLoadingElements[i].classList.add('custom');
-            modalLoadingElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            modalLoadingElements[i].style.backgroundRepeat = 'no-repeat';
-            modalLoadingElements[i].style.backgroundPosition = '50% 50%';
-            modalLoadingElements[i].style.backgroundSize = 'contain';
-            modalLoadingElements[i].style.backgroundColor = 'transparent';
-            modalLoadingElements[i].style.filter = filterValue;
-            modalLoadingElements[i].style.display = 'block';
-            modalLoadingElements[i].style.zIndex = '9999';
-            console.log('Applied custom loader to .modal-loading:', modalLoadingElements[i], 'URL:', escapedUrl);
-        }
-    }
-
-    function insert_activity_loader_prv(escapedUrl) {
-        $('#aniload-id-prv').remove();
-
-        var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
-        var rgb = getFilterRgb(mainColor);
-
-        var filterValue = '';
-        if (colorEnabled) {
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        } else {
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        }
-
-        if (!escapedUrl || escapedUrl === './img/loader.svg') {
-            var defaultLoader = applyDefaultLoaderColor();
-            escapedUrl = defaultLoader.src;
-            filterValue = '';
-        }
-
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + filterValue + ' !important; -webkit-filter: ' + filterValue + ' !important; }' +
-                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
-
-        $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
-
-        setTimeout(function checkPrvElement() {
-            var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
-            if (prvElement) {
-                prvElement.style.filter = filterValue;
-                prvElement.style.webkitFilter = filterValue;
-            } else {
-                setTimeout(checkPrvElement, 500);
-            }
-        }, 100);
-    }
-
-    function remove_activity_loader() {
-        console.log('remove_activity_loader called');
-        var styleElement = document.getElementById('aniload-id');
-        if (styleElement) styleElement.remove();
-        var prvStyleElement = document.getElementById('aniload-id-prv');
-        if (prvStyleElement) prvStyleElement.remove();
-
-        var element = document.querySelector('.activity__loader');
-        if (element) {
-            element.classList.remove('active');
-            element.style.display = 'none';
-            element.style.backgroundImage = '';
-            element.style.filter = '';
-            element.style.backgroundColor = 'transparent';
-        }
-
-        var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
-        for (var i = 0; i < balanserElements.length; i++) {
-            balanserElements[i].classList.remove('custom');
-            balanserElements[i].style.backgroundImage = '';
-            balanserElements[i].style.filter = '';
-            balanserElements[i].style.backgroundColor = 'transparent';
-        }
-
-        var playerLoaderElements = document.querySelectorAll('.player-video__loader');
-        for (var i = 0; i < playerLoaderElements.length; i++) {
-            playerLoaderElements[i].classList.remove('custom');
-            playerLoaderElements[i].style.backgroundImage = '';
-            playerLoaderElements[i].style.filter = '';
-            playerLoaderElements[i].style.backgroundColor = 'transparent';
-            playerLoaderElements[i].style.display = 'none';
-        }
-
-        var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
-        for (var i = 0; i < loadingLayerIco.length; i++) {
-            loadingLayerIco[i].classList.remove('custom');
-            loadingLayerIco[i].style.backgroundImage = '';
-            loadingLayerIco[i].style.filter = '';
-            loadingLayerIco[i].style.backgroundColor = 'transparent';
-            loadingLayerIco[i].style.display = 'none';
-        }
-
-        var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
-        for (var i = 0; i < youtubeNeedclickElements.length; i++) {
-            youtubeNeedclickElements[i].classList.remove('custom');
-            youtubeNeedclickElements[i].style.textIndent = '';
-            youtubeNeedclickElements[i].style.backgroundImage = '';
-            youtubeNeedclickElements[i].style.backgroundRepeat = '';
-            youtubeNeedclickElements[i].style.backgroundPosition = '';
-            youtubeNeedclickElements[i].style.backgroundSize = '';
-            youtubeNeedclickElements[i].style.backgroundColor = '';
-            youtubeNeedclickElements[i].style.filter = '';
-            youtubeNeedclickElements[i].style.zIndex = '';
-            youtubeNeedclickElements[i].style.width = '';
-            youtubeNeedclickElements[i].style.height = '';
-            youtubeNeedclickElements[i].style.position = '';
-            youtubeNeedclickElements[i].style.left = '';
-            youtubeNeedclickElements[i].style.top = '';
-            youtubeNeedclickElements[i].style.transform = '';
-            youtubeNeedclickElements[i].style.webkitTransform = '';
-            youtubeNeedclickElements[i].textContent = Lampa.Lang.translate('loading') || 'Завантаження...';
-        }
-
-        var modalLoadingElements = document.querySelectorAll('.modal-loading');
-        for (var i = 0; i < modalLoadingElements.length; i++) {
-            modalLoadingElements[i].classList.remove('custom');
-            modalLoadingElements[i].style.backgroundImage = 'url("../img/loader.svg")';
-            modalLoadingElements[i].style.backgroundRepeat = 'no-repeat';
-            modalLoadingElements[i].style.backgroundPosition = '50% 50%';
-            modalLoadingElements[i].style.backgroundSize = '';
-            modalLoadingElements[i].style.backgroundColor = '';
-            modalLoadingElements[i].style.filter = '';
-            modalLoadingElements[i].style.display = '';
-            modalLoadingElements[i].style.zIndex = '';
-            console.log('Reset .modal-loading to default:', modalLoadingElements[i]);
-        }
-
-        insert_activity_loader_prv('./img/loader.svg');
-    }
-
-    function create_ani_modal() {
-        var style = document.createElement('style');
-        style.id = 'aniload';
-
-        var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
-        var rgb = getFilterRgb(mainColor);
-
-        var filterValue = '';
-        if (colorEnabled) {
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        }
-
-        var focusBorderColor = colorEnabled ? (mainColor.toLowerCase() === '#353535' ? '#ffffff' : mainColor) : '#ffffff';
-
-        style.textContent = '.ani_modal_root { padding: 1em; }' +
-                            '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
-                            '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
-                            '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
-                            '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
-                            '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
-                            '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
-                            '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
-                            '.svg_input { width: 252px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
-                            '.svg_input.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
-                            '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
-                            '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
-
-        document.head.appendChild(style);
-    }
-
-    function createSvgHtml(src, index) {
-        var className = 'ani_loader_square selector';
-        var content = '<img src="' + src + '" alt="Loader ' + index + '">';
-        return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
-    }
 
     function chunkArray(arr, size) {
         var result = [];
