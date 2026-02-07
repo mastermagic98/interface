@@ -68,14 +68,14 @@
         for (var i = 0; i < playerLoaderElements.length; i++) {
             playerLoaderElements[i].classList.add('custom');
             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            playerLoaderElements[i].style.filter = filterValue;
+            playerLoaderElements[i].style.setProperty('filter', filterValue, 'important');
             playerLoaderElements[i].style.backgroundColor = 'transparent';
         }
 
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            element.style.filter = filterValue;
+            element.style.setProperty('filter', filterValue, 'important');
             element.style.backgroundColor = 'transparent';
             if (Lampa.Storage.get('ani_active')) {
                 element.classList.add('active');
@@ -87,7 +87,7 @@
         for (var i = 0; i < balanserElements.length; i++) {
             balanserElements[i].classList.add('custom');
             balanserElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            balanserElements[i].style.filter = filterValue;
+            balanserElements[i].style.setProperty('filter', filterValue, 'important');
             balanserElements[i].style.backgroundColor = 'transparent';
         }
 
@@ -95,7 +95,7 @@
         for (var i = 0; i < loadingLayerIco.length; i++) {
             loadingLayerIco[i].classList.add('custom');
             loadingLayerIco[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            loadingLayerIco[i].style.filter = filterValue;
+            loadingLayerIco[i].style.setProperty('filter', filterValue, 'important');
             loadingLayerIco[i].style.backgroundColor = 'transparent';
         }
 
@@ -109,7 +109,7 @@
             youtubeNeedclickElements[i].style.backgroundPosition = '50% 50%';
             youtubeNeedclickElements[i].style.backgroundSize = '80% 80%';
             youtubeNeedclickElements[i].style.backgroundColor = 'transparent';
-            youtubeNeedclickElements[i].style.filter = filterValue;
+            youtubeNeedclickElements[i].style.setProperty('filter', filterValue, 'important');
             youtubeNeedclickElements[i].style.zIndex = '9999';
             youtubeNeedclickElements[i].style.width = '8em';
             youtubeNeedclickElements[i].style.height = '8em';
@@ -128,7 +128,7 @@
             modalLoadingElements[i].style.backgroundPosition = '50% 50%';
             modalLoadingElements[i].style.backgroundSize = 'contain';
             modalLoadingElements[i].style.backgroundColor = 'transparent';
-            modalLoadingElements[i].style.filter = filterValue;
+            modalLoadingElements[i].style.setProperty('filter', filterValue, 'important');
             modalLoadingElements[i].style.display = 'block';
             modalLoadingElements[i].style.zIndex = '9999';
             console.log('Applied custom loader to .modal-loading:', modalLoadingElements[i], 'URL:', escapedUrl);
@@ -158,8 +158,8 @@
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                prvElement.style.filter = filterValue;
-                prvElement.style.webkitFilter = filterValue;
+                prvElement.style.setProperty('filter', filterValue, 'important');
+                prvElement.style.setProperty('-webkit-filter', filterValue, 'important');
             } else {
                 setTimeout(checkPrvElement, 500);
             }
@@ -256,7 +256,7 @@
                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
                             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
+                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + ' !important; }' +
                             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
                             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
