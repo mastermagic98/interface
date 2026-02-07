@@ -20,6 +20,12 @@
         return { r: r, g: g, b: b };
     }
 
+    function getMainColorFromCSS() {
+    return getComputedStyle(document.documentElement)
+        .getPropertyValue('--main-color')
+        .trim() || '#ffffff';
+    }
+
     function getFilterRgb(mainColor) {
         if (mainColor.toLowerCase() === '#353535') {
             return { r: 255, g: 255, b: 255 };
@@ -35,7 +41,7 @@
                          '</circle>' +
                          '</svg>';
         var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
-        return { src: encodedSvg, filter: '' };
+        return { src: encodedSvg};
     }
 
     function setCustomLoader(url) {
@@ -43,24 +49,22 @@
         $('#aniload-id').remove();
 
         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+        var mainColor = getMainColorFromCSS();
         var rgb = getFilterRgb(mainColor);
 
         var escapedUrl = url.replace(/'/g, "\\'");
 
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-
         var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
-                       'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
-                       'body .lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
-                       'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
+                       'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + ' !important; z-index: 9999 !important; }' +
+                       'body .lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + ' !important; }' +
+                       'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
                        'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
-                       'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
+                       'body .loading-layer .loading-layer__ico { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + ' !important; width: 1.9em !important; height: 1.9em !important; }' +
                        'body .loading-layer .loading-layer__ico:not(.custom) { background-image: none !important; display: none !important; }' +
                        'body .player-video { position: relative !important; width: 100% !important; height: 100vh !important; }' +
                        'body .player-video__youtube-needclick { position: relative !important; width: 100% !important; height: 100% !important; }' +
-                       'body .player-video__youtube-needclick > div { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }' +
-                       'body .modal-loading { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; display: block !important; z-index: 9999 !important; }';
+                       'body .player-video__youtube-needclick > div { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; -webkit-transform: translate(-50%, -50%) !important; text-indent: -9999px; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + ' !important; z-index: 9999 !important; width: 8em !important; height: 8em !important; }' +
+                       'body .modal-loading { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + ' !important; display: block !important; z-index: 9999 !important; }';
 
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
 
@@ -68,14 +72,15 @@
         for (var i = 0; i < playerLoaderElements.length; i++) {
             playerLoaderElements[i].classList.add('custom');
             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            playerLoaderElements[i].style.setProperty('filter', filterValue, 'important');
+            playerLoaderElements[i].style.setProperty('filter', 'important');
             playerLoaderElements[i].style.backgroundColor = 'transparent';
         }
 
         var element = document.querySelector('.activity__loader');
         if (element) {
+            element.style.color = getMainColorFromCSS();
             element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            element.style.setProperty('filter', filterValue, 'important');
+            element.style.setProperty('filter', 'important');
             element.style.backgroundColor = 'transparent';
             if (Lampa.Storage.get('ani_active')) {
                 element.classList.add('active');
@@ -87,7 +92,7 @@
         for (var i = 0; i < balanserElements.length; i++) {
             balanserElements[i].classList.add('custom');
             balanserElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            balanserElements[i].style.setProperty('filter', filterValue, 'important');
+            balanserElements[i].style.setProperty('filter', 'important');
             balanserElements[i].style.backgroundColor = 'transparent';
         }
 
@@ -95,7 +100,7 @@
         for (var i = 0; i < loadingLayerIco.length; i++) {
             loadingLayerIco[i].classList.add('custom');
             loadingLayerIco[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
-            loadingLayerIco[i].style.setProperty('filter', filterValue, 'important');
+            loadingLayerIco[i].style.setProperty('filter', 'important');
             loadingLayerIco[i].style.backgroundColor = 'transparent';
         }
 
@@ -109,7 +114,7 @@
             youtubeNeedclickElements[i].style.backgroundPosition = '50% 50%';
             youtubeNeedclickElements[i].style.backgroundSize = '80% 80%';
             youtubeNeedclickElements[i].style.backgroundColor = 'transparent';
-            youtubeNeedclickElements[i].style.setProperty('filter', filterValue, 'important');
+            youtubeNeedclickElements[i].style.setProperty('filter', 'important');
             youtubeNeedclickElements[i].style.zIndex = '9999';
             youtubeNeedclickElements[i].style.width = '8em';
             youtubeNeedclickElements[i].style.height = '8em';
@@ -128,7 +133,7 @@
             modalLoadingElements[i].style.backgroundPosition = '50% 50%';
             modalLoadingElements[i].style.backgroundSize = 'contain';
             modalLoadingElements[i].style.backgroundColor = 'transparent';
-            modalLoadingElements[i].style.setProperty('filter', filterValue, 'important');
+            modalLoadingElements[i].style.setProperty('filter', 'important');
             modalLoadingElements[i].style.display = 'block';
             modalLoadingElements[i].style.zIndex = '9999';
             console.log('Applied custom loader to .modal-loading:', modalLoadingElements[i], 'URL:', escapedUrl);
@@ -139,18 +144,15 @@
         $('#aniload-id-prv').remove();
 
         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+        var mainColor = getMainColorFromCSS();
         var rgb = getFilterRgb(mainColor);
-
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
 
         if (!escapedUrl || escapedUrl === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
-            filterValue = '';
         }
 
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + filterValue + ' !important; -webkit-filter: ' + filterValue + ' !important; }' +
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + ' !important; -webkit-filter: ' + ' !important; }' +
                        'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
 
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
@@ -158,8 +160,8 @@
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                prvElement.style.setProperty('filter', filterValue, 'important');
-                prvElement.style.setProperty('-webkit-filter', filterValue, 'important');
+                prvElement.style.setProperty('filter', 'important');
+                prvElement.style.setProperty('-webkit-filter', 'important');
             } else {
                 setTimeout(checkPrvElement, 500);
             }
@@ -174,6 +176,7 @@
         if (prvStyleElement) prvStyleElement.remove();
         var element = document.querySelector('.activity__loader');
         if (element) {
+            element.style.color = getMainColorFromCSS();
             element.classList.remove('active');
             element.style.display = 'none';
             element.style.backgroundImage = '';
@@ -244,10 +247,8 @@
         style.id = 'aniload';
 
         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#353535') : '#ffffff';
+        var mainColor = getMainColorFromCSS();
         var rgb = getFilterRgb(mainColor);
-
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
 
         var focusBorderColor = mainColor.toLowerCase() === '#353535' ? '#ffffff' : mainColor;
 
@@ -256,7 +257,7 @@
                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
                             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + ' !important; }' +
+                            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + ' !important; }' +
                             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
                             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
@@ -640,7 +641,7 @@
     }
 
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_enabled' || e.name === 'color_plugin_main_color' || e.name.startsWith('ani_')) {
+        if (e.name === 'color_plugin_enabled' || e.name === 'color_plugin_main_color') {
             updateLoaderColor();
         }
     });
