@@ -52,7 +52,6 @@
         if (colorEnabled) {
             filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         } else {
-            // Якщо color.js вимкнено — завжди білий колір для кастомних loader'ів
             filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white")';
         }
 
@@ -304,17 +303,17 @@
 
     function addPrvFocusListener() {}
 
-    function byTheme() {
-        console.log('byTheme called');
+    function updateLoaderColor() {
+        console.log('updateLoaderColor called');
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-            create_ani_modal(); // оновлюємо стилі модалки при зміні теми
-            console.log('byTheme: Custom loader applied with current color state');
+            create_ani_modal(); // оновлюємо модалку для правильного прев'ю
+            console.log('updateLoaderColor: Custom loader applied with current color state');
         } else {
             remove_activity_loader();
-            create_ani_modal(); // оновлюємо стилі модалки при зміні теми
-            console.log('byTheme: No custom loader or disabled — reset to default');
+            create_ani_modal(); // оновлюємо модалку для дефолтного стану
+            console.log('updateLoaderColor: No custom loader or disabled — reset to default');
         }
     }
 
@@ -645,21 +644,21 @@
 
     if (window.appready) {
         aniLoad();
-        byTheme();
+        updateLoaderColor();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 aniLoad();
-                byTheme();
+                updateLoaderColor();
             }
         });
     }
 
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_enabled' || e.name === 'color_plugin_main_color' || e.name.startsWith('ani_')) {
-            byTheme();
+            updateLoaderColor();
         }
     });
 
-    window.byTheme = byTheme;
+    window.updateLoaderColor = updateLoaderColor;
 })();
