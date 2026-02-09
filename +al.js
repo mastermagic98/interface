@@ -32,6 +32,7 @@
         var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
         return { src: encodedSvg, filter: '' };
     }
+
     function svgHasOwnFilter(url) {
         if (!url || url.indexOf('data:image/svg+xml') !== 0) return false;
         try {
@@ -41,6 +42,7 @@
             return false;
         }
     }
+
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
@@ -51,9 +53,11 @@
             var rgb = getFilterRgb(mainColor);
             filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         }
+
         var newStyle = 
             'body .activity__loader { display: none !important; background-image: none !important; }' +
             'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
+
             // КЛЮЧОВА ПРАВКА: НЕ ЧІПАЄМО ФОН ПЛЕЄРА — додаємо свій SVG через ::before
             'body .player-video__loader.custom::before {' +
                 'content: "" !important;' +
@@ -66,7 +70,9 @@
                 'z-index: 9999 !important;' +
                 'pointer-events: none;' +
             '}' +
+
             'body .player-video__loader.custom { background-image: none !important; }' +
+
             'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .modal-loading.custom {' +
                 'background-image: url(\'' + escapedUrl + '\') !important;' +
                 'background-repeat: no-repeat !important;' +
@@ -75,20 +81,25 @@
                 'background-color: transparent !important;' +
                 'filter: ' + filterValue + ' !important;' +
             '}' +
+
             'body .player-video__youtube-needclick > div.custom {' +
                 'position: absolute !important; left: 50% !important; top: 50% !important;' +
                 'transform: translate(-50%, -50%) !important; width: 8em !important; height: 8em !important;' +
                 'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
                 'filter: ' + filterValue + ' !important; text-indent: -9999px !important; z-index: 9999 !important;' +
             '}';
+
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
+
         $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').addClass('custom');
+
         var element = document.querySelector('.activity__loader');
         if (element && Lampa.Storage.get('ani_active')) {
             element.classList.add('active');
             element.style.display = 'block';
         }
     }
+
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var hasOwnFilter = svgHasOwnFilter(escapedUrl);
@@ -494,12 +505,16 @@
 function updatePauseIconColor() {
     var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
     var styleId = 'pause-icon-custom-color';
+
     $('#' + styleId).remove();
+
     var css = '.player-video__paused svg rect {' +
               'fill: ' + mainColor + ' !important;' +
               '}';
+
     $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
 }
+
 // Оновлюємо changeColor, щоб він також фарбував паузу
 function changeColor() {
     if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
@@ -511,8 +526,10 @@ function changeColor() {
     
     updatePauseIconColor(); // фарбуємо паузу
 }
+
 // Викликаємо при старті
 updatePauseIconColor();
+
 // При зміні кольору теми — теж оновлюємо
 Lampa.Storage.listener.follow('change', function (e) {
     if (e.name === 'color_plugin_main_color') {
@@ -520,9 +537,3 @@ Lampa.Storage.listener.follow('change', function (e) {
     }
 });
 })();
-0 commit comments
-Comments
-0 (0)
-
-You're not receiving notifications from this thread.
-There are no files selected for viewing
