@@ -99,6 +99,21 @@
             whiteFilterValue = '';
         }
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }';
+        var isColorEnabled = Lampa.Storage.cache['color_plugin_main_color'] !== undefined;
+        var glassStyle = '';
+        if (isColorEnabled) {
+            var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+            var rgb = getFilterRgb(mainColor);
+            var accentFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+            glassStyle = 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
+                         'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
+                         '-webkit-filter: ' + accentFilterValue + ' !important; filter: ' + accentFilterValue + ' !important; }';
+        } else {
+            glassStyle = 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
+                         'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
+                         '-webkit-filter: invert(1) !important; filter: invert(1) !important; }';
+        }
+        newStyle += glassStyle;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
