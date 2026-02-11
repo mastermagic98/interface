@@ -98,14 +98,33 @@
             escapedUrl = defaultLoader.src;
             whiteFilterValue = '';
         }
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff').toLowerCase();
-        var glassFilterValue = (mainColor === '#ffffff') ? 'invert(1)' : 'none';
+        var tempElement = $('<div class="settings-param focus"></div>').appendTo('body');
+        var computedStyle = window.getComputedStyle(tempElement[0]);
+        var bgColor = computedStyle.backgroundColor;
+        tempElement.remove();
+        var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
+        var glassFilterValue = '';
+        if (document.body.classList.contains('glass--style')) {
+            if (isFocusBgWhite) {
+                glassFilterValue = 'none';
+            } else {
+                glassFilterValue = 'invert(1)';
+            }
+        }
+        var glassStyle = '';
+        if (glassFilterValue) {
+            glassStyle = 'body.glass--style .selectbox-item.focus .settings-folder__icon, ' +
+                         'body.glass--style .selectbox-item.focus .selectbox-item__checkbox, ' +
+                         'body.glass--style .settings-folder.focus .settings-folder__icon, ' +
+                         'body.glass--style .settings-folder.focus .selectbox-item__checkbox, ' +
+                         'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
+                         'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
+                         'filter: ' + glassFilterValue + ' !important; ' +
+                         '-webkit-filter: ' + glassFilterValue + ' !important; ' +
+                         '}';
+        }
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
-                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
-                       'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
-                       'filter: ' + glassFilterValue + ' !important; ' +
-                       '-webkit-filter: ' + glassFilterValue + ' !important; ' +
-                       '}';
+                       glassStyle;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
