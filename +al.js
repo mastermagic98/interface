@@ -22,8 +22,12 @@
         }
         return hexToRgb(mainColor);
     }
+    function getColorFilter(mainColor) {
+        var rgb = getFilterRgb(mainColor);
+        return 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+    }
     function applyDefaultLoaderColor() {
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var mainColor = getMainColor();
         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
                          '<circle cx="50" cy="50" fill="none" stroke="' + mainColor + '" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
@@ -42,20 +46,26 @@
             return false;
         }
     }
+    function getMainColor() {
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var isColorPluginEnabled = Lampa.Plugin.array.some(p => p.name === 'color' && p.status === 1);
+        if (!isColorPluginEnabled) {
+            mainColor = '#ffffff';
+        }
+        return mainColor;
+    }
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var hasOwnFilter = svgHasOwnFilter(url);
         var filterValue = '';
         if (!hasOwnFilter) {
-            var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-            var rgb = getFilterRgb(mainColor);
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+            var mainColor = getMainColor();
+            filterValue = getColorFilter(mainColor);
         }
         var newStyle =
             'body .activity__loader { display: none !important; background-image: none !important; }' +
             'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
-            // КЛЮЧОВА ПРАВКА: НЕ ЧІПАЄМО ФОН ПЛЕЄРА — додаємо свій SVG через ::before
             'body .player-video__loader.custom::before {' +
                 'content: "" !important;' +
                 'position: absolute !important;' +
@@ -93,11 +103,8 @@
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var hasOwnFilter = svgHasOwnFilter(escapedUrl);
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        if (!colorEnabled) mainColor = '#ffffff';
-        var rgb = getFilterRgb(mainColor);
-        var prvFilterValue = hasOwnFilter ? '' : (colorEnabled ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")' : '');
+        var mainColor = getMainColor();
+        var prvFilterValue = hasOwnFilter ? '' : getColorFilter(mainColor);
         if (!escapedUrl || escapedUrl === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
@@ -108,24 +115,15 @@
         var bgColor = computedStyle.backgroundColor;
         tempElement.remove();
         var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
-        var glassFilterValue = '';
-        if (document.body.classList.contains('glass--style')) {
-            glassFilterValue = isFocusBgWhite ? 'invert(1)' : '';
-        }
-        var glassStyle = '';
-        if (glassFilterValue) {
-            glassStyle = 'body.glass--style .selectbox-item.focus .settings-folder__icon, ' +
-                         'body.glass--style .selectbox-item.focus .selectbox-item__checkbox, ' +
-                         'body.glass--style .settings-folder.focus .settings-folder__icon, ' +
-                         'body.glass--style .settings-folder.focus .selectbox-item__checkbox, ' +
-                         'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
-                         'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
-                         'filter: ' + glassFilterValue + ' !important; ' +
-                         '-webkit-filter: ' + glassFilterValue + ' !important; ' +
-                         '}';
-        }
+        var black_filter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22black%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#black")';
+        var white_filter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white")';
+        var glassFilterValue = isFocusBgWhite ? black_filter : white_filter;
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
-                       glassStyle;
+                       'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
+                       'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
+                       'filter: ' + glassFilterValue + ' !important; ' +
+                       '-webkit-filter: ' + glassFilterValue + ' !important; ' +
+                       '}';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
@@ -157,12 +155,13 @@
         $('#aniload').remove();
         var style = document.createElement('style');
         style.id = 'aniload';
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        if (!colorEnabled) mainColor = '#ffffff';
-        var rgb = getFilterRgb(mainColor);
-        var filterValue = colorEnabled ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")' : '';
-        var focusBorderColor = mainColor;
+        var mainColor = getMainColor();
+        var filterValue = getColorFilter(mainColor);
+        var isGlass = Lampa.Storage.get('interface_glass', false);
+        var black_filter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22black%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#black")';
+        var white_filter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white")';
+        var focusImgFilter = isGlass ? black_filter : white_filter;
+        var focusBorderColor = isGlass ? '#000000' : mainColor;
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
                             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
@@ -170,6 +169,7 @@
                             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
                             '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
                             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+                            '.ani_loader_square.focus img { filter: ' + focusImgFilter + '; }' +
                             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
                             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
                             '.svg_input { width: 252px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
@@ -522,7 +522,7 @@
     window.changeColor = changeColor;
 // === ПЕРЕФАРБУВАННЯ ІКОНКИ ПАУЗИ У КОЛІР ТЕМИ ===
 function updatePauseIconColor() {
-    var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+    var mainColor = getMainColor();
     var styleId = 'pause-icon-custom-color';
     $('#' + styleId).remove();
     var css = '.player-video__paused svg rect {' +
