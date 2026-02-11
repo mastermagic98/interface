@@ -99,7 +99,7 @@
             whiteFilterValue = '';
         }
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff').toLowerCase();
-        var glassFilterValue = (mainColor !== '#ffffff') ? 'none' : 'invert(1)';
+        var glassFilterValue = (mainColor === '#ffffff') ? 'none' : 'invert(1)';
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
                        'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
                        'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
