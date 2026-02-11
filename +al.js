@@ -98,15 +98,8 @@
             escapedUrl = defaultLoader.src;
             whiteFilterValue = '';
         }
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var colorEnabled = 'color_plugin_main_color' in Lampa.Storage.cache;
-        var glassFilterValue = '';
-        if (colorEnabled) {
-            var rgb = getFilterRgb(mainColor);
-            glassFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        } else {
-            glassFilterValue = 'invert(1)';
-        }
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff').toLowerCase();
+        var glassFilterValue = (mainColor !== '#ffffff') ? 'none' : 'invert(1)';
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
                        'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
                        'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
