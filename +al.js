@@ -23,9 +23,10 @@
         return hexToRgb(mainColor);
     }
     function applyDefaultLoaderColor() {
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
-                         '<circle cx="50" cy="50" fill="none" stroke="#ffffff" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
+                         '<circle cx="50" cy="50" fill="none" stroke="' + mainColor + '" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
                          ' <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
                          '</circle>' +
                          '</svg>';
@@ -92,11 +93,13 @@
     function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
         var hasOwnFilter = svgHasOwnFilter(escapedUrl);
-        var whiteFilterValue = hasOwnFilter ? '' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var rgb = getFilterRgb(mainColor);
+        var prvFilterValue = hasOwnFilter ? '' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
         if (!escapedUrl || escapedUrl === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
-            whiteFilterValue = '';
+            prvFilterValue = '';
         }
         var tempElement = $('<div class="settings-param focus"></div>').appendTo('body');
         var computedStyle = window.getComputedStyle(tempElement[0]);
@@ -105,11 +108,7 @@
         var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
         var glassFilterValue = '';
         if (document.body.classList.contains('glass--style')) {
-            if (isFocusBgWhite) {
-                glassFilterValue = 'none';
-            } else {
-                glassFilterValue = 'invert(1)';
-            }
+            glassFilterValue = isFocusBgWhite ? 'invert(1)' : 'none';
         }
         var glassStyle = '';
         if (glassFilterValue) {
@@ -123,14 +122,14 @@
                          '-webkit-filter: ' + glassFilterValue + ' !important; ' +
                          '}';
         }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
                        glassStyle;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                prvElement.style.filter = whiteFilterValue;
-                prvElement.style.webkitFilter = whiteFilterValue;
+                prvElement.style.filter = prvFilterValue;
+                prvElement.style.webkitFilter = prvFilterValue;
             } else {
                 setTimeout(checkPrvElement, 500);
             }
