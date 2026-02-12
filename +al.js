@@ -107,21 +107,11 @@
         var glassStyle = '';
 
 if (document.body.classList.contains('glass--style')) {
-    if (colorEnabled) {
-        // color.js увімкнено → у фокусі БІЛИЙ
-        glassStyle =
-            'body.glass--style .settings-param.focus .activity__loader_prv,' +
-            'body.glass--style .ani_loader_square.focus img {' +
-            'filter: brightness(0) invert(1) !important;' +
-            '}';
-    } else {
-        // color.js вимкнено → у фокусі ЧОРНИЙ
-        glassStyle =
-            'body.glass--style .settings-param.focus .activity__loader_prv,' +
-            'body.glass--style .ani_loader_square.focus img {' +
-            'filter: brightness(0) invert(0) !important;' +
-            '}';
-    }
+    glassStyle =
+        'body.glass--style .settings-param.focus .activity__loader_prv {' +
+        'filter: brightness(0) invert(0) !important;' +
+        '-webkit-filter: brightness(0) invert(0) !important;' +
+        '}';
 }
 
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
