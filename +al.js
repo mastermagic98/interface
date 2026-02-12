@@ -65,49 +65,13 @@
         var rgb = getFilterRgb(mainColor);
         var filterValue = hasOwnFilter ? '' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
 
-        var newStyle = 
+        var newStyle =
             'body .activity__loader { display: none !important; background-image: none !important; }' +
-            'body .activity__loader.active {' +
-                'display: block !important;' +
-                'position: fixed !important;' +
-                'left: 50% !important;' +
-                'top: 50% !important;' +
-                'transform: translate(-50%, -50%) !important;' +
-                'width: 108px !important;' +
-                'height: 108px !important;' +
-                'background-image: url(\'' + escapedUrl + '\') !important;' +
-                'background-repeat: no-repeat !important;' +
-                'background-position: center !important;' +
-                'background-size: contain !important;' +
-                'filter: ' + filterValue + ' !important;' +
-                'z-index: 9999 !important;' +
-            '}' +
-            'body .player-video__loader.custom::before {' +
-                'content: "" !important;' +
-                'position: absolute !important;' +
-                'left: 50% !important; top: 50% !important;' +
-                'transform: translate(-50%, -50%) !important;' +
-                'width: 80px !important; height: 80px !important;' +
-                'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
-                'filter: ' + filterValue + ' !important;' +
-                'z-index: 9999 !important;' +
-                'pointer-events: none;' +
-            '}' +
+            'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
+            'body .player-video__loader.custom::before { content: "" !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 80px !important; height: 80px !important; background: url(\'' + escapedUrl + '\') center/contain no-repeat !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; pointer-events: none; }' +
             'body .player-video__loader.custom { background-image: none !important; }' +
-            'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .modal-loading.custom {' +
-                'background-image: url(\'' + escapedUrl + '\') !important;' +
-                'background-repeat: no-repeat !important;' +
-                'background-position: center !important;' +
-                'background-size: contain !important;' +
-                'background-color: transparent !important;' +
-                'filter: ' + filterValue + ' !important;' +
-            '}' +
-            'body .player-video__youtube-needclick > div.custom {' +
-                'position: absolute !important; left: 50% !important; top: 50% !important;' +
-                'transform: translate(-50%, -50%) !important; width: 8em !important; height: 8em !important;' +
-                'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
-                'filter: ' + filterValue + ' !important; text-indent: -9999px !important; z-index: 9999 !important;' +
-            '}';
+            'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .modal-loading.custom { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
+            'body .player-video__youtube-needclick > div.custom { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 8em !important; height: 8em !important; background: url(\'' + escapedUrl + '\') center/contain no-repeat !important; filter: ' + filterValue + ' !important; text-indent: -9999px !important; z-index: 9999 !important; }';
 
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').addClass('custom');
@@ -139,17 +103,9 @@
             glassFilterValue = whiteFilter;
         }
 
-        var glassStyle = glassFilterValue ? 
-            'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv {' +
-            'filter: ' + glassFilterValue + ' !important;' +
-            '-webkit-filter: ' + glassFilterValue + ' !important;' +
-            '}' : '';
+        var glassStyle = glassFilterValue ? 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { filter: ' + glassFilterValue + ' !important; -webkit-filter: ' + glassFilterValue + ' !important; }' : '';
 
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
-                       'display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle;' +
-                       'background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important;' +
-                       'filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important;' +
-                       '}' + glassStyle;
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' + glassStyle;
 
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
     }
@@ -227,19 +183,28 @@
                 },
                 onChange: function () {
                     if (!window.svg_loaders || window.svg_loaders.length === 0) return;
+
                     create_ani_modal();
+
                     var groupedLoaders = [];
-                    for (var i = 0; i < window.svg_loaders.length; i += 6) groupedLoaders.push(window.svg_loaders.slice(i, i + 6));
+                    for (var i = 0; i < window.svg_loaders.length; i += 6) {
+                        groupedLoaders.push(window.svg_loaders.slice(i, i + 6));
+                    }
+
                     var svgContent = groupedLoaders.map(function(group, groupIndex) {
                         return '<div class="ani_loader_row">' + group.map(function(loader, index) {
                             return '<div class="ani_loader_square selector" tabindex="0" title="Loader ' + (groupIndex * 6 + index + 1) + '"><img src="' + loader + '"></div>';
                         }).join('') + '</div>';
                     }).join('');
+
                     var defaultLoader = applyDefaultLoaderColor();
                     var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '"></div>';
+
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;"><div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div><div class="value">' + svgValue + '</div></div>';
+
                     var topRowHtml = '<div style="display: flex; gap: 20px; padding: 0; justify-content: center; margin-bottom: 25px;">' + defaultButton + inputHtml + '</div>';
+
                     var modalHtml = $('<div>' + topRowHtml + '<div class="ani_picker_container">' + svgContent + '</div></div>');
 
                     Lampa.Modal.open({
@@ -252,9 +217,11 @@
                             Lampa.Controller.toggle('settings_component');
                             Lampa.Controller.enable('menu');
                         },
-                        onSelect: function (element) {
-                            if (!element.length || !(element[0] instanceof HTMLElement)) return;
-                            var selected = element[0];
+                        onSelect: function (elements) {
+                            if (!elements || elements.length === 0) return;
+
+                            var selected = elements[0];
+
                             if (selected.classList.contains('svg_input')) {
                                 Lampa.Noty.show(Lampa.Lang.translate('svg_input_hint'));
                                 Lampa.Modal.close();
@@ -274,16 +241,32 @@
                                     Lampa.Storage.set('ani_load_custom_svg', value);
                                     Lampa.Storage.set('ani_load', value);
                                     applyCurrentLoader();
+                                    Lampa.Controller.toggle('settings_component');
+                                    Lampa.Controller.enable('menu');
                                 });
                                 return;
                             }
+
                             if (selected.classList.contains('default')) {
                                 Lampa.Storage.set('ani_load', '');
                             } else {
                                 var img = selected.querySelector('img');
                                 Lampa.Storage.set('ani_load', img ? img.src : '');
                             }
+
                             applyCurrentLoader();
+
+                            // Флеш для підтвердження вибору
+                            var flashElement = document.querySelector('.activity__loader');
+                            if (flashElement) {
+                                flashElement.classList.add('active');
+                                flashElement.style.display = 'block';
+                                setTimeout(function () {
+                                    flashElement.classList.remove('active');
+                                    flashElement.style.display = 'none';
+                                }, 500);
+                            }
+
                             Lampa.Modal.close();
                             Lampa.Controller.toggle('settings_component');
                             Lampa.Controller.enable('menu');
