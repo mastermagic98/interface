@@ -9,6 +9,7 @@
         svg_input_hint: { ru: 'Используйте URL SVG, например https://example.com/loader.svg', en: 'Use SVG URL, for example https://example.com/loader.svg', uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg' }
     });
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
+
     function hexToRgb(hex) {
         var cleanHex = hex.replace('#', '');
         var r = parseInt(cleanHex.substring(0, 2), 16);
@@ -16,24 +17,28 @@
         var b = parseInt(cleanHex.substring(4, 6), 16);
         return { r: r, g: g, b: b };
     }
+
     function getFilterRgb(mainColor) {
-        if (mainColor.toLowerCase() === '#353535') {
-            return { r: 255, g: 255, b: 255 };
-        }
+        if (mainColor.toLowerCase() === '#353535') return { r: 255, g: 255, b: 255 };
         return hexToRgb(mainColor);
     }
-    function applyDefaultLoaderColor() {
+
+    function getMainColor() {
         var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
+        return colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
+    }
+
+    function applyDefaultLoaderColor() {
+        var mainColor = getMainColor();
         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
                          '<circle cx="50" cy="50" fill="none" stroke="' + mainColor + '" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
-                         ' <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
-                         '</circle>' +
-                         '</svg>';
+                         '<animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>' +
+                         '</circle></svg>';
         var encodedSvg = 'data:image/svg+xml,' + encodeURIComponent(defaultSvg);
         return { src: encodedSvg, filter: '' };
     }
+
     function svgHasOwnFilter(url) {
         if (!url || url.indexOf('data:image/svg+xml') !== 0) return false;
         try {
@@ -43,66 +48,66 @@
             return false;
         }
     }
+
     function getCurrentLoaderUrl() {
         var stored = Lampa.Storage.get('ani_load', '');
-        if (stored && stored !== './img/loader.svg') {
-            return stored;
-        }
+        if (stored && stored !== './img/loader.svg') return stored;
         return applyDefaultLoaderColor().src;
     }
+
     function setCustomLoader(url) {
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var hasOwnFilter = svgHasOwnFilter(url);
-        var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
+        var mainColor = getMainColor();
         var rgb = getFilterRgb(mainColor);
         var filterValue = '';
         if (!hasOwnFilter) {
             filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         }
-        var newStyle =
-            'body .activity__loader { display: none !important; background-image: none !important; }' +
-            'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
-            'body .player-video__loader.custom::before {' +
-                'content: "" !important;' +
-                'position: absolute !important;' +
-                'left: 50% !important; top: 50% !important;' +
-                'transform: translate(-50%, -50%) !important;' +
-                'width: 80px !important; height: 80px !important;' +
-                'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
-                'filter: ' + filterValue + ' !important;' +
-                'z-index: 9999 !important;' +
-                'pointer-events: none;' +
-            '}' +
-            'body .player-video__loader.custom { background-image: none !important; }' +
-            'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .modal-loading.custom {' +
-                'background-image: url(\'' + escapedUrl + '\') !important;' +
-                'background-repeat: no-repeat !important;' +
-                'background-position: center !important;' +
-                'background-size: contain !important;' +
-                'background-color: transparent !important;' +
-                'filter: ' + filterValue + ' !important;' +
-            '}' +
-            'body .player-video__youtube-needclick > div.custom {' +
-                'position: absolute !important; left: 50% !important; top: 50% !important;' +
-                'transform: translate(-50%, -50%) !important; width: 8em !important; height: 8em !important;' +
-                'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
-                'filter: ' + filterValue + ' !important; text-indent: -9999px !important; z-index: 9999 !important;' +
-            '}';
+        var newStyle = 'body .activity__loader {' +
+                       'background-image: url(\'' + escapedUrl + '\') !important;' +
+                       'filter: ' + filterValue + ' !important;' +
+                       '}' +
+                       'body .player-video__loader.custom::before {' +
+                       'content: "" !important;' +
+                       'position: absolute !important;' +
+                       'left: 50% !important; top: 50% !important;' +
+                       'transform: translate(-50%, -50%) !important;' +
+                       'width: 80px !important; height: 80px !important;' +
+                       'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
+                       'filter: ' + filterValue + ' !important;' +
+                       'z-index: 9999 !important;' +
+                       'pointer-events: none;' +
+                       '}' +
+                       'body .player-video__loader.custom { background-image: none !important; }' +
+                       'body .lampac-balanser-loader.custom, body .loading-layer__ico.custom, body .modal-loading.custom {' +
+                       'background-image: url(\'' + escapedUrl + '\') !important;' +
+                       'background-repeat: no-repeat !important;' +
+                       'background-position: center !important;' +
+                       'background-size: contain !important;' +
+                       'background-color: transparent !important;' +
+                       'filter: ' + filterValue + ' !important;' +
+                       '}' +
+                       'body .player-video__youtube-needclick > div.custom {' +
+                       'position: absolute !important; left: 50% !important; top: 50% !important;' +
+                       'transform: translate(-50%, -50%) !important; width: 8em !important; height: 8em !important;' +
+                       'background: url(\'' + escapedUrl + '\') center/contain no-repeat !important;' +
+                       'filter: ' + filterValue + ' !important; text-indent: -9999px !important; z-index: 9999 !important;' +
+                       '}';
         $('<style id="aniload-id">' + newStyle + '</style>').appendTo('head');
         $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').addClass('custom');
     }
+
     function insert_activity_loader_prv(url) {
         $('#aniload-id-prv').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var hasOwnFilter = svgHasOwnFilter(url);
-        var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
+        var mainColor = getMainColor();
         var rgb = getFilterRgb(mainColor);
         var colorFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
         var whiteFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        var prvFilterValue = hasOwnFilter ? '' : (colorEnabled ? colorFilter : whiteFilter);
+        var prvFilterValue = hasOwnFilter ? '' : colorFilter;
         if (!url || url === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
@@ -115,7 +120,7 @@
         var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
         var glassFilterValue = '';
         if (document.body.classList.contains('glass--style') && isFocusBgWhite) {
-            glassFilterValue = colorEnabled ? whiteFilter : 'invert(1)';
+            glassFilterValue = whiteFilter;
         }
         var glassStyle = '';
         if (glassFilterValue) {
@@ -124,26 +129,20 @@
                          '-webkit-filter: ' + glassFilterValue + ' !important; ' +
                          '}';
         }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
-                       glassStyle;
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv {' +
+                       'display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle;' +
+                       'background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important;' +
+                       'filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important;' +
+                       '}' + glassStyle;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
-        setTimeout(function checkPrvElement() {
-            var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
-            if (prvElement) {
-                prvElement.style.filter = prvFilterValue;
-                prvElement.style.webkitFilter = prvFilterValue;
-            } else {
-                setTimeout(checkPrvElement, 500);
-            }
-        }, 100);
     }
+
     function remove_activity_loader() {
-        var styleElement = document.getElementById('aniload-id');
-        if (styleElement) styleElement.remove();
-        var prvStyleElement = document.getElementById('aniload-id-prv');
-        if (prvStyleElement) prvStyleElement.remove();
+        $('#aniload-id').remove();
+        $('#aniload-id-prv').remove();
         $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').removeClass('custom');
     }
+
     function applyCurrentLoader() {
         remove_activity_loader();
         if (Lampa.Storage.get('ani_active')) {
@@ -152,16 +151,14 @@
             insert_activity_loader_prv(url);
         }
     }
+
     function create_ani_modal() {
         $('#aniload').remove();
         var style = document.createElement('style');
         style.id = 'aniload';
-        var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
+        var mainColor = getMainColor();
         var rgb = getFilterRgb(mainColor);
-        var colorFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var whiteFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        var filterValue = colorEnabled ? colorFilter : whiteFilter;
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
         var focusBorderColor = mainColor;
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
@@ -178,256 +175,171 @@
                             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
         document.head.appendChild(style);
     }
+
     function createSvgHtml(src, index) {
-        var className = 'ani_loader_square selector';
-        var content = '<img src="' + src + '" alt="Loader ' + index + '">';
-        return '<div class="' + className + '" tabindex="0" title="Loader ' + index + '">' + content + '</div>';
+        return '<div class="ani_loader_square selector" tabindex="0" title="Loader ' + index + '"><img src="' + src + '" alt="Loader ' + index + '"></div>';
     }
+
     function chunkArray(arr, size) {
         var result = [];
-        for (var i = 0; i < arr.length; i += size) {
-            result.push(arr.slice(i, i + size));
-        }
+        for (var i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size));
         return result;
     }
+
     function isValidSvgUrl(url) {
         return /^https?:\/\/.*\.svg$/.test(url);
     }
+
     function aniLoad() {
         var icon_plugin = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
-        try {
-            Lampa.SettingsApi.addComponent({
-                component: 'ani_load_menu',
-                name: Lampa.Lang.translate('params_ani_name'),
-                icon: icon_plugin
-            });
-        } catch (e) {}
+
+        try { Lampa.SettingsApi.addComponent({ component: 'ani_load_menu', name: Lampa.Lang.translate('params_ani_name'), icon: icon_plugin }); } catch (e) {}
+
         try {
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
-                param: {
-                    name: 'ani_active',
-                    type: 'trigger',
-                    default: false
-                },
-                field: {
-                    name: Lampa.Lang.translate('params_ani_on')
-                },
-                onChange: function (item) {
-                    Lampa.Storage.set('ani_active', item === 'true');
+                param: { name: 'ani_active', type: 'trigger', default: false },
+                field: { name: Lampa.Lang.translate('params_ani_on') },
+                onChange: function (value) {
+                    Lampa.Storage.set('ani_active', value === 'true');
                     applyCurrentLoader();
-                    var selectItem = $('.settings-param[data-name="select_ani_mation"]');
-                    if (selectItem.length) {
-                        selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
-                    }
-                    if (Lampa.Settings && Lampa.Settings.render) {
-                        Lampa.Settings.render();
-                    }
+                    $('.settings-param[data-name="select_ani_mation"]').css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                    if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
                 }
             });
         } catch (e) {}
+
         try {
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
-                param: {
-                    name: 'select_ani_mation',
-                    type: 'button'
-                },
-                field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
-                },
+                param: { name: 'select_ani_mation', type: 'button' },
+                field: { name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select') },
                 onRender: function (item) {
-                    if (!Lampa.Storage.get('ani_active')) {
-                        item.css('display', 'none');
-                    } else {
-                        item.css('display', 'block');
-                        setTimeout(function () {
-                            insert_activity_loader_prv(getCurrentLoaderUrl());
-                        }, 0);
-                    }
+                    item.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
+                    if (Lampa.Storage.get('ani_active')) insert_activity_loader_prv(getCurrentLoaderUrl());
                 },
                 onChange: function () {
-                    if (!window.svg_loaders || window.svg_loaders.length === 0) {
-                        return;
-                    }
-                    if (!Lampa.Template.get('ani_modal')) {
-                        Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
-                    }
+                    if (!window.svg_loaders || window.svg_loaders.length === 0) return;
                     create_ani_modal();
                     var groupedLoaders = chunkArray(window.svg_loaders, 6);
-                    var svgContent = groupedLoaders.map(function(group) {
-                        var groupContent = group.map(function(loader, index) {
-                            return createSvgHtml(loader, groupedLoaders.indexOf(group) * 6 + index + 1);
-                        }).join('');
-                        return '<div class="ani_loader_row">' + groupContent + '</div>';
-                    });
-                    var midPoint = Math.ceil(svgContent.length / 2);
-                    var leftColumn = svgContent.slice(0, midPoint).join('');
-                    var rightColumn = svgContent.slice(midPoint).join('');
+                    var svgContent = groupedLoaders.map(function(group, groupIndex) {
+                        return '<div class="ani_loader_row">' + group.map(function(loader, index) {
+                            return createSvgHtml(loader, groupIndex * 6 + index + 1);
+                        }).join('') + '</div>';
+                    }).join('');
                     var defaultLoader = applyDefaultLoaderColor();
-                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + defaultLoader.filter + ';"></div>';
+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '"></div>';
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
-                    var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
-                                    '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
-                                    '<div class="value">' + svgValue + '</div>' +
-                                    '</div>';
-                    var topRowHtml = '<div style="display: flex; gap: 20px; padding: 0; justify-content: center; margin-bottom: 25px;">' +
-                                     defaultButton + inputHtml + '</div>';
-                    var modalContent = '<div class="ani_picker_container">' +
-                                       '<div>' + leftColumn + '</div>' +
-                                       '<div>' + rightColumn + '</div>' +
-                                       '</div>';
-                    var modalHtml = $('<div>' + topRowHtml + modalContent + '</div>');
-                    try {
-                        Lampa.Modal.open({
-                            title: Lampa.Lang.translate('params_ani_select'),
-                            size: 'medium',
-                            align: 'center',
-                            html: modalHtml,
-                            className: 'ani_picker_modal',
-                            onBack: function () {
+                    var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;"><div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div><div class="value">' + svgValue + '</div></div>';
+                    var topRowHtml = '<div style="display: flex; gap: 20px; padding: 0; justify-content: center; margin-bottom: 25px;">' + defaultButton + inputHtml + '</div>';
+                    var modalHtml = $('<div>' + topRowHtml + '<div class="ani_picker_container">' + svgContent + '</div></div>');
+                    Lampa.Modal.open({
+                        title: Lampa.Lang.translate('params_ani_select'),
+                        size: 'medium',
+                        align: 'center',
+                        html: modalHtml,
+                        onBack: function () {
+                            Lampa.Modal.close();
+                            Lampa.Controller.toggle('settings_component');
+                            Lampa.Controller.enable('menu');
+                        },
+                        onSelect: function (element) {
+                            if (!(element[0] instanceof HTMLElement)) return;
+                            var selected = element[0];
+                            if (selected.classList.contains('svg_input')) {
+                                Lampa.Noty.show(Lampa.Lang.translate('svg_input_hint'));
                                 Lampa.Modal.close();
-                                Lampa.Controller.toggle('settings_component');
-                                Lampa.Controller.enable('menu');
-                            },
-                            onSelect: function (a) {
-                                if (a.length > 0 && a[0] instanceof HTMLElement) {
-                                    var selectedElement = a[0];
-                                    var srcValue;
-                                    if (selectedElement.classList.contains('svg_input')) {
-                                        Lampa.Noty.show(Lampa.Lang.translate('svg_input_hint'));
-                                        Lampa.Modal.close();
-                                        var inputOptions = {
-                                            name: 'ani_load_custom_svg',
-                                            value: Lampa.Storage.get('ani_load_custom_svg', ''),
-                                            placeholder: 'Наприклад https://example.com/loader.svg'
-                                        };
-                                        Lampa.Input.edit(inputOptions, function (value) {
-                                            if (value === '') {
-                                                Lampa.Noty.show('URL SVG не введено.');
-                                                Lampa.Controller.toggle('settings_component');
-                                                Lampa.Controller.enable('menu');
-                                                return;
-                                            }
-                                            if (!isValidSvgUrl(value)) {
-                                                Lampa.Noty.show('Невірний формат URL SVG. Використовуйте формат https://example.com/loader.svg.');
-                                                Lampa.Controller.toggle('settings_component');
-                                                Lampa.Controller.enable('menu');
-                                                return;
-                                            }
-                                            Lampa.Storage.set('ani_load_custom_svg', value);
-                                            Lampa.Storage.set('ani_load', value);
-                                            applyCurrentLoader();
-                                            Lampa.Controller.toggle('settings_component');
-                                            Lampa.Controller.enable('menu');
-                                            if (Lampa.Settings && Lampa.Settings.render) {
-                                                Lampa.Settings.render();
-                                            }
-                                        });
+                                Lampa.Input.edit({
+                                    name: 'ani_load_custom_svg',
+                                    value: Lampa.Storage.get('ani_load_custom_svg', ''),
+                                    placeholder: 'Наприклад https://example.com/loader.svg'
+                                }, function (value) {
+                                    if (!value) {
+                                        Lampa.Noty.show('URL SVG не введено.');
                                         return;
-                                    } else if (selectedElement.classList.contains('default')) {
-                                        Lampa.Storage.set('ani_load', '');
-                                        applyCurrentLoader();
-                                    } else {
-                                        var imgElement = selectedElement.querySelector('img');
-                                        srcValue = imgElement ? imgElement.getAttribute('src') : '';
-                                        Lampa.Storage.set('ani_load', srcValue);
-                                        applyCurrentLoader();
                                     }
-                                    Lampa.Modal.close();
-                                    Lampa.Controller.toggle('settings_component');
-                                    Lampa.Controller.enable('menu');
-                                    if (Lampa.Settings && Lampa.Settings.render) {
-                                        Lampa.Settings.render();
+                                    if (!isValidSvgUrl(value)) {
+                                        Lampa.Noty.show('Невірний формат URL SVG.');
+                                        return;
                                     }
-                                }
+                                    Lampa.Storage.set('ani_load_custom_svg', value);
+                                    Lampa.Storage.set('ani_load', value);
+                                    applyCurrentLoader();
+                                });
+                                return;
                             }
-                        });
-                    } catch (e) {}
+                            var srcValue;
+                            if (selected.classList.contains('default')) {
+                                Lampa.Storage.set('ani_load', '');
+                            } else {
+                                var img = selected.querySelector('img');
+                                srcValue = img ? img.src : '';
+                                Lampa.Storage.set('ani_load', srcValue);
+                            }
+                            applyCurrentLoader();
+                            Lampa.Modal.close();
+                            Lampa.Controller.toggle('settings_component');
+                            Lampa.Controller.enable('menu');
+                            if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                        }
+                    });
                 }
             });
         } catch (e) {}
-        setTimeout(function () {
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    if (mutation.type === 'childList') {
-                        mutation.addedNodes.forEach(function (node) {
-                            if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick') || node.matches('.modal-loading'))) {
-                                if (Lampa.Storage.get('ani_active')) {
-                                    setTimeout(applyCurrentLoader, 200);
-                                }
-                            }
-                        });
-                    } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                        if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
-                            if (Lampa.Storage.get('ani_active')) {
-                                setTimeout(applyCurrentLoader, 200);
-                            }
-                        }
-                    }
-                });
+
+        // Спостереження за завантаженнями
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'childList' || (mutation.type === 'attributes' && mutation.attributeName === 'class')) {
+                    if (Lampa.Storage.get('ani_active')) applyCurrentLoader();
+                }
             });
-            observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-        }, 500);
+        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+        // Відео події
         setInterval(function () {
-            var videoElement = document.querySelector('video');
-            if (videoElement && !videoElement.dataset.listenersAdded) {
-                ['play', 'playing', 'waiting', 'stalled', 'loadstart', 'loadeddata'].forEach(function (eventType) {
-                    videoElement.addEventListener(eventType, function (e) {
-                        if (Lampa.Storage.get('ani_active')) {
-                            if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
-                                applyCurrentLoader();
-                            }
-                        }
+            var video = document.querySelector('video');
+            if (video && !video.dataset.listenersAdded) {
+                ['waiting', 'loadstart', 'stalled'].forEach(function (type) {
+                    video.addEventListener(type, function () {
+                        if (Lampa.Storage.get('ani_active')) applyCurrentLoader();
                     });
                 });
-                videoElement.dataset.listenersAdded = true;
+                video.dataset.listenersAdded = true;
             }
         }, 1000);
-        Lampa.Listener.follow('full', function (e) {
-            if (e.type === 'start' && Lampa.Storage.get('ani_active')) {
-                setTimeout(applyCurrentLoader, 200);
-            }
-        });
-        Lampa.Listener.follow('activity', function (event) {
-            if ((event.type === 'start' || event.status === 'active') && Lampa.Storage.get('ani_active')) {
-                setTimeout(applyCurrentLoader, 200);
-            }
-        });
+
+        Lampa.Listener.follow('full', function (e) { if (e.type === 'start' && Lampa.Storage.get('ani_active')) applyCurrentLoader(); });
+        Lampa.Listener.follow('activity', function (e) { if ((e.type === 'start' || e.status === 'active') && Lampa.Storage.get('ani_active')) applyCurrentLoader(); });
+
         applyCurrentLoader();
     }
+
     function changeColor() {
         applyCurrentLoader();
-        create_ani_modal();
     }
+
     if (window.appready) {
         aniLoad();
     } else {
-        Lampa.Listener.follow('app', function (event) {
-            if (event.type === 'ready') {
-                aniLoad();
-            }
+        Lampa.Listener.follow('app', function (e) {
+            if (e.type === 'ready') aniLoad();
         });
     }
+
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_main_color' || e.name === 'interface_glass') {
-            changeColor();
-        }
+        if (e.name === 'color_plugin_main_color' || e.name === 'interface_glass') changeColor();
     });
-    window.changeColor = changeColor;
+
     function updatePauseIconColor() {
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var styleId = 'pause-icon-custom-color';
-        $('#' + styleId).remove();
-        var css = '.player-video__paused svg rect {' +
-                  'fill: ' + mainColor + ' !important;' +
-                  '}';
-        $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
+        var mainColor = getMainColor();
+        $('#pause-icon-custom-color').remove();
+        $('<style id="pause-icon-custom-color">.player-video__paused svg rect { fill: ' + mainColor + ' !important; }</style>').appendTo('head');
     }
+
     updatePauseIconColor();
     Lampa.Storage.listener.follow('change', function (e) {
-        if (e.name === 'color_plugin_main_color') {
-            updatePauseIconColor();
-        }
+        if (e.name === 'color_plugin_main_color') updatePauseIconColor();
     });
 })();
