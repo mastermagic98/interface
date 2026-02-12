@@ -102,27 +102,36 @@
         var rgb = getFilterRgb(mainColor);
         var colorFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
         var whiteFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        var prvFilterValue = hasOwnFilter ? '' : (colorEnabled ? colorFilter : whiteFilter);
-        if (!url || url === './img/loader.svg') {
-            var defaultLoader = applyDefaultLoaderColor();
-            escapedUrl = defaultLoader.src;
-            prvFilterValue = '';
-        }
-        var glassFocusStyle = '';
-        if (document.body.classList.contains('glass--style') && colorEnabled) {
-            glassFocusStyle = 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv {' +
+        var baseFilter = hasOwnFilter ? '' : (colorEnabled ? colorFilter : whiteFilter);
+        var focusWhiteStyle = '';
+        if (colorEnabled) {
+            focusWhiteStyle = 'body .settings-param.focus .settings-folder__icon .activity__loader_prv {' +
                               'filter: ' + whiteFilter + ' !important;' +
                               '-webkit-filter: ' + whiteFilter + ' !important;' +
                               '}';
         }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
-                       glassFocusStyle;
+        var glassFocusStyle = '';
+        if (document.body.classList.contains('glass--style') && !colorEnabled) {
+            var tempElement = $('<div class="settings-param focus"></div>').appendTo('body');
+            var computedStyle = window.getComputedStyle(tempElement[0]);
+            var bgColor = computedStyle.backgroundColor;
+            tempElement.remove();
+            var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
+            if (isFocusBgWhite) {
+                glassFocusStyle = 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv {' +
+                                  'filter: invert(1) !important;' +
+                                  '-webkit-filter: invert(1) !important;' +
+                                  '}';
+            }
+        }
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + baseFilter + ' !important; -webkit-filter: ' + baseFilter + ' !important; }' +
+                       focusWhiteStyle + glassFocusStyle;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                prvElement.style.filter = prvFilterValue;
-                prvElement.style.webkitFilter = prvFilterValue;
+                prvElement.style.filter = baseFilter;
+                prvElement.style.webkitFilter = baseFilter;
             } else {
                 setTimeout(checkPrvElement, 500);
             }
