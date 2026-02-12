@@ -112,7 +112,7 @@
         tempElement.remove();
         var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
         var glassFilterValue = '';
-        if (document.body.classList.contains('glass--style')) {
+        if (document.body.classList.contains('glass--style') && !colorEnabled) {
             glassFilterValue = isFocusBgWhite ? 'invert(1)' : 'none';
         }
         var glassStyle = '';
@@ -506,6 +506,7 @@
         } else {
             remove_activity_loader();
         }
+        $('#aniload').remove();
     }
     if (window.appready) {
         aniLoad();
