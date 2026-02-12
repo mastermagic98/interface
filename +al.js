@@ -52,14 +52,10 @@
         var rgb = getFilterRgb(mainColor);
         var filterValue = '';
         if (!hasOwnFilter) {
-            if (colorEnabled) {
-                filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-            } else {
-                filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-            }
+            filterValue = colorEnabled ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
         }
         var newStyle =
-            'body .activity__loader { display: None !important; background-image: none !important; }' +
+            'body .activity__loader { display: none !important; background-image: none !important; }' +
             'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
             'body .player-video__loader.custom::before {' +
                 'content: "" !important;' +
@@ -95,20 +91,17 @@
             element.style.display = 'block';
         }
     }
-    function insert_activity_loader_prv(url) {
+    function insert_activity_loader_prv(escapedUrl) {
         $('#aniload-id-prv').remove();
-        var escapedUrl = url.replace(/'/g, "\\'");
-        var hasOwnFilter = svgHasOwnFilter(url);
+        var hasOwnFilter = svgHasOwnFilter(escapedUrl);
         var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
         var rgb = getFilterRgb(mainColor);
-        var prvFilterValue = '';
-        if (!hasOwnFilter) {
-            if (colorEnabled) {
-                prvFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
-            } else {
-                prvFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-            }
+        var prvFilterValue = hasOwnFilter ? '' : (colorEnabled ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")');
+        if (!escapedUrl || escapedUrl === './img/loader.svg') {
+            var defaultLoader = applyDefaultLoaderColor();
+            escapedUrl = defaultLoader.src;
+            prvFilterValue = '';
         }
         var tempElement = $('<div class="settings-param focus"></div>').appendTo('body');
         var computedStyle = window.getComputedStyle(tempElement[0]);
@@ -125,14 +118,15 @@
                          'body.glass--style .selectbox-item.focus .selectbox-item__checkbox, ' +
                          'body.glass--style .settings-folder.focus .settings-folder__icon, ' +
                          'body.glass--style .settings-folder.focus .selectbox-item__checkbox, ' +
-                         'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
                          'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
                          'filter: ' + glassFilterValue + ' !important; ' +
                          '-webkit-filter: ' + glassFilterValue + ' !important; ' +
                          '}';
         }
+        // Перевизначення для прев'ю — не інвертуємо його у фокусі скла
+        var overridePrv = 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { filter: none !important; -webkit-filter: none !important; }';
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
-                       glassStyle;
+                       glassStyle + overridePrv;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
@@ -153,10 +147,10 @@
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.classList.remove('active');
-            element.style.display = 'none';
+            element.style.display = '';
             element.style.backgroundImage = '';
             element.style.filter = '';
-            element.style.backgroundColor = 'transparent';
+            element.style.backgroundColor = '';
         }
     }
     function getCurrentLoaderUrl() {
@@ -167,13 +161,15 @@
         return applyDefaultLoaderColor().src;
     }
     function applyCurrentLoader() {
+        remove_activity_loader();
         if (Lampa.Storage.get('ani_active')) {
-            var url = getCurrentLoaderUrl();
-            setCustomLoader(url);
-            insert_activity_loader_prv(url);
-        } else {
-            remove_activity_loader();
+            var stored = Lampa.Storage.get('ani_load', '');
+            if (stored && stored !== './img/loader.svg') {
+                setCustomLoader(stored);
+            }
+            // Якщо default — просто видаляємо кастомні стилі, оригінальний завантажувач Lampa покаже себе сам
         }
+        insert_activity_loader_prv(getCurrentLoaderUrl());
     }
     function create_ani_modal() {
         $('#aniload').remove();
@@ -182,9 +178,7 @@
         var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
         var rgb = getFilterRgb(mainColor);
-        var whiteFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        var colorFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var filterValue = colorEnabled ? colorFilter : whiteFilter;
+        var filterValue = colorEnabled ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")' : 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
         var focusBorderColor = mainColor;
         style.textContent = '.ani_modal_root { padding: 1em; }' +
                             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
@@ -377,9 +371,7 @@
                         mutation.addedNodes.forEach(function (node) {
                             if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick') || node.matches('.modal-loading'))) {
                                 if (Lampa.Storage.get('ani_active')) {
-                                    setTimeout(function () {
-                                        applyCurrentLoader();
-                                    }, 200);
+                                    setTimeout(applyCurrentLoader, 200);
                                 }
                             }
                         });
@@ -391,9 +383,7 @@
                     } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                         if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
                             if (Lampa.Storage.get('ani_active')) {
-                                setTimeout(function () {
-                                    applyCurrentLoader();
-                                }, 200);
+                                setTimeout(applyCurrentLoader, 200);
                             }
                         } else if (mutation.target.classList.contains('player-video') && !mutation.target.classList.contains('video--load')) {
                             var playerLoader = document.querySelector('.player-video__loader');
@@ -435,23 +425,19 @@
         setInterval(function () {
             if (Lampa.Storage.get('ani_active')) {
                 var playerVideo = document.querySelector('.player-video.video--load');
-                if (playerVideo) {
-                    applyCurrentLoader();
-                }
+                if (playerVideo) applyCurrentLoader();
                 var modalLoading = document.querySelector('.modal-loading');
-                if (modalLoading) {
-                    applyCurrentLoader();
-                }
+                if (modalLoading) applyCurrentLoader();
             }
         }, 100);
         Lampa.Listener.follow('full', function (e) {
             if (e.type === 'start' && Lampa.Storage.get('ani_active')) {
-                setTimeout(function () { applyCurrentLoader(); }, 200);
+                setTimeout(applyCurrentLoader, 200);
             }
         });
         Lampa.Listener.follow('activity', function (event) {
             if ((event.type === 'start' || event.status === 'active') && Lampa.Storage.get('ani_active')) {
-                setTimeout(function () { applyCurrentLoader(); }, 200);
+                setTimeout(applyCurrentLoader, 200);
             }
         });
         Lampa.Listener.follow('app', function (event) {
@@ -490,7 +476,6 @@
         }
     });
     window.changeColor = changeColor;
-// === ПЕРЕФАРБУВАННЯ ІКОНКИ ПАУЗИ У КОЛІР ТЕМИ ===
     function updatePauseIconColor() {
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var styleId = 'pause-icon-custom-color';
