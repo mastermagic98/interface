@@ -169,10 +169,10 @@ if (document.body.classList.contains('glass--style')) {
     '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
     '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
     '.ani_loader_square.focus {' +
-        'border: 0.3em solid ' + focusBorderColor + ' !important;' +
-        'box-shadow: 0 0 12px ' + focusBorderColor + ' !important;' +
-        'transform: scale(1.1);' +
-    '}' +
+    'border: 0.3em solid ' + focusBorderColor + ' !important;' +
+    'box-shadow: none !important;' +
+    'transform: scale(1.1);' +
+'}' +
     '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
     '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
     '.svg_input { width: 252px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
