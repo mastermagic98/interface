@@ -22,6 +22,54 @@
         }
         return hexToRgb(mainColor);
     }
+    function injectInlineSVG(element, dataUrl) {
+    if (!dataUrl) return;
+
+    // Якщо це звичайний URL (https://...)
+    if (dataUrl.startsWith('http')) {
+        fetch(dataUrl)
+            .then(res => res.text())
+            .then(svgText => insertSvg(element, svgText))
+            .catch(() => {});
+        return;
+    }
+
+    // Якщо data URI
+    if (dataUrl.startsWith('data:image/svg+xml')) {
+        try {
+            const encoded = dataUrl.split(',')[1];
+            const decoded = decodeURIComponent(encoded);
+            insertSvg(element, decoded);
+        } catch (e) {}
+    }
+
+    function insertSvg(element, svgText) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+        let svg = doc.querySelector('svg');
+        if (!svg) return;
+
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+
+        svg.querySelectorAll('[fill]').forEach(el => {
+            el.setAttribute('fill', 'currentColor');
+        });
+
+        svg.querySelectorAll('[stroke]').forEach(el => {
+            el.setAttribute('stroke', 'currentColor');
+        });
+
+        svg.setAttribute('fill', 'currentColor');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+
+        element.innerHTML = '';
+        element.appendChild(svg);
+    }
+}
+
     function applyDefaultLoaderColor() {
         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
         var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
@@ -94,45 +142,22 @@
         $('.player-video__loader, .lampac-balanser-loader, .loading-layer__ico, .modal-loading, .player-video__youtube-needclick > div').addClass('custom');
     }
     function insert_activity_loader_prv(url) {
-        $('#aniload-id-prv').remove();
-        var escapedUrl = url.replace(/'/g, "\\'");
-        var hasOwnFilter = svgHasOwnFilter(url);
-        var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
-        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
-        var rgb = getFilterRgb(mainColor);
-        var prvFilterValue = '';
-        if (!hasOwnFilter) {
-            prvFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
-        }
-        var glassStyle = '';
+    setTimeout(function checkPrvElement() {
+        var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
 
-if (document.body.classList.contains('glass--style')) {
-    glassStyle =
-        'body.glass--style .settings-param.focus .activity__loader_prv {' +
-        'filter: none !important;' +
-        '-webkit-filter: none !important;' +
-        'background-color: transparent !important;' +
-        '}';
+        if (prvElement) {
+            prvElement.style.background = 'none';
+            prvElement.style.filter = 'none';
+            prvElement.style.webkitFilter = 'none';
+
+            injectInlineSVG(prvElement, url);
+        } 
+        else {
+            setTimeout(checkPrvElement, 300);
+        }
+    }, 100);
 }
 
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
-                       glassStyle;
-        $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
-        setTimeout(function checkPrvElement() {
-            var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
-            if (prvElement) {
-                if (!document.body.classList.contains('glass--style')) {
-                    prvElement.style.filter = prvFilterValue;
-                    prvElement.style.webkitFilter = prvFilterValue;
-                } else {
-                    prvElement.style.filter = 'none';
-                    prvElement.style.webkitFilter = 'none';
-                }
-            } else {
-                setTimeout(checkPrvElement, 500);
-            }
-        }, 100);
-    }
     function remove_activity_loader() {
         var styleElement = document.getElementById('aniload-id');
         if (styleElement) styleElement.remove();
@@ -150,6 +175,24 @@ if (document.body.classList.contains('glass--style')) {
     }
     function create_ani_modal() {
         $('#aniload').remove();
+        $('<style>\
+.activity__loader_prv {\
+display:inline-flex;\
+align-items:center;\
+justify-content:center;\
+width:23px;\
+height:24px;\
+color:inherit;\
+}\
+.activity__loader_prv svg{\
+width:100%;\
+height:100%;\
+display:block;\
+}\
+body.glass--style .settings-param.focus .activity__loader_prv {\
+color:#000 !important;\
+}\
+</style>').appendTo('head');
         var style = document.createElement('style');
         style.id = 'aniload';
         var colorEnabled = Lampa.Storage.get('color_plugin_enabled', 'false') === 'true';
