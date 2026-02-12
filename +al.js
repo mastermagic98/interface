@@ -23,9 +23,8 @@
         return hexToRgb(mainColor);
     }
     function applyDefaultLoaderColor() {
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
         var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        if (!colorEnabled) mainColor = '#ffffff';
+        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
         var defaultSvg = '<?xml version="1.0" encoding="utf-8"?>' +
                          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">' +
                          '<circle cx="50" cy="50" fill="none" stroke="' + mainColor + '" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">' +
@@ -48,14 +47,19 @@
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var hasOwnFilter = svgHasOwnFilter(url);
+        var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
+        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
+        var rgb = getFilterRgb(mainColor);
         var filterValue = '';
         if (!hasOwnFilter) {
-            var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-            var rgb = getFilterRgb(mainColor);
-            filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+            if (colorEnabled) {
+                filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+            } else {
+                filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
+            }
         }
         var newStyle =
-            'body .activity__loader { display: none !important; background-image: none !important; }' +
+            'body .activity__loader { display: None !important; background-image: none !important; }' +
             'body .activity__loader.active { display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; width: 108px !important; height: 108px !important; background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
             'body .player-video__loader.custom::before {' +
                 'content: "" !important;' +
@@ -91,20 +95,20 @@
             element.style.display = 'block';
         }
     }
-    function insert_activity_loader_prv(escapedUrl) {
+    function insert_activity_loader_prv(url) {
         $('#aniload-id-prv').remove();
-        var hasOwnFilter = svgHasOwnFilter(escapedUrl);
+        var escapedUrl = url.replace(/'/g, "\\'");
+        var hasOwnFilter = svgHasOwnFilter(url);
         var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        if (!colorEnabled) mainColor = '#ffffff';
+        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
         var rgb = getFilterRgb(mainColor);
-        var whiteFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
-        var colorFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
-        var prvFilterValue = hasOwnFilter ? '' : (colorEnabled ? colorFilter : whiteFilter);
-        if (!escapedUrl || escapedUrl === './img/loader.svg') {
-            var defaultLoader = applyDefaultLoaderColor();
-            escapedUrl = defaultLoader.src;
-            prvFilterValue = '';
+        var prvFilterValue = '';
+        if (!hasOwnFilter) {
+            if (colorEnabled) {
+                prvFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22prv_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#prv_color")';
+            } else {
+                prvFilterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
+            }
         }
         var tempElement = $('<div class="settings-param focus"></div>').appendTo('body');
         var computedStyle = window.getComputedStyle(tempElement[0]);
@@ -112,7 +116,7 @@
         tempElement.remove();
         var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
         var glassFilterValue = '';
-        if (document.body.classList.contains('glass--style') && !colorEnabled) {
+        if (document.body.classList.contains('glass--style')) {
             glassFilterValue = isFocusBgWhite ? 'invert(1)' : 'none';
         }
         var glassStyle = '';
@@ -154,15 +158,29 @@
             element.style.filter = '';
             element.style.backgroundColor = 'transparent';
         }
-        insert_activity_loader_prv('./img/loader.svg');
+    }
+    function getCurrentLoaderUrl() {
+        var stored = Lampa.Storage.get('ani_load', '');
+        if (stored && stored !== './img/loader.svg') {
+            return stored;
+        }
+        return applyDefaultLoaderColor().src;
+    }
+    function applyCurrentLoader() {
+        if (Lampa.Storage.get('ani_active')) {
+            var url = getCurrentLoaderUrl();
+            setCustomLoader(url);
+            insert_activity_loader_prv(url);
+        } else {
+            remove_activity_loader();
+        }
     }
     function create_ani_modal() {
         $('#aniload').remove();
         var style = document.createElement('style');
         style.id = 'aniload';
         var colorEnabled = Lampa.Storage.cache.hasOwnProperty('color_plugin_main_color');
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        if (!colorEnabled) mainColor = '#ffffff';
+        var mainColor = colorEnabled ? Lampa.Storage.get('color_plugin_main_color', '#ffffff') : '#ffffff';
         var rgb = getFilterRgb(mainColor);
         var whiteFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22white_color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#white_color")';
         var colorFilter = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
@@ -198,7 +216,6 @@
     function isValidSvgUrl(url) {
         return /^https?:\/\/.*\.svg$/.test(url);
     }
-    function addPrvFocusListener() {}
     function aniLoad() {
         var icon_plugin = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>';
         try {
@@ -221,26 +238,13 @@
                 },
                 onChange: function (item) {
                     Lampa.Storage.set('ani_active', item === 'true');
+                    applyCurrentLoader();
                     var selectItem = $('.settings-param[data-name="select_ani_mation"]');
                     if (selectItem.length) {
-                        selectItem.css('display', item === 'true' ? 'block' : 'none');
-                        if (item === 'true') {
-                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                setCustomLoader(Lampa.Storage.get('ani_load'));
-                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                            } else {
-                                insert_activity_loader_prv('./img/loader.svg');
-                            }
-                        } else {
-                            remove_activity_loader();
-                        }
+                        selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
                     }
                     if (Lampa.Settings && Lampa.Settings.render) {
                         Lampa.Settings.render();
-                        setTimeout(function () {
-                            var selectItem = $('.settings-param[data-name="select_ani_mation"]');
-                            selectItem.css('display', Lampa.Storage.get('ani_active') ? 'block' : 'none');
-                        }, 50);
                     }
                 }
             });
@@ -261,8 +265,7 @@
                     } else {
                         item.css('display', 'block');
                         setTimeout(function () {
-                            insert_activity_loader_prv(Lampa.Storage.get('ani_load', './img/loader.svg'));
-                            setTimeout(addPrvFocusListener, 100);
+                            insert_activity_loader_prv(getCurrentLoaderUrl());
                         }, 0);
                     }
                 },
@@ -337,10 +340,7 @@
                                             }
                                             Lampa.Storage.set('ani_load_custom_svg', value);
                                             Lampa.Storage.set('ani_load', value);
-                                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active')) {
-                                                setCustomLoader(Lampa.Storage.get('ani_load'));
-                                                insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                            }
+                                            applyCurrentLoader();
                                             Lampa.Controller.toggle('settings_component');
                                             Lampa.Controller.enable('menu');
                                             if (Lampa.Settings && Lampa.Settings.render) {
@@ -349,30 +349,13 @@
                                         });
                                         return;
                                     } else if (selectedElement.classList.contains('default')) {
-                                        srcValue = './img/loader.svg';
                                         Lampa.Storage.set('ani_load', '');
-                                        remove_activity_loader();
+                                        applyCurrentLoader();
                                     } else {
                                         var imgElement = selectedElement.querySelector('img');
-                                        srcValue = imgElement ? imgElement.getAttribute('src') : Lampa.Storage.get('ani_load', './img/loader.svg');
+                                        srcValue = imgElement ? imgElement.getAttribute('src') : '';
                                         Lampa.Storage.set('ani_load', srcValue);
-                                    }
-                                    if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && srcValue !== './img/loader.svg') {
-                                        setCustomLoader(Lampa.Storage.get('ani_load'));
-                                        insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-                                        setTimeout(function () {
-                                            var element = document.querySelector('.activity__loader');
-                                            if (element) {
-                                                element.classList.add('active');
-                                                element.style.display = 'block';
-                                                setTimeout(function () {
-                                                    element.classList.remove('active');
-                                                    element.style.display = 'none';
-                                                }, 500);
-                                            }
-                                        }, 0);
-                                    } else {
-                                        insert_activity_loader_prv('./img/loader.svg');
+                                        applyCurrentLoader();
                                     }
                                     Lampa.Modal.close();
                                     Lampa.Controller.toggle('settings_component');
@@ -393,9 +376,9 @@
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(function (node) {
                             if (node.nodeType === 1 && (node.matches('.activity__loader') || node.matches('.lampac-balanser-loader') || node.matches('.player-video__loader') || node.matches('.loading-layer__ico') || node.matches('.loading-layer') || node.matches('.player-video') || node.matches('.player-video__youtube-needclick') || node.matches('.modal-loading'))) {
-                                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                                if (Lampa.Storage.get('ani_active')) {
                                     setTimeout(function () {
-                                        setCustomLoader(Lampa.Storage.get('ani_load'));
+                                        applyCurrentLoader();
                                     }, 200);
                                 }
                             }
@@ -407,24 +390,18 @@
                         });
                     } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                         if (mutation.target.classList.contains('player-video') && mutation.target.classList.contains('video--load')) {
-                            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+                            if (Lampa.Storage.get('ani_active')) {
                                 setTimeout(function () {
-                                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                                    applyCurrentLoader();
                                 }, 200);
                             }
                         } else if (mutation.target.classList.contains('player-video') && !mutation.target.classList.contains('video--load')) {
                             var playerLoader = document.querySelector('.player-video__loader');
-                            if (playerLoader) {
-                                playerLoader.style.display = 'none';
-                            }
+                            if (playerLoader) playerLoader.style.display = 'none';
                             var youtubeNeedclick = document.querySelector('.player-video__youtube-needclick > div');
-                            if (youtubeNeedclick) {
-                                youtubeNeedclick.style.display = 'none';
-                            }
+                            if (youtubeNeedclick) youtubeNeedclick.style.display = 'none';
                             var modalLoading = document.querySelector('.modal-loading');
-                            if (modalLoading) {
-                                modalLoading.style.display = 'none';
-                            }
+                            if (modalLoading) modalLoading.style.display = 'none';
                         }
                     }
                 });
@@ -441,8 +418,8 @@
                         var modalLoading = document.querySelector('.modal-loading');
                         if (playerLoader || youtubeNeedclick || modalLoading) {
                             if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
-                                if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                                if (Lampa.Storage.get('ani_active')) {
+                                    applyCurrentLoader();
                                 }
                             } else if (e.type === 'playing' || e.type === 'loadeddata') {
                                 if (playerLoader) playerLoader.style.display = 'none';
@@ -456,25 +433,25 @@
             }
         }, 1000);
         setInterval(function () {
-            if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
+            if (Lampa.Storage.get('ani_active')) {
                 var playerVideo = document.querySelector('.player-video.video--load');
                 if (playerVideo) {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                    applyCurrentLoader();
                 }
                 var modalLoading = document.querySelector('.modal-loading');
                 if (modalLoading) {
-                    setCustomLoader(Lampa.Storage.get('ani_load'));
+                    applyCurrentLoader();
                 }
             }
         }, 100);
         Lampa.Listener.follow('full', function (e) {
-            if (e.type === 'start' && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
+            if (e.type === 'start' && Lampa.Storage.get('ani_active')) {
+                setTimeout(function () { applyCurrentLoader(); }, 200);
             }
         });
         Lampa.Listener.follow('activity', function (event) {
-            if ((event.type === 'start' || event.status === 'active') && Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                setTimeout(function () { setCustomLoader(Lampa.Storage.get('ani_load')); }, 200);
+            if ((event.type === 'start' || event.status === 'active') && Lampa.Storage.get('ani_active')) {
+                setTimeout(function () { applyCurrentLoader(); }, 200);
             }
         });
         Lampa.Listener.follow('app', function (event) {
@@ -492,30 +469,18 @@
                 element.style.display = 'none';
             }
         }, 500);
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-            setCustomLoader(Lampa.Storage.get('ani_load'));
-            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-        } else {
-            remove_activity_loader();
-        }
+        applyCurrentLoader();
     }
     function changeColor() {
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-            setCustomLoader(Lampa.Storage.get('ani_load'));
-            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-        } else {
-            remove_activity_loader();
-        }
+        applyCurrentLoader();
         $('#aniload').remove();
     }
     if (window.appready) {
         aniLoad();
-        changeColor();
     } else {
         Lampa.Listener.follow('app', function (event) {
             if (event.type === 'ready') {
                 aniLoad();
-                changeColor();
             }
         });
     }
@@ -535,20 +500,10 @@
                   '}';
         $('<style id="' + styleId + '">' + css + '</style>').appendTo('head');
     }
-    function changeColor() {
-        if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-            setCustomLoader(Lampa.Storage.get('ani_load'));
-            insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
-        } else {
-            remove_activity_loader();
-        }
-       
-        updatePauseIconColor();
-    }
     updatePauseIconColor();
     Lampa.Storage.listener.follow('change', function (e) {
         if (e.name === 'color_plugin_main_color') {
-            changeColor();
+            updatePauseIconColor();
         }
     });
 })();
