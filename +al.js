@@ -1,4 +1,3 @@
-```javascript
 (function () {
     'use strict';
     Lampa.Lang.add({
@@ -551,4 +550,3 @@ Lampa.Storage.listener.follow('change', function (e) {
     }
 });
 })();
-```
