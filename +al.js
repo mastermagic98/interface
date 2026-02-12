@@ -109,8 +109,9 @@
 if (document.body.classList.contains('glass--style')) {
     glassStyle =
         'body.glass--style .settings-param.focus .activity__loader_prv {' +
-        'filter: brightness(0) invert(0) !important;' +
-        '-webkit-filter: brightness(0) invert(0) !important;' +
+        'filter: none !important;' +
+        '-webkit-filter: none !important;' +
+        'background-color: transparent !important;' +
         '}';
 }
 
@@ -120,8 +121,13 @@ if (document.body.classList.contains('glass--style')) {
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
-                prvElement.style.filter = prvFilterValue;
-                prvElement.style.webkitFilter = prvFilterValue;
+                if (!document.body.classList.contains('glass--style')) {
+                    prvElement.style.filter = prvFilterValue;
+                    prvElement.style.webkitFilter = prvFilterValue;
+                } else {
+                    prvElement.style.filter = 'none';
+                    prvElement.style.webkitFilter = 'none';
+                }
             } else {
                 setTimeout(checkPrvElement, 500);
             }
