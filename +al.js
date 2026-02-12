@@ -43,7 +43,7 @@
             return false;
         }
     }
-    function getCurrentLoaderUrl() {
+    function getCurrentLoaderUrl() {
         var stored = Lampa.Storage.get('ani_load', '');
         if (stored && stored !== './img/loader.svg') {
             return stored;
@@ -114,26 +114,17 @@
         tempElement.remove();
         var isFocusBgWhite = bgColor === 'rgb(255, 255, 255)';
         var glassFilterValue = '';
-        if (document.body.classList.contains('glass--style')) {
-            if (colorEnabled) {
-                glassFilterValue = whiteFilter;
-            } else if (isFocusBgWhite) {
-                glassFilterValue = 'invert(1)';
-            }
+        if (document.body.classList.contains('glass--style') && isFocusBgWhite) {
+            glassFilterValue = colorEnabled ? whiteFilter : 'invert(1)';
         }
         var glassStyle = '';
         if (glassFilterValue) {
-            glassStyle = 'body.glass--style .selectbox-item.focus .settings-folder__icon .activity__loader_prv, ' +
-                         'body.glass--style .selectbox-item.focus .selectbox-item__checkbox, ' +
-                         'body.glass--style .settings-folder.focus .settings-folder__icon .activity__loader_prv, ' +
-                         'body.glass--style .settings-folder.focus .selectbox-item__checkbox, ' +
-                         'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv, ' +
-                         'body.glass--style .settings-param.focus .selectbox-item__checkbox { ' +
+            glassStyle = 'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv {' +
                          'filter: ' + glassFilterValue + ' !important; ' +
                          '-webkit-filter: ' + glassFilterValue + ' !important; ' +
                          '}';
         }
-        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
+        var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + prvFilterValue + ' !important; -webkit-filter: ' + prvFilterValue + ' !important; }' +
                        glassStyle;
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
         setTimeout(function checkPrvElement() {
@@ -337,31 +328,11 @@
                                     } else if (selectedElement.classList.contains('default')) {
                                         Lampa.Storage.set('ani_load', '');
                                         applyCurrentLoader();
-                                        // Флеш для підтвердження вибору
-                                        var element = document.querySelector('.activity__loader');
-                                        if (element) {
-                                            element.classList.add('active');
-                                            element.style.display = 'block';
-                                            setTimeout(function () {
-                                                element.classList.remove('active');
-                                                element.style.display = 'none';
-                                            }, 500);
-                                        }
                                     } else {
                                         var imgElement = selectedElement.querySelector('img');
                                         srcValue = imgElement ? imgElement.getAttribute('src') : '';
                                         Lampa.Storage.set('ani_load', srcValue);
                                         applyCurrentLoader();
-                                        // Флеш для підтвердження вибору
-                                        var element = document.querySelector('.activity__loader');
-                                        if (element) {
-                                            element.classList.add('active');
-                                            element.style.display = 'block';
-                                            setTimeout(function () {
-                                                element.classList.remove('active');
-                                                element.style.display = 'none';
-                                            }, 500);
-                                        }
                                     }
                                     Lampa.Modal.close();
                                     Lampa.Controller.toggle('settings_component');
@@ -413,11 +384,6 @@
                 videoElement.dataset.listenersAdded = true;
             }
         }, 1000);
-        setInterval(function () {
-            if (Lampa.Storage.get('ani_active')) {
-                applyCurrentLoader();
-            }
-        }, 100);
         Lampa.Listener.follow('full', function (e) {
             if (e.type === 'start' && Lampa.Storage.get('ani_active')) {
                 setTimeout(applyCurrentLoader, 200);
