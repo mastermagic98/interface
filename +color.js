@@ -237,7 +237,6 @@
             '.menu__item.focus .menu__ico [stroke], .menu__item.traverse .menu__ico [stroke], .menu__item:hover .menu__ico [stroke] { stroke: #fff !important; }',
             '.console__tab { background-color: var(--main-color) !important; }',
             '.console__tab.focus { background: var(--main-color) !important; color: #fff !important; ' + highlight + ' }',
-            // Основний фокус (з доданими елементами menu-edit-list)
             '.menu__item.focus, .menu__item.traverse, .menu__item:hover, .full-person.focus, .full-start__button.focus, .full-descr__tag.focus, ' +
             '.simple-button.focus, .search-source.active, ' +
             '.settings-param.focus, .items-line__more.focus, .settings-folder.focus, .selectbox-item.focus, .navigation-tabs__button.focus, ' +
@@ -248,20 +247,16 @@
             '.navigation-tabs__button.focus { background-color: var(--main-color) !important; color: #fff !important; ' + highlight + radius + ' }',
             '.items-line__more.focus { color: #fff !important; background-color: var(--main-color) !important; ' + radius + ' }',
             '.timetable__item.focus { color: #fff !important; }',
-            // Шапка
             headFocus,
             headFocusRadius,
             headNonFocusDimming,
             headNonFocusRadius,
-            // Плеєр
             playerFocus,
             playerRadius,
-            // Картки
             cardNoBackground,
             cardBorderColor,
             cardRadiusImg,
             cardRadiusBorder,
-            // Кнопки карточки
             '.full-start__button, .simple-button, .full-start__button.focus { ' + radius + ' }',
             '.online.focus { box-shadow: 0 0 0 0.2em var(--main-color) !important; }',
             dimming,
@@ -443,6 +438,12 @@
                         ColorPlugin.settings.enabled = value === 'true';
                         Lampa.Storage.set('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
                         localStorage.setItem('color_plugin_enabled', ColorPlugin.settings.enabled.toString());
+
+                        // ==== НОВА ЛОГІКА: при увімкненні одразу встановлюємо колір за замовчуванням ====
+                        if (value === 'true') {
+                            ColorPlugin.settings.main_color = '#353535';
+                        }
+
                         applyStyles();
                         forceBlackFilterBackground();
                         updateCanvasFillStyle(window.draw_context);
