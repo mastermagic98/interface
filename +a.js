@@ -215,8 +215,9 @@
         for (var i = 0; i < loadingLayerIco.length; i++) {
             loadingLayerIco[i].classList.remove('custom');
             loadingLayerIco[i].style.backgroundImage = '';
-            loadingLayerIco[i].style.filter = '';
-            loadingLayerIco[i].style.backgroundColor = 'transparent';
+            loadingLayerIco[i].style.filter = 'none';
+            loadingLayerIco[i].style.backgroundColor = '';
+            loadingLayerIco[i].style.opacity = '';
             loadingLayerIco[i].style.display = 'none';
         }
         var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
@@ -253,6 +254,13 @@
             console.log('Reset .modal-loading to default:', modalLoadingElements[i]);
         }
         insert_activity_loader_prv('./img/loader.svg');
+        // Гарантоване скидання всіх SVG
+var allSvgIcons = document.querySelectorAll('svg, .settings-folder__icon svg');
+allSvgIcons.forEach(function(svg) {
+    svg.style.fill = '#ffffff';
+    svg.style.stroke = '#ffffff';
+    svg.style.filter = 'none';
+});
     }
 
     function create_ani_modal() {
@@ -267,7 +275,7 @@
             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
             '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
             '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
-            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
+            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: none !important; -webkit-filter: none !important; }' +
             '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
             '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
             '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
@@ -746,6 +754,7 @@
             console.log('Initial load: Removed custom loader');
         }
     }
+    // додаткове скидання стилів для svg
 
     function byTheme() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
