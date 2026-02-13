@@ -255,11 +255,12 @@
         }
         insert_activity_loader_prv('./img/loader.svg');
         // Гарантоване скидання всіх SVG
-var allSvgIcons = document.querySelectorAll('svg, .settings-folder__icon svg');
+var allSvgIcons = document.querySelectorAll('svg, .settings-folder__icon svg, .ani_loader_square img');
 allSvgIcons.forEach(function(svg) {
     svg.style.fill = '#ffffff';
     svg.style.stroke = '#ffffff';
     svg.style.filter = 'none';
+    svg.style.webkitFilter = 'none';
 });
     }
 
@@ -284,6 +285,12 @@ allSvgIcons.forEach(function(svg) {
             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
         document.head.appendChild(style);
+        // Застосувати color.js фільтр до всіх svg в модальному вікні
+var modalSvg = document.querySelectorAll('.ani_modal_root img, .ani_modal_root svg');
+modalSvg.forEach(function(el) {
+    el.style.filter = filterValue;
+    el.style.webkitFilter = filterValue;
+});
     }
 
     function createSvgHtml(src, index) {
