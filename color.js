@@ -462,7 +462,20 @@
             if (Lampa.Settings?.render) Lampa.Settings.render();
         }
     });
+// ==== НОВА ЛОГІКА: при увімкненні одразу встановлюємо колір за замовчуванням ====
+                        if (value === 'true') {
+                            ColorPlugin.settings.main_color = '#353535';
+                        }
 
+                        applyStyles();
+                        forceBlackFilterBackground();
+                        updateCanvasFillStyle(window.draw_context);
+                        updateParamsVisibility();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    },
+                    onRender: item => item.css?.('display', 'block')
+                });
     // ===== Основний колір =====
     Lampa.SettingsApi.addParam({
         component: 'color_plugin',
@@ -499,7 +512,20 @@
             if (Lampa.Settings?.render) Lampa.Settings.render();
         }
     });
+// ==== НОВА ЛОГІКА: при увімкненні одразу встановлюємо колір за замовчуванням ====
+                        if (value === 'true') {
+                            ColorPlugin.settings.main_color = '#353535';
+                        }
 
+                        applyStyles();
+                        forceBlackFilterBackground();
+                        updateCanvasFillStyle(window.draw_context);
+                        updateParamsVisibility();
+                        saveSettings();
+                        if (Lampa.Settings && Lampa.Settings.render) Lampa.Settings.render();
+                    },
+                    onRender: item => item.css?.('display', 'block')
+                });
     // ===== Виділення =====
     Lampa.SettingsApi.addParam({
         component: 'color_plugin',
