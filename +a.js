@@ -215,9 +215,8 @@
         for (var i = 0; i < loadingLayerIco.length; i++) {
             loadingLayerIco[i].classList.remove('custom');
             loadingLayerIco[i].style.backgroundImage = '';
-            loadingLayerIco[i].style.filter = 'none';
-            loadingLayerIco[i].style.backgroundColor = '';
-            loadingLayerIco[i].style.opacity = '';
+            loadingLayerIco[i].style.filter = '';
+            loadingLayerIco[i].style.backgroundColor = 'transparent';
             loadingLayerIco[i].style.display = 'none';
         }
         var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
@@ -254,49 +253,30 @@
             console.log('Reset .modal-loading to default:', modalLoadingElements[i]);
         }
         insert_activity_loader_prv('./img/loader.svg');
-        // Гарантоване скидання всіх SVG
-var allSvgIcons = document.querySelectorAll('svg, .settings-folder__icon svg, .ani_loader_square img');
-allSvgIcons.forEach(function(svg) {
-    svg.style.fill = '#ffffff';
-    svg.style.stroke = '#ffffff';
-    svg.style.filter = 'none';
-    svg.style.webkitFilter = 'none';
-});
     }
 
     function create_ani_modal() {
-    var style = document.createElement('style');
-    style.id = 'aniload';
-    style.textContent = `
-        .ani_modal_root { padding: 1em; }
-        .ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .ani_loader_square {
-            width: 35px; height: 35px; border-radius: 4px; display: flex;
-            justify-content: center; align-items: center; cursor: pointer;
-            border: 2px solid transparent; background-color: transparent;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .ani_loader_square img, .ani_loader_square svg {
-            max-width: 30px; max-height: 30px; object-fit: contain;
-            fill: #ffffff; stroke: #ffffff;
-        }
-        .ani_loader_square.focus { border-color: #ffffff; transform: scale(1.1); }
-        .svg_input.focus { border-color: #ffffff; transform: scale(1.1); }
-    `;
-    document.head.appendChild(style);
-
-    // Застосовуємо колір до всіх svg в модальному вікні
-    var modalSvg = document.querySelectorAll('.ani_modal_root img, .ani_modal_root svg');
-    modalSvg.forEach(function(el) {
-        if (el.tagName.toLowerCase() === 'img') {
-            el.style.filter = 'invert(1)'; // перетворює чорні SVG на білі
-        } else {
-            el.setAttribute('fill', '#ffffff');
-            el.setAttribute('stroke', '#ffffff');
-        }
-    });
-}
-
+        var style = document.createElement('style');
+        style.id = 'aniload';
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var rgb = getFilterRgb(mainColor);
+        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
+        var focusBorderColor = mainColor.toLowerCase() === '#353535' ? '#ffffff' : 'var(--main-color)';
+        style.textContent = '.ani_modal_root { padding: 1em; }' +
+            '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
+            '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
+            '.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }' +
+            '.ani_loader_square { width: 35px; height: 35px; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; color: #ffffff !important; font-size: 10px; text-align: center; }' +
+            '.ani_loader_square img { max-width: 30px; max-height: 30px; object-fit: contain; filter: ' + filterValue + '; }' +
+            '.ani_loader_square.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+            '.ani_loader_square.default { width: 35px; height: 35px; border-radius: 4px; }' +
+            '.ani_loader_square.default img { max-width: 30px; max-height: 30px; object-fit: contain; }' +
+            '.svg_input { width: 252px; height: 35px; border-radius: 8px; border: 2px solid #ddd; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff !important; font-size: 12px; font-weight: bold; text-shadow: 0 0 2px #000; background-color: #353535; }' +
+            '.svg_input.focus { border: 0.3em solid ' + focusBorderColor + '; transform: scale(1.1); }' +
+            '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
+            '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
+        document.head.appendChild(style);
+    }
 
     function createSvgHtml(src, index) {
         var className = 'ani_loader_square selector';
@@ -404,20 +384,9 @@ allSvgIcons.forEach(function(svg) {
                     var midPoint = Math.ceil(svgContent.length / 2);
                     var leftColumn = svgContent.slice(0, midPoint).join('');
                     var rightColumn = svgContent.slice(midPoint).join('');
-                   // Визначаємо вибране значення, але якщо анімація вимкнена — беремо дефолт
-var selected = Lampa.Storage.get('ani_load', './img/loader.svg');
-if (!Lampa.Storage.get('ani_active')) {
-    selected = './img/loader.svg';
-}
-
-// Дефолтний білий лоадер
-var defaultLoader = applyDefaultLoaderColor();
-var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" /></div>';
-
-// Значення для input-поля (URL обраної SVG)
-var svgValue = (selected && selected !== './img/loader.svg') ? selected : 'Наприклад https://example.com/loader.svg';
-
-
+                    var defaultLoader = applyDefaultLoaderColor();
+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + defaultLoader.filter + ';"></div>';
+                    var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
                         '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
                         '<div class="value">' + svgValue + '</div>' +
@@ -777,7 +746,6 @@ var svgValue = (selected && selected !== './img/loader.svg') ? selected : 'На�
             console.log('Initial load: Removed custom loader');
         }
     }
-    // додаткове скидання стилів для svg
 
     function byTheme() {
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
