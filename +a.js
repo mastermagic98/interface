@@ -84,17 +84,24 @@
         console.log('=== setCustomLoader START === URL:', url);
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        console.log('  - mainColor from storage:', mainColor, '(default #ffffff if not set)');
+        var mainColorFromStorage = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var mainColorFromVar = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+        console.log('  - mainColor from storage:', mainColorFromStorage);
+        console.log('  - --main-color CSS var value:', mainColorFromVar || 'EMPTY (color.js disabled)');
+        var useWhite = (mainColorFromVar === '' || mainColorFromVar === 'none');
         var filterValue;
-        if (mainColor === '#ffffff') {
+        if (useWhite) {
             filterValue = getWhiteFilter();
-            console.log('  - Using WHITE filter because mainColor is default (#ffffff). Reason: color.js likely disabled/removed.');
+            if (mainColorFromStorage !== '#ffffff') {
+                Lampa.Storage.set('color_plugin_main_color', '#ffffff');
+                console.log('  - AUTO RESET storage to #ffffff (CSS var empty, color.js disabled)');
+            }
+            console.log('  - Using WHITE filter (CSS var empty)');
         } else {
-            filterValue = getColorFilter(mainColor);
-            console.log('  - Using COLOR filter for mainColor:', mainColor, '. If color.js removed, reset storage manually: Lampa.Storage.set("color_plugin_main_color", "#ffffff")');
+            filterValue = getColorFilter(mainColorFromStorage);
+            console.log('  - Using COLOR filter from storage:', mainColorFromStorage);
         }
-        console.log('  - Generated filterValue:', filterValue.substring(0, 50) + '...');
+        console.log('  - Final filterValue:', filterValue.substring(0, 50) + '...');
         var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
             'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
             'body .lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
@@ -115,14 +122,14 @@
             playerLoaderElements[i].style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             playerLoaderElements[i].style.filter = filterValue;
             playerLoaderElements[i].style.backgroundColor = 'transparent';
-            console.log('  - Applied to player-video__loader #' + i + ': filter=' + filterValue.substring(0, 30) + '...');
+            console.log('  - Applied to player-video__loader #' + i);
         }
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.style.backgroundImage = 'url(\'' + escapedUrl + '\')';
             element.style.filter = filterValue;
             element.style.backgroundColor = 'transparent';
-            console.log('  - Applied to .activity__loader: filter=' + filterValue.substring(0, 30) + '...');
+            console.log('  - Applied to .activity__loader');
             if (Lampa.Storage.get('ani_active')) {
                 element.classList.add('active');
                 element.style.display = 'block';
@@ -183,51 +190,39 @@
             modalLoadingElements[i].style.filter = filterValue;
             modalLoadingElements[i].style.display = 'block';
             modalLoadingElements[i].style.zIndex = '9999';
-            console.log('Applied custom loader to .modal-loading:', modalLoadingElements[i], 'URL:', escapedUrl, 'filter:', filterValue.substring(0, 30) + '...');
+            console.log('  - Applied to .modal-loading #' + i);
         }
         console.log('=== setCustomLoader END ===');
     }
 
     function insert_activity_loader_prv(escapedUrl) {
-        console.log('insert_activity_loader_prv called with escapedUrl:', escapedUrl);
         $('#aniload-id-prv').remove();
         var whiteFilterValue = getWhiteFilter();
         if (!escapedUrl || escapedUrl === './img/loader.svg') {
             var defaultLoader = applyDefaultLoaderColor();
             escapedUrl = defaultLoader.src;
             whiteFilterValue = '';
-            console.log('  - Using default loader, whiteFilterValue reset to empty');
         }
-        console.log('  - whiteFilterValue:', whiteFilterValue.substring(0, 50) + '...');
         var newStyle = '.settings-param[data-name="select_ani_mation"] .activity__loader_prv { display: inline-block; width: 23px; height: 24px; margin-right: 10px; vertical-align: middle; background: url(\'' + escapedUrl + '\') no-repeat 50% 50%; background-size: contain; background-color: transparent !important; filter: ' + whiteFilterValue + ' !important; -webkit-filter: ' + whiteFilterValue + ' !important; }' +
             'body.glass--style .settings-param.focus .settings-folder__icon .activity__loader_prv { -webkit-filter: none !important; filter: none !important; }';
         $('<style id="aniload-id-prv">' + newStyle + '</style>').appendTo('head');
-        console.log('  - Applied newStyle to #aniload-id-prv');
         setTimeout(function checkPrvElement() {
             var prvElement = document.querySelector('.settings-param[data-name="select_ani_mation"] .activity__loader_prv');
             if (prvElement) {
                 prvElement.style.filter = whiteFilterValue;
                 prvElement.style.webkitFilter = whiteFilterValue;
-                console.log('  - Applied filter to prvElement');
             } else {
-                console.log('  - prvElement not found, retrying...');
                 setTimeout(checkPrvElement, 500);
             }
         }, 100);
     }
 
     function remove_activity_loader() {
-        console.log('=== remove_activity_loader START ===');
+        console.log('remove_activity_loader called');
         var styleElement = document.getElementById('aniload-id');
-        if (styleElement) {
-            styleElement.remove();
-            console.log('  - Removed #aniload-id style');
-        }
+        if (styleElement) styleElement.remove();
         var prvStyleElement = document.getElementById('aniload-id-prv');
-        if (prvStyleElement) {
-            prvStyleElement.remove();
-            console.log('  - Removed #aniload-id-prv style');
-        }
+        if (prvStyleElement) prvStyleElement.remove();
         var element = document.querySelector('.activity__loader');
         if (element) {
             element.classList.remove('active');
@@ -235,7 +230,6 @@
             element.style.backgroundImage = '';
             element.style.filter = '';
             element.style.backgroundColor = 'transparent';
-            console.log('  - Reset .activity__loader');
         }
         var balanserElements = document.querySelectorAll('.lampac-balanser-loader');
         for (var i = 0; i < balanserElements.length; i++) {
@@ -243,7 +237,6 @@
             balanserElements[i].style.backgroundImage = '';
             balanserElements[i].style.filter = '';
             balanserElements[i].style.backgroundColor = 'transparent';
-            console.log('  - Reset .lampac-balanser-loader #' + i);
         }
         var playerLoaderElements = document.querySelectorAll('.player-video__loader');
         for (var i = 0; i < playerLoaderElements.length; i++) {
@@ -252,7 +245,6 @@
             playerLoaderElements[i].style.filter = '';
             playerLoaderElements[i].style.backgroundColor = 'transparent';
             playerLoaderElements[i].style.display = 'none';
-            console.log('  - Reset .player-video__loader #' + i);
         }
         var loadingLayerIco = document.querySelectorAll('.loading-layer__ico');
         for (var i = 0; i < loadingLayerIco.length; i++) {
@@ -261,7 +253,6 @@
             loadingLayerIco[i].style.filter = '';
             loadingLayerIco[i].style.backgroundColor = 'transparent';
             loadingLayerIco[i].style.display = 'none';
-            console.log('  - Reset .loading-layer__ico #' + i);
         }
         var youtubeNeedclickElements = document.querySelectorAll('.player-video__youtube-needclick > div');
         for (var i = 0; i < youtubeNeedclickElements.length; i++) {
@@ -282,7 +273,6 @@
             youtubeNeedclickElements[i].style.transform = '';
             youtubeNeedclickElements[i].style.webkitTransform = '';
             youtubeNeedclickElements[i].textContent = Lampa.Lang.translate('loading') || 'Завантаження...';
-            console.log('  - Reset .player-video__youtube-needclick > div #' + i);
         }
         var modalLoadingElements = document.querySelectorAll('.modal-loading');
         for (var i = 0; i < modalLoadingElements.length; i++) {
@@ -298,34 +288,39 @@
             console.log('Reset .modal-loading to default:', modalLoadingElements[i]);
         }
         insert_activity_loader_prv('./img/loader.svg');
-        console.log('=== remove_activity_loader END ===');
     }
 
     function create_ani_modal() {
         console.log('=== create_ani_modal START ===');
         var style = document.createElement('style');
         style.id = 'aniload';
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        console.log('  - mainColor for modal:', mainColor);
+        var mainColorFromStorage = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var mainColorFromVar = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+        console.log('  - Modal: storage mainColor:', mainColorFromStorage, 'CSS var --main-color:', mainColorFromVar || 'EMPTY');
+        var useWhite = (mainColorFromVar === '' || mainColorFromVar === 'none');
         var filterValue;
-        if (mainColor === '#ffffff') {
+        if (useWhite) {
             filterValue = getWhiteFilter();
-            console.log('  - Using WHITE filter for modal icons (color.js disabled)');
+            if (mainColorFromStorage !== '#ffffff') {
+                Lampa.Storage.set('color_plugin_main_color', '#ffffff');
+                console.log('  - AUTO RESET in modal: storage to #ffffff (var empty)');
+            }
+            console.log('  - Modal: WHITE filter for icons (var empty)');
         } else {
-            filterValue = getColorFilter(mainColor);
-            console.log('  - Using COLOR filter for modal icons: mainColor=', mainColor);
+            filterValue = getColorFilter(mainColorFromStorage);
+            console.log('  - Modal: COLOR filter:', mainColorFromStorage);
         }
-        console.log('  - Generated filterValue for modal:', filterValue.substring(0, 50) + '...');
+        console.log('  - Modal: filterValue:', filterValue.substring(0, 50) + '...');
         var focusBorderColor;
-        if (mainColor === '#ffffff') {
+        if (useWhite) {
             focusBorderColor = '#ffffff';
-            console.log('  - focusBorderColor set to #ffffff (default white for frame)');
-        } else if (mainColor.toLowerCase() === '#353535') {
+            console.log('  - Modal: border #ffffff (white frame)');
+        } else if (mainColorFromStorage.toLowerCase() === '#353535') {
             focusBorderColor = '#ffffff';
-            console.log('  - focusBorderColor set to #ffffff (for dark theme)');
+            console.log('  - Modal: border #ffffff (dark)');
         } else {
             focusBorderColor = 'var(--main-color)';
-            console.log('  - focusBorderColor set to var(--main-color) for custom color');
+            console.log('  - Modal: border var(--main-color)');
         }
         style.textContent = '.ani_modal_root { padding: 1em; }' +
             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
@@ -341,7 +336,7 @@
             '.svg_input .label { position: absolute; top: 1px; font-size: 10px; }' +
             '.svg_input .value { position: absolute; bottom: 1px; font-size: 10px; }';
         document.head.appendChild(style);
-        console.log('  - Applied modal styles with focusBorderColor:', focusBorderColor);
+        console.log('  - Modal: Applied styles, border:', focusBorderColor);
         console.log('=== create_ani_modal END ===');
     }
 
@@ -374,10 +369,7 @@
                 name: Lampa.Lang.translate('params_ani_name'),
                 icon: icon_plugin
             });
-            console.log('  - Added ani_load_menu component');
-        } catch (e) {
-            console.error('  - Error adding component:', e);
-        }
+        } catch (e) {}
         try {
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
@@ -415,10 +407,7 @@
                     }
                 }
             });
-            console.log('  - Added ani_active param');
-        } catch (e) {
-            console.error('  - Error adding ani_active param:', e);
-        }
+        } catch (e) {}
         try {
             Lampa.SettingsApi.addParam({
                 component: 'ani_load_menu',
@@ -441,9 +430,7 @@
                     }
                 },
                 onChange: function () {
-                    console.log('select_ani_mation onChange triggered');
                     if (!window.svg_loaders || window.svg_loaders.length === 0) {
-                        console.log('  - No svg_loaders available');
                         return;
                     }
                     if (!Lampa.Template.get('ani_modal')) {
@@ -461,16 +448,6 @@
                     var leftColumn = svgContent.slice(0, midPoint).join('');
                     var rightColumn = svgContent.slice(midPoint).join('');
                     var defaultLoader = applyDefaultLoaderColor();
-                    var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-                    console.log('  - Modal: mainColor=', mainColor);
-                    var filterValue;
-                    if (mainColor === '#ffffff') {
-                        filterValue = getWhiteFilter();
-                        console.log('  - Modal: Using WHITE filter');
-                    } else {
-                        filterValue = getColorFilter(mainColor);
-                        console.log('  - Modal: Using COLOR filter');
-                    }
                     var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + filterValue + ' !important; -webkit-filter: ' + filterValue + ' !important;"></div>';
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
@@ -573,18 +550,10 @@
                                 }
                             }
                         });
-                        console.log('  - Modal opened successfully');
-                    } catch (e) {
-                        console.error('  - Error opening modal:', e);
-                    }
+                    } catch (e) {}
                 }
             });
-            console.log('  - Added select_ani_mation param');
-        } catch (e) {
-            console.error('  - Error adding select_ani_mation param:', e);
-        }
-        // Пояснення проблеми: При видаленні color.js storage не скидається, тому mainColor лишається. Ручне скидання: Lampa.Storage.set('color_plugin_main_color', '#ffffff');
-        console.log('  - Recommendation: If color.js removed, run in console: Lampa.Storage.set("color_plugin_main_color", "#ffffff"); then reload.');
+        } catch (e) {}
         setTimeout(function () {
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (mutation) {
@@ -636,7 +605,6 @@
                 attributes: true,
                 attributeFilter: ['class']
             });
-            console.log('  - MutationObserver started');
         }, 500);
         setInterval(function () {
             var videoElement = document.querySelector('video');
@@ -649,15 +617,21 @@
                         if (playerLoader || youtubeNeedclick || modalLoading) {
                             if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                                    var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-                                    console.log('Video event ' + e.type + ': mainColor=', mainColor);
+                                    var mainColorFromStorage = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+                                    var mainColorFromVar = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+                                    console.log('Video event ' + e.type + ': storage=', mainColorFromStorage, 'var=', mainColorFromVar || 'EMPTY');
+                                    var useWhite = (mainColorFromVar === '' || mainColorFromVar === 'none');
                                     var filterValue;
-                                    if (mainColor === '#ffffff') {
+                                    if (useWhite) {
                                         filterValue = getWhiteFilter();
-                                        console.log('  - Video: Using WHITE filter');
+                                        if (mainColorFromStorage !== '#ffffff') {
+                                            Lampa.Storage.set('color_plugin_main_color', '#ffffff');
+                                            console.log('  - AUTO RESET in video: storage to #ffffff');
+                                        }
+                                        console.log('  - Video: WHITE filter');
                                     } else {
-                                        filterValue = getColorFilter(mainColor);
-                                        console.log('  - Video: Using COLOR filter');
+                                        filterValue = getColorFilter(mainColorFromStorage);
+                                        console.log('  - Video: COLOR filter');
                                     }
                                     if (playerLoader) {
                                         playerLoader.classList.add('custom');
@@ -665,7 +639,6 @@
                                         playerLoader.style.filter = filterValue;
                                         playerLoader.style.backgroundColor = 'transparent';
                                         playerLoader.style.display = 'block';
-                                        console.log('  - Applied to playerLoader');
                                     }
                                     if (youtubeNeedclick) {
                                         youtubeNeedclick.classList.add('custom');
@@ -685,7 +658,6 @@
                                         youtubeNeedclick.style.transform = 'translate(-50%, -50%)';
                                         youtubeNeedclick.style.webkitTransform = 'translate(-50%, -50%)';
                                         youtubeNeedclick.style.display = 'block';
-                                        console.log('  - Applied to youtubeNeedclick');
                                     }
                                     if (modalLoading) {
                                         modalLoading.classList.add('custom');
@@ -697,7 +669,7 @@
                                         modalLoading.style.filter = filterValue;
                                         modalLoading.style.display = 'block';
                                         modalLoading.style.zIndex = '9999';
-                                        console.log('Video event:', e.type, 'Applied custom loader to .modal-loading');
+                                        console.log('Video event:', e.type, 'Applied to .modal-loading');
                                     }
                                 }
                             } else if (e.type === 'playing' || e.type === 'loadeddata') {
@@ -716,20 +688,25 @@
                     });
                 });
                 videoElement.dataset.listenersAdded = true;
-                console.log('  - Added video event listeners');
             }
         }, 1000);
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
-                var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-                console.log('Periodic check: mainColor=', mainColor);
+                var mainColorFromStorage = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+                var mainColorFromVar = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+                console.log('Periodic check: storage=', mainColorFromStorage, 'var=', mainColorFromVar || 'EMPTY');
+                var useWhite = (mainColorFromVar === '' || mainColorFromVar === 'none');
                 var filterValue;
-                if (mainColor === '#ffffff') {
+                if (useWhite) {
                     filterValue = getWhiteFilter();
-                    console.log('  - Periodic: Using WHITE filter');
+                    if (mainColorFromStorage !== '#ffffff') {
+                        Lampa.Storage.set('color_plugin_main_color', '#ffffff');
+                        console.log('  - AUTO RESET in periodic: storage to #ffffff');
+                    }
+                    console.log('  - Periodic: WHITE filter');
                 } else {
-                    filterValue = getColorFilter(mainColor);
-                    console.log('  - Periodic: Using COLOR filter');
+                    filterValue = getColorFilter(mainColorFromStorage);
+                    console.log('  - Periodic: COLOR filter');
                 }
                 var playerVideo = document.querySelector('.player-video.video--load');
                 if (playerVideo) {
@@ -769,7 +746,6 @@
                         }
                     });
                 }
-                // Додаткова перевірка для .modal-loading поза .player-video
                 var modalLoading = document.querySelector('.modal-loading');
                 if (modalLoading) {
                     var computedBg = getComputedStyle(modalLoading).backgroundImage;
@@ -860,15 +836,17 @@
             remove_activity_loader();
             console.log('Initial load: Removed custom loader');
         }
-        console.log('=== aniLoad END ===');
     }
 
     function byTheme() {
         console.log('=== byTheme START ===');
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        console.log('  - byTheme: mainColor from storage:', mainColor);
-        if (mainColor !== '#ffffff') {
-            console.log('  - Warning: Color from storage applied, but if color.js removed, reset manually: Lampa.Storage.set("color_plugin_main_color", "#ffffff")');
+        var mainColorFromStorage = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        var mainColorFromVar = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+        console.log('  - byTheme: storage=', mainColorFromStorage, 'var=', mainColorFromVar || 'EMPTY');
+        var useWhite = (mainColorFromVar === '' || mainColorFromVar === 'none');
+        if (useWhite && mainColorFromStorage !== '#ffffff') {
+            Lampa.Storage.set('color_plugin_main_color', '#ffffff');
+            console.log('  - AUTO RESET in byTheme: storage to #ffffff');
         }
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
