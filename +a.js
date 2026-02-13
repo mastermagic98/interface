@@ -265,68 +265,37 @@ allSvgIcons.forEach(function(svg) {
     }
 
     function create_ani_modal() {
-        var style = document.createElement('style');
-        style.id = 'aniload';
-        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var rgb = getFilterRgb(mainColor);
-        var filterValue = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22color%22 color-interpolation-filters=%22sRGB%22%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 ' + (rgb.r / 255) + ' 0 0 0 0 ' + (rgb.g / 255) + ' 0 0 0 0 ' + (rgb.b / 255) + ' 0 0 0 1 0%22/%3E%3C/filter%3E%3C/svg%3E#color")';
-        var focusBorderColor = mainColor.toLowerCase() === '#353535' ? '#ffffff' : 'var(--main-color)';
-        style.textContent = `
-.ani_modal_root { padding: 1em; }
-.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }
-@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }
-.ani_loader_row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 25px; justify-content: center; }
-.ani_loader_square {
-    width: 35px;
-    height: 35px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    border: 2px solid #ffffff !important;
-    background-color: transparent !important;
-}
-.ani_loader_square img {
-    max-width: 30px;
-    max-height: 30px;
-    object-fit: contain;
-    filter: none !important;
-    -webkit-filter: none !important;
-}
-.ani_loader_square.focus {
-    border-color: #ffffff !important;
-    transform: scale(1.1);
-}
-.ani_loader_square.default img { /* дефолтний лоадер */
-    filter: none !important;
-    -webkit-filter: none !important;
-}
-.svg_input {
-    width: 252px;
-    height: 35px;
-    border-radius: 8px;
-    border: 2px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #353535;
-    color: #fff !important;
-    font-size: 12px;
-    font-weight: bold;
-}
-.svg_input.focus { border-color: #ffffff !important; transform: scale(1.1); }
-.svg_input .label, .svg_input .value { font-size: 10px; }
-`;
+    var style = document.createElement('style');
+    style.id = 'aniload';
+    style.textContent = `
+        .ani_modal_root { padding: 1em; }
+        .ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .ani_loader_square {
+            width: 35px; height: 35px; border-radius: 4px; display: flex;
+            justify-content: center; align-items: center; cursor: pointer;
+            border: 2px solid transparent; background-color: transparent;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .ani_loader_square img, .ani_loader_square svg {
+            max-width: 30px; max-height: 30px; object-fit: contain;
+            fill: #ffffff; stroke: #ffffff;
+        }
+        .ani_loader_square.focus { border-color: #ffffff; transform: scale(1.1); }
+        .svg_input.focus { border-color: #ffffff; transform: scale(1.1); }
+    `;
+    document.head.appendChild(style);
 
-        document.head.appendChild(style);
-        // Застосувати color.js фільтр до всіх svg в модальному вікні
-var modalSvg = document.querySelectorAll('.ani_modal_root img, .ani_modal_root svg');
-modalSvg.forEach(function(el) {
-    el.style.filter = filterValue;
-    el.style.webkitFilter = filterValue;
-});
-    }
+    // Застосовуємо колір до всіх svg в модальному вікні
+    var modalSvg = document.querySelectorAll('.ani_modal_root img, .ani_modal_root svg');
+    modalSvg.forEach(function(el) {
+        if (el.tagName.toLowerCase() === 'img') {
+            el.style.filter = 'invert(1)'; // перетворює чорні SVG на білі
+        } else {
+            el.setAttribute('fill', '#ffffff');
+            el.setAttribute('stroke', '#ffffff');
+        }
+    });
+}
 
     function createSvgHtml(src, index) {
         var className = 'ani_loader_square selector';
