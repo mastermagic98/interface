@@ -434,7 +434,7 @@ modalSvg.forEach(function(el) {
                     var midPoint = Math.ceil(svgContent.length / 2);
                     var leftColumn = svgContent.slice(0, midPoint).join('');
                     var rightColumn = svgContent.slice(midPoint).join('');
-                   v// Визначаємо вибране значення, але якщо анімація вимкнена — беремо дефолт
+                   // Визначаємо вибране значення, але якщо анімація вимкнена — беремо дефолт
 var selected = Lampa.Storage.get('ani_load', './img/loader.svg');
 if (!Lampa.Storage.get('ani_active')) {
     selected = './img/loader.svg';
