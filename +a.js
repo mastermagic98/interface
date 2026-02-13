@@ -85,9 +85,15 @@
         $('#aniload-id').remove();
         var escapedUrl = url.replace(/'/g, "\\'");
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var filterValue = getColorFilter(mainColor);
+        var filterValue;
+        if (mainColor === '#ffffff') {
+            // Явно використовувати white filter, якщо колір за замовчуванням (плагін color.js вимкнено або видалено)
+            filterValue = getWhiteFilter();
+        } else {
+            filterValue = getColorFilter(mainColor);
+        }
         var newStyle = 'body .activity__loader { display: none !important; background-image: none !important; }' +
-            'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + '; z-index: 9999 !important; }' +
+            'body .activity__loader.active { background-attachment: scroll; background-clip: border-box; background-color: transparent !important; background-image: url(\'' + escapedUrl + '\') !important; background-origin: padding-box; background-position-x: 50%; background-position-y: 50%; background-repeat: no-repeat; background-size: contain !important; box-sizing: border-box; display: block !important; position: fixed !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) scale(1) !important; -webkit-transform: translate(-50%, -50%) scale(1) !important; width: 108px !important; height: 108px !important; filter: ' + filterValue + ' !important; z-index: 9999 !important; }' +
             'body .lampac-balanser-loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: contain !important; background-color: transparent !important; filter: ' + filterValue + ' !important; }' +
             'body .player-video .player-video__loader, body .player-video.video--load .player-video__loader { background-image: url(\'' + escapedUrl + '\') !important; background-repeat: no-repeat !important; background-position: 50% 50% !important; background-size: 80% 80% !important; background-color: transparent !important; filter: ' + filterValue + ' !important; backdrop-filter: none !important; z-index: 9999 !important; }' +
             'body .player-video .player-video__loader:not(.custom) { background-image: none !important; display: none !important; }' +
@@ -263,9 +269,16 @@
         var style = document.createElement('style');
         style.id = 'aniload';
         var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-        var rgb = getFilterRgb(mainColor);
         var filterValue = getColorFilter(mainColor);
-        var focusBorderColor = mainColor.toLowerCase() === '#353535' ? '#ffffff' : 'var(--main-color)';
+        var focusBorderColor;
+        if (mainColor === '#ffffff') {
+            // Фікс для прозорої рамки: використовувати білий колір явно, якщо mainColor за замовчуванням
+            focusBorderColor = '#ffffff';
+        } else if (mainColor.toLowerCase() === '#353535') {
+            focusBorderColor = '#ffffff';
+        } else {
+            focusBorderColor = 'var(--main-color)';
+        }
         style.textContent = '.ani_modal_root { padding: 1em; }' +
             '.ani_picker_container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0; }' +
             '@media (max-width: 768px) { .ani_picker_container { grid-template-columns: 1fr; } }' +
@@ -390,8 +403,14 @@
                     var rightColumn = svgContent.slice(midPoint).join('');
                     var defaultLoader = applyDefaultLoaderColor();
                     var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-                    var filterValue = getColorFilter(mainColor);
-                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + filterValue + '; -webkit-filter: ' + filterValue + ';"></div>';
+                    var filterValue;
+                    if (mainColor === '#ffffff') {
+                        // Явно білий для модального вікна, якщо колір за замовчуванням
+                        filterValue = getWhiteFilter();
+                    } else {
+                        filterValue = getColorFilter(mainColor);
+                    }
+                    var defaultButton = '<div class="ani_loader_square selector default" tabindex="0" title="' + Lampa.Lang.translate('default_loader') + '"><img src="' + defaultLoader.src + '" style="filter: ' + filterValue + ' !important; -webkit-filter: ' + filterValue + ' !important;"></div>';
                     var svgValue = Lampa.Storage.get('ani_load_custom_svg', '') || 'Наприклад https://example.com/loader.svg';
                     var inputHtml = '<div class="ani_loader_square selector svg_input" tabindex="0" style="width: 252px;">' +
                         '<div class="label">' + Lampa.Lang.translate('custom_svg_input') + '</div>' +
@@ -561,7 +580,12 @@
                             if (e.type === 'waiting' || e.type === 'loadstart' || e.type === 'stalled') {
                                 if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                                     var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-                                    var filterValue = getColorFilter(mainColor);
+                                    var filterValue;
+                                    if (mainColor === '#ffffff') {
+                                        filterValue = getWhiteFilter();
+                                    } else {
+                                        filterValue = getColorFilter(mainColor);
+                                    }
                                     if (playerLoader) {
                                         playerLoader.classList.add('custom');
                                         playerLoader.style.backgroundImage = 'url(\'' + Lampa.Storage.get('ani_load') + '\')';
@@ -622,7 +646,12 @@
         setInterval(function () {
             if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
                 var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
-                var filterValue = getColorFilter(mainColor);
+                var filterValue;
+                if (mainColor === '#ffffff') {
+                    filterValue = getWhiteFilter();
+                } else {
+                    filterValue = getColorFilter(mainColor);
+                }
                 var playerVideo = document.querySelector('.player-video.video--load');
                 if (playerVideo) {
                     var loader = playerVideo.querySelector('.player-video__loader');
@@ -744,6 +773,7 @@
                 element.style.display = 'none';
             }
         }, 500);
+        // При ініціалізації, якщо mainColor не '#ffffff', але плагін color.js видалено, рекомендується скинути вручну: Lampa.Storage.set('color_plugin_main_color', '#ffffff');
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
@@ -755,6 +785,12 @@
     }
 
     function byTheme() {
+        // Фікс для збереження кольору після видалення color.js: якщо mainColor === '#ffffff', використовувати white
+        var mainColor = Lampa.Storage.get('color_plugin_main_color', '#ffffff');
+        if (mainColor !== '#ffffff') {
+            // Якщо колір не за замовчуванням, але плагін видалено, скинути в консолі: Lampa.Storage.set('color_plugin_main_color', '#ffffff');
+            console.log('Warning: Color from storage applied, but if color.js removed, reset manually.');
+        }
         if (Lampa.Storage.get('ani_load') && Lampa.Storage.get('ani_active') && Lampa.Storage.get('ani_load') !== './img/loader.svg') {
             setCustomLoader(Lampa.Storage.get('ani_load'));
             insert_activity_loader_prv(Lampa.Storage.get('ani_load'));
