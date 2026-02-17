@@ -30,15 +30,15 @@
             en: 'Use SVG URL, for example https://example.com/loader.svg',
             uk: 'Використовуйте URL SVG, наприклад https://example.com/loader.svg'
         },
-        params_ani_on_desc: {
+        params_ani_on_description: {
             ru: 'Изменяет вид иконки загрузки Lampa',
             en: 'Changes the appearance of the Lampa loading icon',
             uk: 'Змінює вигляд іконки завантаження Lampa'
         },
-        params_ani_select_desc: {
-            ru: 'Выберите или добавьте svg-иконку загрузки',
-            en: 'Select or add svg loading icon',
-            uk: 'Виберіть чи додайте svg-іконку завантаження'
+        params_ani_select_description: {
+            ru: 'Выберите или добавьте svg-иконку загрузки.',
+            en: 'Select or add a loading svg icon.',
+            uk: 'Виберіть чи додайте svg-іконку завантаження.'
         }
     });
     Lampa.Template.add('ani_modal', '<div class="ani_modal_root"><div class="ani_picker_container">{ani_svg_content}</div></div>');
@@ -341,7 +341,7 @@
                 },
                 field: {
                     name: Lampa.Lang.translate('params_ani_on'),
-                    hint: Lampa.Lang.translate('params_ani_on_desc')
+                    description: Lampa.Lang.translate('params_ani_on_description')
                 },
                 onChange: function (item) {
                     Lampa.Storage.set('ani_active', item === 'true');
@@ -378,7 +378,7 @@
                 },
                 field: {
                     name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select'),
-                    hint: Lampa.Lang.translate('params_ani_select_desc')
+                    description: Lampa.Lang.translate('params_ani_select_description')
                 },
                 onRender: function (item) {
                     if (!Lampa.Storage.get('ani_active')) {
