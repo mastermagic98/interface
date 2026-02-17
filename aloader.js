@@ -1,19 +1,24 @@
 (function () { 'use strict';
     Lampa.Lang.add({
         params_ani_on: {
-            ru: 'Змінити іконку завантажувача',
+            ru: 'Сменить иконку загрущика',
             en: 'Change loader icon',
             uk: 'Змінити іконку завантажувача'
+        },
+        params_ani_on_description: {
+            ru: 'Изменяет вид иконки загрузки Lampa',
+            en: 'Changes the appearance of the Lampa loading icon',
+            uk: 'Змінює вигляд іконки завантаження Lampa'
         },
         params_ani_select: {
             ru: 'Выбор анимации',
             en: 'Select loading animation',
             uk: 'Вибір анімації завантаження'
         },
-        params_ani_name: {
-            ru: 'Анимация Загрузки',
-            en: 'Loading animation',
-            uk: 'Анімація завантаження'
+        params_ani_select_description: {
+            ru: 'Выберите или добавьте svg-иконку загрузки.',
+            en: 'Select or add a loading svg icon.',
+            uk: 'Виберіть чи додайте svg-іконку завантаження.'
         },
         default_loader: {
             ru: 'По умолчанию',
@@ -333,7 +338,8 @@
                     default: false
                 },
                 field: {
-                    name: '<div style="display: flex; align-items: center;"><svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>Змінити іконку завантаження</div>'
+                    name: '<div style="display: flex; align-items: center;"><svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px"><circle cx="12" cy="12" r="3"/><g><circle cx="4" cy="12" r="3"/><circle cx="20" cy="12" r="3"/><animateTransform attributeName="transform" type="rotate" calcMode="spline" dur="1s" keySplines=".36,.6,.31,1;.36,.6,.31,1" values="0 12 12;180 12 12;360 12 12" repeatCount="indefinite"/></g></svg>Змінити іконку завантаження</div>',
+                    description: Lampa.Lang.translate('params_ani_on_description')
                 },
                 onChange: function (item) {
                     Lampa.Storage.set('ani_active', item === 'true');
@@ -369,7 +375,8 @@
                     type: 'button'
                 },
                 field: {
-                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select')
+                    name: '<div class="settings-folder__icon" style="display: inline-block; vertical-align: middle; width: 23px; height: 24px; margin-right: 10px;"><div class="activity__loader_prv"></div></div>' + Lampa.Lang.translate('params_ani_select'),
+                    description: Lampa.Lang.translate('params_ani_select_description')
                 },
                 onRender: function (item) {
                     if (!Lampa.Storage.get('ani_active')) {
