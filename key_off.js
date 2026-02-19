@@ -1,4 +1,4 @@
-function () {
+(function () {
 'use strict';
 console.log('Keyboard Plugin: Starting load');
 if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) {
@@ -138,8 +138,8 @@ Lampa.Controller.toggle('settings_component');
 function addSettings() {
 console.log('Keyboard Plugin: Trying to add settings');
 if (!Lampa.SettingsApi) {
-console.log('Keyboard Plugin: SettingsApi not available');
-return;
+console.log('Keyboard Plugin: SettingsApi not available yet');
+return false;
 }
 console.log('Keyboard Plugin: SettingsApi available');
 // Додаємо компонент у Налаштування
