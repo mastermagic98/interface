@@ -1,149 +1,192 @@
 (function () {
     'use strict';
+    if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
+    if (window.keyboard_multi_hide_plugin) return;
+    if (!Lampa.KeyboardLayouts) return;
+    window.keyboard_multi_hide_plugin = true;
 
-    var plugin_name = 'Приховати клавіатуру';
-
-    var defaults = {
-        default_lang: 'uk',  // uk | en | he | ru
-        hide_uk: false,
-        hide_en: false,
-        hide_he: false,
-        hide_ru: true
+    const LANGUAGES = ['English', 'Русский', 'Українська', 'עִברִית'];
+    const LANG_CODES = {
+        'English': 'en',
+        'Русский': 'default',
+        'Українська': 'uk',
+        'עִברִית': 'he'
+    };
+    const CODE_TO_LANG = Object.fromEntries(Object.entries(LANG_CODES).map(([k, v]) => [v, k]));
+    const STORAGE_KEYS = {
+        'English': 'keyboard_hide_en',
+        'Русский': 'keyboard_hide_ru',
+        'Українська': 'keyboard_hide_uk',
+        'עִברִית': 'keyboard_hide_he'
     };
 
-    function getSettings() {
-        var s = Lampa.Storage.get('keyboard_controller_v2', {});
-        if (Object.keys(s).length === 0) {
-            Lampa.Storage.set('keyboard_controller_v2', defaults);
-            return defaults;
-        }
-        return s;
-    }
+    // Збереження оригінальних layers
+    const layouts = Lampa.KeyboardLayouts;
+    let original_layers = {};
+    Object.keys(layouts.get()).forEach(mode => {
+        original_layers[mode] = JSON.parse(JSON.stringify(layouts.get(mode)));
+    });
 
+    // Функція застосування приховування (видалення/відновлення ключів у layers)
     function applyHiding() {
-        var s = getSettings();
-        if (s.hide_uk) $('.selectbox-item.selector > div:contains("Українська")').parent().hide();
-        if (s.hide_en) $('.selectbox-item.selector > div:contains("English")').parent().hide();
-        if (s.hide_he) $('.selectbox-item.selector > div:contains("עִברִית")').parent().hide();
-        if (s.hide_ru) $('.selectbox-item.selector > div:contains("Русский"), .selectbox-item.selector > div:contains("Russian")').parent().hide();
-    }
+        const defaultLangCode = Lampa.Storage.get('keyboard_default_lang', 'default');
+        let fallbackNeeded = false;
 
-    function setDefaultLanguage() {
-        var s = getSettings();
-        Lampa.Storage.set('keyboard_default_lang', s.default_lang);
-
-        setTimeout(function () {
-            var btn = $('.hg-button.hg-functionBtn.hg-button-LANG');
-            if (btn.length === 0) return;
-
-            var target = '';
-            if (s.default_lang === 'uk') target = 'Й';
-            if (s.default_lang === 'en') target = 'Q';
-            if (s.default_lang === 'he') target = 'ש';
-            if (s.default_lang === 'ru') target = 'Й';
-
-            var attempts = 0;
-            var checker = setInterval(function () {
-                attempts++;
-                if ($('.hg-button.hg-activeButton:contains("' + target + '")').length > 0 || attempts > 15) {
-                    clearInterval(checker);
-                    return;
+        Object.keys(original_layers).forEach(mode => {
+            let layer = layouts.get(mode) || {};
+            LANGUAGES.forEach(lang => {
+                const code = LANG_CODES[lang];
+                const hide = Lampa.Storage.get(STORAGE_KEYS[lang], 'false') === 'true';
+                if (hide) {
+                    if (layer[code]) {
+                        delete layer[code];
+                        console.log('Keyboard Hide: Removed ' + code + ' from ' + mode);
+                        if (code === defaultLangCode) fallbackNeeded = true;
+                    }
+                } else {
+                    if (original_layers[mode][code] && !layer[code]) {
+                        layer[code] = original_layers[mode][code];
+                        console.log('Keyboard Hide: Restored ' + code + ' to ' + mode);
+                    }
                 }
-                btn.trigger('hover:enter');
-            }, 100);
-        }, 350);
+            });
+        });
+
+        // Якщо вимкнута default мова, встановити fallback
+        if (fallbackNeeded) {
+            Lampa.Storage.set('keyboard_default_lang', 'default');
+            console.log('Keyboard Hide: Fallback to default lang as current was hidden');
+        }
     }
 
-    function start() {
-        // Додаємо пункт в меню
-        Lampa.Settings.main().render().find('[data-component="more"]').after(
-            '<div class="settings-folder selector" data-action="kb_ctrl">' +
-                '<div class="settings-folder__icon"><div class="icon-keyboard"></div></div>' +
-                '<div class="settings-folder__name">' + plugin_name + '</div>' +
-            '</div>'
-        );
+    // Отримання доступних мов (не вимкнених)
+    function getAvailableLanguages() {
+        return LANGUAGES.filter(lang => Lampa.Storage.get(STORAGE_KEYS[lang], 'false') !== 'true');
+    }
 
-        // Обробник натискання
-        $(document).off('hover:enter', '[data-action="kb_ctrl"]').on('hover:enter', '[data-action="kb_ctrl"]', function () {
-            var s = getSettings();
+    // Функція відкриття меню вибору default мови
+    function openDefaultLangMenu() {
+        const availableLangs = getAvailableLanguages();
+        if (availableLangs.length === 0) {
+            Lampa.Noty.show('Немає доступних мов для вибору.');
+            return;
+        }
+        const currentDefault = Lampa.Storage.get('keyboard_default_lang', 'default');
+        const items = availableLangs.map(lang => ({
+            title: lang,
+            selected: LANG_CODES[lang] === currentDefault
+        }));
+        Lampa.Select.show({
+            title: 'Мова за замовчуванням',
+            items: items,
+            onSelect(item) {
+                const newCode = LANG_CODES[item.title];
+                Lampa.Storage.set('keyboard_default_lang', newCode);
+                console.log('Keyboard Default: Set to ' + newCode);
+                Lampa.Noty.show('Мова за замовчуванням змінена на ' + item.title);
+            },
+            onBack() {
+                Lampa.Controller.toggle('settings_component');
+            }
+        });
+    }
 
-            var items = [];
+    // Функція відкриття меню вимкнення мов
+    function openHideMenu() {
+        const currentDefaultCode = Lampa.Storage.get('keyboard_default_lang', 'default');
+        const currentDefaultLang = CODE_TO_LANG[currentDefaultCode] || 'Русский';
+        const items = LANGUAGES.map(lang => ({
+            title: lang,
+            checkbox: true,
+            selected: Lampa.Storage.get(STORAGE_KEYS[lang], 'false') === 'true',
+            lang: lang
+        }));
+        Lampa.Select.show({
+            title: 'Вимкнути мови',
+            items: items,
+            onSelect(item) {
+                if (item.checkbox && item.lang) {
+                    const key = STORAGE_KEYS[item.lang];
+                    const isHidden = Lampa.Storage.get(key, 'false') === 'true';
+                    const newVal = isHidden ? 'false' : 'true';
 
-            // === Мова за замовчуванням ===
-            items.push({ title: 'Мова за замовчуванням', separator: true });
-
-            items.push({ title: 'Українська',   selected: s.default_lang === 'uk',   lang_code: 'uk' });
-            items.push({ title: 'English',      selected: s.default_lang === 'en',   lang_code: 'en' });
-            items.push({ title: 'עִברִית',      selected: s.default_lang === 'he',   lang_code: 'he' });
-            items.push({ title: 'Русский',      selected: s.default_lang === 'ru',   lang_code: 'ru' });
-
-            // === Приховати зі списку ===
-            items.push({ title: 'Приховати зі списку', separator: true });
-
-            });
-            items.push({ title: 'Приховати українську',  selected: s.hide_uk,  hide_key: 'uk' });
-            items.push({ title: 'Приховати англійську',  selected: s.hide_en,  hide_key: 'en' });
-            items.push({ title: 'Приховати іврит',      selected: s.hide_he,  hide_key: 'he' });
-            items.push({ title: 'Приховати російську',   selected: s.hide_ru,  hide_key: 'ru' });
-
-            Lampa.Select.show({
-                title: plugin_name,
-                items: items,
-                onSelect: function (item) {
-                    // Зміна мови за замовчуванням
-                    if (item.lang_code) {
-                        s.default_lang = item.lang_code;
-                        Lampa.Storage.set('keyboard_default_lang', item.lang_code);
+                    if (!isHidden && item.lang === currentDefaultLang) {
+                        Lampa.Noty.show('Не можна вимкнути мову за замовчуванням. Спочатку змініть мову за замовчуванням.');
+                        openHideMenu(); // Оновити меню без змін
+                        return;
                     }
 
-                    // Перемикач приховування
-                    if (item.hide_key === 'uk') s.hide_uk = !s.hide_uk;
-                    if (item.hide_key === 'en') s.hide_en = !s.hide_en;
-                    if (item.hide_key === 'he') s.hide_he = !s.hide_he;
-                    if (item.hide_key === 'ru') s.hide_ru = !s.hide_ru;
-
-                    Lampa.Storage.set('keyboard_controller_v2', s);
-
+                    Lampa.Storage.set(key, newVal);
                     applyHiding();
-                    setDefaultLanguage();
-
-                    // Оновлюємо список, щоб галочки змінилися
-                    Lampa.Settings.main().refresh();
-                },
-                onBack: function () {
-                    Lampa.Controller.toggle('settings_component');
+                    openHideMenu(); // Оновити меню
                 }
+            },
+            onBack() {
+                Lampa.Controller.toggle('settings_component');
+            }
+        });
+    }
+
+    // Додаємо компонент у Налаштування
+    Lampa.SettingsApi.addComponent({
+        component: 'keyboard_multi_hide_plugin',
+        name: 'Клавіатура',
+        icon: '<svg fill="#fff" width="38px" height="38px" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Zm1 11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v8Zm-6-3H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2Zm3.5-4h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Z"/></svg>'
+    });
+
+    // Додаємо параметр для вибору default мови
+    Lampa.SettingsApi.addParam({
+        component: 'keyboard_multi_hide_plugin',
+        param: {
+            name: 'default_keyboard_lang',
+            type: 'trigger',
+            default: false
+        },
+        field: {
+            name: 'Мова за замовчуванням',
+            description: 'Виберіть мову клавіатури за замовчуванням'
+        },
+        onRender(el) {
+            el.off('hover:enter').on('hover:enter', function () {
+                openDefaultLangMenu();
             });
-        });
-
-        // При відкритті пошуку
-        Lampa.Listener.follow('full', function (e) {
-            if (e.type === 'start') {
-                setTimeout(function () {
-                    applyHiding();
-                    setDefaultLanguage();
-                }, 300);
-            }
-        });
-
-        // Якщо додаток вже запущений
-        if (window.appready) {
-            setTimeout(function () {
-                applyHiding();
-                setDefaultLanguage();
-            }, 600);
         }
-    }
+    });
 
-    // Запуск
-    if (window.appready) {
-        start();
-    } else {
-        Lampa.Listener.follow('app', function (e) {
-            if (e.type === 'ready') {
-                start();
-            }
-        });
-    }
+    // Додаємо параметр для вимкнення мов
+    Lampa.SettingsApi.addParam({
+        component: 'keyboard_multi_hide_plugin',
+        param: {
+            name: 'select_keyboard_hide',
+            type: 'trigger',
+            default: false
+        },
+        field: {
+            name: 'Вимкнути мови',
+            description: 'Вимкніть непотрібні мови клавіатури'
+        },
+        onRender(el) {
+            el.off('hover:enter').on('hover:enter', function () {
+                Lampa.Select.show({
+                    title: 'Вимкнути мови?',
+                    items: [
+                        { title: 'Так', selected: true },
+                        { title: 'Ні' }
+                    ],
+                    onSelect: function (item) {
+                        if (item.title === 'Так') {
+                            openHideMenu();
+                        }
+                    },
+                    onBack: function () {
+                        Lampa.Controller.toggle('settings_component');
+                    }
+                });
+            });
+        }
+    });
 
+    // Застосування приховування при старті
+    Lampa.Listener.follow('full', e => e.type === 'start' && setTimeout(applyHiding, 300));
+    if (window.appready) setTimeout(applyHiding, 500);
 })();
