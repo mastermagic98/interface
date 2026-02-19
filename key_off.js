@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    console.log('Keyboard Plugin: Loaded');
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
     if (window.keyboard_multi_hide_plugin) return;
     if (!Lampa.KeyboardLayouts) return;
@@ -129,10 +130,12 @@
 
     // Функція додавання налаштувань з логуванням та оновленням
     function addSettings() {
+        console.log('Keyboard Plugin: Trying to add settings');
         if (!Lampa.SettingsApi) {
             console.log('Keyboard Plugin: SettingsApi not available');
             return;
         }
+        console.log('Keyboard Plugin: SettingsApi available');
 
         // Додаємо компонент у Налаштування
         Lampa.SettingsApi.addComponent({
@@ -205,17 +208,19 @@
 
     // Застосування приховування та додавання налаштувань при старті
     if (window.appready) {
+        console.log('Keyboard Plugin: App ready - immediate');
         setTimeout(() => {
             addSettings();
             applyHiding();
-        }, 1000);
+        }, 2000);
     } else {
         Lampa.Listener.follow('app', e => {
             if (e.type === 'ready') {
+                console.log('Keyboard Plugin: App ready - listener');
                 setTimeout(() => {
                     addSettings();
                     applyHiding();
-                }, 1000);
+                }, 2000);
             }
         });
     }
