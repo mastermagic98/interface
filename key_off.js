@@ -127,7 +127,7 @@
         });
     }
 
-    // Функція додавання налаштувань з логуванням
+    // Функція додавання налаштувань з логуванням та оновленням
     function addSettings() {
         if (!Lampa.SettingsApi) {
             console.log('Keyboard Plugin: SettingsApi not available');
@@ -195,6 +195,12 @@
             }
         });
         console.log('Keyboard Plugin: Added param select_keyboard_hide');
+
+        // Оновлюємо налаштування для відображення змін
+        if (Lampa.Settings.update) {
+            Lampa.Settings.update();
+            console.log('Keyboard Plugin: Settings updated');
+        }
     }
 
     // Застосування приховування та додавання налаштувань при старті
@@ -202,14 +208,14 @@
         setTimeout(() => {
             addSettings();
             applyHiding();
-        }, 500);
+        }, 1000);
     } else {
         Lampa.Listener.follow('app', e => {
             if (e.type === 'ready') {
                 setTimeout(() => {
                     addSettings();
                     applyHiding();
-                }, 300);
+                }, 1000);
             }
         });
     }
