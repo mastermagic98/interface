@@ -122,6 +122,7 @@
     }  
   
     function openDefaultMenu() {  
+        log('openDefaultMenu: opened');  
         const current = getDefaultCode();  
         const items = LANGUAGES.map(lang => ({  
             title: lang.title,  
@@ -212,8 +213,11 @@
         onRender(el) {  
             try {  
                 el.find('.settings-param__value').text(getDefaultTitle());  
-                el.off('hover:enter').on('hover:enter', openDefaultMenu);  
-                log('onRender default: rendered');  
+                el.off('hover:enter').on('hover:enter', function () {  
+                    log('hover:enter triggered for default trigger');  
+                    openDefaultMenu();  
+                });  
+                log('onRender default: rendered and hover:enter bound');  
             } catch (e) {  
                 console.error('keyboard_settings_select onRender error (default):', e);  
             }  
@@ -234,8 +238,11 @@
                     .map(lang => lang.title);  
                 const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
                 el.find('.settings-param__value').text(hideText);  
-                el.off('hover:enter').on('hover:enter', openHideMenu);  
-                log('onRender hide: rendered with "' + hideText + '"');  
+                el.off('hover:enter').on('hover:enter', function () {  
+                    log('hover:enter triggered for hide trigger');  
+                    openHideMenu();  
+                });  
+                log('onRender hide: rendered with "' + hideText + '" and hover:enter bound');  
             } catch (e) {  
                 console.error('keyboard_settings_select onRender error (hide):', e);  
             }  
