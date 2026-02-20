@@ -1,13 +1,3 @@
-Дії, які буду робити:
-1. Проаналізую попередній код на помилки: type 'select' для 'keyboard_hide_select' потребує values, тому додам dummy values {'Жодна': ''}, щоб уникнути помилок в Lampa.SettingsApi (type 'select' без values може викликати crash при рендері параметра).
-2. Збережемо показ string з вимкнутими розкладками (getHiddenTitles()) в .settings-param__value.text на onRender, без onChange, бо вибір множинний через custom menu на 'hover:enter'.
-3. Інтегрую твій робочий код з setInterval і add() для виклику applySettings при старті та при появі кнопки LANG, щоб приховування працювало надійно.
-4. Додам console.log для перевірки Storage після кожного set, щоб побачити, чи зберігається.
-5. Додам автоматичне вмикання default розкладки якщо вона вимкнута.
-6. Видалю зайві listeners (mutation, click), щоб покладатися на твій setInterval, як у робочому коді.
-7. Залишу параметр "Розкладка за замовчуванням" як 'select' з values об'єктом.
-8. Додам try-catch навколо onRender і applySettings для запобігання помилок при виклику налаштувань.
-
 (function () {
     'use strict';
 
