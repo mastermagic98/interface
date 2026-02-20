@@ -7,7 +7,7 @@
  
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', key: 'keyboard_hide_uk' },
-        { title: 'Русский', code: 'ru', key: 'keyboard_hide_ru' },
+        { title: 'Русский', code: 'default', key: 'keyboard_hide_ru' },
         { title: 'English', code: 'en', key: 'keyboard_hide_en' },
         { title: 'עִברִית', code: 'he', key: 'keyboard_hide_he' }
     ];
@@ -63,7 +63,7 @@
     }
  
     function ensureKeyboardHooked(retry = 0) {
-        if (retry > 20) {
+        if (retry > 50) {
             log('ensureKeyboardHooked: max retries reached');
             return;
         }
@@ -85,9 +85,7 @@
             const stored = Lampa.Storage.get(lang.key, 'false');
             const hide = stored === 'true';
             log('applyHiding: lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);
-            const element = $('.selectbox-item.selector').filter(function () {
-                return $(this).text().trim() === lang.title;
-            });
+            const element = $('.selectbox-item.selector > div.selectbox-item__title:contains("' + lang.title + '")').closest('.selectbox-item.selector');
             if (element.length) {
                 element.toggle(!hide);
                 log('applyHiding: toggled ' + lang.title + ' -> ' + (!hide ? 'shown' : 'hidden'));
@@ -99,31 +97,33 @@
  
     function updateDisplays() {
         log('updateDisplays: start');
-        const defaultEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');
-        if (defaultEl.length) {
-            const title = getDefaultTitle();
-            defaultEl.text(title);
-            log('updateDisplays: default title set to ' + title);
-        } else {
-            log('updateDisplays: default display element not found');
-        }
- 
-        const hiddenTitles = LANGUAGES
-            .filter(lang => {
-                const stored = Lampa.Storage.get(lang.key, 'false');
-                const hide = stored === 'true';
-                log('updateDisplays: hidden check lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);
-                return hide;
-            })
-            .map(lang => lang.title);
-        const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';
-        const hideEl = $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value');
-        if (hideEl.length) {
-            hideEl.text(hideText);
-            log('updateDisplays: hide text set to ' + hideText);
-        } else {
-            log('updateDisplays: hide display element not found');
-        }
+        setTimeout(function() {
+            const defaultEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');
+            if (defaultEl.length) {
+                const title = getDefaultTitle();
+                defaultEl.text(title);
+                log('updateDisplays: default title set to ' + title + '; current text=' + defaultEl.text());
+            } else {
+                log('updateDisplays: default display element not found');
+            }
+     
+            const hiddenTitles = LANGUAGES
+                .filter(lang => {
+                    const stored = Lampa.Storage.get(lang.key, 'false');
+                    const hide = stored === 'true';
+                    log('updateDisplays: hidden check lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);
+                    return hide;
+                })
+                .map(lang => lang.title);
+            const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';
+            const hideEl = $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value');
+            if (hideEl.length) {
+                hideEl.text(hideText);
+                log('updateDisplays: hide text set to ' + hideText + '; current text=' + hideEl.text());
+            } else {
+                log('updateDisplays: hide display element not found');
+            }
+        }, 100);
     }
  
     function openDefaultMenu() {
@@ -293,11 +293,11 @@
             applyHiding();
         }
     }, 0);
- 
+
     function start() {
         log('start: begin');
         ensureKeyboardHooked();
-        setTimeout(updateDisplays, 0);
+        setTimeout(updateDisplays, 100);
         Lampa.Listener.follow('select', e => {
             if (e.type === 'open') {
                 log('listener select open: will applyHiding in 100ms');
