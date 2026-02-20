@@ -2,8 +2,8 @@
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_v8) return;
-    window.keyboard_settings_v8 = true;
+    if (window.keyboard_settings_v9) return;
+    window.keyboard_settings_v9 = true;
 
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', hideKey: 'keyboard_hide_uk' },
@@ -27,10 +27,21 @@
         return lang ? lang.title : 'Українська';
     }
 
-    // Головна функція приховування
+    // Функція застосування приховування
     function applySettings() {
         try {
+            if ($('.selectbox-item.selector').length === 0) return; // Якщо меню не відкрито, виходимо
+
             const defaultCode = getDefaultCode();
+            console.log('[Keyboard v9] Застосовую hiding. Default:', getDefaultTitle());
+
+            // Автоматично вмикаємо default якщо вона прихована
+            const defaultLang = LANGUAGES.find(l => l.code === defaultCode);
+            if (defaultLang && Lampa.Storage.get(defaultLang.hideKey, 'false') === 'true') {
+                Lampa.Storage.set(defaultLang.hideKey, 'false');
+                console.log('[Keyboard v9] Автоматично включили default:', defaultLang.title);
+            }
+
             LANGUAGES.forEach(function(lang) {
                 const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
                 const shouldHide = hide && lang.code !== defaultCode;
@@ -40,15 +51,21 @@
                     const parent = element.parent('div');
                     if (shouldHide) {
                         parent.hide();
+                        console.log('[Keyboard v9] СХОВАНО:', lang.title);
                     } else {
                         parent.show();
+                        console.log('[Keyboard v9] ПОКАЗАНО:', lang.title);
                     }
+                } else {
+                    console.log('[Keyboard v9] Не знайдено елемент:', lang.title);
                 }
             });
-        } catch(e) {}
+        } catch(e) {
+            console.log('[Keyboard v9] Помилка applySettings:', e.message);
+        }
     }
 
-    // Меню вибору default для select
+    // Меню вибору default (для select param не потрібно, але для сумісності)
     function openDefaultMenu() {
         const currentCode = getDefaultCode();
         const items = LANGUAGES.map(function(lang) {
@@ -65,8 +82,12 @@
             onSelect: function(item) {
                 if (item.value) {
                     const langObj = LANGUAGES.find(l => l.code === item.value);
-                    if (langObj) Lampa.Storage.set(langObj.hideKey, 'false');
+                    if (langObj) {
+                        Lampa.Storage.set(langObj.hideKey, 'false');
+                        console.log('[Keyboard v9] Включили default:', langObj.title, 'hide = false');
+                    }
                     Lampa.Storage.set('keyboard_default_lang', item.value);
+                    console.log('[Keyboard v9] Default збережено:', item.value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
                     setTimeout(applySettings, 200);
                 }
             },
@@ -76,23 +97,17 @@
         });
     }
 
-    // Меню вимкнення (як закладки в Лампі - чекбокси)
+    // Меню вимкнення (чекбокси як закладки)
     function openHideMenu() {
         const defaultCode = getDefaultCode();
-        const items = [];
+        const items = [
+            { title: 'Статус', subtitle: true } // Заголовок як в прикладі
+        ];
 
-        // Додаємо заголовок як в прикладі (settings-param-title)
-        // Але оскільки Lampa.Select.show не підтримує заголовки, робимо перший пункт як заголовок (неклікабельний)
-        items.push({
-            title: 'Статус розкладок',
-            subtitle: true // Для імітації заголовка
-        });
-
-        // Додаємо чекбокси для кожної мови (як "Дивлюся - Українська")
         LANGUAGES.forEach(function(lang) {
             const isHidden = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
             items.push({
-                title: lang.title, // Наприклад "Українська" як "Дивлюся - Українська", але адаптовано
+                title: lang.title,
                 checkbox: true,
                 selected: isHidden,
                 disabled: lang.code === defaultCode,
@@ -109,7 +124,7 @@
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';
                 const newVal = current ? 'false' : 'true';
                 Lampa.Storage.set(item.key, newVal);
-
+                console.log('[Keyboard v9] Змінено hide:', item.key, 'на', newVal, 'перевірка:', Lampa.Storage.get(item.key));
                 setTimeout(applySettings, 200);
                 setTimeout(openHideMenu, 100);
             },
@@ -119,16 +134,16 @@
         });
     }
 
-    // Додаємо компонент
+    // Додаємо компонент в Налаштування
     Lampa.SettingsApi.addComponent({
-        component: 'keyboard_settings_v8',
+        component: 'keyboard_settings_v9',
         name: 'Налаштування клавіатури',
         icon: '<svg fill="#fff" width="38px" height="38px" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
-    // Параметр default - type: 'select' (заміна toggle)
+    // Параметр default - type 'select'
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v8',
+        component: 'keyboard_settings_v9',
         param: {
             name: 'keyboard_default_lang',
             type: 'select',
@@ -144,18 +159,22 @@
         },
         onChange: function(value) {
             const langObj = LANGUAGES.find(l => l.code === value);
-            if (langObj) Lampa.Storage.set(langObj.hideKey, 'false');
+            if (langObj) {
+                Lampa.Storage.set(langObj.hideKey, 'false');
+                console.log('[Keyboard v9] Включили default в onChange:', langObj.title, 'hide = false');
+            }
             Lampa.Storage.set('keyboard_default_lang', value);
+            console.log('[Keyboard v9] Default змінено в onChange:', value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
             setTimeout(applySettings, 200);
         },
         onRender: function(el) {
-            // Не потрібно, бо type: 'select' показує вибране значення автоматично
+            el.off('hover:enter').on('hover:enter', openDefaultMenu); // Для відкриття меню якщо потрібно
         }
     });
 
-    // Параметр hide - trigger
+    // Параметр hide - type 'trigger'
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v8',
+        component: 'keyboard_settings_v9',
         param: {
             name: 'keyboard_hide_trigger',
             type: 'trigger',
@@ -170,30 +189,25 @@
         }
     });
 
-    // Інтервал для перевірки
-    setInterval(function() {
-        if ($('div.hg-button.hg-functionBtn.hg-button-LANG.selector.binded').length > 0) {
-            setTimeout(applySettings, 100);
-            setTimeout(applySettings, 300);
-        }
-    }, 50);
-
-    // Listener на клік LANG
+    // Listener на клік по кнопці LANG
     function setupListeners() {
-        $('body').on('click', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function() {
+        $('body').off('click.keyboard_hide').on('click.keyboard_hide', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function() {
             setTimeout(applySettings, 50);
             setTimeout(applySettings, 200);
             setTimeout(applySettings, 500);
+            console.log('[Keyboard v9] Клік на LANG - застосовую hiding');
         });
     }
 
-    // Mutation observer для selectbox-item
+    // Mutation observer для додавання selectbox-item
     function setupObserver() {
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length > 0) {
                     if ($(mutation.addedNodes).find('.selectbox-item.selector').length > 0) {
                         setTimeout(applySettings, 100);
+                        setTimeout(applySettings, 300);
+                        console.log('[Keyboard v9] Mutation: додані selectbox-item - застосовую hiding');
                     }
                 }
             });
@@ -201,7 +215,7 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Запуск
+    // Запуск плагіна
     function start() {
         setupListeners();
         setupObserver();
