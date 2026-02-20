@@ -2,8 +2,8 @@
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_v13) return;
-    window.keyboard_settings_v13 = true;
+    if (window.keyboard_settings_v14) return;
+    window.keyboard_settings_v14 = true;
 
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', hideKey: 'keyboard_hide_uk' },
@@ -35,17 +35,17 @@
     function applySettings() {
         try {
             const defaultCode = getDefaultCode();
-            console.log('[Keyboard v13] Застосовую hiding. Default:', getDefaultTitle());
+            console.log('[Keyboard v14] Застосовую hiding. Default:', getDefaultTitle());
 
             const defaultLang = LANGUAGES.find(l => l.code === defaultCode);
             if (defaultLang && Lampa.Storage.get(defaultLang.hideKey, 'false') === 'true') {
                 Lampa.Storage.set(defaultLang.hideKey, 'false');
-                console.log('[Keyboard v13] Автоматично включили default:', defaultLang.title, 'hide = false; перевірка:', Lampa.Storage.get(defaultLang.hideKey));
+                console.log('[Keyboard v14] Автоматично включили default:', defaultLang.title, 'hide = false; перевірка:', Lampa.Storage.get(defaultLang.hideKey));
             }
 
             LANGUAGES.forEach(function(lang) {
                 const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
-                console.log('[Keyboard v13] Hide status з Storage for ' + lang.title + ': ' + hide);
+                console.log('[Keyboard v14] Hide status з Storage for ' + lang.title + ': ' + hide);
                 const shouldHide = hide && lang.code !== defaultCode;
 
                 const element = $('.selectbox-item.selector > div:contains("' + lang.title + '")');
@@ -53,17 +53,17 @@
                     const parent = element.parent('div');
                     if (shouldHide) {
                         parent.hide();
-                        console.log('[Keyboard v13] СХОВАНО:', lang.title);
+                        console.log('[Keyboard v14] СХОВАНО:', lang.title);
                     } else {
                         parent.show();
-                        console.log('[Keyboard v13] ПОКАЗАНО:', lang.title);
+                        console.log('[Keyboard v14] ПОКАЗАНО:', lang.title);
                     }
                 } else {
-                    console.log('[Keyboard v13] Не знайдено елемент:', lang.title);
+                    console.log('[Keyboard v14] Не знайдено елемент:', lang.title);
                 }
             });
         } catch(e) {
-            console.log('[Keyboard v13] Помилка applySettings:', e.message);
+            console.log('[Keyboard v14] Помилка applySettings:', e.message);
         }
     }
 
@@ -85,10 +85,10 @@
                     const langObj = LANGUAGES.find(l => l.code === item.value);
                     if (langObj) {
                         Lampa.Storage.set(langObj.hideKey, 'false');
-                        console.log('[Keyboard v13] Включили default:', langObj.title, 'hide = false; перевірка:', Lampa.Storage.get(langObj.hideKey));
+                        console.log('[Keyboard v14] Включили default:', langObj.title, 'hide = false; перевірка:', Lampa.Storage.get(langObj.hideKey));
                     }
                     Lampa.Storage.set('keyboard_default_lang', item.value);
-                    console.log('[Keyboard v13] Default збережено:', item.value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
+                    console.log('[Keyboard v14] Default збережено:', item.value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
                     setTimeout(applySettings, 200);
                 }
             },
@@ -120,7 +120,7 @@
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';
                 const newVal = current ? 'false' : 'true';
                 Lampa.Storage.set(item.key, newVal);
-                console.log('[Keyboard v13] Змінено hide:', item.key, 'на', newVal, 'перевірка:', Lampa.Storage.get(item.key));
+                console.log('[Keyboard v14] Змінено hide:', item.key, 'на', newVal, 'перевірка:', Lampa.Storage.get(item.key));
                 setTimeout(applySettings, 200);
                 setTimeout(openHideMenu, 100);
             },
@@ -131,19 +131,19 @@
     }
 
     Lampa.SettingsApi.addComponent({
-        component: 'keyboard_settings_v13',
+        component: 'keyboard_settings_v14',
         name: 'Налаштування клавіатури',
         icon: '<svg fill="#fff" width="38px" height="38px" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v13',
+        component: 'keyboard_settings_v14',
         param: {
             name: 'keyboard_default_lang',
             type: 'select',
             default: getDefaultCode(),
             values: LANGUAGES.reduce(function(acc, lang) {
-                acc[lang.title] = lang.code;
+                acc[lang.code] = lang.title;
                 return acc;
             }, {})
         },
@@ -155,23 +155,23 @@
             const langObj = LANGUAGES.find(l => l.code === value);
             if (langObj) {
                 Lampa.Storage.set(langObj.hideKey, 'false');
-                console.log('[Keyboard v13] Включили default в onChange:', langObj.title, 'hide = false; перевірка:', Lampa.Storage.get(langObj.hideKey));
+                console.log('[Keyboard v14] Включили default в onChange:', langObj.title, 'hide = false; перевірка:', Lampa.Storage.get(langObj.hideKey));
             }
             Lampa.Storage.set('keyboard_default_lang', value);
-            console.log('[Keyboard v13] Default змінено в onChange:', value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
+            console.log('[Keyboard v14] Default змінено в onChange:', value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
             setTimeout(applySettings, 200);
         },
         onRender: function(el) {
             try {
                 el.off('hover:enter').on('hover:enter', openDefaultMenu);
             } catch(e) {
-                console.log('[Keyboard v13] Помилка onRender default:', e.message);
+                console.log('[Keyboard v14] Помилка onRender default:', e.message);
             }
         }
     });
 
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v13',
+        component: 'keyboard_settings_v14',
         param: {
             name: 'keyboard_hide_select',
             type: 'select',
@@ -183,7 +183,7 @@
             description: 'Вибір розкладок для вимкнення'
         },
         onChange: function() {
-            // Ігнор, бо через menu
+            // Ігнор
         },
         onRender: function(el) {
             try {
@@ -191,7 +191,7 @@
                 el.find('.settings-param__value').text(hiddenString);
                 el.off('hover:enter').on('hover:enter', openHideMenu);
             } catch(e) {
-                console.log('[Keyboard v13] Помилка onRender hide:', e.message);
+                console.log('[Keyboard v14] Помилка onRender hide:', e.message);
             }
         }
     });
