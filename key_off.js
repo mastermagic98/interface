@@ -72,6 +72,10 @@
   
     function applyHiding() {  
         log('applyHiding: start');  
+        if (!window.Lampa || !Lampa.Storage) {  
+            log('applyHiding: Lampa.Storage not available');  
+            return;  
+        }  
         LANGUAGES.forEach(lang => {  
             const stored = Lampa.Storage.get(lang.key, 'false');  
             const hide = stored === 'true';  
@@ -142,17 +146,27 @@
     }  
   
     function openHideMenu() {  
+        log('openHideMenu: opened');  
+        if (!window.Lampa || !Lampa.Storage) {  
+            log('openHideMenu: Lampa.Storage not available');  
+            return;  
+        }  
         const defaultCode = getDefaultCode();  
   
         function buildItems() {  
             return LANGUAGES  
                 .filter(lang => lang.code !== defaultCode)  
-                .map(lang => ({  
-                    title: lang.title,  
-                    checkbox: true,  
-                    selected: Lampa.Storage.get(lang.key, 'false') === 'true',  
-                    key: lang.key  
-                }));  
+                .map(lang => {  
+                    const stored = Lampa.Storage.get(lang.key, 'false');  
+                    const selected = stored === 'true';  
+                    log('buildItems: lang=' + lang.title + ' stored=' + stored + ' selected=' + selected);  
+                    return {  
+                        title: lang.title,  
+                        checkbox: true,  
+                        selected: selected,  
+                        key: lang.key  
+                    };  
+                });  
         }  
   
         let items = buildItems();  
