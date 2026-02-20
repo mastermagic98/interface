@@ -68,11 +68,18 @@
                 if (!item.value) return;  
                 Lampa.Storage.set('keyboard_default_lang', item.value);  
                 if (window.keyboard) window.keyboard.init();  
+                // Оновити відображення значення в налаштуваннях  
+                updateDefaultDisplay();  
             },  
             onBack() {  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
+    }  
+  
+    function updateDefaultDisplay() {  
+        const valueEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');  
+        if (valueEl.length) valueEl.text(getDefaultTitle());  
     }  
   
     // ----------------------  
@@ -124,21 +131,25 @@
         icon: '<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'  
     });  
   
-    // Default як select  
+    // Default як trigger (безпечніше для старих збірок)  
     Lampa.SettingsApi.addParam({  
         component: 'keyboard_settings_select',  
-        param: { name: 'keyboard_default_lang', type: 'select', default: 'uk' },  
+        param: { name: 'keyboard_default_trigger', type: 'trigger', default: false },  
         field: {  
             name: 'Розкладка за замовчуванням',  
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onRender(el) {  
-            el.find('.settings-param__value').text(getDefaultTitle());  
-            el.off('hover:enter').on('hover:enter', openDefaultMenu);  
+            try {  
+                el.find('.settings-param__value').text(getDefaultTitle());  
+                el.off('hover:enter').on('hover:enter', openDefaultMenu);  
+            } catch (e) {  
+                console.error('keyboard_settings_select onRender error (default):', e);  
+            }  
         }  
     });  
   
-    // Приховані розкладки як checkbox  
+    // Приховані розкладки як trigger  
     Lampa.SettingsApi.addParam({  
         component: 'keyboard_settings_select',  
         param: { name: 'keyboard_hide_trigger', type: 'trigger', default: false },  
@@ -147,7 +158,11 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onRender(el) {  
-            el.off('hover:enter').on('hover:enter', openHideMenu);  
+            try {  
+                el.off('hover:enter').on('hover:enter', openHideMenu);  
+            } catch (e) {  
+                console.error('keyboard_settings_select onRender error (hide):', e);  
+            }  
         }  
     });  
   
