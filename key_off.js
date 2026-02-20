@@ -2,8 +2,8 @@
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_v14) return;
-    window.keyboard_settings_v14 = true;
+    if (window.keyboard_settings_select) return;
+    window.keyboard_settings_select = true;
 
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', key: 'keyboard_hide_uk' },
@@ -43,7 +43,7 @@
     }
 
     // ----------------------
-    // Меню вибору default
+    // Select для розкладки за замовчуванням
     // ----------------------
     function openDefaultMenu(){
         const current = getDefaultCode();
@@ -55,7 +55,7 @@
 
         Lampa.Select.show({
             title:'Розкладка за замовчуванням',
-            items:items,
+            items: items,
             onSelect:function(item){
                 if(!item.value) return;
                 Lampa.Storage.set('keyboard_default_lang', item.value);
@@ -68,29 +68,28 @@
     }
 
     // ----------------------
-    // Меню вибору розкладок для приховування (selector)
+    // Select для прихованих розкладок (як закладки)
     // ----------------------
     function openHideMenu(){
         const defaultCode = getDefaultCode();
 
         const items = LANGUAGES
-            .filter(lang=>lang.code!==defaultCode) // default завжди видно
+            .filter(lang => lang.code !== defaultCode)
             .map(lang=>({
                 title: lang.title,
-                value: lang.code,
+                checkbox: true,
                 selected: Lampa.Storage.get(lang.key,'false')==='true',
                 key: lang.key
             }));
 
         Lampa.Select.show({
-            title:'Вибрати розкладки для приховування',
-            items:items,
+            title:'Приховати розкладки',
+            items: items,
             onSelect:function(item){
-                if(!item.value) return;
                 const current = Lampa.Storage.get(item.key,'false')==='true';
                 Lampa.Storage.set(item.key, current ? 'false' : 'true');
 
-                // Перегенеруємо клавіатуру
+                // оновлюємо клавіатуру
                 if(window.keyboard) window.keyboard.init();
 
                 // залишаємо меню відкритим для мультивибору
@@ -103,16 +102,17 @@
     }
 
     // ----------------------
-    // Налаштування Lampa
+    // Додаємо компонент у налаштування
     // ----------------------
     Lampa.SettingsApi.addComponent({
-        component:'keyboard_settings_v14',
+        component:'keyboard_settings_select',
         name:'Налаштування клавіатури',
         icon:'<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
+    // Default як select
     Lampa.SettingsApi.addParam({
-        component:'keyboard_settings_v14',
+        component:'keyboard_settings_select',
         param:{name:'keyboard_default_trigger', type:'trigger', default:false},
         field:{
             name:'Розкладка за замовчуванням',
@@ -120,18 +120,21 @@
         },
         onRender:function(el){
             el.find('.settings-param__value').text(getDefaultTitle());
+            el.removeClass('toggle').addClass('selector'); // міняємо toggle на selector
             el.off('hover:enter').on('hover:enter', openDefaultMenu);
         }
     });
 
+    // Приховані розкладки як checkbox select
     Lampa.SettingsApi.addParam({
-        component:'keyboard_settings_v14',
+        component:'keyboard_settings_select',
         param:{name:'keyboard_hide_trigger', type:'trigger', default:false},
         field:{
             name:'Приховати розкладки',
             description:'Вибір розкладок для приховування'
         },
         onRender:function(el){
+            el.removeClass('toggle').addClass('selector'); // міняємо toggle на selector
             el.off('hover:enter').on('hover:enter', openHideMenu);
         }
     });
