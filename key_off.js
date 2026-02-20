@@ -2,8 +2,8 @@
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_v9) return;
-    window.keyboard_settings_v9 = true;
+    if (window.keyboard_settings_v10) return;
+    window.keyboard_settings_v10 = true;
 
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', hideKey: 'keyboard_hide_uk' },
@@ -27,23 +27,29 @@
         return lang ? lang.title : 'Українська';
     }
 
+    function getHiddenTitles() {
+        const hidden = LANGUAGES.filter(lang => Lampa.Storage.get(lang.hideKey, 'false') === 'true').map(lang => lang.title);
+        return hidden.length > 0 ? hidden.join(', ') : 'Жодна';
+    }
+
     // Функція застосування приховування
     function applySettings() {
         try {
-            if ($('.selectbox-item.selector').length === 0) return; // Якщо меню не відкрито, виходимо
+            if ($('.selectbox-item.selector').length === 0) return; // Якщо меню не відкрито
 
             const defaultCode = getDefaultCode();
-            console.log('[Keyboard v9] Застосовую hiding. Default:', getDefaultTitle());
+            console.log('[Keyboard v10] Застосовую hiding. Default:', getDefaultTitle());
 
-            // Автоматично вмикаємо default якщо вона прихована
+            // Автоматично вмикаємо default якщо вимкнена
             const defaultLang = LANGUAGES.find(l => l.code === defaultCode);
             if (defaultLang && Lampa.Storage.get(defaultLang.hideKey, 'false') === 'true') {
                 Lampa.Storage.set(defaultLang.hideKey, 'false');
-                console.log('[Keyboard v9] Автоматично включили default:', defaultLang.title);
+                console.log('[Keyboard v10] Автоматично включили default:', defaultLang.title, 'hide = false; перевірка:', Lampa.Storage.get(defaultLang.hideKey));
             }
 
             LANGUAGES.forEach(function(lang) {
                 const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
+                console.log('[Keyboard v10] Hide status з Storage for ' + lang.title + ': ' + hide);
                 const shouldHide = hide && lang.code !== defaultCode;
 
                 const element = $('.selectbox-item.selector > div:contains("' + lang.title + '")');
@@ -51,21 +57,21 @@
                     const parent = element.parent('div');
                     if (shouldHide) {
                         parent.hide();
-                        console.log('[Keyboard v9] СХОВАНО:', lang.title);
+                        console.log('[Keyboard v10] СХОВАНО:', lang.title);
                     } else {
                         parent.show();
-                        console.log('[Keyboard v9] ПОКАЗАНО:', lang.title);
+                        console.log('[Keyboard v10] ПОКАЗАНО:', lang.title);
                     }
                 } else {
-                    console.log('[Keyboard v9] Не знайдено елемент:', lang.title);
+                    console.log('[Keyboard v10] Не знайдено елемент:', lang.title);
                 }
             });
         } catch(e) {
-            console.log('[Keyboard v9] Помилка applySettings:', e.message);
+            console.log('[Keyboard v10] Помилка applySettings:', e.message);
         }
     }
 
-    // Меню вибору default (для select param не потрібно, але для сумісності)
+    // Меню вибору default
     function openDefaultMenu() {
         const currentCode = getDefaultCode();
         const items = LANGUAGES.map(function(lang) {
@@ -84,10 +90,10 @@
                     const langObj = LANGUAGES.find(l => l.code === item.value);
                     if (langObj) {
                         Lampa.Storage.set(langObj.hideKey, 'false');
-                        console.log('[Keyboard v9] Включили default:', langObj.title, 'hide = false');
+                        console.log('[Keyboard v10] Включили default:', langObj.title, 'hide = false; перевірка:', Lampa.Storage.get(langObj.hideKey));
                     }
                     Lampa.Storage.set('keyboard_default_lang', item.value);
-                    console.log('[Keyboard v9] Default збережено:', item.value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
+                    console.log('[Keyboard v10] Default збережено:', item.value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
                     setTimeout(applySettings, 200);
                 }
             },
@@ -97,34 +103,30 @@
         });
     }
 
-    // Меню вимкнення (чекбокси як закладки)
+    // Меню вимкнення
     function openHideMenu() {
         const defaultCode = getDefaultCode();
-        const items = [
-            { title: 'Статус', subtitle: true } // Заголовок як в прикладі
-        ];
-
-        LANGUAGES.forEach(function(lang) {
+        const items = LANGUAGES.map(function(lang) {
             const isHidden = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
-            items.push({
+            return {
                 title: lang.title,
                 checkbox: true,
                 selected: isHidden,
                 disabled: lang.code === defaultCode,
                 key: lang.hideKey
-            });
+            };
         });
 
         Lampa.Select.show({
             title: 'Вимкнути розкладки',
             items: items,
             onSelect: function(item) {
-                if (item.disabled || item.subtitle) return;
+                if (item.disabled) return;
 
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';
                 const newVal = current ? 'false' : 'true';
                 Lampa.Storage.set(item.key, newVal);
-                console.log('[Keyboard v9] Змінено hide:', item.key, 'на', newVal, 'перевірка:', Lampa.Storage.get(item.key));
+                console.log('[Keyboard v10] Змінено hide:', item.key, 'на', newVal, 'перевірка:', Lampa.Storage.get(item.key));
                 setTimeout(applySettings, 200);
                 setTimeout(openHideMenu, 100);
             },
@@ -134,16 +136,16 @@
         });
     }
 
-    // Додаємо компонент в Налаштування
+    // Додаємо компонент у Налаштування
     Lampa.SettingsApi.addComponent({
-        component: 'keyboard_settings_v9',
+        component: 'keyboard_settings_v10',
         name: 'Налаштування клавіатури',
         icon: '<svg fill="#fff" width="38px" height="38px" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
     // Параметр default - type 'select'
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v9',
+        component: 'keyboard_settings_v10',
         param: {
             name: 'keyboard_default_lang',
             type: 'select',
@@ -161,20 +163,20 @@
             const langObj = LANGUAGES.find(l => l.code === value);
             if (langObj) {
                 Lampa.Storage.set(langObj.hideKey, 'false');
-                console.log('[Keyboard v9] Включили default в onChange:', langObj.title, 'hide = false');
+                console.log('[Keyboard v10] Включили default в onChange:', langObj.title, 'hide = false; перевірка:', Lampa.Storage.get(langObj.hideKey));
             }
             Lampa.Storage.set('keyboard_default_lang', value);
-            console.log('[Keyboard v9] Default змінено в onChange:', value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
+            console.log('[Keyboard v10] Default змінено в onChange:', value, 'перевірка:', Lampa.Storage.get('keyboard_default_lang'));
             setTimeout(applySettings, 200);
         },
         onRender: function(el) {
-            el.off('hover:enter').on('hover:enter', openDefaultMenu); // Для відкриття меню якщо потрібно
+            el.off('hover:enter').on('hover:enter', openDefaultMenu);
         }
     });
 
-    // Параметр hide - type 'trigger'
+    // Параметр hide - type 'trigger' з показом назв вимкнутих
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v9',
+        component: 'keyboard_settings_v10',
         param: {
             name: 'keyboard_hide_trigger',
             type: 'trigger',
@@ -185,21 +187,27 @@
             description: 'Вибір розкладок для вимкнення'
         },
         onRender: function(el) {
+            try {
+                const hiddenString = getHiddenTitles();
+                el.find('.settings-param__value').text(hiddenString);
+            } catch(e) {
+                console.log('[Keyboard v10] Помилка onRender hide:', e.message);
+            }
             el.off('hover:enter').on('hover:enter', openHideMenu);
         }
     });
 
-    // Listener на клік по кнопці LANG
+    // Listener на клік LANG
     function setupListeners() {
         $('body').off('click.keyboard_hide').on('click.keyboard_hide', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function() {
             setTimeout(applySettings, 50);
-            setTimeout(applySettings, 200);
-            setTimeout(applySettings, 500);
-            console.log('[Keyboard v9] Клік на LANG - застосовую hiding');
+            setTimeout(applySettings, 250);
+            setTimeout(applySettings, 600);
+            console.log('[Keyboard v10] Клік на LANG - застосовую hiding');
         });
     }
 
-    // Mutation observer для додавання selectbox-item
+    // Mutation observer
     function setupObserver() {
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -207,7 +215,7 @@
                     if ($(mutation.addedNodes).find('.selectbox-item.selector').length > 0) {
                         setTimeout(applySettings, 100);
                         setTimeout(applySettings, 300);
-                        console.log('[Keyboard v9] Mutation: додані selectbox-item - застосовую hiding');
+                        console.log('[Keyboard v10] Mutation: додані selectbox-item - застосовую hiding');
                     }
                 }
             });
@@ -215,7 +223,7 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Запуск плагіна
+    // Запуск
     function start() {
         setupListeners();
         setupObserver();
