@@ -37,9 +37,7 @@
             const hide = stored === 'true';
             log('applyHiding: lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);
             
-            // Точний селектор з твоєї HTML-структури
             const element = $('.selectbox-item.selector > div.selectbox-item__title:contains("' + lang.title + '")').closest('.selectbox-item.selector');
-            
             if (element.length) {
                 element.toggle(!hide);
                 log('applyHiding: toggled ' + lang.title + ' -> ' + (!hide ? 'shown' : 'hidden'));
@@ -69,9 +67,9 @@
             const hideEl = $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value');
             if (hideEl.length) {
                 hideEl.text(hideText);
-                log('updateDisplays: hide set to "' + hideText + '"');
+                log('updateDisplays: hide set to "' + hideText + '" ← це має бути видно в меню');
             }
-        }, 50);
+        }, 150);
     }
  
     function openDefaultMenu() {
@@ -96,7 +94,7 @@
             onBack() {
                 log('openDefaultMenu onBack');
                 Lampa.Controller.toggle('settings_component');
-                updateDisplays();        // ← оновлюємо після повернення
+                setTimeout(updateDisplays, 300);
             }
         });
     }
@@ -132,15 +130,16 @@
                 log('openHideMenu onSelect: ' + item.key + ' = ' + newVal);
                 if (window.keyboard) window.keyboard.init();
                 applyHiding();
-                updateDisplays();        // ← оновлюємо після кожної галочки
+                updateDisplays();               // після кожної галочки
                 items = buildItems();
                 if (typeof Lampa.Select.update === 'function') Lampa.Select.update(items);
                 else setTimeout(openHideMenu, 50);
             },
             onBack() {
-                log('openHideMenu onBack');
+                log('openHideMenu onBack ← головне місце виправлення');
                 Lampa.Controller.toggle('settings_component');
-                updateDisplays();        // ← головне виправлення — оновлюємо після виходу
+                setTimeout(updateDisplays, 400);   // велика затримка після повернення в меню
+                setTimeout(updateDisplays, 800);   // ще один виклик для надійності
             }
         });
     }
@@ -185,13 +184,22 @@
     }, 0);
  
     function start() {
-        setTimeout(updateDisplays, 300);
+        setTimeout(updateDisplays, 500);
         Lampa.Listener.follow('select', e => {
             if (e.type === 'open') setTimeout(applyHiding, 100);
+        });
+        // Додатковий listener на повернення в налаштування
+        Lampa.Listener.follow('settings', function(e) {
+            if (e.type === 'open') {
+                log('settings opened - force updateDisplays');
+                setTimeout(updateDisplays, 300);
+            }
         });
     }
  
     if (window.appready) start();
-    else Lampa.Listener.follow('app', e => { if (e.type === 'ready') start(); });
+    else Lampa.Listener.follow('app', function (e) {
+        if (e.type === 'ready') start();
+    });
  
 })();
