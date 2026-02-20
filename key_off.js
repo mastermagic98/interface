@@ -9,11 +9,11 @@
         { title: 'Українська', code: 'uk', hideKey: 'keyboard_hide_uk' },
         { title: 'Русский',    code: 'ru', hideKey: 'keyboard_hide_ru' },
         { title: 'English',    code: 'en', hideKey: 'keyboard_hide_en' },
-        { title: 'עִברִית',    code: 'he', hideKey: 'keyboard_hide_he' }
+        { title: 'עִברִית',   code: 'he', hideKey: 'keyboard_hide_he' }
     ];
 
     /* ============================= */
-    /*        ДОПОМІЖНІ ФУНКЦІЇ      */
+    /*        ДОПОМІЖНІ              */
     /* ============================= */
 
     function getDefaultCode() {
@@ -34,44 +34,75 @@
     }
 
     /* ============================= */
-    /*       ПРИХОВУВАННЯ            */
+    /*      ПРИХОВУВАННЯ             */
     /* ============================= */
 
     function applySettings() {
-        try {
-            const defaultCode = getDefaultCode();
 
-            LANGUAGES.forEach(function(lang) {
+        const defaultCode = getDefaultCode();
 
-                const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
-                const shouldHide = hide && lang.code !== defaultCode;
+        LANGUAGES.forEach(function(lang){
 
-                const item = $('.selectbox-item.selector[data-value="' + lang.code + '"]');
+            const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
+            const shouldHide = hide && lang.code !== defaultCode;
 
-                if (!item.length) return;
+            const element = $('.selectbox-item.selector > div:contains("' + lang.title + '")');
 
-                if (shouldHide) {
-                    item.hide();
-                    console.log('[Keyboard v7] СХОВАНО:', lang.code);
-                } else {
-                    item.show();
-                }
+            if(!element.length) return;
 
-            });
+            const parent = element.parent('div');
 
-        } catch (e) {
-            console.log('[Keyboard v7] applySettings error:', e.message);
-        }
+            if(shouldHide){
+                parent.hide();
+            } else {
+                parent.show();
+            }
+
+        });
+    }
+
+    /* ============================= */
+    /*        WATCHER SELECT         */
+    /* ============================= */
+
+    function watchSelect(){
+
+        let timer = null;
+
+        Lampa.Listener.follow('select', function(e){
+
+            if(e.type === 'open'){
+
+                let attempts = 0;
+
+                timer = setInterval(function(){
+
+                    applySettings();
+                    attempts++;
+
+                    if(attempts > 25){
+                        clearInterval(timer);
+                    }
+
+                }, 40);
+            }
+
+            if(e.type === 'close'){
+                if(timer) clearInterval(timer);
+            }
+
+        });
     }
 
     /* ============================= */
     /*        МЕНЮ DEFAULT           */
     /* ============================= */
 
-    function openDefaultMenu() {
+    function openDefaultMenu(){
+
         const currentCode = getDefaultCode();
 
-        const items = LANGUAGES.map(function(lang) {
+        const items = LANGUAGES.map(function(lang){
             return {
                 title: lang.title,
                 value: lang.code,
@@ -82,20 +113,20 @@
         Lampa.Select.show({
             title: 'Розкладка за замовчуванням',
             items: items,
-            onSelect: function(item) {
+            onSelect: function(item){
 
-                if (!item.value) return;
+                if(!item.value) return;
 
                 Lampa.Storage.set('keyboard_default_lang', item.value);
 
                 const langObj = LANGUAGES.find(l => l.code === item.value);
-                if (langObj) {
+                if(langObj){
                     Lampa.Storage.set(langObj.hideKey, 'false');
                 }
 
-                setTimeout(applySettings, 150);
+                setTimeout(applySettings, 200);
             },
-            onBack: function() {
+            onBack: function(){
                 Lampa.Controller.toggle('settings_component');
             }
         });
@@ -105,10 +136,11 @@
     /*        МЕНЮ ПРИХОВАННЯ        */
     /* ============================= */
 
-    function openHideMenu() {
+    function openHideMenu(){
+
         const defaultCode = getDefaultCode();
 
-        const items = LANGUAGES.map(function(lang) {
+        const items = LANGUAGES.map(function(lang){
 
             const isHidden = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
 
@@ -124,9 +156,9 @@
         Lampa.Select.show({
             title: 'Вимкнути розкладки',
             items: items,
-            onSelect: function(item) {
+            onSelect: function(item){
 
-                if (item.disabled) return;
+                if(item.disabled) return;
 
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';
                 Lampa.Storage.set(item.key, current ? 'false' : 'true');
@@ -134,16 +166,16 @@
                 setTimeout(function(){
                     applySettings();
                     openHideMenu();
-                }, 100);
+                }, 150);
             },
-            onBack: function() {
+            onBack: function(){
                 Lampa.Controller.toggle('settings_component');
             }
         });
     }
 
     /* ============================= */
-    /*       ДОДАЄМО КОМПОНЕНТ       */
+    /*      ДОДАЄМО КОМПОНЕНТ        */
     /* ============================= */
 
     Lampa.SettingsApi.addComponent({
@@ -153,7 +185,7 @@
     });
 
     /* ============================= */
-    /*      ПАРАМЕТР DEFAULT         */
+    /*       PARAM DEFAULT           */
     /* ============================= */
 
     Lampa.SettingsApi.addParam({
@@ -167,14 +199,14 @@
             name: 'Розкладка за замовчуванням',
             description: 'Вибір мови за замовчуванням'
         },
-        onRender: function(el) {
+        onRender: function(el){
             el.find('.settings-param__value').text(getDefaultTitle());
             el.off('hover:enter').on('hover:enter', openDefaultMenu);
         }
     });
 
     /* ============================= */
-    /*      ПАРАМЕТР HIDE            */
+    /*       PARAM HIDE              */
     /* ============================= */
 
     Lampa.SettingsApi.addParam({
@@ -188,37 +220,31 @@
             name: 'Вимкнути розкладки',
             description: 'Вибір розкладок для вимкнення'
         },
-        onRender: function(el) {
+        onRender: function(el){
             el.off('hover:enter').on('hover:enter', openHideMenu);
         }
     });
 
     /* ============================= */
-    /*       LISTENERS               */
+    /*           START               */
     /* ============================= */
 
-    function setupListeners() {
+    function start(){
 
-        $('body').on('click', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function() {
-            setTimeout(applySettings, 80);
-            setTimeout(applySettings, 250);
-        });
+        watchSelect();
 
-        Lampa.Listener.follow('select', function(e) {
-            if (e.type === 'open') {
-                setTimeout(applySettings, 80);
-                setTimeout(applySettings, 250);
+        $('body').on('click',
+            '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded',
+            function(){
+                setTimeout(applySettings, 120);
+                setTimeout(applySettings, 300);
             }
-        });
+        );
     }
 
-    function start() {
-        setupListeners();
-    }
-
-    if (window.appready) start();
-    else Lampa.Listener.follow('app', function(e) {
-        if (e.type === 'ready') start();
+    if(window.appready) start();
+    else Lampa.Listener.follow('app', function(e){
+        if(e.type === 'ready') start();
     });
 
 })();
