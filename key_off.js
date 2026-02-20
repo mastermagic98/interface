@@ -2,8 +2,8 @@
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_v8) return;
-    window.keyboard_settings_v8 = true;
+    if (window.keyboard_settings_v9) return;
+    window.keyboard_settings_v9 = true;
 
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', hideKey: 'keyboard_hide_uk' },
@@ -12,9 +12,7 @@
         { title: 'עִברִית',   code: 'he', hideKey: 'keyboard_hide_he' }
     ];
 
-    /* ========================== */
-    /*      ДОПОМІЖНІ ФУНКЦІЇ     */
-    /* ========================== */
+    /* ===================== */
 
     function getDefaultCode() {
         return Lampa.Storage.get('keyboard_default_lang', 'uk');
@@ -26,54 +24,61 @@
         return lang ? lang.title : 'Українська';
     }
 
-    /* ========================== */
-    /*     ПРИХОВУВАННЯ          */
-    /* ========================== */
+    /* ===================== */
+    /*  ЖОРСТКЕ ВИДАЛЕННЯ   */
+    /* ===================== */
 
-    function applySettings() {
+    function removeHiddenLayouts() {
 
         const defaultCode = getDefaultCode();
 
         LANGUAGES.forEach(function(lang){
 
             const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
-            const shouldHide = hide && lang.code !== defaultCode;
+            const shouldRemove = hide && lang.code !== defaultCode;
+
+            if (!shouldRemove) return;
 
             const element = $('.selectbox-item.selector > div:contains("' + lang.title + '")');
 
-            if (!element.length) return;
-
-            const parent = element.parent('.selectbox-item.selector');
-
-            if (shouldHide) parent.hide();
-            else parent.show();
+            if (element.length) {
+                element.parent('.selectbox-item.selector').remove();
+                console.log('[Keyboard v9] ВИДАЛЕНО:', lang.title);
+            }
 
         });
     }
 
-    /* ========================== */
-    /*   СПОСТЕРІГАЧ DOM         */
-    /* ========================== */
+    /* ===================== */
+    /*  ПЕРЕХОПЛЕННЯ SELECT */
+    /* ===================== */
 
-    function observeSelect() {
+    function hookSelect() {
 
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if ($(mutation.target).find('.selectbox-item.selector').length) {
-                    applySettings();
-                }
-            });
+        Lampa.Listener.follow('select', function(e) {
+
+            if (e.type === 'open') {
+
+                // 3 проходи — бо Lampa часто перерендерює
+                setTimeout(removeHiddenLayouts, 50);
+                setTimeout(removeHiddenLayouts, 150);
+                setTimeout(removeHiddenLayouts, 300);
+            }
+
         });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
+        $('body').on('click', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function(){
+
+            setTimeout(removeHiddenLayouts, 50);
+            setTimeout(removeHiddenLayouts, 150);
+            setTimeout(removeHiddenLayouts, 300);
+
         });
     }
 
-    /* ========================== */
-    /*      МЕНЮ DEFAULT         */
-    /* ========================== */
+    /* ===================== */
+    /*     МЕНЮ DEFAULT     */
+    /* ===================== */
 
     function openDefaultMenu() {
 
@@ -99,7 +104,7 @@
                 const langObj = LANGUAGES.find(l => l.code === item.value);
                 if (langObj) Lampa.Storage.set(langObj.hideKey, 'false');
 
-                setTimeout(applySettings, 100);
+                setTimeout(removeHiddenLayouts, 150);
             },
             onBack: function(){
                 Lampa.Controller.toggle('settings_component');
@@ -107,16 +112,15 @@
         });
     }
 
-    /* ========================== */
-    /*      МЕНЮ ПРИХОВАННЯ      */
-    /* ========================== */
+    /* ===================== */
+    /*     МЕНЮ HIDE        */
+    /* ===================== */
 
     function openHideMenu() {
 
         const defaultCode = getDefaultCode();
 
         const items = LANGUAGES.map(function(lang){
-
             return {
                 title: lang.title,
                 checkbox: true,
@@ -137,7 +141,7 @@
                 Lampa.Storage.set(item.key, current ? 'false' : 'true');
 
                 setTimeout(function(){
-                    applySettings();
+                    removeHiddenLayouts();
                     openHideMenu();
                 }, 100);
             },
@@ -147,18 +151,18 @@
         });
     }
 
-    /* ========================== */
-    /*      SETTINGS UI          */
-    /* ========================== */
+    /* ===================== */
+    /*      SETTINGS UI     */
+    /* ===================== */
 
     Lampa.SettingsApi.addComponent({
-        component: 'keyboard_settings_v8',
+        component: 'keyboard_settings_v9',
         name: 'Налаштування клавіатури',
         icon: '<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v8',
+        component: 'keyboard_settings_v9',
         param: {
             name: 'keyboard_default_trigger',
             type: 'trigger',
@@ -175,7 +179,7 @@
     });
 
     Lampa.SettingsApi.addParam({
-        component: 'keyboard_settings_v8',
+        component: 'keyboard_settings_v9',
         param: {
             name: 'keyboard_hide_trigger',
             type: 'trigger',
@@ -190,17 +194,10 @@
         }
     });
 
-    /* ========================== */
-    /*         START             */
-    /* ========================== */
+    /* ===================== */
 
     function start() {
-        observeSelect();
-
-        $('body').on('click', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function(){
-            setTimeout(applySettings, 80);
-            setTimeout(applySettings, 250);
-        });
+        hookSelect();
     }
 
     if (window.appready) start();
