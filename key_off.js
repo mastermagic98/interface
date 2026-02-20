@@ -176,6 +176,11 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect(item) {  
+                log('openHideMenu onSelect: triggered for item=' + JSON.stringify(item));  
+                if (!item || !item.key) {  
+                    log('openHideMenu onSelect: no item.key, abort');  
+                    return;  
+                }  
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';  
                 const newVal = current ? 'false' : 'true';  
                 log('openHideMenu onSelect: key=' + item.key + ' current=' + current + ' set=' + newVal);  
@@ -192,6 +197,7 @@
                 updateDisplays();  
             },  
             onBack() {  
+                log('openHideMenu onBack');  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
