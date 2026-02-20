@@ -1,19 +1,24 @@
-(function(){
+(function () {
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_select) return;
-    window.keyboard_settings_select = true;
+    if (window.keyboard_settings_v8) return;
+    window.keyboard_settings_v8 = true;
 
     const LANGUAGES = [
-        { title: 'Українська', code: 'uk', key: 'keyboard_hide_uk' },
-        { title: 'Русский',    code: 'ru', key: 'keyboard_hide_ru' },
-        { title: 'English',    code: 'en', key: 'keyboard_hide_en' },
-        { title: 'עִברִית',   code: 'he', key: 'keyboard_hide_he' }
+        { title: 'Українська', code: 'uk', hideKey: 'keyboard_hide_uk' },
+        { title: 'Русский',    code: 'ru', hideKey: 'keyboard_hide_ru' },
+        { title: 'English',    code: 'en', hideKey: 'keyboard_hide_en' },
+        { title: 'עִברִית',   code: 'he', hideKey: 'keyboard_hide_he' }
     ];
 
     function getDefaultCode() {
-        return Lampa.Storage.get('keyboard_default_lang', 'uk');
+        let code = Lampa.Storage.get('keyboard_default_lang', 'uk');
+        if (code === 'Українська') code = 'uk';
+        if (code === 'Русский') code = 'ru';
+        if (code === 'English') code = 'en';
+        if (code === 'עִברִית') code = 'he';
+        return code;
     }
 
     function getDefaultTitle() {
@@ -22,131 +27,201 @@
         return lang ? lang.title : 'Українська';
     }
 
-    function filterLayouts(layouts) {
-        const defaultCode = getDefaultCode();
-        return layouts.filter(l=>{
-            const langObj = LANGUAGES.find(lang=>lang.code===l.code);
-            if (!langObj) return true;
-            const hide = Lampa.Storage.get(langObj.key,'false')==='true';
-            return !hide || l.code===defaultCode;
-        });
+    // Головна функція приховування
+    function applySettings() {
+        try {
+            const defaultCode = getDefaultCode();
+            LANGUAGES.forEach(function(lang) {
+                const hide = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
+                const shouldHide = hide && lang.code !== defaultCode;
+
+                const element = $('.selectbox-item.selector > div:contains("' + lang.title + '")');
+                if (element.length > 0) {
+                    const parent = element.parent('div');
+                    if (shouldHide) {
+                        parent.hide();
+                    } else {
+                        parent.show();
+                    }
+                }
+            });
+        } catch(e) {}
     }
 
-    function hookKeyboard(){
-        if (window.Keyboard && window.Keyboard.prototype){
-            const origInit = window.Keyboard.prototype.init;
-            window.Keyboard.prototype.init = function(){
-                if (this.layouts) this.layouts = filterLayouts(this.layouts);
-                return origInit.apply(this, arguments);
-            };
-        }
-    }
-
-    // ----------------------
-    // Select для розкладки за замовчуванням
-    // ----------------------
-    function openDefaultMenu(){
-        const current = getDefaultCode();
-        const items = LANGUAGES.map(lang=>({
-            title: lang.title,
-            value: lang.code,
-            selected: lang.code===current
-        }));
-
-        Lampa.Select.show({
-            title:'Розкладка за замовчуванням',
-            items: items,
-            onSelect:function(item){
-                if(!item.value) return;
-                Lampa.Storage.set('keyboard_default_lang', item.value);
-                if(window.keyboard) window.keyboard.init();
-            },
-            onBack:function(){
-                Lampa.Controller.toggle('settings_component');
-            }
-        });
-    }
-
-    // ----------------------
-    // Select для прихованих розкладок (як закладки)
-    // ----------------------
-    function openHideMenu(){
-        const defaultCode = getDefaultCode();
-
-        const items = LANGUAGES
-            .filter(lang => lang.code !== defaultCode)
-            .map(lang=>({
+    // Меню вибору default для select
+    function openDefaultMenu() {
+        const currentCode = getDefaultCode();
+        const items = LANGUAGES.map(function(lang) {
+            return {
                 title: lang.title,
-                checkbox: true,
-                selected: Lampa.Storage.get(lang.key,'false')==='true',
-                key: lang.key
-            }));
+                value: lang.code,
+                selected: lang.code === currentCode
+            };
+        });
 
         Lampa.Select.show({
-            title:'Приховати розкладки',
+            title: 'Розкладка за замовчуванням',
             items: items,
-            onSelect:function(item){
-                const current = Lampa.Storage.get(item.key,'false')==='true';
-                Lampa.Storage.set(item.key, current ? 'false' : 'true');
-
-                // оновлюємо клавіатуру
-                if(window.keyboard) window.keyboard.init();
-
-                // залишаємо меню відкритим для мультивибору
-                setTimeout(openHideMenu,50);
+            onSelect: function(item) {
+                if (item.value) {
+                    const langObj = LANGUAGES.find(l => l.code === item.value);
+                    if (langObj) Lampa.Storage.set(langObj.hideKey, 'false');
+                    Lampa.Storage.set('keyboard_default_lang', item.value);
+                    setTimeout(applySettings, 200);
+                }
             },
-            onBack:function(){
+            onBack: function() {
                 Lampa.Controller.toggle('settings_component');
             }
         });
     }
 
-    // ----------------------
-    // Додаємо компонент у налаштування
-    // ----------------------
+    // Меню вимкнення (як закладки в Лампі - чекбокси)
+    function openHideMenu() {
+        const defaultCode = getDefaultCode();
+        const items = [];
+
+        // Додаємо заголовок як в прикладі (settings-param-title)
+        // Але оскільки Lampa.Select.show не підтримує заголовки, робимо перший пункт як заголовок (неклікабельний)
+        items.push({
+            title: 'Статус розкладок',
+            subtitle: true // Для імітації заголовка
+        });
+
+        // Додаємо чекбокси для кожної мови (як "Дивлюся - Українська")
+        LANGUAGES.forEach(function(lang) {
+            const isHidden = Lampa.Storage.get(lang.hideKey, 'false') === 'true';
+            items.push({
+                title: lang.title, // Наприклад "Українська" як "Дивлюся - Українська", але адаптовано
+                checkbox: true,
+                selected: isHidden,
+                disabled: lang.code === defaultCode,
+                key: lang.hideKey
+            });
+        });
+
+        Lampa.Select.show({
+            title: 'Вимкнути розкладки',
+            items: items,
+            onSelect: function(item) {
+                if (item.disabled || item.subtitle) return;
+
+                const current = Lampa.Storage.get(item.key, 'false') === 'true';
+                const newVal = current ? 'false' : 'true';
+                Lampa.Storage.set(item.key, newVal);
+
+                setTimeout(applySettings, 200);
+                setTimeout(openHideMenu, 100);
+            },
+            onBack: function() {
+                Lampa.Controller.toggle('settings_component');
+            }
+        });
+    }
+
+    // Додаємо компонент
     Lampa.SettingsApi.addComponent({
-        component:'keyboard_settings_select',
-        name:'Налаштування клавіатури',
-        icon:'<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
+        component: 'keyboard_settings_v8',
+        name: 'Налаштування клавіатури',
+        icon: '<svg fill="#fff" width="38px" height="38px" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
-    // Default як select
+    // Параметр default - type: 'select' (заміна toggle)
     Lampa.SettingsApi.addParam({
-        component:'keyboard_settings_select',
-        param:{name:'keyboard_default_trigger', type:'trigger', default:false},
-        field:{
-            name:'Розкладка за замовчуванням',
-            description:'Вибір розкладки за замовчуванням'
+        component: 'keyboard_settings_v8',
+        param: {
+            name: 'keyboard_default_lang',
+            type: 'select',
+            default: getDefaultCode(),
+            values: LANGUAGES.reduce(function(acc, lang) {
+                acc[lang.title] = lang.code;
+                return acc;
+            }, {})
         },
-        onRender:function(el){
-            el.find('.settings-param__value').text(getDefaultTitle());
-            el.removeClass('toggle').addClass('selector'); // міняємо toggle на selector
-            el.off('hover:enter').on('hover:enter', openDefaultMenu);
+        field: {
+            name: 'Розкладка за замовчуванням',
+            description: 'Вибір мови за замовчуванням'
+        },
+        onChange: function(value) {
+            const langObj = LANGUAGES.find(l => l.code === value);
+            if (langObj) Lampa.Storage.set(langObj.hideKey, 'false');
+            Lampa.Storage.set('keyboard_default_lang', value);
+            setTimeout(applySettings, 200);
+        },
+        onRender: function(el) {
+            // Не потрібно, бо type: 'select' показує вибране значення автоматично
         }
     });
 
-    // Приховані розкладки як checkbox select
+    // Параметр hide - trigger
     Lampa.SettingsApi.addParam({
-        component:'keyboard_settings_select',
-        param:{name:'keyboard_hide_trigger', type:'trigger', default:false},
-        field:{
-            name:'Приховати розкладки',
-            description:'Вибір розкладок для приховування'
+        component: 'keyboard_settings_v8',
+        param: {
+            name: 'keyboard_hide_trigger',
+            type: 'trigger',
+            default: false
         },
-        onRender:function(el){
-            el.removeClass('toggle').addClass('selector'); // міняємо toggle на selector
+        field: {
+            name: 'Вимкнути розкладки',
+            description: 'Вибір розкладок для вимкнення'
+        },
+        onRender: function(el) {
             el.off('hover:enter').on('hover:enter', openHideMenu);
         }
     });
 
-    // ----------------------
-    // Старт
-    // ----------------------
-    function start(){ hookKeyboard(); }
+    // Інтервал для перевірки
+    setInterval(function() {
+        if ($('div.hg-button.hg-functionBtn.hg-button-LANG.selector.binded').length > 0) {
+            setTimeout(applySettings, 100);
+            setTimeout(applySettings, 300);
+        }
+    }, 50);
 
-    if(window.appready) start();
-    else Lampa.Listener.follow('app', function(e){
-        if(e.type==='ready') start();
+    // Listener на клік LANG
+    function setupListeners() {
+        $('body').on('click', '.hg-button.hg-functionBtn.hg-button-LANG.selector.binded', function() {
+            setTimeout(applySettings, 50);
+            setTimeout(applySettings, 200);
+            setTimeout(applySettings, 500);
+        });
+    }
+
+    // Mutation observer для selectbox-item
+    function setupObserver() {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    if ($(mutation.addedNodes).find('.selectbox-item.selector').length > 0) {
+                        setTimeout(applySettings, 100);
+                    }
+                }
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Запуск
+    function start() {
+        setupListeners();
+        setupObserver();
+    }
+
+    if (window.appready) start();
+    else Lampa.Listener.follow('app', function(e) {
+        if (e.type === 'ready') start();
+    });
+
+    Lampa.Listener.follow('full', function(e) {
+        if (e.type === 'start') setTimeout(start, 1500);
+    });
+
+    Lampa.Listener.follow('select', function(e) {
+        if (e.type === 'open') {
+            setTimeout(applySettings, 100);
+            setTimeout(applySettings, 300);
+            setTimeout(applySettings, 600);
+        }
     });
 
 })();
