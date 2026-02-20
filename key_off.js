@@ -50,6 +50,35 @@
         hookKeyboard();  
     }  
   
+    // Приховування елементів списку мов у клавіатурі  
+    function applyHiding() {  
+        LANGUAGES.forEach(lang => {  
+            const hide = Lampa.Storage.get(lang.key, 'false') === 'true';  
+            const element = $('.selectbox-item.selector').filter(function () {  
+                return $(this).text().trim() === lang.title;  
+            });  
+            if (element.length) {  
+                element.toggle(!hide);  
+                console.log('Keyboard Hide: ' + lang.title + (hide ? ' hidden' : ' shown'));  
+            } else {  
+                console.log('Keyboard Hide: Element not found for ' + lang.title);  
+            }  
+        });  
+    }  
+  
+    // Оновлення відображення значень у налаштуваннях  
+    function updateDisplays() {  
+        const defaultEl = $('.settings-param[data-name="keyboard_default_lang"] .settings-param__value');  
+        if (defaultEl.length) defaultEl.text(getDefaultTitle());  
+  
+        const hiddenTitles = LANGUAGES  
+            .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')  
+            .map(lang => lang.title);  
+        const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
+        const hideEl = $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value');  
+        if (hideEl.length) hideEl.text(hideText);  
+    }  
+  
     // ----------------------  
     // Select для розкладки за замовчуванням  
     // ----------------------  
@@ -68,18 +97,12 @@
                 if (!item.value) return;  
                 Lampa.Storage.set('keyboard_default_lang', item.value);  
                 if (window.keyboard) window.keyboard.init();  
-                // Оновити відображення значення в налаштуваннях  
-                updateDefaultDisplay();  
+                updateDisplays();  
             },  
             onBack() {  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
-    }  
-  
-    function updateDefaultDisplay() {  
-        const valueEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');  
-        if (valueEl.length) valueEl.text(getDefaultTitle());  
     }  
   
     // ----------------------  
@@ -108,6 +131,7 @@
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';  
                 Lampa.Storage.set(item.key, current ? 'false' : 'true');  
                 if (window.keyboard) window.keyboard.init();  
+                applyHiding();  
                 items = buildItems();  
                 if (typeof Lampa.Select.update === 'function') {  
                     Lampa.Select.update(items);  
@@ -115,6 +139,7 @@
                     Lampa.Select.destroy();  
                     setTimeout(openHideMenu, 0);  
                 }  
+                updateDisplays();  
             },  
             onBack() {  
                 Lampa.Controller.toggle('settings_component');  
@@ -131,21 +156,17 @@
         icon: '<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'  
     });  
   
-    // Default як trigger (безпечніше для старих збірок)  
+    // Default як select  
     Lampa.SettingsApi.addParam({  
         component: 'keyboard_settings_select',  
-        param: { name: 'keyboard_default_trigger', type: 'trigger', default: false },  
+        param: { name: 'keyboard_default_lang', type: 'select', default: 'uk' },  
         field: {  
             name: 'Розкладка за замовчуванням',  
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onRender(el) {  
-            try {  
-                el.find('.settings-param__value').text(getDefaultTitle());  
-                el.off('hover:enter').on('hover:enter', openDefaultMenu);  
-            } catch (e) {  
-                console.error('keyboard_settings_select onRender error (default):', e);  
-            }  
+            el.find('.settings-param__value').text(getDefaultTitle());  
+            el.off('hover:enter').on('hover:enter', openDefaultMenu);  
         }  
     });  
   
@@ -158,19 +179,27 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onRender(el) {  
-            try {  
-                el.off('hover:enter').on('hover:enter', openHideMenu);  
-            } catch (e) {  
-                console.error('keyboard_settings_select onRender error (hide):', e);  
-            }  
+            const hiddenTitles = LANGUAGES  
+                .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')  
+                .map(lang => lang.title);  
+            const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
+            el.find('.settings-param__value').text(hideText);  
+            el.off('hover:enter').on('hover:enter', openHideMenu);  
         }  
     });  
   
     // ----------------------  
-    // Старт  
+    // Старт та слухачі  
     // ----------------------  
     function start() {  
         ensureKeyboardHooked();  
+        updateDisplays();  
+        // Приховувати при кожному відкритті списку мов у клавіатурі  
+        Lampa.Listener.follow('select', e => {  
+            if (e.type === 'open') {  
+                setTimeout(applyHiding, 100);  
+            }  
+        });  
     }  
   
     if (window.appready) start();  
