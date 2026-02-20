@@ -30,62 +30,16 @@
         return title;
     }
  
-    function filterLayouts(layouts) {
-        const defaultCode = getDefaultCode();
-        const filtered = layouts.filter(l => {
-            const langObj = LANGUAGES.find(lang => lang.code === l.code);
-            if (!langObj) return true;
-            const hide = Lampa.Storage.get(langObj.key, 'false') === 'true';
-            const keep = !hide || l.code === defaultCode;
-            log('filterLayouts: code=' + l.code + ' hide=' + hide + ' keep=' + keep);
-            return keep;
-        });
-        log('filterLayouts: before=' + layouts.length + ' after=' + filtered.length);
-        return filtered;
-    }
- 
-    function hookKeyboard() {
-        if (window.Keyboard && window.Keyboard.prototype) {
-            const origInit = window.Keyboard.prototype.init;
-            window.Keyboard.prototype.init = function () {
-                log('Keyboard.init called');
-                if (this.layouts) {
-                    log('hookKeyboard: before layouts=' + this.layouts.length);
-                    this.layouts = filterLayouts(this.layouts);
-                    log('hookKeyboard: after layouts=' + this.layouts.length);
-                }
-                return origInit.apply(this, arguments);
-            };
-            log('hookKeyboard: hooked');
-        } else {
-            log('hookKeyboard: window.Keyboard not available yet');
-        }
-    }
- 
-    function ensureKeyboardHooked(retry = 0) {
-        if (retry > 50) {
-            log('ensureKeyboardHooked: max retries reached');
-            return;
-        }
-        if (!window.Keyboard) {
-            log('ensureKeyboardHooked: Keyboard not ready, retry in 500ms ' + retry);
-            setTimeout(() => ensureKeyboardHooked(retry + 1), 500);
-            return;
-        }
-        hookKeyboard();
-    }
- 
     function applyHiding() {
         log('applyHiding: start');
-        if (!window.Lampa || !Lampa.Storage) {
-            log('applyHiding: Lampa.Storage not available');
-            return;
-        }
         LANGUAGES.forEach(lang => {
             const stored = Lampa.Storage.get(lang.key, 'false');
             const hide = stored === 'true';
             log('applyHiding: lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);
+            
+            // Точний селектор з твоєї HTML-структури
             const element = $('.selectbox-item.selector > div.selectbox-item__title:contains("' + lang.title + '")').closest('.selectbox-item.selector');
+            
             if (element.length) {
                 element.toggle(!hide);
                 log('applyHiding: toggled ' + lang.title + ' -> ' + (!hide ? 'shown' : 'hidden'));
@@ -97,33 +51,27 @@
  
     function updateDisplays() {
         log('updateDisplays: start');
-        setTimeout(function() {
+        setTimeout(() => {
+            // Розкладка за замовчуванням
             const defaultEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');
             if (defaultEl.length) {
                 const title = getDefaultTitle();
                 defaultEl.text(title);
-                log('updateDisplays: default title set to ' + title + '; current text=' + defaultEl.text());
-            } else {
-                log('updateDisplays: default display element not found');
+                log('updateDisplays: default set to ' + title);
             }
-     
+ 
+            // Приховати розкладки
             const hiddenTitles = LANGUAGES
-                .filter(lang => {
-                    const stored = Lampa.Storage.get(lang.key, 'false');
-                    const hide = stored === 'true';
-                    log('updateDisplays: hidden check lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);
-                    return hide;
-                })
+                .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')
                 .map(lang => lang.title);
             const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';
+            
             const hideEl = $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value');
             if (hideEl.length) {
                 hideEl.text(hideText);
-                log('updateDisplays: hide text set to ' + hideText + '; current text=' + hideEl.text());
-            } else {
-                log('updateDisplays: hide display element not found');
+                log('updateDisplays: hide set to "' + hideText + '"');
             }
-        }, 100);
+        }, 50);
     }
  
     function openDefaultMenu() {
@@ -134,90 +82,67 @@
             value: lang.code,
             selected: lang.code === current
         }));
-        log('openDefaultMenu: items.length ' + items.length);
  
-        try {
-            Lampa.Select.show({
-                title: 'Розкладка за замовчуванням',
-                items: items,
-                onSelect(item) {
-                    if (!item.value) return;
-                    log('openDefaultMenu onSelect: set keyboard_default_lang=' + item.value);
-                    Lampa.Storage.set('keyboard_default_lang', item.value);
-                    if (window.keyboard) window.keyboard.init();
-                    updateDisplays();
-                },
-                onBack() {
-                    Lampa.Controller.toggle('settings_component');
-                }
-            });
-        } catch (e) {
-            log('openDefaultMenu error: ' + e.message);
-        }
+        Lampa.Select.show({
+            title: 'Розкладка за замовчуванням',
+            items: items,
+            onSelect(item) {
+                if (!item.value) return;
+                Lampa.Storage.set('keyboard_default_lang', item.value);
+                log('openDefaultMenu onSelect: saved ' + item.value);
+                if (window.keyboard) window.keyboard.init();
+                updateDisplays();
+            },
+            onBack() {
+                log('openDefaultMenu onBack');
+                Lampa.Controller.toggle('settings_component');
+                updateDisplays();        // ← оновлюємо після повернення
+            }
+        });
     }
  
     function openHideMenu() {
         log('openHideMenu: opened');
-        if (!window.Lampa || !Lampa.Storage) {
-            log('openHideMenu: Lampa.Storage not available');
-            return;
-        }
         const defaultCode = getDefaultCode();
  
         function buildItems() {
-            const filtered = LANGUAGES.filter(lang => lang.code !== defaultCode);
-            log('buildItems: filtered languages length ' + filtered.length);
-            return filtered.map(lang => {
-                const stored = Lampa.Storage.get(lang.key, 'false');
-                const selected = stored === 'true';
-                log('buildItems: lang=' + lang.title + ' stored=' + stored + ' selected=' + selected);
-                return {
-                    title: lang.title,
-                    checkbox: true,
-                    selected: selected,
-                    key: lang.key
-                };
-            });
+            return LANGUAGES
+                .filter(lang => lang.code !== defaultCode)
+                .map(lang => {
+                    const stored = Lampa.Storage.get(lang.key, 'false');
+                    return {
+                        title: lang.title,
+                        checkbox: true,
+                        selected: stored === 'true',
+                        key: lang.key
+                    };
+                });
         }
  
         let items = buildItems();
-        log('openHideMenu: items.length ' + items.length);
  
-        try {
-            Lampa.Select.show({
-                title: 'Приховати розкладки',
-                items: items,
-                onSelect(item) {
-                    log('openHideMenu onSelect: triggered for item.title=' + item.title);
-                    if (!item || !item.key) {
-                        log('openHideMenu onSelect: no item.key, abort');
-                        return;
-                    }
-                    const current = Lampa.Storage.get(item.key, 'false') === 'true';
-                    const newVal = current ? 'false' : 'true';
-                    log('openHideMenu onSelect: key=' + item.key + ' current=' + current + ' set=' + newVal);
-                    Lampa.Storage.set(item.key, newVal);
-                    if (window.keyboard) window.keyboard.init();
-                    applyHiding();
-                    items = buildItems();
-                    if (typeof Lampa.Select.update === 'function') {
-                        log('openHideMenu onSelect: Lampa.Select.update exists');
-                        Lampa.Select.update(items);
-                    } else {
-                        log('openHideMenu onSelect: Lampa.Select.update not exists, re-open');
-                        Lampa.Select.destroy();
-                        setTimeout(openHideMenu, 0);
-                    }
-                    updateDisplays();
-                },
-                onBack() {
-                    log('openHideMenu onBack');
-                    Lampa.Controller.toggle('settings_component');
-                }
-            });
-        } catch (e) {
-            log('openHideMenu error: ' + e.message);
-        }
+        Lampa.Select.show({
+            title: 'Приховати розкладки',
+            items: items,
+            onSelect(item) {
+                if (!item || !item.key) return;
+                const current = Lampa.Storage.get(item.key, 'false') === 'true';
+                const newVal = current ? 'false' : 'true';
+                Lampa.Storage.set(item.key, newVal);
+                log('openHideMenu onSelect: ' + item.key + ' = ' + newVal);
+                if (window.keyboard) window.keyboard.init();
+                applyHiding();
+                updateDisplays();        // ← оновлюємо після кожної галочки
+                items = buildItems();
+                if (typeof Lampa.Select.update === 'function') Lampa.Select.update(items);
+                else setTimeout(openHideMenu, 50);
+            },
+            onBack() {
+                log('openHideMenu onBack');
+                Lampa.Controller.toggle('settings_component');
+                updateDisplays();        // ← головне виправлення — оновлюємо після виходу
+            }
+        });
     }
  
     Lampa.SettingsApi.addComponent({
@@ -229,87 +154,44 @@
     Lampa.SettingsApi.addParam({
         component: 'keyboard_settings_select',
         param: { name: 'keyboard_default_trigger', type: 'trigger', default: false },
-        field: {
-            name: 'Розкладка за замовчуванням',
-            description: 'Вибір розкладки за замовчуванням'
-        },
+        field: { name: 'Розкладка за замовчуванням', description: 'Вибір розкладки за замовчуванням' },
         onRender(el) {
-            try {
-                log('onRender default: el length ' + el.length);
-                const title = getDefaultTitle();
-                setTimeout(function() {
-                    const defaultEl = el.find('.settings-param__value');
-                    log('onRender default: defaultEl length ' + defaultEl.length);
-                    defaultEl.text(title);
-                    log('onRender default: set text to ' + title + '; current text=' + defaultEl.text());
-                }, 0);
-                el.off('hover:enter').on('hover:enter', function () {
-                    log('hover:enter triggered for default trigger');
-                    openDefaultMenu();
-                });
-                log('onRender default: rendered and hover:enter bound');
-            } catch (e) {
-                console.error('keyboard_settings_select onRender error (default):', e);
-            }
+            setTimeout(() => {
+                el.find('.settings-param__value').text(getDefaultTitle());
+            }, 50);
+            el.off('hover:enter').on('hover:enter', openDefaultMenu);
         }
     });
  
     Lampa.SettingsApi.addParam({
         component: 'keyboard_settings_select',
         param: { name: 'keyboard_hide_trigger', type: 'trigger', default: false },
-        field: {
-            name: 'Приховати розкладки',
-            description: 'Вибір розкладок для приховування'
-        },
+        field: { name: 'Приховати розкладки', description: 'Вибір розкладок для приховування' },
         onRender(el) {
-            try {
-                log('onRender hide: el length ' + el.length);
-                const hiddenTitles = LANGUAGES
-                    .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')
-                    .map(lang => lang.title);
-                const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';
-                setTimeout(function() {
-                    const hideEl = el.find('.settings-param__value');
-                    log('onRender hide: hideEl length ' + hideEl.length);
-                    hideEl.text(hideText);
-                    log('onRender hide: set text to ' + hideText + '; current text=' + hideEl.text());
-                }, 0);
-                el.off('hover:enter').on('hover:enter', function () {
-                    log('hover:enter triggered for hide trigger');
-                    openHideMenu();
-                });
-                log('onRender hide: rendered and hover:enter bound');
-            } catch (e) {
-                console.error('keyboard_settings_select onRender error (hide):', e);
-            }
+            setTimeout(() => {
+                const hidden = LANGUAGES.filter(l => Lampa.Storage.get(l.key, 'false') === 'true')
+                                      .map(l => l.title);
+                el.find('.settings-param__value').text(hidden.length ? hidden.join(', ') : 'жодна');
+            }, 50);
+            el.off('hover:enter').on('hover:enter', openHideMenu);
         }
     });
  
-    // Твій робочий setInterval для перевірки LANG кнопки
+    // Твій робочий інтервал
     setInterval(function() {
-        var elementCHlang = $('div.hg-button.hg-functionBtn.hg-button-LANG.selector.binded');
-        if (elementCHlang.length > 0){
-            log('setInterval: LANG button found, call applyHiding');
+        if ($('div.hg-button.hg-functionBtn.hg-button-LANG.selector.binded').length > 0) {
             applyHiding();
         }
     }, 0);
-
+ 
     function start() {
-        log('start: begin');
-        ensureKeyboardHooked();
-        setTimeout(updateDisplays, 100);
+        setTimeout(updateDisplays, 300);
         Lampa.Listener.follow('select', e => {
-            if (e.type === 'open') {
-                log('listener select open: will applyHiding in 100ms');
-                setTimeout(applyHiding, 100);
-            }
+            if (e.type === 'open') setTimeout(applyHiding, 100);
         });
-        log('start: done');
     }
  
     if (window.appready) start();
-    else Lampa.Listener.follow('app', function (e) {
-        if (e.type === 'ready') start();
-    });
+    else Lampa.Listener.follow('app', e => { if (e.type === 'ready') start(); });
  
 })();
