@@ -2,8 +2,8 @@
     'use strict';
 
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
-    if (window.keyboard_settings_v13) return;
-    window.keyboard_settings_v13 = true;
+    if (window.keyboard_settings_v14) return;
+    window.keyboard_settings_v14 = true;
 
     const LANGUAGES = [
         { title: 'Українська', code: 'uk', key: 'keyboard_hide_uk' },
@@ -68,33 +68,32 @@
     }
 
     // ----------------------
-    // Меню мультивибору прихованих розкладок
+    // Меню вибору розкладок для приховування (selector)
     // ----------------------
     function openHideMenu(){
         const defaultCode = getDefaultCode();
 
-        const items = LANGUAGES.map(lang=>({
-            title: lang.title,
-            checkbox: true,
-            selected: Lampa.Storage.get(lang.key,'false')==='true',
-            key: lang.key,
-            disabled: lang.code===defaultCode
-        }));
+        const items = LANGUAGES
+            .filter(lang=>lang.code!==defaultCode) // default завжди видно
+            .map(lang=>({
+                title: lang.title,
+                value: lang.code,
+                selected: Lampa.Storage.get(lang.key,'false')==='true',
+                key: lang.key
+            }));
 
         Lampa.Select.show({
-            title:'Приховати розкладки (чекбокси)',
+            title:'Вибрати розкладки для приховування',
             items:items,
             onSelect:function(item){
-                if(item.disabled) return;
-
-                // переключаємо чекбокс
+                if(!item.value) return;
                 const current = Lampa.Storage.get(item.key,'false')==='true';
                 Lampa.Storage.set(item.key, current ? 'false' : 'true');
 
-                // оновлюємо клавіатуру
+                // Перегенеруємо клавіатуру
                 if(window.keyboard) window.keyboard.init();
 
-                // меню залишаємо відкритим для мультивибору
+                // залишаємо меню відкритим для мультивибору
                 setTimeout(openHideMenu,50);
             },
             onBack:function(){
@@ -107,13 +106,13 @@
     // Налаштування Lampa
     // ----------------------
     Lampa.SettingsApi.addComponent({
-        component:'keyboard_settings_v13',
+        component:'keyboard_settings_v14',
         name:'Налаштування клавіатури',
         icon:'<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'
     });
 
     Lampa.SettingsApi.addParam({
-        component:'keyboard_settings_v13',
+        component:'keyboard_settings_v14',
         param:{name:'keyboard_default_trigger', type:'trigger', default:false},
         field:{
             name:'Розкладка за замовчуванням',
@@ -126,7 +125,7 @@
     });
 
     Lampa.SettingsApi.addParam({
-        component:'keyboard_settings_v13',
+        component:'keyboard_settings_v14',
         param:{name:'keyboard_hide_trigger', type:'trigger', default:false},
         field:{
             name:'Приховати розкладки',
