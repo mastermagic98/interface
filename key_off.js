@@ -50,7 +50,6 @@
         hookKeyboard();  
     }  
   
-    // Приховування елементів списку мов у клавіатурі  
     function applyHiding() {  
         LANGUAGES.forEach(lang => {  
             const hide = Lampa.Storage.get(lang.key, 'false') === 'true';  
@@ -66,9 +65,8 @@
         });  
     }  
   
-    // Оновлення відображення значень у налаштуваннях  
     function updateDisplays() {  
-        const defaultEl = $('.settings-param[data-name="keyboard_default_lang"] .settings-param__value');  
+        const defaultEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');  
         if (defaultEl.length) defaultEl.text(getDefaultTitle());  
   
         const hiddenTitles = LANGUAGES  
@@ -79,9 +77,6 @@
         if (hideEl.length) hideEl.text(hideText);  
     }  
   
-    // ----------------------  
-    // Select для розкладки за замовчуванням  
-    // ----------------------  
     function openDefaultMenu() {  
         const current = getDefaultCode();  
         const items = LANGUAGES.map(lang => ({  
@@ -105,9 +100,6 @@
         });  
     }  
   
-    // ----------------------  
-    // Select для прихованих розкладок (checkbox)  
-    // ----------------------  
     function openHideMenu() {  
         const defaultCode = getDefaultCode();  
   
@@ -147,30 +139,29 @@
         });  
     }  
   
-    // ----------------------  
-    // Додаємо компонент у налаштування  
-    // ----------------------  
     Lampa.SettingsApi.addComponent({  
         component: 'keyboard_settings_select',  
         name: 'Налаштування клавіатури',  
         icon: '<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'  
     });  
   
-    // Default як select  
     Lampa.SettingsApi.addParam({  
         component: 'keyboard_settings_select',  
-        param: { name: 'keyboard_default_lang', type: 'select', default: 'uk' },  
+        param: { name: 'keyboard_default_trigger', type: 'trigger', default: false },  
         field: {  
             name: 'Розкладка за замовчуванням',  
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onRender(el) {  
-            el.find('.settings-param__value').text(getDefaultTitle());  
-            el.off('hover:enter').on('hover:enter', openDefaultMenu);  
+            try {  
+                el.find('.settings-param__value').text(getDefaultTitle());  
+                el.off('hover:enter').on('hover:enter', openDefaultMenu);  
+            } catch (e) {  
+                console.error('keyboard_settings_select onRender error (default):', e);  
+            }  
         }  
     });  
   
-    // Приховані розкладки як trigger  
     Lampa.SettingsApi.addParam({  
         component: 'keyboard_settings_select',  
         param: { name: 'keyboard_hide_trigger', type: 'trigger', default: false },  
@@ -179,22 +170,22 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onRender(el) {  
-            const hiddenTitles = LANGUAGES  
-                .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')  
-                .map(lang => lang.title);  
-            const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
-            el.find('.settings-param__value').text(hideText);  
-            el.off('hover:enter').on('hover:enter', openHideMenu);  
+            try {  
+                const hiddenTitles = LANGUAGES  
+                    .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')  
+                    .map(lang => lang.title);  
+                const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
+                el.find('.settings-param__value').text(hideText);  
+                el.off('hover:enter').on('hover:enter', openHideMenu);  
+            } catch (e) {  
+                console.error('keyboard_settings_select onRender error (hide):', e);  
+            }  
         }  
     });  
   
-    // ----------------------  
-    // Старт та слухачі  
-    // ----------------------  
     function start() {  
         ensureKeyboardHooked();  
-        updateDisplays();  
-        // Приховувати при кожному відкритті списку мов у клавіатурі  
+        setTimeout(updateDisplays, 0);  
         Lampa.Listener.follow('select', e => {  
             if (e.type === 'open') {  
                 setTimeout(applyHiding, 100);  
