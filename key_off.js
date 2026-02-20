@@ -12,38 +12,58 @@
         { title: 'עִברִית',   code: 'he', key: 'keyboard_hide_he' }  
     ];  
   
+    function log(msg) {  
+        console.log('[keyboard_settings_select]', msg);  
+    }  
+  
     function getDefaultCode() {  
-        return Lampa.Storage.get('keyboard_default_lang', 'uk');  
+        const val = Lampa.Storage.get('keyboard_default_lang', 'uk');  
+        log('getDefaultCode -> ' + val);  
+        return val;  
     }  
   
     function getDefaultTitle() {  
         const code = getDefaultCode();  
         const lang = LANGUAGES.find(l => l.code === code);  
-        return lang ? lang.title : 'Українська';  
+        const title = lang ? lang.title : 'Українська';  
+        log('getDefaultTitle -> ' + title);  
+        return title;  
     }  
   
     function filterLayouts(layouts) {  
         const defaultCode = getDefaultCode();  
-        return layouts.filter(l => {  
+        const filtered = layouts.filter(l => {  
             const langObj = LANGUAGES.find(lang => lang.code === l.code);  
             if (!langObj) return true;  
             const hide = Lampa.Storage.get(langObj.key, 'false') === 'true';  
-            return !hide || l.code === defaultCode;  
+            const keep = !hide || l.code === defaultCode;  
+            log('filterLayouts: code=' + l.code + ' hide=' + hide + ' keep=' + keep);  
+            return keep;  
         });  
+        log('filterLayouts: before=' + layouts.length + ' after=' + filtered.length);  
+        return filtered;  
     }  
   
     function hookKeyboard() {  
         if (window.Keyboard && window.Keyboard.prototype) {  
             const origInit = window.Keyboard.prototype.init;  
             window.Keyboard.prototype.init = function () {  
-                if (this.layouts) this.layouts = filterLayouts(this.layouts);  
+                if (this.layouts) {  
+                    log('hookKeyboard: before layouts=' + this.layouts.length);  
+                    this.layouts = filterLayouts(this.layouts);  
+                    log('hookKeyboard: after layouts=' + this.layouts.length);  
+                }  
                 return origInit.apply(this, arguments);  
             };  
+            log('hookKeyboard: hooked');  
+        } else {  
+            log('hookKeyboard: window.Keyboard not available yet');  
         }  
     }  
   
     function ensureKeyboardHooked() {  
         if (!window.Keyboard) {  
+            log('ensureKeyboardHooked: Keyboard not ready, retry in 500ms');  
             setTimeout(ensureKeyboardHooked, 500);  
             return;  
         }  
@@ -51,30 +71,50 @@
     }  
   
     function applyHiding() {  
+        log('applyHiding: start');  
         LANGUAGES.forEach(lang => {  
-            const hide = Lampa.Storage.get(lang.key, 'false') === 'true';  
+            const stored = Lampa.Storage.get(lang.key, 'false');  
+            const hide = stored === 'true';  
+            log('applyHiding: lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);  
             const element = $('.selectbox-item.selector').filter(function () {  
                 return $(this).text().trim() === lang.title;  
             });  
             if (element.length) {  
                 element.toggle(!hide);  
-                console.log('Keyboard Hide: ' + lang.title + (hide ? ' hidden' : ' shown'));  
+                log('applyHiding: toggled ' + lang.title + ' -> ' + (!hide ? 'shown' : 'hidden'));  
             } else {  
-                console.log('Keyboard Hide: Element not found for ' + lang.title);  
+                log('applyHiding: element not found for ' + lang.title);  
             }  
         });  
     }  
   
     function updateDisplays() {  
+        log('updateDisplays: start');  
         const defaultEl = $('.settings-param[data-name="keyboard_default_trigger"] .settings-param__value');  
-        if (defaultEl.length) defaultEl.text(getDefaultTitle());  
+        if (defaultEl.length) {  
+            const title = getDefaultTitle();  
+            defaultEl.text(title);  
+            log('updateDisplays: default title set to ' + title);  
+        } else {  
+            log('updateDisplays: default display element not found');  
+        }  
   
         const hiddenTitles = LANGUAGES  
-            .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')  
+            .filter(lang => {  
+                const stored = Lampa.Storage.get(lang.key, 'false');  
+                const hide = stored === 'true';  
+                log('updateDisplays: hidden check lang=' + lang.title + ' stored=' + stored + ' hide=' + hide);  
+                return hide;  
+            })  
             .map(lang => lang.title);  
         const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
         const hideEl = $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value');  
-        if (hideEl.length) hideEl.text(hideText);  
+        if (hideEl.length) {  
+            hideEl.text(hideText);  
+            log('updateDisplays: hide text set to ' + hideText);  
+        } else {  
+            log('updateDisplays: hide display element not found');  
+        }  
     }  
   
     function openDefaultMenu() {  
@@ -90,6 +130,7 @@
             items: items,  
             onSelect(item) {  
                 if (!item.value) return;  
+                log('openDefaultMenu onSelect: set keyboard_default_lang=' + item.value);  
                 Lampa.Storage.set('keyboard_default_lang', item.value);  
                 if (window.keyboard) window.keyboard.init();  
                 updateDisplays();  
@@ -121,7 +162,9 @@
             items: items,  
             onSelect(item) {  
                 const current = Lampa.Storage.get(item.key, 'false') === 'true';  
-                Lampa.Storage.set(item.key, current ? 'false' : 'true');  
+                const newVal = current ? 'false' : 'true';  
+                log('openHideMenu onSelect: key=' + item.key + ' current=' + current + ' set=' + newVal);  
+                Lampa.Storage.set(item.key, newVal);  
                 if (window.keyboard) window.keyboard.init();  
                 applyHiding();  
                 items = buildItems();  
@@ -156,6 +199,7 @@
             try {  
                 el.find('.settings-param__value').text(getDefaultTitle());  
                 el.off('hover:enter').on('hover:enter', openDefaultMenu);  
+                log('onRender default: rendered');  
             } catch (e) {  
                 console.error('keyboard_settings_select onRender error (default):', e);  
             }  
@@ -177,6 +221,7 @@
                 const hideText = hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
                 el.find('.settings-param__value').text(hideText);  
                 el.off('hover:enter').on('hover:enter', openHideMenu);  
+                log('onRender hide: rendered with "' + hideText + '"');  
             } catch (e) {  
                 console.error('keyboard_settings_select onRender error (hide):', e);  
             }  
@@ -184,13 +229,16 @@
     });  
   
     function start() {  
+        log('start: begin');  
         ensureKeyboardHooked();  
         setTimeout(updateDisplays, 0);  
         Lampa.Listener.follow('select', e => {  
             if (e.type === 'open') {  
+                log('listener select open: will applyHiding in 100ms');  
                 setTimeout(applyHiding, 100);  
             }  
         });  
+        log('start: done');  
     }  
   
     if (window.appready) start();  
