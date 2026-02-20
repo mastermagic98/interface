@@ -1,6 +1,41 @@
 (function(){
     'use strict';
+/* ---------------- KEYBOARD HOOK ---------------- */
 
+function hookKeyboard(){
+
+    if (!window.Keyboard || !window.Keyboard.prototype) return;
+
+    if (window.Keyboard.prototype.__layouts_patched) return;
+    window.Keyboard.prototype.__layouts_patched = true;
+
+    const originalInit = window.Keyboard.prototype.init;
+
+    window.Keyboard.prototype.init = function(){
+
+        const defaultLang = getDefault();
+        const hidden = getHidden();
+
+        if (this.layouts && Array.isArray(this.layouts)){
+
+            this.layouts = this.layouts.filter(layout => {
+
+                // якщо layout не має code — пропускаємо
+                if(!layout.code) return true;
+
+                // default не можна приховати
+                if(layout.code === defaultLang) return true;
+
+                // якщо в масиві прихованих — не показуємо
+                if(hidden.includes(layout.code)) return false;
+
+                return true;
+            });
+        }
+
+        return originalInit.apply(this, arguments);
+    };
+}
     if (!Lampa.Manifest || Lampa.Manifest.app_digital < 300) return;
     if (window.keyboard_settings_fixed2) return;
     window.keyboard_settings_fixed2 = true;
@@ -127,5 +162,14 @@
             el.on('hover:enter',openHideMenu);
         }
     });
+function start(){
+    hookKeyboard();
+}
 
+if (window.appready) start();
+else {
+    Lampa.Listener.follow('app', function(e){
+        if (e.type === 'ready') start();
+    });
+}
 })();
