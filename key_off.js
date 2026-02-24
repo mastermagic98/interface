@@ -1,10 +1,13 @@
 (function () {
     'use strict';
 
+    /**
+     * Окремий компонент налаштувань клавіатури
+     */
+
     var DEFAULT_LAYOUT_KEY = 'keyboard_default_layout';
     var HIDDEN_LAYOUTS_KEY = 'keyboard_hidden_layouts';
 
-    // Доступні системні розкладки
     var AVAILABLE_LAYOUTS = [
         { value: 'uk', name: 'Українська' },
         { value: 'ru', name: 'Русский' },
@@ -14,13 +17,14 @@
 
     function initPlugin() {
 
-        if (!Lampa || !Lampa.Settings) return;
+        if (!window.Lampa) return;
 
+        // --- Переклади ---
         Lampa.Lang.add({
-            keyboard_layout_plugin: {
-                ru: 'Клавиатура',
-                en: 'Keyboard',
-                uk: 'Клавіатура'
+            keyboard_settings_component: {
+                ru: 'Настройки клавиатуры',
+                en: 'Keyboard settings',
+                uk: 'Налаштування клавіатури'
             },
             keyboard_default_layout: {
                 ru: 'Раскладка по умолчанию',
@@ -34,6 +38,13 @@
             }
         });
 
+        // --- Реєстрація окремого компонента ---
+        Lampa.SettingsApi.addComponent({
+            name: 'keyboard_settings',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v14H3zM5 7v2h2V7H5zm0 4v2h2v-2H5zm4-4v2h2V7H9zm0 4v2h2v-2H9zm4-4v2h2V7h-2zm0 4v2h2v-2h-2z"/></svg>',
+            title: 'keyboard_settings_component'
+        });
+
         var savedDefault = Lampa.Storage.get(DEFAULT_LAYOUT_KEY, 'uk');
         var savedHidden = Lampa.Storage.get(HIDDEN_LAYOUTS_KEY, []);
 
@@ -42,22 +53,17 @@
             Lampa.Storage.set(HIDDEN_LAYOUTS_KEY, savedHidden);
         }
 
+        // --- Розкладка за замовчуванням ---
         Lampa.SettingsApi.addParam({
-            component: 'interface',
-            param: {
-                name: 'keyboard_layout_plugin',
-                type: 'title'
-            }
-        });
-
-        // Розкладка за замовчуванням
-        Lampa.SettingsApi.addParam({
-            component: 'interface',
+            component: 'keyboard_settings',
             param: {
                 name: 'keyboard_default_layout',
                 type: 'select',
                 values: AVAILABLE_LAYOUTS.map(function (l) {
-                    return { value: l.value, name: l.name };
+                    return {
+                        value: l.value,
+                        name: l.name
+                    };
                 }),
                 default: savedDefault
             },
@@ -75,14 +81,17 @@
             }
         });
 
-        // Приховані розкладки
+        // --- Приховані розкладки ---
         Lampa.SettingsApi.addParam({
-            component: 'interface',
+            component: 'keyboard_settings',
             param: {
                 name: 'keyboard_hidden_layouts',
                 type: 'multiselect',
                 values: AVAILABLE_LAYOUTS.map(function (l) {
-                    return { value: l.value, name: l.name };
+                    return {
+                        value: l.value,
+                        name: l.name
+                    };
                 }),
                 default: savedHidden
             },
@@ -98,7 +107,7 @@
             }
         });
 
-        // Перехоплення клавіатури
+        // --- Перехоплення клавіатури ---
         Lampa.Listener.follow('keyboard', function (event) {
 
             if (!event || !event.layouts) return;
@@ -112,6 +121,7 @@
 
             event.default = defaultLayout;
         });
+
     }
 
     if (window.appready) initPlugin();
