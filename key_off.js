@@ -33,19 +33,25 @@
     function getHiddenLanguages() {  
         // Отримуємо збережений масив прихованих мов  
         const stored = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
+        log('getHiddenLanguages: stored string=' + stored);  
         try {  
             const parsed = JSON.parse(stored);  
             log('getHiddenLanguages: parsed=' + JSON.stringify(parsed));  
             return Array.isArray(parsed) ? parsed : [];  
         } catch (e) {  
-            log('getHiddenLanguages: parse error, returning []');  
+            log('getHiddenLanguages: parse error=' + e.message + ', returning []');  
             return [];  
         }  
     }  
   
     function saveHiddenLanguages(hiddenCodes) {  
         log('saveHiddenLanguages: saving ' + JSON.stringify(hiddenCodes));  
-        Lampa.Storage.set('keyboard_hidden_layouts', JSON.stringify(hiddenCodes));  
+        const jsonString = JSON.stringify(hiddenCodes);  
+        Lampa.Storage.set('keyboard_hidden_layouts', jsonString);  
+        
+        // Перевіряємо, що збереглося  
+        const verified = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
+        log('saveHiddenLanguages: verified stored value=' + verified);  
         
         // Також зберігаємо в окремі ключі для зворотної сумісності  
         LANGUAGES.forEach(lang => {  
@@ -143,19 +149,21 @@
     function showHideLayoutsDialog() {  
         log('showHideLayoutsDialog: opened');  
         const defaultCode = getDefaultCode();  
-        const hiddenCodes = getHiddenLanguages();  
         
-        log('showHideLayoutsDialog: defaultCode=' + defaultCode + ' hiddenCodes=' + JSON.stringify(hiddenCodes));  
-  
-        // Створюємо копію масиву для роботи  
-        let workingHiddenCodes = [...hiddenCodes];  
+        // ВАЖЛИВО: отримуємо поточний стан з Storage кожного разу  
+        let hiddenCodes = getHiddenLanguages();  
+        log('showHideLayoutsDialog: initial hiddenCodes=' + JSON.stringify(hiddenCodes));  
   
         function buildItems() {  
+            // Перечитуємо поточний стан перед побудовою  
+            hiddenCodes = getHiddenLanguages();  
+            log('buildItems: current hiddenCodes=' + JSON.stringify(hiddenCodes));  
+            
             // Виключаємо розкладку за замовчуванням зі списку  
             return LANGUAGES  
                 .filter(lang => lang.code !== defaultCode)  
                 .map(lang => {  
-                    const selected = workingHiddenCodes.includes(lang.code);  
+                    const selected = hiddenCodes.includes(lang.code);  
                     log('buildItems: lang=' + lang.title + ' code=' + lang.code + ' selected=' + selected);  
                     return {  
                         title: lang.title,  
@@ -172,31 +180,37 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect(item) {  
-                log('showHideLayoutsDialog onSelect: item.title=' + item.title + ' item.code=' + item.code);  
+                log('showHideLayoutsDialog onSelect: START - item.title=' + item.title + ' item.code=' + item.code);  
                 
                 if (!item || !item.code) {  
                     log('showHideLayoutsDialog onSelect: no item.code, abort');  
                     return;  
                 }  
                 
-                // Перемикаємо стан в робочому масиві  
-                const index = workingHiddenCodes.indexOf(item.code);  
+                // Отримуємо ПОТОЧНИЙ стан з Storage  
+                let currentHiddenCodes = getHiddenLanguages();  
+                log('showHideLayoutsDialog onSelect: BEFORE toggle, currentHiddenCodes=' + JSON.stringify(currentHiddenCodes));  
+                
+                // Перемикаємо стан  
+                const index = currentHiddenCodes.indexOf(item.code);  
                 if (index > -1) {  
                     // Видаляємо з прихованих  
-                    workingHiddenCodes.splice(index, 1);  
-                    log('showHideLayoutsDialog onSelect: removed ' + item.code + ', new array=' + JSON.stringify(workingHiddenCodes));  
+                    currentHiddenCodes.splice(index, 1);  
+                    log('showHideLayoutsDialog onSelect: REMOVED ' + item.code);  
                 } else {  
                     // Додаємо до прихованих  
-                    workingHiddenCodes.push(item.code);  
-                    log('showHideLayoutsDialog onSelect: added ' + item.code + ', new array=' + JSON.stringify(workingHiddenCodes));  
+                    currentHiddenCodes.push(item.code);  
+                    log('showHideLayoutsDialog onSelect: ADDED ' + item.code);  
                 }  
                 
-                // Зберігаємо оновлений масив  
-                saveHiddenLanguages(workingHiddenCodes);  
+                log('showHideLayoutsDialog onSelect: AFTER toggle, currentHiddenCodes=' + JSON.stringify(currentHiddenCodes));  
                 
-                // Оновлюємо стан чекбокса  
-                item.selected = workingHiddenCodes.includes(item.code);  
-                log('showHideLayoutsDialog onSelect: item.selected=' + item.selected);  
+                // ЗБЕРІГАЄМО НЕГАЙНО  
+                saveHiddenLanguages(currentHiddenCodes);  
+                
+                // Перевіряємо, що збереглося  
+                const verifyHidden = getHiddenLanguages();  
+                log('showHideLayoutsDialog onSelect: VERIFIED after save=' + JSON.stringify(verifyHidden));  
                 
                 // Оновлюємо клавіатуру  
                 if (window.keyboard) {  
@@ -204,8 +218,9 @@
                     log('showHideLayoutsDialog onSelect: keyboard reinitialized');  
                 }  
                 
-                // Перебудовуємо список елементів  
+                // Перебудовуємо список елементів (це заново прочитає з Storage)  
                 items = buildItems();  
+                log('showHideLayoutsDialog onSelect: items rebuilt, count=' + items.length);  
                 
                 // Оновлюємо Select dialog  
                 if (typeof Lampa.Select.update === 'function') {  
@@ -219,9 +234,13 @@
                 
                 // Оновлюємо відображення в налаштуваннях  
                 updateHideDisplay();  
+                
+                log('showHideLayoutsDialog onSelect: END');  
             },  
             onBack() {  
                 log('showHideLayoutsDialog onBack');  
+                // При закритті оновлюємо відображення  
+                updateHideDisplay();  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
