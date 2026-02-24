@@ -119,7 +119,7 @@
                 .map(lang => {  
                     const stored = Lampa.Storage.get(lang.key, 'false');  
                     const selected = stored === 'true';  
-                    log('buildItems: lang=' + lang.title + ' stored=' + stored + ' selected=' + selected);  
+                    log('buildItems: lang=' + lang.title + ' key=' + lang.key + ' stored=' + stored + ' selected=' + selected);  
                     return {  
                         title: lang.title,  
                         checkbox: true,  
@@ -136,31 +136,53 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect(item) {  
-                log('showHideLayoutsDialog onSelect: triggered for item=' + JSON.stringify(item));  
+                log('showHideLayoutsDialog onSelect: item=' + JSON.stringify(item));  
+                
                 if (!item || !item.key) {  
                     log('showHideLayoutsDialog onSelect: no item.key, abort');  
                     return;  
                 }  
                 
-                const current = Lampa.Storage.get(item.key, 'false') === 'true';  
-                const newVal = current ? 'false' : 'true';  
-                log('showHideLayoutsDialog onSelect: key=' + item.key + ' current=' + current + ' set=' + newVal);  
+                // Отримуємо поточний стан  
+                const currentValue = Lampa.Storage.get(item.key, 'false');  
+                const currentState = currentValue === 'true';  
                 
-                Lampa.Storage.set(item.key, newVal);  
+                // Перемикаємо стан  
+                const newState = !currentState;  
+                const newValue = newState ? 'true' : 'false';  
+                
+                log('showHideLayoutsDialog onSelect: key=' + item.key + ' currentValue=' + currentValue + ' currentState=' + currentState + ' newState=' + newState + ' newValue=' + newValue);  
+                
+                // Зберігаємо новий стан  
+                Lampa.Storage.set(item.key, newValue);  
+                
+                // Перевіряємо, що значення збережено  
+                const savedValue = Lampa.Storage.get(item.key);  
+                log('showHideLayoutsDialog onSelect: saved and verified value=' + savedValue);  
+                
+                // Оновлюємо стан чекбокса в поточному елементі  
+                item.selected = newState;  
                 
                 // Оновлюємо клавіатуру  
-                if (window.keyboard) window.keyboard.init();  
+                if (window.keyboard) {  
+                    window.keyboard.init();  
+                    log('showHideLayoutsDialog onSelect: keyboard reinitialized');  
+                }  
                 
-                // Перебудовуємо список елементів  
+                // Перебудовуємо список елементів з новими станами  
                 items = buildItems();  
                 
+                // Оновлюємо Select dialog  
                 if (typeof Lampa.Select.update === 'function') {  
+                    log('showHideLayoutsDialog onSelect: calling Lampa.Select.update');  
                     Lampa.Select.update(items);  
                 } else {  
+                    log('showHideLayoutsDialog onSelect: Lampa.Select.update not available, reopening');  
                     Lampa.Select.destroy();  
                     setTimeout(showHideLayoutsDialog, 0);  
                 }  
                 
+                // Оновлюємо відображення в налаштуваннях  
                 updateHideDisplay();  
             },  
             onBack() {  
@@ -204,10 +226,14 @@
             const langObj = LANGUAGES.find(l => l.code === value);  
             if (langObj) {  
                 Lampa.Storage.set(langObj.key, 'false');  
+                log('onChange keyboard_default_lang: unhid language ' + langObj.title + ' by setting ' + langObj.key + '=false');  
             }  
             
             // Оновлюємо клавіатуру  
-            if (window.keyboard) window.keyboard.init();  
+            if (window.keyboard) {  
+                window.keyboard.init();  
+                log('onChange keyboard_default_lang: keyboard reinitialized');  
+            }  
             
             // Оновлюємо відображення прихованих розкладок  
             updateHideDisplay();  
@@ -232,8 +258,9 @@
         onRender(el) {  
             try {  
                 // Встановлюємо поточне значення  
-                el.find('.settings-param__value').text(getHiddenLanguagesText());  
-                log('onRender hide button: rendered with value');  
+                const hideText = getHiddenLanguagesText();  
+                el.find('.settings-param__value').text(hideText);  
+                log('onRender hide button: rendered with value "' + hideText + '"');  
             } catch (e) {  
                 console.error('keyboard_settings_select onRender error (hide):', e);  
             }  
@@ -242,6 +269,13 @@
   
     function start() {  
         log('start: begin');  
+        
+        // Виводимо поточні значення з Storage для діагностики  
+        LANGUAGES.forEach(lang => {  
+            const val = Lampa.Storage.get(lang.key, 'false');  
+            log('start: initial storage ' + lang.key + '=' + val);  
+        });  
+        
         ensureKeyboardHooked();  
         
         // Відслідковуємо відкриття селектора розкладок  
