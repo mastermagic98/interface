@@ -32,14 +32,24 @@
   
     function getHiddenLanguages() {  
         // Отримуємо збережений масив прихованих мов  
-        const stored = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
-        log('getHiddenLanguages: stored string=' + stored);  
+        let stored = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
+        
+        // ВИПРАВЛЕННЯ: якщо stored порожній або undefined, використовуємо []  
+        if (!stored || stored === '' || stored === 'undefined' || stored === 'null') {  
+            stored = '[]';  
+            log('getHiddenLanguages: empty or invalid stored value, using []');  
+        }  
+        
+        log('getHiddenLanguages: stored string="' + stored + '"');  
+        
         try {  
             const parsed = JSON.parse(stored);  
             log('getHiddenLanguages: parsed=' + JSON.stringify(parsed));  
             return Array.isArray(parsed) ? parsed : [];  
         } catch (e) {  
             log('getHiddenLanguages: parse error=' + e.message + ', returning []');  
+            // Якщо помилка парсингу, ініціалізуємо Storage правильним значенням  
+            Lampa.Storage.set('keyboard_hidden_layouts', '[]');  
             return [];  
         }  
     }  
@@ -50,8 +60,8 @@
         Lampa.Storage.set('keyboard_hidden_layouts', jsonString);  
         
         // Перевіряємо, що збереглося  
-        const verified = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
-        log('saveHiddenLanguages: verified stored value=' + verified);  
+        const verified = Lampa.Storage.get('keyboard_hidden_layouts');  
+        log('saveHiddenLanguages: verified stored value="' + verified + '"');  
         
         // Також зберігаємо в окремі ключі для зворотної сумісності  
         LANGUAGES.forEach(lang => {  
@@ -150,7 +160,7 @@
         log('showHideLayoutsDialog: opened');  
         const defaultCode = getDefaultCode();  
         
-        // ВАЖЛИВО: отримуємо поточний стан з Storage кожного разу  
+        // Отримуємо поточний стан з Storage  
         let hiddenCodes = getHiddenLanguages();  
         log('showHideLayoutsDialog: initial hiddenCodes=' + JSON.stringify(hiddenCodes));  
   
@@ -308,50 +318,4 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
-            log('onChange keyboard_hide_button: opening dialog');  
-            showHideLayoutsDialog();  
-        },  
-        onRender(el) {  
-            try {  
-                // Встановлюємо поточне значення  
-                const hideText = getHiddenLanguagesText();  
-                el.find('.settings-param__value').text(hideText);  
-                log('onRender hide button: rendered with value "' + hideText + '"');  
-            } catch (e) {  
-                console.error('keyboard_settings_select onRender error (hide):', e);  
-            }  
-        }  
-    });  
-  
-    function start() {  
-        log('start: begin');  
-        
-        // Виводимо поточні значення з Storage для діагностики  
-        log('start: keyboard_default_lang=' + Lampa.Storage.get('keyboard_default_lang', 'uk'));  
-        log('start: keyboard_hidden_layouts=' + Lampa.Storage.get('keyboard_hidden_layouts', '[]'));  
-        
-        ensureKeyboardHooked();  
-        
-        // Відслідковуємо відкриття селектора розкладок  
-        Lampa.Listener.follow('select', e => {  
-            if (e.type === 'open') {  
-                log('listener select open: will applyHidingToSelector');  
-                applyHidingToSelector();  
-            }  
-        });  
-        
-        // Відслідковуємо натискання кнопки перемикання мови  
-        $(document).on('click', '.hg-button.hg-functionBtn.selector', function() {  
-            log('Language selector button clicked');  
-            applyHidingToSelector();  
-        });  
-        
-        log('start: done');  
-    }  
-  
-    if (window.appready) start();  
-    else Lampa.Listener.follow('app', function (e) {  
-        if (e.type === 'ready') start();  
-    });  
-  
-})();
+            log('onChange keyboard_hid
