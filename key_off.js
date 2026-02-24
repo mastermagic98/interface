@@ -39,6 +39,10 @@
     function saveHiddenLanguages(hiddenCodes) {  
         log('saveHiddenLanguages: ' + JSON.stringify(hiddenCodes));  
         Lampa.Storage.set('keyboard_hidden_layouts', JSON.stringify(hiddenCodes));  
+        
+        // Перевірка  
+        const verify = Lampa.Storage.get('keyboard_hidden_layouts');  
+        log('saveHiddenLanguages: VERIFIED=' + verify);  
     }  
   
     function getHiddenLanguagesText() {  
@@ -56,15 +60,11 @@
         log('applyHidingToSelector: defaultCode=' + defaultCode + ', hiddenCodes=' + JSON.stringify(hiddenCodes));  
         
         setTimeout(function() {  
-            // Шукаємо всі кнопки селектора мов  
             const buttons = document.querySelectorAll('.hg-button.hg-functionBtn.selector');  
             log('applyHidingToSelector: found ' + buttons.length + ' selector buttons');  
             
             buttons.forEach(function(button) {  
                 const buttonText = button.textContent.trim();  
-                log('applyHidingToSelector: checking button "' + buttonText + '"');  
-                
-                // Знаходимо відповідну мову  
                 const lang = LANGUAGES.find(function(l) { return l.title === buttonText; });  
                 
                 if (lang) {  
@@ -94,18 +94,22 @@
     function showHideLayoutsDialog() {  
         log('showHideLayoutsDialog: OPENED');  
         const defaultCode = getDefaultCode();  
+        let currentHidden = getHiddenLanguages();  
+        
+        log('showHideLayoutsDialog: initial currentHidden=' + JSON.stringify(currentHidden));  
   
         function buildItems() {  
-            const hiddenCodes = getHiddenLanguages();  
-            log('buildItems: hiddenCodes=' + JSON.stringify(hiddenCodes));  
+            log('buildItems: currentHidden=' + JSON.stringify(currentHidden));  
             
             return LANGUAGES  
                 .filter(function(lang) { return lang.code !== defaultCode; })  
                 .map(function(lang) {  
-                    const selected = hiddenCodes.indexOf(lang.code) > -1;  
+                    const selected = currentHidden.indexOf(lang.code) > -1;  
+                    log('buildItems: ' + lang.title + ' selected=' + selected);  
                     return {  
                         title: lang.title,  
                         checkbox: true,  
+                        checked: selected,  // Спробуємо checked замість selected  
                         selected: selected,  
                         code: lang.code  
                     };  
@@ -118,34 +122,37 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
-                log('onSelect: item.code=' + item.code);  
+                log('onSelect: CALLED! item=' + JSON.stringify(item));  
                 
-                if (!item || !item.code) return;  
-                
-                let currentHiddenCodes = getHiddenLanguages();  
-                log('onSelect: BEFORE=' + JSON.stringify(currentHiddenCodes));  
-                
-                const index = currentHiddenCodes.indexOf(item.code);  
-                
-                if (index > -1) {  
-                    currentHiddenCodes.splice(index, 1);  
-                } else {  
-                    currentHiddenCodes.push(item.code);  
+                if (!item || !item.code) {  
+                    log('onSelect: no code, ABORT');  
+                    return;  
                 }  
                 
-                log('onSelect: AFTER=' + JSON.stringify(currentHiddenCodes));  
+                log('onSelect: BEFORE currentHidden=' + JSON.stringify(currentHidden));  
                 
-                saveHiddenLanguages(currentHiddenCodes);  
+                const index = currentHidden.indexOf(item.code);  
+                log('onSelect: index=' + index);  
                 
-                // Перевірка збереження  
-                const verify = getHiddenLanguages();  
-                log('onSelect: VERIFY=' + JSON.stringify(verify));  
+                if (index > -1) {  
+                    currentHidden.splice(index, 1);  
+                    log('onSelect: REMOVED ' + item.code);  
+                } else {  
+                    currentHidden.push(item.code);  
+                    log('onSelect: ADDED ' + item.code);  
+                }  
+                
+                log('onSelect: AFTER currentHidden=' + JSON.stringify(currentHidden));  
+                
+                saveHiddenLanguages(currentHidden);  
                 
                 items = buildItems();  
                 
                 if (typeof Lampa.Select.update === 'function') {  
+                    log('onSelect: calling Lampa.Select.update');  
                     Lampa.Select.update(items);  
                 } else {  
+                    log('onSelect: reopening dialog');  
                     Lampa.Select.destroy();  
                     setTimeout(showHideLayoutsDialog, 0);  
                 }  
@@ -153,7 +160,33 @@
                 updateHideDisplay();  
                 applyHidingToSelector();  
             },  
+            onCheck: function(item) {  
+                // Додаємо onCheck на випадок, якщо Lampa використовує це для чекбоксів  
+                log('onCheck: CALLED! item=' + JSON.stringify(item));  
+                
+                if (!item || !item.code) return;  
+                
+                const index = currentHidden.indexOf(item.code);  
+                
+                if (index > -1) {  
+                    currentHidden.splice(index, 1);  
+                } else {  
+                    currentHidden.push(item.code);  
+                }  
+                
+                saveHiddenLanguages(currentHidden);  
+                items = buildItems();  
+                
+                if (typeof Lampa.Select.update === 'function') {  
+                    Lampa.Select.update(items);  
+                }  
+                
+                updateHideDisplay();  
+                applyHidingToSelector();  
+            },  
             onBack: function() {  
+                log('onBack: saving final state=' + JSON.stringify(currentHidden));  
+                saveHiddenLanguages(currentHidden);  
                 updateHideDisplay();  
                 Lampa.Controller.toggle('settings_component');  
             }  
@@ -210,6 +243,7 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
+            log('onChange: opening dialog');  
             showHideLayoutsDialog();  
         },  
         onRender: function(el) {  
@@ -231,13 +265,11 @@
         
         log('init: keyboard_hidden_layouts=' + Lampa.Storage.get('keyboard_hidden_layouts'));  
         
-        // Застосовуємо приховування при кожному відкритті клавіатури  
         $(document).on('click', '.hg-button.hg-functionBtn.selector', function() {  
             log('Selector button clicked');  
             applyHidingToSelector();  
         });  
         
-        // Також застосовуємо при відкритті Select діалогу  
         Lampa.Listener.follow('select', function(e) {  
             if (e.type === 'open') {  
                 log('Select opened');  
