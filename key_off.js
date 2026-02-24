@@ -13,10 +13,11 @@
 
     function initPlugin() {
 
-        if (!window.Lampa) return;
+        if (!window.Lampa || !Lampa.SettingsApi) return;
 
+        // --- Переклади ---
         Lampa.Lang.add({
-            keyboard_settings_component: {
+            keyboard_settings_title: {
                 ru: 'Настройки клавиатуры',
                 en: 'Keyboard settings',
                 uk: 'Налаштування клавіатури'
@@ -33,11 +34,13 @@
             }
         });
 
-        // --- ЄДИНИЙ пункт у меню ---
+        var title = Lampa.Lang.translate('keyboard_settings_title');
+
+        // --- Реєстрація компонента ---
         Lampa.SettingsApi.addComponent({
             name: 'keyboard_settings',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v14H3zM5 7h2v2H5zm4 0h2v2H9zm4 0h2v2h-2zM5 11h2v2H5zm4 0h2v2H9zm4 0h2v2h-2z"/></svg>',
-            title: 'keyboard_settings_component'
+            title: title
         });
 
         var savedDefault = Lampa.Storage.get(DEFAULT_LAYOUT_KEY, 'uk');
@@ -50,11 +53,11 @@
             Lampa.Storage.set(HIDDEN_LAYOUTS_KEY, savedHidden);
         }
 
-        // Розкладка за замовчуванням
+        // --- Параметр 1 ---
         Lampa.SettingsApi.addParam({
             component: 'keyboard_settings',
             param: {
-                name: 'keyboard_default_layout',
+                name: Lampa.Lang.translate('keyboard_default_layout'),
                 type: 'select',
                 values: AVAILABLE_LAYOUTS,
                 default: savedDefault
@@ -73,11 +76,11 @@
             }
         });
 
-        // Приховані розкладки
+        // --- Параметр 2 ---
         Lampa.SettingsApi.addParam({
             component: 'keyboard_settings',
             param: {
-                name: 'keyboard_hidden_layouts',
+                name: Lampa.Lang.translate('keyboard_hidden_layouts'),
                 type: 'multiselect',
                 values: AVAILABLE_LAYOUTS,
                 default: savedHidden
@@ -94,7 +97,7 @@
             }
         });
 
-        // Фільтрація клавіатури
+        // --- Перехоплення клавіатури ---
         Lampa.Listener.follow('keyboard', function (event) {
 
             if (!event || !event.layouts) return;
@@ -110,6 +113,7 @@
         });
     }
 
+    // Чекаємо повної ініціалізації
     if (window.appready) initPlugin();
     else Lampa.Listener.follow('app', function (e) {
         if (e.type === 'ready') initPlugin();
