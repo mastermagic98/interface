@@ -30,23 +30,54 @@
         return title;  
     }  
   
+    function getHiddenLanguages() {  
+        // Отримуємо збережений масив прихованих мов  
+        const stored = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
+        try {  
+            const parsed = JSON.parse(stored);  
+            log('getHiddenLanguages: parsed=' + JSON.stringify(parsed));  
+            return Array.isArray(parsed) ? parsed : [];  
+        } catch (e) {  
+            log('getHiddenLanguages: parse error, returning []');  
+            return [];  
+        }  
+    }  
+  
+    function saveHiddenLanguages(hiddenCodes) {  
+        log('saveHiddenLanguages: saving ' + JSON.stringify(hiddenCodes));  
+        Lampa.Storage.set('keyboard_hidden_layouts', JSON.stringify(hiddenCodes));  
+        
+        // Також зберігаємо в окремі ключі для зворотної сумісності  
+        LANGUAGES.forEach(lang => {  
+            const isHidden = hiddenCodes.includes(lang.code);  
+            Lampa.Storage.set(lang.key, isHidden ? 'true' : 'false');  
+            log('saveHiddenLanguages: set ' + lang.key + '=' + (isHidden ? 'true' : 'false'));  
+        });  
+    }  
+  
     function getHiddenLanguagesText() {  
+        const hiddenCodes = getHiddenLanguages();  
         const hiddenTitles = LANGUAGES  
-            .filter(lang => Lampa.Storage.get(lang.key, 'false') === 'true')  
+            .filter(lang => hiddenCodes.includes(lang.code))  
             .map(lang => lang.title);  
         return hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
     }  
   
     function filterLayouts(layouts) {  
         const defaultCode = getDefaultCode();  
+        const hiddenCodes = getHiddenLanguages();  
+        
         const filtered = layouts.filter(l => {  
             const langObj = LANGUAGES.find(lang => lang.code === l.code);  
             if (!langObj) return true;  
-            const hide = Lampa.Storage.get(langObj.key, 'false') === 'true';  
+            
+            const hide = hiddenCodes.includes(l.code);  
             const keep = !hide || l.code === defaultCode;  
+            
             log('filterLayouts: code=' + l.code + ' hide=' + hide + ' keep=' + keep);  
             return keep;  
         });  
+        
         log('filterLayouts: before=' + layouts.length + ' after=' + filtered.length);  
         return filtered;  
     }  
@@ -80,10 +111,11 @@
     function applyHidingToSelector() {  
         log('applyHidingToSelector: start');  
         const defaultCode = getDefaultCode();  
+        const hiddenCodes = getHiddenLanguages();  
         
         setTimeout(function() {  
             LANGUAGES.forEach(lang => {  
-                const hide = Lampa.Storage.get(lang.key, 'false') === 'true';  
+                const hide = hiddenCodes.includes(lang.code);  
                 const element = $('.selectbox-item.selector').filter(function () {  
                     return $(this).text().trim() === lang.title;  
                 });  
@@ -111,20 +143,24 @@
     function showHideLayoutsDialog() {  
         log('showHideLayoutsDialog: opened');  
         const defaultCode = getDefaultCode();  
+        const hiddenCodes = getHiddenLanguages();  
+        
+        log('showHideLayoutsDialog: defaultCode=' + defaultCode + ' hiddenCodes=' + JSON.stringify(hiddenCodes));  
+  
+        // Створюємо копію масиву для роботи  
+        let workingHiddenCodes = [...hiddenCodes];  
   
         function buildItems() {  
             // Виключаємо розкладку за замовчуванням зі списку  
             return LANGUAGES  
                 .filter(lang => lang.code !== defaultCode)  
                 .map(lang => {  
-                    const stored = Lampa.Storage.get(lang.key, 'false');  
-                    const selected = stored === 'true';  
-                    log('buildItems: lang=' + lang.title + ' key=' + lang.key + ' stored=' + stored + ' selected=' + selected);  
+                    const selected = workingHiddenCodes.includes(lang.code);  
+                    log('buildItems: lang=' + lang.title + ' code=' + lang.code + ' selected=' + selected);  
                     return {  
                         title: lang.title,  
                         checkbox: true,  
                         selected: selected,  
-                        key: lang.key,  
                         code: lang.code  
                     };  
                 });  
@@ -136,32 +172,31 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect(item) {  
-                log('showHideLayoutsDialog onSelect: item=' + JSON.stringify(item));  
+                log('showHideLayoutsDialog onSelect: item.title=' + item.title + ' item.code=' + item.code);  
                 
-                if (!item || !item.key) {  
-                    log('showHideLayoutsDialog onSelect: no item.key, abort');  
+                if (!item || !item.code) {  
+                    log('showHideLayoutsDialog onSelect: no item.code, abort');  
                     return;  
                 }  
                 
-                // Отримуємо поточний стан  
-                const currentValue = Lampa.Storage.get(item.key, 'false');  
-                const currentState = currentValue === 'true';  
+                // Перемикаємо стан в робочому масиві  
+                const index = workingHiddenCodes.indexOf(item.code);  
+                if (index > -1) {  
+                    // Видаляємо з прихованих  
+                    workingHiddenCodes.splice(index, 1);  
+                    log('showHideLayoutsDialog onSelect: removed ' + item.code + ', new array=' + JSON.stringify(workingHiddenCodes));  
+                } else {  
+                    // Додаємо до прихованих  
+                    workingHiddenCodes.push(item.code);  
+                    log('showHideLayoutsDialog onSelect: added ' + item.code + ', new array=' + JSON.stringify(workingHiddenCodes));  
+                }  
                 
-                // Перемикаємо стан  
-                const newState = !currentState;  
-                const newValue = newState ? 'true' : 'false';  
+                // Зберігаємо оновлений масив  
+                saveHiddenLanguages(workingHiddenCodes);  
                 
-                log('showHideLayoutsDialog onSelect: key=' + item.key + ' currentValue=' + currentValue + ' currentState=' + currentState + ' newState=' + newState + ' newValue=' + newValue);  
-                
-                // Зберігаємо новий стан  
-                Lampa.Storage.set(item.key, newValue);  
-                
-                // Перевіряємо, що значення збережено  
-                const savedValue = Lampa.Storage.get(item.key);  
-                log('showHideLayoutsDialog onSelect: saved and verified value=' + savedValue);  
-                
-                // Оновлюємо стан чекбокса в поточному елементі  
-                item.selected = newState;  
+                // Оновлюємо стан чекбокса  
+                item.selected = workingHiddenCodes.includes(item.code);  
+                log('showHideLayoutsDialog onSelect: item.selected=' + item.selected);  
                 
                 // Оновлюємо клавіатуру  
                 if (window.keyboard) {  
@@ -169,7 +204,7 @@
                     log('showHideLayoutsDialog onSelect: keyboard reinitialized');  
                 }  
                 
-                // Перебудовуємо список елементів з новими станами  
+                // Перебудовуємо список елементів  
                 items = buildItems();  
                 
                 // Оновлюємо Select dialog  
@@ -222,11 +257,13 @@
             // Зберігаємо нову розкладку за замовчуванням  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
-            // Автоматично показуємо нову розкладку за замовчуванням, якщо вона була прихована  
-            const langObj = LANGUAGES.find(l => l.code === value);  
-            if (langObj) {  
-                Lampa.Storage.set(langObj.key, 'false');  
-                log('onChange keyboard_default_lang: unhid language ' + langObj.title + ' by setting ' + langObj.key + '=false');  
+            // Автоматично видаляємо нову розкладку за замовчуванням з прихованих  
+            const hiddenCodes = getHiddenLanguages();  
+            const index = hiddenCodes.indexOf(value);  
+            if (index > -1) {  
+                hiddenCodes.splice(index, 1);  
+                saveHiddenLanguages(hiddenCodes);  
+                log('onChange keyboard_default_lang: removed ' + value + ' from hidden, new array=' + JSON.stringify(hiddenCodes));  
             }  
             
             // Оновлюємо клавіатуру  
@@ -271,10 +308,8 @@
         log('start: begin');  
         
         // Виводимо поточні значення з Storage для діагностики  
-        LANGUAGES.forEach(lang => {  
-            const val = Lampa.Storage.get(lang.key, 'false');  
-            log('start: initial storage ' + lang.key + '=' + val);  
-        });  
+        log('start: keyboard_default_lang=' + Lampa.Storage.get('keyboard_default_lang', 'uk'));  
+        log('start: keyboard_hidden_layouts=' + Lampa.Storage.get('keyboard_hidden_layouts', '[]'));  
         
         ensureKeyboardHooked();  
         
