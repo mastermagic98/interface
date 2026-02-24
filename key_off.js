@@ -18,6 +18,7 @@
   
     function getDefaultCode() {  
         const val = Lampa.Storage.get('keyboard_default_lang', 'uk');  
+        log('getDefaultCode: ' + val);  
         return val;  
     }  
   
@@ -29,28 +30,43 @@
   
     function getHiddenLanguages() {  
         let stored = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
+        log('getHiddenLanguages: raw stored="' + stored + '"');  
         
         if (!stored || stored === '' || stored === 'undefined' || stored === 'null') {  
             stored = '[]';  
+            log('getHiddenLanguages: empty value, using []');  
         }  
         
         try {  
             const parsed = JSON.parse(stored);  
+            log('getHiddenLanguages: parsed=' + JSON.stringify(parsed));  
             return Array.isArray(parsed) ? parsed : [];  
         } catch (e) {  
+            log('getHiddenLanguages: parse error, initializing to []');  
             Lampa.Storage.set('keyboard_hidden_layouts', '[]');  
             return [];  
         }  
     }  
   
     function saveHiddenLanguages(hiddenCodes) {  
+        log('saveHiddenLanguages: START, hiddenCodes=' + JSON.stringify(hiddenCodes));  
         const jsonString = JSON.stringify(hiddenCodes);  
+        log('saveHiddenLanguages: jsonString="' + jsonString + '"');  
+        
         Lampa.Storage.set('keyboard_hidden_layouts', jsonString);  
+        log('saveHiddenLanguages: Storage.set called');  
+        
+        // Перевірка
+        const verify = Lampa.Storage.get('keyboard_hidden_layouts');  
+        log('saveHiddenLanguages: VERIFY read back="' + verify + '"');  
         
         LANGUAGES.forEach(function(lang) {  
             const isHidden = hiddenCodes.indexOf(lang.code) > -1;  
             Lampa.Storage.set(lang.key, isHidden ? 'true' : 'false');  
+            log('saveHiddenLanguages: set ' + lang.key + '=' + (isHidden ? 'true' : 'false'));  
         });  
+        
+        log('saveHiddenLanguages: END');  
     }  
   
     function getHiddenLanguagesText() {  
@@ -85,6 +101,7 @@
                 }  
                 return origInit.apply(this, arguments);  
             };  
+            log('hookKeyboard: hooked');  
         }  
     }  
   
@@ -116,23 +133,30 @@
     }  
   
     function updateHideDisplay() {  
+        log('updateHideDisplay: called');  
         const hideEl = $('.settings-param[data-name="keyboard_hide_button"] .settings-param__value');  
         if (hideEl.length) {  
             const hideText = getHiddenLanguagesText();  
             hideEl.text(hideText);  
+            log('updateHideDisplay: set text to "' + hideText + '"');  
+        } else {  
+            log('updateHideDisplay: element not found');  
         }  
     }  
   
     function showHideLayoutsDialog() {  
+        log('showHideLayoutsDialog: OPENED');  
         const defaultCode = getDefaultCode();  
   
         function buildItems() {  
             const hiddenCodes = getHiddenLanguages();  
+            log('buildItems: hiddenCodes=' + JSON.stringify(hiddenCodes));  
             
             return LANGUAGES  
                 .filter(function(lang) { return lang.code !== defaultCode; })  
                 .map(function(lang) {  
                     const selected = hiddenCodes.indexOf(lang.code) > -1;  
+                    log('buildItems: ' + lang.title + ' (code=' + lang.code + ') selected=' + selected);  
                     return {  
                         title: lang.title,  
                         checkbox: true,  
@@ -148,30 +172,47 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
+                log('onSelect: TRIGGERED for item=' + JSON.stringify(item));  
+                
                 if (!item || !item.code) {  
+                    log('onSelect: no item.code, ABORT');  
                     return;  
                 }  
                 
                 let currentHiddenCodes = getHiddenLanguages();  
+                log('onSelect: BEFORE change, currentHiddenCodes=' + JSON.stringify(currentHiddenCodes));  
+                
                 const index = currentHiddenCodes.indexOf(item.code);  
+                log('onSelect: index of ' + item.code + ' = ' + index);  
                 
                 if (index > -1) {  
                     currentHiddenCodes.splice(index, 1);  
+                    log('onSelect: REMOVED ' + item.code);  
                 } else {  
                     currentHiddenCodes.push(item.code);  
+                    log('onSelect: ADDED ' + item.code);  
                 }  
                 
+                log('onSelect: AFTER change, currentHiddenCodes=' + JSON.stringify(currentHiddenCodes));  
+                
                 saveHiddenLanguages(currentHiddenCodes);  
+                
+                // Додаткова перевірка після збереження
+                const afterSave = getHiddenLanguages();
+                log('onSelect: AFTER saveHiddenLanguages, read back=' + JSON.stringify(afterSave));  
                 
                 if (window.keyboard) {  
                     window.keyboard.init();  
                 }  
                 
                 items = buildItems();  
+                log('onSelect: items rebuilt, count=' + items.length);  
                 
                 if (typeof Lampa.Select.update === 'function') {  
+                    log('onSelect: calling Lampa.Select.update');  
                     Lampa.Select.update(items);  
                 } else {  
+                    log('onSelect: Lampa.Select.update not available, reopening dialog');  
                     Lampa.Select.destroy();  
                     setTimeout(showHideLayoutsDialog, 0);  
                 }  
@@ -179,6 +220,7 @@
                 updateHideDisplay();  
             },  
             onBack: function() {  
+                log('onBack: dialog closed');  
                 updateHideDisplay();  
                 Lampa.Controller.toggle('settings_component');  
             }  
@@ -209,6 +251,7 @@
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onChange: function(value) {  
+            log('onChange keyboard_default_lang: value=' + value);  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
             const hiddenCodes = getHiddenLanguages();  
@@ -237,12 +280,14 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
+            log('onChange keyboard_hide_button: opening dialog');  
             showHideLayoutsDialog();  
         },  
         onRender: function(el) {  
             try {  
                 const hideText = getHiddenLanguagesText();  
                 el.find('.settings-param__value').text(hideText);  
+                log('onRender: set value to "' + hideText + '"');  
             } catch (e) {  
                 console.error('keyboard_settings_select onRender error:', e);  
             }  
@@ -250,9 +295,16 @@
     });  
   
     function start() {  
+        log('start: BEGIN');  
+        
         const storedValue = Lampa.Storage.get('keyboard_hidden_layouts');  
+        log('start: initial keyboard_hidden_layouts="' + storedValue + '"');  
+        
         if (!storedValue || storedValue === '' || storedValue === 'undefined' || storedValue === 'null') {  
+            log('start: initializing keyboard_hidden_layouts to []');  
             Lampa.Storage.set('keyboard_hidden_layouts', '[]');  
+            const verify = Lampa.Storage.get('keyboard_hidden_layouts');  
+            log('start: after init, keyboard_hidden_layouts="' + verify + '"');  
         }  
         
         ensureKeyboardHooked();  
@@ -266,6 +318,8 @@
         $(document).on('click', '.hg-button.hg-functionBtn.selector', function() {  
             applyHidingToSelector();  
         });  
+        
+        log('start: END');  
     }  
   
     if (window.appready) {
