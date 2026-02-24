@@ -15,7 +15,6 @@
 
         if (!window.Lampa) return;
 
-        // --- Переклади ---
         Lampa.Lang.add({
             keyboard_settings_component: {
                 ru: 'Настройки клавиатуры',
@@ -34,7 +33,7 @@
             }
         });
 
-        // --- Створення окремого пункту меню ---
+        // --- ЄДИНИЙ пункт у меню ---
         Lampa.SettingsApi.addComponent({
             name: 'keyboard_settings',
             icon: '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v14H3zM5 7h2v2H5zm4 0h2v2H9zm4 0h2v2h-2zM5 11h2v2H5zm4 0h2v2H9zm4 0h2v2h-2z"/></svg>',
@@ -46,12 +45,12 @@
 
         if (!Array.isArray(savedHidden)) savedHidden = [];
 
-        if (savedHidden.indexOf(savedDefault) === -1) {
+        if (!savedHidden.includes(savedDefault)) {
             savedHidden.push(savedDefault);
             Lampa.Storage.set(HIDDEN_LAYOUTS_KEY, savedHidden);
         }
 
-        // --- Розкладка за замовчуванням ---
+        // Розкладка за замовчуванням
         Lampa.SettingsApi.addParam({
             component: 'keyboard_settings',
             param: {
@@ -66,7 +65,7 @@
 
                 var hidden = Lampa.Storage.get(HIDDEN_LAYOUTS_KEY, []);
 
-                if (hidden.indexOf(value) === -1) {
+                if (!hidden.includes(value)) {
                     hidden.push(value);
                 }
 
@@ -74,7 +73,7 @@
             }
         });
 
-        // --- Приховані розкладки ---
+        // Приховані розкладки
         Lampa.SettingsApi.addParam({
             component: 'keyboard_settings',
             param: {
@@ -95,7 +94,7 @@
             }
         });
 
-        // --- Фільтрація клавіатури ---
+        // Фільтрація клавіатури
         Lampa.Listener.follow('keyboard', function (event) {
 
             if (!event || !event.layouts) return;
@@ -104,7 +103,7 @@
             var defaultLayout = Lampa.Storage.get(DEFAULT_LAYOUT_KEY, 'uk');
 
             event.layouts = event.layouts.filter(function (layout) {
-                return hidden.indexOf(layout.code) === -1;
+                return !hidden.includes(layout.code);
             });
 
             event.default = defaultLayout;
