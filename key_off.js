@@ -60,14 +60,10 @@
     }  
   
     function isKeyboardLanguageSelector() {  
-        // Перевіряємо чи це вікно вибору мови клавіатури (не налаштування)  
         const selectbox = document.querySelector('.selectbox');  
         if (!selectbox) return false;  
         
-        // Перевіряємо чи є кнопки з класом selector (кнопки мов)  
         const hasLanguageButtons = selectbox.querySelectorAll('.selectbox-item.selector').length > 0;  
-        
-        // Перевіряємо чи НЕ є це діалог налаштувань (немає checkbox)  
         const isNotSettingsDialog = selectbox.querySelectorAll('.selectbox-item__checkbox').length === 0;  
         
         return hasLanguageButtons && isNotSettingsDialog;  
@@ -78,7 +74,6 @@
             return;  
         }  
         
-        // КРИТИЧНО: приховуємо тільки якщо це селектор мови клавіатури  
         if (!isKeyboardLanguageSelector()) {  
             return;  
         }  
@@ -97,7 +92,7 @@
             return;  
         }  
         
-        log('applyHiding: hiding in keyboard language selector, codes=' + JSON.stringify(hiddenCodes));  
+        log('applyHiding: codes=' + JSON.stringify(hiddenCodes));  
         
         buttons.forEach(function(button) {  
             const buttonText = button.textContent.trim();  
@@ -136,16 +131,16 @@
         log('showDialog: initial=' + JSON.stringify(currentHidden));  
   
         function buildItems() {  
-            // В діалозі налаштувань показуємо ВСІ мови (крім дефолтної)  
             return LANGUAGES  
                 .filter(function(lang) { return lang.code !== defaultCode; })  
                 .map(function(lang) {  
                     const isSelected = currentHidden.indexOf(lang.code) > -1;  
                     return {  
                         title: lang.title,  
+                        checkbox: true,  
+                        checked: isSelected,  
                         selected: isSelected,  
-                        code: lang.code,  
-                        subtitle: isSelected ? '✓ Приховано' : ''  
+                        code: lang.code  
                     };  
                 });  
         }  
@@ -156,12 +151,13 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
-                log('onSelect: code=' + item.code);  
+                log('onSelect: code=' + item.code + ', selected=' + item.selected);  
                 
                 if (!item || !item.code) return;  
                 
                 const index = currentHidden.indexOf(item.code);  
                 
+                // Перемикаємо стан  
                 if (index > -1) {  
                     currentHidden.splice(index, 1);  
                     log('onSelect: REMOVED ' + item.code);  
@@ -170,13 +166,20 @@
                     log('onSelect: ADDED ' + item.code);  
                 }  
                 
+                log('onSelect: new state=' + JSON.stringify(currentHidden));  
+                
+                // Зберігаємо  
                 saveHiddenLanguages(currentHidden);  
                 
+                // Перебудовуємо items з новими станами  
                 items = buildItems();  
                 
+                // Оновлюємо діалог  
                 if (typeof Lampa.Select.update === 'function') {  
+                    log('onSelect: calling update');  
                     Lampa.Select.update(items);  
                 } else {  
+                    log('onSelect: reopening');  
                     Lampa.Select.destroy();  
                     setTimeout(showHideLayoutsDialog, 0);  
                 }  
@@ -188,6 +191,8 @@
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
+        
+        log('showDialog: shown with ' + items.length + ' items');  
     }  
   
     Lampa.SettingsApi.addComponent({  
@@ -217,7 +222,6 @@
             log('onChange default: ' + value);  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
-            // Видаляємо нову дефолтну розкладку з прихованих  
             const hiddenCodes = getHiddenLanguages();  
             const index = hiddenCodes.indexOf(value);  
             if (index > -1) {  
@@ -258,14 +262,13 @@
         log('init: keyboard_type=' + keyboardType);  
         
         if (!isLampaKeyboard()) {  
-            log('init: system keyboard active, plugin disabled');  
+            log('init: system keyboard, disabled');  
             return;  
         }  
         
         const stored = Lampa.Storage.get('keyboard_hidden_layouts', '');  
         log('init: stored="' + stored + '"');  
         
-        // Інтервал для перевірки  
         setInterval(function() {  
             if (!isLampaKeyboard()) return;  
             
@@ -274,7 +277,6 @@
             }  
         }, 1000);  
         
-        // MutationObserver  
         const observer = new MutationObserver(function(mutations) {  
             if (!isLampaKeyboard()) return;  
             
