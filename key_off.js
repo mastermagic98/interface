@@ -62,7 +62,6 @@
     }  
   
     function applyHidingToSelector() {  
-        // Перевіряємо чи використовується Lampa клавіатура  
         if (!isLampaKeyboard()) {  
             log('applyHiding: system keyboard active, skipping');  
             return;  
@@ -124,20 +123,30 @@
         const defaultCode = getDefaultCode();  
         let currentHidden = getHiddenLanguages().slice();  
         
-        log('showDialog: initial=' + JSON.stringify(currentHidden));  
+        log('showDialog: initial=' + JSON.stringify(currentHidden) + ', default=' + defaultCode);  
   
         function buildItems() {  
-            return LANGUAGES  
-                .filter(function(lang) { return lang.code !== defaultCode; })  
-                .map(function(lang) {  
-                    const isSelected = currentHidden.indexOf(lang.code) > -1;  
-                    return {  
-                        title: lang.title,  
-                        selected: isSelected,  
-                        code: lang.code,  
-                        subtitle: isSelected ? '✓ Приховано' : ''  
-                    };  
-                });  
+            // Показуємо ВСІ мови, включаючи розкладку за замовчуванням  
+            return LANGUAGES.map(function(lang) {  
+                const isDefault = lang.code === defaultCode;  
+                const isSelected = currentHidden.indexOf(lang.code) > -1;  
+                
+                // Формуємо підзаголовок  
+                let subtitle = '';  
+                if (isDefault) {  
+                    subtitle = '(за замовчуванням)';  
+                } else if (isSelected) {  
+                    subtitle = '✓ Приховано';  
+                }  
+                
+                return {  
+                    title: lang.title,  
+                    selected: isSelected && !isDefault, // Не показуємо галочку для дефолтної  
+                    code: lang.code,  
+                    subtitle: subtitle,  
+                    isDefault: isDefault // Додаємо прапорець  
+                };  
+            });  
         }  
   
         let items = buildItems();  
@@ -146,10 +155,17 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
-                log('onSelect: ENTER, code=' + item.code);  
+                log('onSelect: ENTER, code=' + item.code + ', isDefault=' + item.isDefault);  
                 
                 if (!item || !item.code) {  
                     log('onSelect: no code, EXIT');  
+                    return;  
+                }  
+                
+                // Якщо це розкладка за замовчуванням - не дозволяємо її ховати  
+                if (item.isDefault) {  
+                    log('onSelect: cannot hide default layout, EXIT');  
+                    Lampa.Noty.show('Не можна приховати розкладку за замовчуванням');  
                     return;  
                 }  
                 
@@ -220,6 +236,7 @@
             log('onChange default: ' + value);  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
+            // Видаляємо нову дефолтну розкладку з прихованих  
             const hiddenCodes = getHiddenLanguages();  
             const index = hiddenCodes.indexOf(value);  
             if (index > -1) {  
@@ -265,13 +282,11 @@
         lastHiddenState = stored;  
         log('init: stored="' + stored + '"');  
         
-        // Якщо системна клавіатура - не запускаємо моніторинг  
         if (!isLampaKeyboard()) {  
             log('init: system keyboard active, monitoring disabled');  
             return;  
         }  
         
-        // Інтервал для перевірки кнопок  
         setInterval(function() {  
             if (!isLampaKeyboard()) return;  
             
@@ -281,7 +296,6 @@
             }  
         }, 1000);  
         
-        // MutationObserver для швидкої реакції  
         const observer = new MutationObserver(function(mutations) {  
             if (!isLampaKeyboard()) return;  
             
