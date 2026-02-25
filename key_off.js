@@ -13,6 +13,7 @@
     ];  
   
     let isProcessing = false;  
+    let isInSettingsDialog = false;  
   
     function log(msg) {  
         console.log('[keyboard_settings_select]', msg);  
@@ -74,6 +75,12 @@
             return;  
         }  
         
+        // НЕ застосовуємо приховування якщо це діалог налаштувань  
+        if (isInSettingsDialog) {  
+            log('applyHiding: skipping - in settings dialog');  
+            return;  
+        }  
+        
         if (!isKeyboardLanguageSelector()) {  
             return;  
         }  
@@ -124,7 +131,6 @@
     }  
   
     function updateCheckboxVisually(item, isChecked) {  
-        // Оновлюємо візуально чекбокс  
         const checkbox = item.querySelector('.selectbox-item__checkbox');  
         if (checkbox) {  
             if (isChecked) {  
@@ -134,7 +140,6 @@
             }  
         }  
         
-        // Також оновлюємо клас на самому item  
         if (isChecked) {  
             item.classList.add('selectbox-item--checked');  
         } else {  
@@ -142,11 +147,63 @@
         }  
     }  
   
+    function showDefaultLangDialog() {  
+        isInSettingsDialog = true;  
+        log('showDefaultLangDialog: opened, isInSettingsDialog=true');  
+        
+        const currentDefault = getDefaultCode();  
+        
+        const items = LANGUAGES.map(function(lang) {  
+            return {  
+                title: lang.title,  
+                code: lang.code,  
+                selected: lang.code === currentDefault  
+            };  
+        });  
+        
+        Lampa.Select.show({  
+            title: 'Встановити розкладку за замовчуванням',  
+            items: items,  
+            onSelect: function(item) {  
+                log('showDefaultLangDialog: selected ' + item.code);  
+                
+                if (!item || !item.code) return;  
+                
+                // Зберігаємо нову розкладку за замовчуванням  
+                Lampa.Storage.set('keyboard_default_lang', item.code);  
+                
+                // Видаляємо її з прихованих якщо там є  
+                const hiddenCodes = getHiddenLanguages();  
+                const index = hiddenCodes.indexOf(item.code);  
+                if (index > -1) {  
+                    hiddenCodes.splice(index, 1);  
+                    saveHiddenLanguages(hiddenCodes);  
+                }  
+                
+                updateHideDisplay();  
+                
+                isInSettingsDialog = false;  
+                log('showDefaultLangDialog: closed, isInSettingsDialog=false');  
+                
+                Lampa.Controller.toggle('settings_component');  
+            },  
+            onBack: function() {  
+                log('showDefaultLangDialog: back');  
+                isInSettingsDialog = false;  
+                log('showDefaultLangDialog: closed, isInSettingsDialog=false');  
+                Lampa.Controller.toggle('settings_component');  
+            }  
+        });  
+    }  
+  
     function showHideLayoutsDialog() {  
+        isInSettingsDialog = true;  
+        log('showHideLayoutsDialog: opened, isInSettingsDialog=true');  
+        
         const defaultCode = getDefaultCode();  
         let workingHidden = getHiddenLanguages().slice();  
         
-        log('showDialog: defaultCode=' + defaultCode + ', initial=' + JSON.stringify(workingHidden));  
+        log('showHideLayoutsDialog: defaultCode=' + defaultCode + ', initial=' + JSON.stringify(workingHidden));  
   
         function buildItems() {  
             return LANGUAGES  
@@ -179,18 +236,14 @@
                     
                     if (!lang) return;  
                     
-                    // Встановлюємо правильний стан чекбокса візуально  
                     const isCurrentlyChecked = workingHidden.indexOf(lang.code) > -1;  
                     updateCheckboxVisually(item, isCurrentlyChecked);  
                     
-                    // Видаляємо старі обробники  
                     const newItem = item.cloneNode(true);  
                     item.parentNode.replaceChild(newItem, item);  
                     
-                    // Перевстановлюємо візуальний стан після клонування  
                     updateCheckboxVisually(newItem, isCurrentlyChecked);  
                     
-                    // Додаємо новий обробник  
                     newItem.addEventListener('click', function(e) {  
                         e.preventDefault();  
                         e.stopPropagation();  
@@ -212,19 +265,13 @@
                         
                         log('CLICK: new state=' + JSON.stringify(workingHidden));  
                         
-                        // Оновлюємо візуально ОДРАЗУ  
                         updateCheckboxVisually(newItem, newCheckedState);  
-                        
-                        // Зберігаємо  
                         saveHiddenLanguages(workingHidden);  
                         
-                        // Перебудовуємо items для Lampa.Select  
                         items = buildItems();  
                         
-                        // Оновлюємо через Lampa API (це оновить внутрішній стан)  
                         if (typeof Lampa.Select.update === 'function') {  
                             Lampa.Select.update(items);  
-                            // Після оновлення Lampa перепідключаємо обробники  
                             attachHandlers();  
                         }  
                     });  
@@ -240,20 +287,23 @@
                     // Ігноруємо  
                 },  
                 onBack: function() {  
-                    log('onBack: final=' + JSON.stringify(workingHidden));  
+                    log('showHideLayoutsDialog: back, final=' + JSON.stringify(workingHidden));  
                     saveHiddenLanguages(workingHidden);  
                     updateHideDisplay();  
+                    isInSettingsDialog = false;  
+                    log('showHideLayoutsDialog: closed, isInSettingsDialog=false');  
                     Lampa.Controller.toggle('settings_component');  
                 }  
             });  
             
-            log('showDialog: dialog shown');  
+            log('showHideLayoutsDialog: dialog shown');  
             
             attachHandlers();  
             
         } catch (e) {  
-            log('showDialog: ERROR=' + e.message);  
+            log('showHideLayoutsDialog: ERROR=' + e.message);  
             console.error('showHideLayoutsDialog error:', e);  
+            isInSettingsDialog = false;  
         }  
     }  
   
@@ -266,32 +316,26 @@
     Lampa.SettingsApi.addParam({  
         component: 'keyboard_settings_select',  
         param: {  
-            name: 'keyboard_default_lang',  
-            type: 'select',  
-            values: {  
-                'uk': 'Українська',  
-                'ru': 'Русский',  
-                'en': 'English',  
-                'he': 'עִברִית'  
-            },  
-            'default': 'uk'  
+            name: 'keyboard_default_lang_button',  
+            type: 'button'  
         },  
         field: {  
-            name: 'Розкладка за замовчуванням',  
+            name: 'Встановити розкладку за замовчуванням',  
             description: 'Вибір розкладки за замовчуванням'  
         },  
-        onChange: function(value) {  
-            log('onChange default: ' + value);  
-            Lampa.Storage.set('keyboard_default_lang', value);  
-            
-            const hiddenCodes = getHiddenLanguages();  
-            const index = hiddenCodes.indexOf(value);  
-            if (index > -1) {  
-                hiddenCodes.splice(index, 1);  
-                saveHiddenLanguages(hiddenCodes);  
+        onChange: function() {  
+            log('onChange: opening default lang dialog');  
+            showDefaultLangDialog();  
+        },  
+        onRender: function(el) {  
+            try {  
+                const defaultTitle = LANGUAGES.find(function(l) { 
+                    return l.code === getDefaultCode(); 
+                });  
+                el.find('.settings-param__value').text(defaultTitle ? defaultTitle.title : 'Українська');  
+            } catch (e) {  
+                console.error('onRender error:', e);  
             }  
-            
-            updateHideDisplay();  
         }  
     });  
   
@@ -306,7 +350,7 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
-            log('onChange: opening dialog');  
+            log('onChange: opening hide dialog');  
             try {  
                 showHideLayoutsDialog();  
             } catch (e) {  
@@ -333,13 +377,14 @@
         
         setInterval(function() {  
             if (!isLampaKeyboard()) return;  
-            if (isKeyboardLanguageSelector()) {  
+            if (isKeyboardLanguageSelector() && !isInSettingsDialog) {  
                 applyHidingToSelector();  
             }  
         }, 1000);  
         
         const observer = new MutationObserver(function(mutations) {  
             if (!isLampaKeyboard()) return;  
+            if (isInSettingsDialog) return;  
             
             let foundSelectbox = false;  
             
