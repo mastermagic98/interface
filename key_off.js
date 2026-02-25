@@ -16,10 +16,21 @@
         console.log('[keyboard_hide]', msg);
     }
 
+    function getDefaultCode() {
+        const val = localStorage.getItem('keyboard_default_lang') || 'uk';
+        log('localStorage GET default: ' + val);
+        return val;
+    }
+
+    function setDefaultCode(value) {
+        localStorage.setItem('keyboard_default_lang', value);
+        log('localStorage SET default: ' + value);
+    }
+
     function getHidden() {
         try {
             const hidden = JSON.parse(localStorage.getItem('keyboard_hidden_layouts') || '[]');
-            log('localStorage GET: ' + JSON.stringify(hidden));
+            log('localStorage GET hidden: ' + JSON.stringify(hidden));
             return hidden;
         } catch (e) {
             return [];
@@ -28,7 +39,7 @@
 
     function setHidden(hidden) {
         localStorage.setItem('keyboard_hidden_layouts', JSON.stringify(hidden));
-        log('localStorage SET: ' + JSON.stringify(hidden));
+        log('localStorage SET hidden: ' + JSON.stringify(hidden));
     }
 
     function parseHtml(str) {
@@ -77,7 +88,7 @@
 
     function openHideMenu() {
         var hidden = getHidden();
-        var defaultCode = Lampa.Storage.get('keyboard_default_lang', 'uk');
+        var defaultCode = getDefaultCode();
         var defaultTitle = LANGUAGES.find(l => l.code === defaultCode)?.title || 'Українська';
 
         var items = [
@@ -138,7 +149,7 @@
         },
         field: { name: 'Розкладка за замовчуванням', description: 'Вибір розкладки за замовчуванням' },
         onChange: function(value) {
-            Lampa.Storage.set('keyboard_default_lang', value);
+            setDefaultCode(value);
             var hidden = getHidden();
             var langTitle = LANGUAGES.find(l => l.code === value)?.title;
             if (langTitle && hidden.includes(langTitle)) {
