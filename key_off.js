@@ -13,7 +13,6 @@
     ];  
   
     let isProcessing = false;  
-    let selectInstance = null;  
   
     function log(msg) {  
         console.log('[keyboard_settings_select]', msg);  
@@ -106,7 +105,6 @@
                 
                 if (shouldHide) {  
                     button.style.display = 'none';  
-                    log('applyHiding: HIDE ' + buttonText);  
                 } else {  
                     button.style.display = '';  
                 }  
@@ -129,109 +127,99 @@
         const defaultCode = getDefaultCode();  
         let workingHidden = getHiddenLanguages().slice();  
         
-        log('showDialog: initial=' + JSON.stringify(workingHidden));  
+        log('showDialog: defaultCode=' + defaultCode + ', initial=' + JSON.stringify(workingHidden));  
   
         function buildItems() {  
-            log('buildItems: workingHidden=' + JSON.stringify(workingHidden));  
-            
-            return LANGUAGES  
-                .filter(function(lang) { return lang.code !== defaultCode; })  
-                .map(function(lang) {  
-                    const isChecked = workingHidden.indexOf(lang.code) > -1;  
-                    return {  
-                        title: lang.title,  
-                        checkbox: true,
-                        checked: isChecked,
-                        code: lang.code  
-                    };  
-                });  
+            // Показуємо ВСІ мови (не виключаємо дефолтну)  
+            return LANGUAGES.map(function(lang) {  
+                const isChecked = workingHidden.indexOf(lang.code) > -1;  
+                const isDefault = lang.code === defaultCode;  
+                
+                return {  
+                    title: lang.title + (isDefault ? ' (за замовчуванням)' : ''),  
+                    checkbox: true,
+                    checked: isChecked,
+                    code: lang.code  
+                };  
+            });  
         }  
   
         let items = buildItems();  
+        let dialogShown = false;  
   
-        // Обробник для чекбоксів через DOM події  
-        setTimeout(function() {  
-            const checkboxItems = document.querySelectorAll('.selectbox-item--checkbox');  
-            log('showDialog: found ' + checkboxItems.length + ' checkbox items');  
-            
-            checkboxItems.forEach(function(item) {  
-                const titleEl = item.querySelector('.selectbox-item__title');  
-                if (!titleEl) return;  
+        function attachHandlers() {  
+            setTimeout(function() {  
+                const checkboxItems = document.querySelectorAll('.selectbox-item--checkbox');  
+                log('attachHandlers: found ' + checkboxItems.length + ' items');  
                 
-                const title = titleEl.textContent.trim();  
-                const lang = LANGUAGES.find(function(l) { return l.title === title; });  
-                
-                if (!lang) return;  
-                
-                log('showDialog: attaching handler to ' + title);  
-                
-                // Видаляємо старі обробники  
-                item.replaceWith(item.cloneNode(true));  
-                const newItem = document.querySelector('.selectbox-item--checkbox .selectbox-item__title:contains("' + title + '")');  
-                if (!newItem) return;  
-                const newItemEl = newItem.closest('.selectbox-item--checkbox');  
-                
-                // Альтернативний пошук  
-                const allItems = document.querySelectorAll('.selectbox-item--checkbox');  
-                let targetItem = null;  
-                allItems.forEach(function(el) {  
-                    const t = el.querySelector('.selectbox-item__title');  
-                    if (t && t.textContent.trim() === title) {  
-                        targetItem = el;  
-                    }  
-                });  
-                
-                if (!targetItem) {  
-                    log('showDialog: item not found for ' + title);  
-                    return;  
-                }  
-                
-                // Додаємо обробник кліку  
-                targetItem.addEventListener('click', function(e) {  
-                    log('CLICK on ' + title + ' (code=' + lang.code + ')');  
+                checkboxItems.forEach(function(item) {  
+                    const titleEl = item.querySelector('.selectbox-item__title');  
+                    if (!titleEl) return;  
                     
-                    const index = workingHidden.indexOf(lang.code);  
+                    const titleText = titleEl.textContent.trim();  
+                    // Видаляємо "(за замовчуванням)" з тексту для пошуку  
+                    const cleanTitle = titleText.replace(' (за замовчуванням)', '');  
+                    const lang = LANGUAGES.find(function(l) { return l.title === cleanTitle; });  
                     
-                    if (index > -1) {  
-                        workingHidden.splice(index, 1);  
-                        log('CLICK: REMOVED ' + lang.code);  
-                    } else {  
-                        workingHidden.push(lang.code);  
-                        log('CLICK: ADDED ' + lang.code);  
-                    }  
+                    if (!lang) return;  
                     
-                    log('CLICK: workingHidden=' + JSON.stringify(workingHidden));  
+                    // Видаляємо старі обробники через clone  
+                    const newItem = item.cloneNode(true);  
+                    item.parentNode.replaceChild(newItem, item);  
                     
-                    saveHiddenLanguages(workingHidden);  
-                    
-                    // Перебудовуємо  
-                    items = buildItems();  
-                    
-                    if (typeof Lampa.Select.update === 'function') {  
-                        Lampa.Select.update(items);  
+                    // Додаємо новий обробник  
+                    newItem.addEventListener('click', function(e) {  
+                        log('CLICK: ' + lang.title + ' (code=' + lang.code + ')');  
                         
-                        // Перепідключаємо обробники  
-                        setTimeout(function() {  
-                            showHideLayoutsDialog();  
-                        }, 0);  
-                    }  
+                        const index = workingHidden.indexOf(lang.code);  
+                        
+                        if (index > -1) {  
+                            workingHidden.splice(index, 1);  
+                            log('CLICK: REMOVED ' + lang.code);  
+                        } else {  
+                            workingHidden.push(lang.code);  
+                            log('CLICK: ADDED ' + lang.code);  
+                        }  
+                        
+                        log('CLICK: new state=' + JSON.stringify(workingHidden));  
+                        
+                        saveHiddenLanguages(workingHidden);  
+                        
+                        items = buildItems();  
+                        
+                        if (typeof Lampa.Select.update === 'function') {  
+                            Lampa.Select.update(items);  
+                            attachHandlers();  
+                        }  
+                    });  
                 });  
-            });  
-        }, 100);  
+            }, 150);  
+        }  
   
-        Lampa.Select.show({  
-            title: 'Приховати розкладки',  
-            items: items,  
-            onSelect: function(item) {  
-                log('onSelect: code=' + (item ? item.code : 'null'));  
-            },  
-            onBack: function() {  
-                log('onBack: final=' + JSON.stringify(workingHidden));  
-                saveHiddenLanguages(workingHidden);  
-                updateHideDisplay();  
-                Lampa.Controller.toggle('settings_component');  
-            }  
-        });  
+        try {  
+            Lampa.Select.show({  
+                title: 'Приховати розкладки',  
+                items: items,  
+                onSelect: function(item) {  
+                    // Lampa може викликати onSelect - ігноруємо  
+                },  
+                onBack: function() {  
+                    log('onBack: final=' + JSON.stringify(workingHidden));  
+                    saveHiddenLanguages(workingHidden);  
+                    updateHideDisplay();  
+                    Lampa.Controller.toggle('settings_component');  
+                }  
+            });  
+            
+            dialogShown = true;  
+            log('showDialog: dialog shown');  
+            
+            attachHandlers();  
+            
+        } catch (e) {  
+            log('showDialog: ERROR=' + e.message);  
+            console.error('showHideLayoutsDialog error:', e);  
+        }  
     }  
   
     Lampa.SettingsApi.addComponent({  
@@ -258,6 +246,7 @@
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onChange: function(value) {  
+            log('onChange default: ' + value);  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
             const hiddenCodes = getHiddenLanguages();  
@@ -282,7 +271,13 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
-            showHideLayoutsDialog();  
+            log('onChange: opening dialog');  
+            try {  
+                showHideLayoutsDialog();  
+            } catch (e) {  
+                log('onChange: ERROR=' + e.message);  
+                console.error('onChange error:', e);  
+            }  
         },  
         onRender: function(el) {  
             try {  
