@@ -380,8 +380,7 @@
             
             if (foundSelectbox) {  
                 applyHidingToSelector();  
-                setTimeout(applyHidingToSelector, 10);  
-                setTimeout(applyHidingToSelector, 50);  
+                setTimeout(applyHidingToSelector, 1);  
             }  
         });  
         
