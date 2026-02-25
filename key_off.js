@@ -18,28 +18,29 @@
 
     function getDefaultCode() {
         const val = localStorage.getItem('keyboard_default_lang') || 'uk';
-        log('localStorage GET default: ' + val);
+        log('getDefaultCode: ' + val);
         return val;
     }
 
     function setDefaultCode(value) {
         localStorage.setItem('keyboard_default_lang', value);
-        log('localStorage SET default: ' + value);
+        log('setDefaultCode: ' + value);
     }
 
     function getHidden() {
         try {
             const hidden = JSON.parse(localStorage.getItem('keyboard_hidden_layouts') || '[]');
-            log('localStorage GET hidden: ' + JSON.stringify(hidden));
+            log('getHidden: ' + JSON.stringify(hidden));
             return hidden;
         } catch (e) {
+            log('getHidden error: ' + e.message);
             return [];
         }
     }
 
     function setHidden(hidden) {
         localStorage.setItem('keyboard_hidden_layouts', JSON.stringify(hidden));
-        log('localStorage SET hidden: ' + JSON.stringify(hidden));
+        log('setHidden: ' + JSON.stringify(hidden));
     }
 
     function parseHtml(str) {
@@ -67,6 +68,7 @@
     }
 
     function applyHiding() {
+        log('applyHiding start');
         var selectContent = $('.selectbox__content.layer--height');
         if (selectContent.length) {
             var html = selectContent.prop('outerHTML');
@@ -87,6 +89,7 @@
     }
 
     function openHideMenu() {
+        log('openHideMenu opened');
         var hidden = getHidden();
         var defaultCode = getDefaultCode();
         var defaultTitle = LANGUAGES.find(l => l.code === defaultCode)?.title || 'Українська';
@@ -114,16 +117,20 @@
                     var index = newHidden.indexOf(item.lang);
                     if (index > -1) {
                         newHidden.splice(index, 1);
+                        log('Removed from hidden: ' + item.lang);
                     } else {
                         newHidden.push(item.lang);
+                        log('Added to hidden: ' + item.lang);
                     }
                     setHidden(newHidden);
                     updateDisplays();
                 }
             },
             onBack: function() {
+                log('openHideMenu onBack');
                 Lampa.Controller.toggle('settings_component');
-                setTimeout(updateDisplays, 300);
+                setTimeout(updateDisplays, 400);
+                setTimeout(updateDisplays, 800);
             }
         });
     }
