@@ -75,9 +75,7 @@
             return;  
         }  
         
-        // НЕ застосовуємо приховування якщо це діалог налаштувань  
         if (isInSettingsDialog) {  
-            log('applyHiding: skipping - in settings dialog');  
             return;  
         }  
         
@@ -99,7 +97,7 @@
             return;  
         }  
         
-        log('applyHiding: codes=' + JSON.stringify(hiddenCodes));  
+        log('applyHiding: INSTANT hiding, codes=' + JSON.stringify(hiddenCodes));  
         
         buttons.forEach(function(button) {  
             const buttonText = button.textContent.trim();  
@@ -149,7 +147,7 @@
   
     function showDefaultLangDialog() {  
         isInSettingsDialog = true;  
-        log('showDefaultLangDialog: opened, isInSettingsDialog=true');  
+        log('showDefaultLangDialog: opened');  
         
         const currentDefault = getDefaultCode();  
         
@@ -169,10 +167,8 @@
                 
                 if (!item || !item.code) return;  
                 
-                // Зберігаємо нову розкладку за замовчуванням  
                 Lampa.Storage.set('keyboard_default_lang', item.code);  
                 
-                // Видаляємо її з прихованих якщо там є  
                 const hiddenCodes = getHiddenLanguages();  
                 const index = hiddenCodes.indexOf(item.code);  
                 if (index > -1) {  
@@ -183,14 +179,10 @@
                 updateHideDisplay();  
                 
                 isInSettingsDialog = false;  
-                log('showDefaultLangDialog: closed, isInSettingsDialog=false');  
-                
                 Lampa.Controller.toggle('settings_component');  
             },  
             onBack: function() {  
-                log('showDefaultLangDialog: back');  
                 isInSettingsDialog = false;  
-                log('showDefaultLangDialog: closed, isInSettingsDialog=false');  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
@@ -198,12 +190,10 @@
   
     function showHideLayoutsDialog() {  
         isInSettingsDialog = true;  
-        log('showHideLayoutsDialog: opened, isInSettingsDialog=true');  
+        log('showHideLayoutsDialog: opened');  
         
         const defaultCode = getDefaultCode();  
         let workingHidden = getHiddenLanguages().slice();  
-        
-        log('showHideLayoutsDialog: defaultCode=' + defaultCode + ', initial=' + JSON.stringify(workingHidden));  
   
         function buildItems() {  
             return LANGUAGES  
@@ -225,7 +215,6 @@
         function attachHandlers() {  
             setTimeout(function() {  
                 const checkboxItems = document.querySelectorAll('.selectbox-item--checkbox');  
-                log('attachHandlers: found ' + checkboxItems.length + ' items');  
                 
                 checkboxItems.forEach(function(item) {  
                     const titleEl = item.querySelector('.selectbox-item__title');  
@@ -248,22 +237,16 @@
                         e.preventDefault();  
                         e.stopPropagation();  
                         
-                        log('CLICK: ' + lang.title + ' (code=' + lang.code + ')');  
-                        
                         const index = workingHidden.indexOf(lang.code);  
                         let newCheckedState;  
                         
                         if (index > -1) {  
                             workingHidden.splice(index, 1);  
                             newCheckedState = false;  
-                            log('CLICK: REMOVED ' + lang.code);  
                         } else {  
                             workingHidden.push(lang.code);  
                             newCheckedState = true;  
-                            log('CLICK: ADDED ' + lang.code);  
                         }  
-                        
-                        log('CLICK: new state=' + JSON.stringify(workingHidden));  
                         
                         updateCheckboxVisually(newItem, newCheckedState);  
                         saveHiddenLanguages(workingHidden);  
@@ -287,21 +270,16 @@
                     // Ігноруємо  
                 },  
                 onBack: function() {  
-                    log('showHideLayoutsDialog: back, final=' + JSON.stringify(workingHidden));  
                     saveHiddenLanguages(workingHidden);  
                     updateHideDisplay();  
                     isInSettingsDialog = false;  
-                    log('showHideLayoutsDialog: closed, isInSettingsDialog=false');  
                     Lampa.Controller.toggle('settings_component');  
                 }  
             });  
             
-            log('showHideLayoutsDialog: dialog shown');  
-            
             attachHandlers();  
             
         } catch (e) {  
-            log('showHideLayoutsDialog: ERROR=' + e.message);  
             console.error('showHideLayoutsDialog error:', e);  
             isInSettingsDialog = false;  
         }  
@@ -324,7 +302,6 @@
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onChange: function() {  
-            log('onChange: opening default lang dialog');  
             showDefaultLangDialog();  
         },  
         onRender: function(el) {  
@@ -350,11 +327,9 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
-            log('onChange: opening hide dialog');  
             try {  
                 showHideLayoutsDialog();  
             } catch (e) {  
-                log('onChange: ERROR=' + e.message);  
                 console.error('onChange error:', e);  
             }  
         },  
@@ -375,13 +350,16 @@
             return;  
         }  
         
+        // Інтервал без затримки - перевіряє кожні 100ms  
         setInterval(function() {  
             if (!isLampaKeyboard()) return;  
-            if (isKeyboardLanguageSelector() && !isInSettingsDialog) {  
+            if (isInSettingsDialog) return;  
+            if (isKeyboardLanguageSelector()) {  
                 applyHidingToSelector();  
             }  
-        }, 1000);  
+        }, 100);  
         
+        // MutationObserver з миттєвою реакцією  
         const observer = new MutationObserver(function(mutations) {  
             if (!isLampaKeyboard()) return;  
             if (isInSettingsDialog) return;  
@@ -401,9 +379,11 @@
             });  
             
             if (foundSelectbox) {  
-                setTimeout(applyHidingToSelector, 100);  
-                setTimeout(applyHidingToSelector, 300);  
-                setTimeout(applyHidingToSelector, 600);  
+                // МИТТЄВО без затримки  
+                applyHidingToSelector();  
+                // Додаткові виклики для гарантії  
+                setTimeout(applyHidingToSelector, 10);  
+                setTimeout(applyHidingToSelector, 50);  
             }  
         });  
         
