@@ -21,28 +21,44 @@
     }  
   
     function getHiddenLanguages() {  
-        let stored = Lampa.Storage.get('keyboard_hidden_layouts', '[]');  
+        let stored = Lampa.Storage.get('keyboard_hidden_layouts', '');  
+        log('getHiddenLanguages: RAW stored="' + stored + '" type=' + typeof stored);  
         
-        if (!stored || stored === '' || stored === 'undefined' || stored === 'null') {  
-            stored = '[]';  
+        // Якщо це просто рядок з комами (не JSON), розбиваємо  
+        if (stored && typeof stored === 'string' && stored.indexOf(',') > -1 && stored.indexOf('[') === -1) {  
+            const arr = stored.split(',').filter(function(s) { return s.length > 0; });  
+            log('getHiddenLanguages: parsed from comma string=' + JSON.stringify(arr));  
+            return arr;  
         }  
         
-        try {  
-            const parsed = JSON.parse(stored);  
-            return Array.isArray(parsed) ? parsed : [];  
-        } catch (e) {  
-            Lampa.Storage.set('keyboard_hidden_layouts', '[]');  
-            return [];  
+        // Якщо це JSON  
+        if (stored && stored.indexOf('[') === 0) {  
+            try {  
+                const parsed = JSON.parse(stored);  
+                log('getHiddenLanguages: parsed from JSON=' + JSON.stringify(parsed));  
+                return Array.isArray(parsed) ? parsed : [];  
+            } catch (e) {  
+                log('getHiddenLanguages: JSON parse error');  
+            }  
         }  
+        
+        // Якщо порожній або невалідний  
+        log('getHiddenLanguages: returning empty array');  
+        return [];  
     }  
   
     function saveHiddenLanguages(hiddenCodes) {  
-        log('saveHiddenLanguages: ' + JSON.stringify(hiddenCodes));  
-        Lampa.Storage.set('keyboard_hidden_layouts', JSON.stringify(hiddenCodes));  
+        log('saveHiddenLanguages: input=' + JSON.stringify(hiddenCodes));  
+        
+        // Зберігаємо як рядок з комами (так як Lampa.Storage все одно перетворює на рядок)  
+        const stringValue = hiddenCodes.join(',');  
+        log('saveHiddenLanguages: saving as string="' + stringValue + '"');  
+        
+        Lampa.Storage.set('keyboard_hidden_layouts', stringValue);  
         
         // Перевірка  
         const verify = Lampa.Storage.get('keyboard_hidden_layouts');  
-        log('saveHiddenLanguages: VERIFIED=' + verify);  
+        log('saveHiddenLanguages: VERIFIED="' + verify + '"');  
     }  
   
     function getHiddenLanguagesText() {  
@@ -109,7 +125,7 @@
                     return {  
                         title: lang.title,  
                         checkbox: true,  
-                        checked: selected,  // Спробуємо checked замість selected  
+                        checked: selected,  
                         selected: selected,  
                         code: lang.code  
                     };  
@@ -161,7 +177,6 @@
                 applyHidingToSelector();  
             },  
             onCheck: function(item) {  
-                // Додаємо onCheck на випадок, якщо Lampa використовує це для чекбоксів  
                 log('onCheck: CALLED! item=' + JSON.stringify(item));  
                 
                 if (!item || !item.code) return;  
@@ -259,11 +274,7 @@
         log('init: START');  
         
         const storedValue = Lampa.Storage.get('keyboard_hidden_layouts');  
-        if (!storedValue || storedValue === '') {  
-            Lampa.Storage.set('keyboard_hidden_layouts', '[]');  
-        }  
-        
-        log('init: keyboard_hidden_layouts=' + Lampa.Storage.get('keyboard_hidden_layouts'));  
+        log('init: current keyboard_hidden_layouts="' + storedValue + '"');  
         
         $(document).on('click', '.hg-button.hg-functionBtn.selector', function() {  
             log('Selector button clicked');  
