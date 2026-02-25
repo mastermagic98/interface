@@ -57,22 +57,21 @@
     }  
   
     function openHiddenDialog() {  
+        log('openHiddenDialog: opened');  
         var defaultLang = getDefaultLang();  
-        var values = {};  
-        LANGUAGES.forEach(function (lang) {  
-            if (lang.code !== defaultLang) values[lang.code] = lang.title;  
-        });  
+        var hidden = getHiddenLangs();  
   
         function buildItems() {  
-            var hidden = getHiddenLangs();  
-            return Object.keys(values).map(function (code) {  
-                return {  
-                    title: values[code],  
-                    checkbox: true,  
-                    selected: hidden.indexOf(code) !== -1,  
-                    code: code  
-                };  
-            });  
+            return LANGUAGES  
+                .filter(function (lang) { return lang.code !== defaultLang; })  
+                .map(function (lang) {  
+                    var isHidden = hidden.indexOf(lang.code) !== -1;  
+                    return {  
+                        title: lang.title + (isHidden ? ' (приховано)' : ''),  
+                        subtitle: isHidden ? 'Показати' : 'Приховати',  
+                        code: lang.code  
+                    };  
+                });  
         }  
   
         var items = buildItems();  
@@ -81,8 +80,8 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function (item) {  
+                log('openHiddenDialog onSelect: triggered for ' + JSON.stringify(item));  
                 if (!item || !item.code) return;  
-                var hidden = getHiddenLangs();  
                 var idx = hidden.indexOf(item.code);  
                 if (idx === -1) {  
                     hidden.push(item.code);  
@@ -101,6 +100,7 @@
                 }  
             },  
             onBack: function () {  
+                log('openHiddenDialog onBack');  
                 updateHiddenLabel();  
                 Lampa.Controller.toggle('settings_component');  
             }  
@@ -175,6 +175,7 @@
                 var valueEl = el.querySelector('.settings-param__value');  
                 if (valueEl) valueEl.textContent = getHiddenText();  
                 el.off('hover:enter').on('hover:enter', openHiddenDialog);  
+                log('onRender hide: rendered and hover:enter bound');  
             } catch (e) {  
                 log('onRender hide error: ' + e.message);  
             }  
