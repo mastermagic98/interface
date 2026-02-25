@@ -19,6 +19,11 @@
         console.log('[keyboard_settings_select]', msg);  
     }  
   
+    function isLampaKeyboard() {  
+        const keyboardType = Lampa.Storage.get('keyboard_type', 'lampa');  
+        return keyboardType === 'lampa';  
+    }  
+  
     function getDefaultCode() {  
         return Lampa.Storage.get('keyboard_default_lang', 'uk');  
     }  
@@ -57,16 +62,16 @@
     }  
   
     function applyHidingToSelector() {  
+        // Перевіряємо чи використовується Lampa клавіатура  
+        if (!isLampaKeyboard()) {  
+            log('applyHiding: system keyboard active, skipping');  
+            return;  
+        }  
+        
         if (isProcessing) return;  
         
         const defaultCode = getDefaultCode();  
         const hiddenCodes = getHiddenLanguages();  
-        const currentState = hiddenCodes.join(',');  
-        
-        // Не обробляємо якщо стан не змінився  
-        if (currentState === lastHiddenState && lastHiddenState !== '') {  
-            return;  
-        }  
         
         isProcessing = true;  
         
@@ -77,7 +82,9 @@
             return;  
         }  
         
-        log('applyHiding: hiddenCodes=' + JSON.stringify(hiddenCodes) + ', buttons=' + buttons.length);  
+        log('applyHiding: found ' + buttons.length + ' buttons, hiding=' + JSON.stringify(hiddenCodes));  
+        
+        let hiddenCount = 0;  
         
         buttons.forEach(function(button) {  
             const buttonText = button.textContent.trim();  
@@ -88,11 +95,19 @@
                 const isDefault = lang.code === defaultCode;  
                 const shouldHide = isHidden && !isDefault;  
                 
-                button.style.display = shouldHide ? 'none' : '';  
+                if (shouldHide) {  
+                    button.style.display = 'none';  
+                    hiddenCount++;  
+                    log('applyHiding: HIDE ' + buttonText);  
+                } else {  
+                    button.style.display = '';  
+                    log('applyHiding: SHOW ' + buttonText);  
+                }  
             }  
         });  
         
-        lastHiddenState = currentState;  
+        log('applyHiding: hidden ' + hiddenCount + ' buttons');  
+        
         isProcessing = false;  
     }  
   
@@ -131,27 +146,41 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
-                log('onSelect: code=' + item.code);  
+                log('onSelect: ENTER, code=' + item.code);  
                 
-                if (!item || !item.code) return;  
+                if (!item || !item.code) {  
+                    log('onSelect: no code, EXIT');  
+                    return;  
+                }  
                 
                 const index = currentHidden.indexOf(item.code);  
+                log('onSelect: current index=' + index + ', currentHidden=' + JSON.stringify(currentHidden));  
                 
                 if (index > -1) {  
                     currentHidden.splice(index, 1);  
+                    log('onSelect: REMOVED ' + item.code);  
                 } else {  
                     currentHidden.push(item.code);  
+                    log('onSelect: ADDED ' + item.code);  
                 }  
                 
+                log('onSelect: new currentHidden=' + JSON.stringify(currentHidden));  
+                
                 saveHiddenLanguages(currentHidden);  
+                
                 items = buildItems();  
+                log('onSelect: rebuilt items, count=' + items.length);  
                 
                 if (typeof Lampa.Select.update === 'function') {  
+                    log('onSelect: calling update');  
                     Lampa.Select.update(items);  
                 } else {  
+                    log('onSelect: reopening dialog');  
                     Lampa.Select.destroy();  
                     setTimeout(showHideLayoutsDialog, 0);  
                 }  
+                
+                log('onSelect: EXIT');  
             },  
             onBack: function() {  
                 log('onBack: final=' + JSON.stringify(currentHidden));  
@@ -160,6 +189,8 @@
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
+        
+        log('showDialog: shown with ' + items.length + ' items');  
     }  
   
     Lampa.SettingsApi.addComponent({  
@@ -186,6 +217,7 @@
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onChange: function(value) {  
+            log('onChange default: ' + value);  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
             const hiddenCodes = getHiddenLanguages();  
@@ -193,6 +225,7 @@
             if (index > -1) {  
                 hiddenCodes.splice(index, 1);  
                 saveHiddenLanguages(hiddenCodes);  
+                log('onChange default: removed ' + value + ' from hidden');  
             }  
             
             updateHideDisplay();  
@@ -210,6 +243,7 @@
             description: 'Вибір розкладок для приховування'  
         },  
         onChange: function() {  
+            log('onChange hide button: opening dialog');  
             showHideLayoutsDialog();  
         },  
         onRender: function(el) {  
@@ -224,20 +258,33 @@
     function init() {  
         log('init: START');  
         
+        const keyboardType = Lampa.Storage.get('keyboard_type', 'lampa');  
+        log('init: keyboard_type=' + keyboardType);  
+        
         const stored = Lampa.Storage.get('keyboard_hidden_layouts', '');  
         lastHiddenState = stored;  
         log('init: stored="' + stored + '"');  
         
-        // Інтервал що перевіряє кнопки, але не обробляє якщо стан не змінився  
+        // Якщо системна клавіатура - не запускаємо моніторинг  
+        if (!isLampaKeyboard()) {  
+            log('init: system keyboard active, monitoring disabled');  
+            return;  
+        }  
+        
+        // Інтервал для перевірки кнопок  
         setInterval(function() {  
+            if (!isLampaKeyboard()) return;  
+            
             const buttons = document.querySelectorAll('.selectbox-item.selector');  
             if (buttons.length > 0) {  
                 applyHidingToSelector();  
             }  
-        }, 1000); // Збільшено до 1 секунди  
+        }, 1000);  
         
         // MutationObserver для швидкої реакції  
         const observer = new MutationObserver(function(mutations) {  
+            if (!isLampaKeyboard()) return;  
+            
             let foundSelectbox = false;  
             
             mutations.forEach(function(mutation) {  
@@ -255,8 +302,9 @@
             
             if (foundSelectbox) {  
                 log('MutationObserver: selectbox detected');  
-                setTimeout(applyHidingToSelector, 50);  
-                setTimeout(applyHidingToSelector, 200);  
+                setTimeout(applyHidingToSelector, 100);  
+                setTimeout(applyHidingToSelector, 300);  
+                setTimeout(applyHidingToSelector, 600);  
             }  
         });  
         
