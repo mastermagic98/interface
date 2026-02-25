@@ -39,7 +39,7 @@
     }  
   
     function saveHiddenLanguages(hiddenCodes) {  
-        const stringValue = hiddenCodes.join(',');  
+        const stringValue = hiddenCodes.length > 0 ? hiddenCodes.join(',') : '';  
         Lampa.Storage.set('keyboard_hidden_layouts', stringValue);  
         log('saveHiddenLanguages: saved="' + stringValue + '"');  
     }  
@@ -58,11 +58,10 @@
         
         log('applyHidingToSelector: hiddenCodes=' + JSON.stringify(hiddenCodes));  
         
-        // Використовуємо найкращий селектор  
         const buttons = document.querySelectorAll('.selectbox-item.selector');  
         
         if (buttons.length === 0) {  
-            log('applyHidingToSelector: NO BUTTONS FOUND');  
+            log('applyHidingToSelector: NO BUTTONS');  
             return;  
         }  
         
@@ -94,25 +93,23 @@
   
     function showHideLayoutsDialog() {  
         const defaultCode = getDefaultCode();  
+        let currentHidden = getHiddenLanguages().slice();  
         
-        // Читаємо актуальний стан зі Storage  
-        function getCurrentHidden() {  
-            return getHiddenLanguages();  
-        }  
+        log('showHideLayoutsDialog: initial=' + JSON.stringify(currentHidden));  
   
         function buildItems() {  
-            const current = getCurrentHidden();  
-            log('buildItems: current=' + JSON.stringify(current));  
-            
             return LANGUAGES  
                 .filter(function(lang) { return lang.code !== defaultCode; })  
                 .map(function(lang) {  
-                    const isSelected = current.indexOf(lang.code) > -1;  
+                    const isSelected = currentHidden.indexOf(lang.code) > -1;  
                     return {  
                         title: lang.title,  
-                        checkbox: true,  
+                        // Не використовуємо checkbox, робимо звичайний список  
+                        // checkbox: true,  
                         selected: isSelected,  
-                        code: lang.code  
+                        code: lang.code,  
+                        // Додаємо іконку чекбокса в назву  
+                        subtitle: isSelected ? '✓ Приховано' : 'Показано'  
                     };  
                 });  
         }  
@@ -123,13 +120,9 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
-                log('onSelect: CALLED! item.title=' + item.title + ', item.code=' + item.code);  
+                log('onSelect: CALLED! code=' + item.code);  
                 
                 if (!item || !item.code) return;  
-                
-                // Читаємо поточний стан  
-                let currentHidden = getCurrentHidden();  
-                log('onSelect: BEFORE currentHidden=' + JSON.stringify(currentHidden));  
                 
                 const index = currentHidden.indexOf(item.code);  
                 
@@ -141,12 +134,12 @@
                     log('onSelect: ADDED ' + item.code);  
                 }  
                 
-                log('onSelect: AFTER currentHidden=' + JSON.stringify(currentHidden));  
+                log('onSelect: currentHidden=' + JSON.stringify(currentHidden));  
                 
-                // Зберігаємо негайно  
+                // Зберігаємо  
                 saveHiddenLanguages(currentHidden);  
                 
-                // Перечитуємо і оновлюємо діалог  
+                // Оновлюємо список  
                 items = buildItems();  
                 
                 if (typeof Lampa.Select.update === 'function') {  
@@ -157,19 +150,13 @@
                 }  
             },  
             onBack: function() {  
-                log('onBack: closing dialog');  
+                log('onBack: final=' + JSON.stringify(currentHidden));  
+                saveHiddenLanguages(currentHidden);  
                 updateHideDisplay();  
-                
-                // Затримка перед застосуванням  
-                setTimeout(function() {  
-                    applyHidingToSelector();  
-                }, 300);  
-                
+                applyHidingToSelector();  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
-        
-        log('showHideLayoutsDialog: dialog shown with items=' + JSON.stringify(items));  
     }  
   
     Lampa.SettingsApi.addComponent({  
@@ -236,17 +223,27 @@
         log('init: START');  
         log('init: stored="' + Lampa.Storage.get('keyboard_hidden_layouts') + '"');  
         
-        // Спостерігаємо за появою selectbox  
+        // Постійно моніторимо появу кнопок селектора  
+        let checkInterval = setInterval(function() {  
+            const buttons = document.querySelectorAll('.selectbox-item.selector');  
+            if (buttons.length > 0) {  
+                log('Interval: found selector buttons, applying hiding');  
+                applyHidingToSelector();  
+            }  
+        }, 500);  
+        
+        // Також спостерігаємо за DOM  
         const observer = new MutationObserver(function(mutations) {  
             mutations.forEach(function(mutation) {  
                 if (mutation.addedNodes.length) {  
                     mutation.addedNodes.forEach(function(node) {  
                         if (node.nodeType === 1 && node.classList) {  
-                            if (node.classList.contains('selectbox') || node.querySelector && node.querySelector('.selectbox-item.selector')) {  
+                            if (node.classList.contains('selectbox') || 
+                                (node.querySelector && node.querySelector('.selectbox-item.selector'))) {  
                                 log('MutationObserver: selectbox detected');  
-                                setTimeout(applyHidingToSelector, 50);  
-                                setTimeout(applyHidingToSelector, 150);  
+                                setTimeout(applyHidingToSelector, 100);  
                                 setTimeout(applyHidingToSelector, 300);  
+                                setTimeout(applyHidingToSelector, 600);  
                             }  
                         }  
                     });  
