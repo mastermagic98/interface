@@ -130,18 +130,19 @@
         log('showDialog: defaultCode=' + defaultCode + ', initial=' + JSON.stringify(workingHidden));  
   
         function buildItems() {  
-            // Показуємо ВСІ мови (не виключаємо дефолтну)  
-            return LANGUAGES.map(function(lang) {  
-                const isChecked = workingHidden.indexOf(lang.code) > -1;  
-                const isDefault = lang.code === defaultCode;  
-                
-                return {  
-                    title: lang.title + (isDefault ? ' (за замовчуванням)' : ''),  
-                    checkbox: true,
-                    checked: isChecked,
-                    code: lang.code  
-                };  
-            });  
+            // НЕ показуємо мову за замовчуванням  
+            return LANGUAGES  
+                .filter(function(lang) { return lang.code !== defaultCode; })  
+                .map(function(lang) {  
+                    const isChecked = workingHidden.indexOf(lang.code) > -1;  
+                    
+                    return {  
+                        title: lang.title,  
+                        checkbox: true,
+                        checked: isChecked,
+                        code: lang.code  
+                    };  
+                });  
         }  
   
         let items = buildItems();  
@@ -157,9 +158,7 @@
                     if (!titleEl) return;  
                     
                     const titleText = titleEl.textContent.trim();  
-                    // Видаляємо "(за замовчуванням)" з тексту для пошуку  
-                    const cleanTitle = titleText.replace(' (за замовчуванням)', '');  
-                    const lang = LANGUAGES.find(function(l) { return l.title === cleanTitle; });  
+                    const lang = LANGUAGES.find(function(l) { return l.title === titleText; });  
                     
                     if (!lang) return;  
                     
@@ -169,6 +168,10 @@
                     
                     // Додаємо новий обробник  
                     newItem.addEventListener('click', function(e) {  
+                        // Запобігаємо подвійному спрацюванню  
+                        e.preventDefault();  
+                        e.stopPropagation();  
+                        
                         log('CLICK: ' + lang.title + ' (code=' + lang.code + ')');  
                         
                         const index = workingHidden.indexOf(lang.code);  
@@ -193,7 +196,7 @@
                         }  
                     });  
                 });  
-            }, 150);  
+            }, 100);  
         }  
   
         try {  
@@ -201,7 +204,7 @@
                 title: 'Приховати розкладки',  
                 items: items,  
                 onSelect: function(item) {  
-                    // Lampa може викликати onSelect - ігноруємо  
+                    // Ігноруємо - використовуємо власні обробники  
                 },  
                 onBack: function() {  
                     log('onBack: final=' + JSON.stringify(workingHidden));  
