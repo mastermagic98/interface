@@ -12,6 +12,9 @@
         { title: 'עִברִית',   code: 'he' }  
     ];  
   
+    let lastHiddenState = '';  
+    let isProcessing = false;  
+  
     function log(msg) {  
         console.log('[keyboard_settings_select]', msg);  
     }  
@@ -41,6 +44,7 @@
     function saveHiddenLanguages(hiddenCodes) {  
         const stringValue = hiddenCodes.length > 0 ? hiddenCodes.join(',') : '';  
         Lampa.Storage.set('keyboard_hidden_layouts', stringValue);  
+        lastHiddenState = stringValue;  
         log('saveHiddenLanguages: saved="' + stringValue + '"');  
     }  
   
@@ -53,19 +57,27 @@
     }  
   
     function applyHidingToSelector() {  
+        if (isProcessing) return;  
+        
         const defaultCode = getDefaultCode();  
         const hiddenCodes = getHiddenLanguages();  
+        const currentState = hiddenCodes.join(',');  
         
-        log('applyHidingToSelector: hiddenCodes=' + JSON.stringify(hiddenCodes));  
+        // Не обробляємо якщо стан не змінився  
+        if (currentState === lastHiddenState && lastHiddenState !== '') {  
+            return;  
+        }  
+        
+        isProcessing = true;  
         
         const buttons = document.querySelectorAll('.selectbox-item.selector');  
         
         if (buttons.length === 0) {  
-            log('applyHidingToSelector: NO BUTTONS');  
+            isProcessing = false;  
             return;  
         }  
         
-        log('applyHidingToSelector: found ' + buttons.length + ' buttons');  
+        log('applyHiding: hiddenCodes=' + JSON.stringify(hiddenCodes) + ', buttons=' + buttons.length);  
         
         buttons.forEach(function(button) {  
             const buttonText = button.textContent.trim();  
@@ -77,9 +89,11 @@
                 const shouldHide = isHidden && !isDefault;  
                 
                 button.style.display = shouldHide ? 'none' : '';  
-                log('applyHidingToSelector: ' + buttonText + ' -> ' + (shouldHide ? 'HIDDEN' : 'VISIBLE'));  
             }  
         });  
+        
+        lastHiddenState = currentState;  
+        isProcessing = false;  
     }  
   
     function updateHideDisplay() {  
@@ -95,7 +109,7 @@
         const defaultCode = getDefaultCode();  
         let currentHidden = getHiddenLanguages().slice();  
         
-        log('showHideLayoutsDialog: initial=' + JSON.stringify(currentHidden));  
+        log('showDialog: initial=' + JSON.stringify(currentHidden));  
   
         function buildItems() {  
             return LANGUAGES  
@@ -104,12 +118,9 @@
                     const isSelected = currentHidden.indexOf(lang.code) > -1;  
                     return {  
                         title: lang.title,  
-                        // Не використовуємо checkbox, робимо звичайний список  
-                        // checkbox: true,  
                         selected: isSelected,  
                         code: lang.code,  
-                        // Додаємо іконку чекбокса в назву  
-                        subtitle: isSelected ? '✓ Приховано' : 'Показано'  
+                        subtitle: isSelected ? '✓ Приховано' : ''  
                     };  
                 });  
         }  
@@ -120,7 +131,7 @@
             title: 'Приховати розкладки',  
             items: items,  
             onSelect: function(item) {  
-                log('onSelect: CALLED! code=' + item.code);  
+                log('onSelect: code=' + item.code);  
                 
                 if (!item || !item.code) return;  
                 
@@ -128,18 +139,11 @@
                 
                 if (index > -1) {  
                     currentHidden.splice(index, 1);  
-                    log('onSelect: REMOVED ' + item.code);  
                 } else {  
                     currentHidden.push(item.code);  
-                    log('onSelect: ADDED ' + item.code);  
                 }  
                 
-                log('onSelect: currentHidden=' + JSON.stringify(currentHidden));  
-                
-                // Зберігаємо  
                 saveHiddenLanguages(currentHidden);  
-                
-                // Оновлюємо список  
                 items = buildItems();  
                 
                 if (typeof Lampa.Select.update === 'function') {  
@@ -153,7 +157,6 @@
                 log('onBack: final=' + JSON.stringify(currentHidden));  
                 saveHiddenLanguages(currentHidden);  
                 updateHideDisplay();  
-                applyHidingToSelector();  
                 Lampa.Controller.toggle('settings_component');  
             }  
         });  
@@ -183,7 +186,6 @@
             description: 'Вибір розкладки за замовчуванням'  
         },  
         onChange: function(value) {  
-            log('onChange default: ' + value);  
             Lampa.Storage.set('keyboard_default_lang', value);  
             
             const hiddenCodes = getHiddenLanguages();  
@@ -221,34 +223,41 @@
   
     function init() {  
         log('init: START');  
-        log('init: stored="' + Lampa.Storage.get('keyboard_hidden_layouts') + '"');  
         
-        // Постійно моніторимо появу кнопок селектора  
-        let checkInterval = setInterval(function() {  
+        const stored = Lampa.Storage.get('keyboard_hidden_layouts', '');  
+        lastHiddenState = stored;  
+        log('init: stored="' + stored + '"');  
+        
+        // Інтервал що перевіряє кнопки, але не обробляє якщо стан не змінився  
+        setInterval(function() {  
             const buttons = document.querySelectorAll('.selectbox-item.selector');  
             if (buttons.length > 0) {  
-                log('Interval: found selector buttons, applying hiding');  
                 applyHidingToSelector();  
             }  
-        }, 500);  
+        }, 1000); // Збільшено до 1 секунди  
         
-        // Також спостерігаємо за DOM  
+        // MutationObserver для швидкої реакції  
         const observer = new MutationObserver(function(mutations) {  
+            let foundSelectbox = false;  
+            
             mutations.forEach(function(mutation) {  
-                if (mutation.addedNodes.length) {  
+                if (mutation.addedNodes.length && !foundSelectbox) {  
                     mutation.addedNodes.forEach(function(node) {  
                         if (node.nodeType === 1 && node.classList) {  
                             if (node.classList.contains('selectbox') || 
                                 (node.querySelector && node.querySelector('.selectbox-item.selector'))) {  
-                                log('MutationObserver: selectbox detected');  
-                                setTimeout(applyHidingToSelector, 100);  
-                                setTimeout(applyHidingToSelector, 300);  
-                                setTimeout(applyHidingToSelector, 600);  
+                                foundSelectbox = true;  
                             }  
                         }  
                     });  
                 }  
             });  
+            
+            if (foundSelectbox) {  
+                log('MutationObserver: selectbox detected');  
+                setTimeout(applyHidingToSelector, 50);  
+                setTimeout(applyHidingToSelector, 200);  
+            }  
         });  
         
         observer.observe(document.body, {  
