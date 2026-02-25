@@ -80,17 +80,24 @@
         var defaultCode = Lampa.Storage.get('keyboard_default_lang', 'uk');
         var defaultTitle = LANGUAGES.find(l => l.code === defaultCode)?.title || 'Українська';
 
-        var items = LANGUAGES.filter(lang => lang.title !== defaultTitle).map(lang => ({
-            title: lang.title,
-            checkbox: true,
-            selected: hidden.includes(lang.title),
-            lang: lang.title
-        }));
+        var items = [
+            { title: 'Статус', subtitle: true } // Заголовок як в закладках
+        ];
+
+        LANGUAGES.filter(lang => lang.title !== defaultTitle).forEach(lang => {
+            items.push({
+                title: lang.title,
+                checkbox: true,
+                selected: hidden.includes(lang.title),
+                lang: lang.title
+            });
+        });
 
         Lampa.Select.show({
             title: 'Приховати розкладки',
             items: items,
             onSelect: function(item) {
+                if (item.subtitle) return; // Ігнор заголовка
                 if (item.lang) {
                     var newHidden = hidden.slice();
                     var index = newHidden.indexOf(item.lang);
@@ -105,44 +112,9 @@
             },
             onBack: function() {
                 Lampa.Controller.toggle('settings_component');
-                setTimeout(updateDisplays, 500);
+                setTimeout(updateDisplays, 300);
             }
         });
-    }
-
-    function openDefaultMenu() {
-        var current = Lampa.Storage.get('keyboard_default_lang', 'uk');
-        var items = LANGUAGES.map(lang => ({
-            title: lang.title,
-            value: lang.code,
-            selected: lang.code === current
-        }));
-
-        Lampa.Select.show({
-            title: 'Розкладка за замовчуванням',
-            items: items,
-            onSelect: function(item) {
-                Lampa.Storage.set('keyboard_default_lang', item.value);
-                var hidden = getHidden();
-                if (hidden.includes(item.title)) {
-                    hidden = hidden.filter(t => t !== item.title);
-                    setHidden(hidden);
-                }
-                updateDisplays();
-            },
-            onBack: function() {
-                Lampa.Controller.toggle('settings_component');
-                setTimeout(updateDisplays, 500);
-            }
-        });
-    }
-
-    function updateDisplays() {
-        setTimeout(() => {
-            var hiddenText = getHiddenText();
-            $('.settings-param[data-name="keyboard_hide_trigger"] .settings-param__value').text(hiddenText);
-            log('Updated hide display to: ' + hiddenText);
-        }, 100);
     }
 
     Lampa.SettingsApi.addComponent({
@@ -153,15 +125,27 @@
  
     Lampa.SettingsApi.addParam({
         component: 'keyboard_hide_plugin',
-        param: { name: 'keyboard_default_trigger', type: 'trigger', default: false },
+        param: {
+            name: 'keyboard_default_lang',
+            type: 'select',
+            default: 'uk',
+            values: {
+                'uk': 'Українська',
+                'default': 'Русский',
+                'en': 'English',
+                'he': 'עִברִית'
+            }
+        },
         field: { name: 'Розкладка за замовчуванням', description: 'Вибір розкладки за замовчуванням' },
-        onRender: function(el) {
-            setTimeout(() => {
-                var current = Lampa.Storage.get('keyboard_default_lang', 'uk');
-                var title = LANGUAGES.find(l => l.code === current)?.title || 'Українська';
-                el.find('.settings-param__value').text(title);
-            }, 100);
-            el.on('hover:enter', openDefaultMenu);
+        onChange: function(value) {
+            Lampa.Storage.set('keyboard_default_lang', value);
+            var hidden = getHidden();
+            var langTitle = LANGUAGES.find(l => l.code === value)?.title;
+            if (langTitle && hidden.includes(langTitle)) {
+                hidden = hidden.filter(t => t !== langTitle);
+                setHidden(hidden);
+            }
+            updateDisplays();
         }
     });
 
