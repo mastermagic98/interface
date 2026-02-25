@@ -123,6 +123,25 @@
         }, 50);  
     }  
   
+    function updateCheckboxVisually(item, isChecked) {  
+        // Оновлюємо візуально чекбокс  
+        const checkbox = item.querySelector('.selectbox-item__checkbox');  
+        if (checkbox) {  
+            if (isChecked) {  
+                checkbox.classList.add('selectbox-item__checkbox--checked');  
+            } else {  
+                checkbox.classList.remove('selectbox-item__checkbox--checked');  
+            }  
+        }  
+        
+        // Також оновлюємо клас на самому item  
+        if (isChecked) {  
+            item.classList.add('selectbox-item--checked');  
+        } else {  
+            item.classList.remove('selectbox-item--checked');  
+        }  
+    }  
+  
     function showHideLayoutsDialog() {  
         const defaultCode = getDefaultCode();  
         let workingHidden = getHiddenLanguages().slice();  
@@ -130,7 +149,6 @@
         log('showDialog: defaultCode=' + defaultCode + ', initial=' + JSON.stringify(workingHidden));  
   
         function buildItems() {  
-            // НЕ показуємо мову за замовчуванням  
             return LANGUAGES  
                 .filter(function(lang) { return lang.code !== defaultCode; })  
                 .map(function(lang) {  
@@ -146,7 +164,6 @@
         }  
   
         let items = buildItems();  
-        let dialogShown = false;  
   
         function attachHandlers() {  
             setTimeout(function() {  
@@ -162,41 +179,57 @@
                     
                     if (!lang) return;  
                     
-                    // Видаляємо старі обробники через clone  
+                    // Встановлюємо правильний стан чекбокса візуально  
+                    const isCurrentlyChecked = workingHidden.indexOf(lang.code) > -1;  
+                    updateCheckboxVisually(item, isCurrentlyChecked);  
+                    
+                    // Видаляємо старі обробники  
                     const newItem = item.cloneNode(true);  
                     item.parentNode.replaceChild(newItem, item);  
                     
+                    // Перевстановлюємо візуальний стан після клонування  
+                    updateCheckboxVisually(newItem, isCurrentlyChecked);  
+                    
                     // Додаємо новий обробник  
                     newItem.addEventListener('click', function(e) {  
-                        // Запобігаємо подвійному спрацюванню  
                         e.preventDefault();  
                         e.stopPropagation();  
                         
                         log('CLICK: ' + lang.title + ' (code=' + lang.code + ')');  
                         
                         const index = workingHidden.indexOf(lang.code);  
+                        let newCheckedState;  
                         
                         if (index > -1) {  
                             workingHidden.splice(index, 1);  
+                            newCheckedState = false;  
                             log('CLICK: REMOVED ' + lang.code);  
                         } else {  
                             workingHidden.push(lang.code);  
+                            newCheckedState = true;  
                             log('CLICK: ADDED ' + lang.code);  
                         }  
                         
                         log('CLICK: new state=' + JSON.stringify(workingHidden));  
                         
+                        // Оновлюємо візуально ОДРАЗУ  
+                        updateCheckboxVisually(newItem, newCheckedState);  
+                        
+                        // Зберігаємо  
                         saveHiddenLanguages(workingHidden);  
                         
+                        // Перебудовуємо items для Lampa.Select  
                         items = buildItems();  
                         
+                        // Оновлюємо через Lampa API (це оновить внутрішній стан)  
                         if (typeof Lampa.Select.update === 'function') {  
                             Lampa.Select.update(items);  
+                            // Після оновлення Lampa перепідключаємо обробники  
                             attachHandlers();  
                         }  
                     });  
                 });  
-            }, 100);  
+            }, 50);  
         }  
   
         try {  
@@ -204,7 +237,7 @@
                 title: 'Приховати розкладки',  
                 items: items,  
                 onSelect: function(item) {  
-                    // Ігноруємо - використовуємо власні обробники  
+                    // Ігноруємо  
                 },  
                 onBack: function() {  
                     log('onBack: final=' + JSON.stringify(workingHidden));  
@@ -214,7 +247,6 @@
                 }  
             });  
             
-            dialogShown = true;  
             log('showDialog: dialog shown');  
             
             attachHandlers();  
