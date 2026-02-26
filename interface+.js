@@ -21,7 +21,8 @@
     //    'https://mastermagic98.github.io/interface/incardtemplate.js',  
         'https://mastermagic98.github.io/interface/fix_lang.js',
         'https://mastermagic98.github.io/interface/buttons.js',
-        'https://mastermagic98.github.io/interface/studios.js'
+       // 'https://mastermagic98.github.io/interface/studios.js',
+        'https://mastermagic98.github.io/interface/key_off.js'
     ];  
   
     // Асинхронне підключення модулів  
