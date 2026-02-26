@@ -12,11 +12,45 @@
         { title: 'עִברִית',   code: 'he' }  
     ];  
   
+    // Переклади  
+    const TRANSLATIONS = {  
+        uk: {  
+            component_name: 'Налаштування клавіатури',  
+            default_layout: 'Розкладка за замовчуванням',  
+            default_layout_desc: 'Вибір розкладки за замовчуванням',  
+            hide_layouts: 'Приховати розкладки',  
+            hide_layouts_desc: 'Вибір розкладок для приховування',  
+            none: 'жодна'  
+        },  
+        ru: {  
+            component_name: 'Настройки клавиатуры',  
+            default_layout: 'Раскладка по умолчанию',  
+            default_layout_desc: 'Выбор раскладки по умолчанию',  
+            hide_layouts: 'Скрыть раскладки',  
+            hide_layouts_desc: 'Выбор раскладок для скрытия',  
+            none: 'нет'  
+        },  
+        en: {  
+            component_name: 'Keyboard Settings',  
+            default_layout: 'Default Layout',  
+            default_layout_desc: 'Choose default keyboard layout',  
+            hide_layouts: 'Hide Layouts',  
+            hide_layouts_desc: 'Choose layouts to hide',  
+            none: 'none'  
+        }  
+    };  
+  
     let isProcessing = false;  
     let isInSettingsDialog = false;  
+    let hidingApplied = false;  
   
     function log(msg) {  
         console.log('[keyboard_settings_select]', msg);  
+    }  
+  
+    function getLang() {  
+        const lang = Lampa.Storage.get('language', 'uk');  
+        return TRANSLATIONS[lang] || TRANSLATIONS.uk;  
     }  
   
     function isLampaKeyboard() {  
@@ -55,7 +89,7 @@
     function saveHiddenLanguages(hiddenCodes) {  
         const stringValue = hiddenCodes.length > 0 ? hiddenCodes.join(',') : '';  
         Lampa.Storage.set('keyboard_hidden_layouts', stringValue);  
-        log('saveHiddenLanguages: saved="' + stringValue + '"');  
+        hidingApplied = false; // Скидаємо прапорець для повторного застосування  
     }  
   
     function getHiddenLanguagesText() {  
@@ -63,7 +97,7 @@
         const hiddenTitles = LANGUAGES  
             .filter(function(lang) { return hiddenCodes.indexOf(lang.code) > -1; })  
             .map(function(lang) { return lang.title; });  
-        return hiddenTitles.length ? hiddenTitles.join(', ') : 'жодна';  
+        return hiddenTitles.length ? hiddenTitles.join(', ') : getLang().none;  
     }  
   
     function isKeyboardLanguageSelector() {  
@@ -76,12 +110,8 @@
         return hasLanguageButtons && !hasCheckboxes;  
     }  
   
-    function applyHidingToSelector() {  
-        if (!isLampaKeyboard()) {  
-            return;  
-        }  
-        
-        if (isInSettingsDialog) {  
+    function applyHidingToSelectorFast() {  
+        if (!isLampaKeyboard() || isInSettingsDialog || hidingApplied) {  
             return;  
         }  
         
@@ -89,17 +119,12 @@
             return;  
         }  
         
-        if (isProcessing) return;  
-        
         const defaultCode = getDefaultCode();  
         const hiddenCodes = getHiddenLanguages();  
-        
-        isProcessing = true;  
         
         const buttons = document.querySelectorAll('.selectbox-item.selector:not(.selectbox-item--checkbox)');  
         
         if (buttons.length === 0) {  
-            isProcessing = false;  
             return;  
         }  
         
@@ -110,27 +135,32 @@
             if (lang) {  
                 const isHidden = hiddenCodes.indexOf(lang.code) > -1;  
                 const isDefault = lang.code === defaultCode;  
-                const shouldHide = isHidden && !isDefault;  
                 
-                if (shouldHide) {  
+                if (isHidden && !isDefault) {  
                     button.style.display = 'none';  
-                } else {  
-                    button.style.display = '';  
                 }  
             }  
         });  
         
-        isProcessing = false;  
+        hidingApplied = true;  
     }  
   
     function updateDisplays() {  
-        // Оновлюємо відображення дефолтної мови  
-        const defaultEl = $('.settings-param[data-name="keyboard_default_lang_button"] .settings-param__value');  
+        const defaultEl = $('.settings-param[data-name="keyboard_default_lang_button"]');  
         if (defaultEl.length) {  
-            defaultEl.text(getDefaultTitle());  
+            // Оновлюємо значення  
+            defaultEl.find('.settings-param__value').text(getDefaultTitle());  
+            
+            // Додаємо мову після назви параметра  
+            const nameEl = defaultEl.find('.settings-param__name');  
+            if (nameEl.length) {  
+                // Видаляємо старий span якщо є  
+                nameEl.find('.keyboard-lang-display').remove();  
+                // Додаємо новий  
+                nameEl.append('<span class="keyboard-lang-display" style="margin-left: 10px; opacity: 0.7;">(' + getDefaultTitle() + ')</span>');  
+            }  
         }  
         
-        // Оновлюємо відображення прихованих мов  
         const hideEl = $('.settings-param[data-name="keyboard_hide_button"] .settings-param__value');  
         if (hideEl.length) {  
             hideEl.text(getHiddenLanguagesText());  
@@ -168,7 +198,7 @@
         });  
         
         Lampa.Select.show({  
-            title: 'Розкладка за замовчуванням',  
+            title: getLang().default_layout,  
             items: items,  
             onSelect: function(item) {  
                 if (!item || !item.code) return;  
@@ -264,16 +294,14 @@
                         }  
                     });  
                 });  
-            }, 50);  
+            }, 30);  
         }  
   
         try {  
             Lampa.Select.show({  
-                title: 'Приховати розкладки',  
+                title: getLang().hide_layouts,  
                 items: items,  
-                onSelect: function(item) {  
-                    // Ігноруємо  
-                },  
+                onSelect: function(item) {},  
                 onBack: function() {  
                     saveHiddenLanguages(workingHidden);  
                     updateDisplays();  
@@ -292,8 +320,8 @@
   
     Lampa.SettingsApi.addComponent({  
         component: 'keyboard_settings_select',  
-        name: 'Налаштування клавіатури',  
-        icon: '<svg fill="#fff" width="38" height="38" viewBox="0 0 24 24"><path d="M20 5H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3Z"/></svg>'  
+        name: getLang().component_name,  
+        icon: '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="38" height="38" fill="#ffffff"><path d="M459.576,99.307H52.423C23.524,99.307,0,122.837,0,151.736v192.879c0,37.536,30.537,68.078,68.068,68.078h375.862c37.532,0,68.069-30.542,68.069-68.078V151.736C512,122.837,488.475,99.307,459.576,99.307z M485.515,344.615c0,22.934-18.655,41.589-41.584,41.589H68.068c-22.929,0-41.584-18.655-41.584-41.589V151.736c0-14.306,11.638-25.938,25.938-25.938h407.154c14.301,0,25.938,11.633,25.938,25.938V344.615z"/><rect x="189.792" y="233.929" width="44.138" height="44.142"/><rect x="256.002" y="233.929" width="44.134" height="44.142"/><rect x="322.207" y="233.929" width="44.138" height="44.142"/><rect x="410.484" y="300.139" width="44.134" height="44.134"/><rect x="189.792" y="167.729" width="44.138" height="44.134"/><rect x="123.587" y="233.929" width="44.138" height="44.142"/><rect x="123.587" y="167.729" width="44.138" height="44.134"/><rect x="57.382" y="300.139" width="44.134" height="44.134"/><rect x="57.382" y="233.929" width="44.134" height="44.142"/><rect x="57.382" y="167.729" width="44.134" height="44.134"/><rect x="256.002" y="167.729" width="44.134" height="44.134"/><rect x="322.207" y="167.729" width="44.138" height="44.134"/><rect x="123.587" y="300.139" width="264.825" height="44.134"/><rect x="388.412" y="167.729" width="66.205" height="110.343"/></svg>'  
     });  
   
     Lampa.SettingsApi.addParam({  
@@ -303,8 +331,8 @@
             type: 'button'  
         },  
         field: {  
-            name: 'Розкладка за замовчуванням',  
-            description: 'Вибір розкладки за замовчуванням'  
+            name: getLang().default_layout,  
+            description: getLang().default_layout_desc  
         },  
         onChange: function() {  
             showDefaultLangDialog();  
@@ -312,6 +340,13 @@
         onRender: function(el) {  
             try {  
                 el.find('.settings-param__value').text(getDefaultTitle());  
+                
+                // Додаємо мову після назви  
+                const nameEl = el.find('.settings-param__name');  
+                if (nameEl.length) {  
+                    nameEl.find('.keyboard-lang-display').remove();  
+                    nameEl.append('<span class="keyboard-lang-display" style="margin-left: 10px; opacity: 0.7;">(' + getDefaultTitle() + ')</span>');  
+                }  
             } catch (e) {  
                 console.error('onRender error:', e);  
             }  
@@ -325,8 +360,8 @@
             type: 'button'  
         },  
         field: {  
-            name: 'Приховати розкладки',  
-            description: 'Вибір розкладок для приховування'  
+            name: getLang().hide_layouts,  
+            description: getLang().hide_layouts_desc  
         },  
         onChange: function() {  
             try {  
@@ -352,35 +387,30 @@
             return;  
         }  
         
+        // Швидкий інтервал  
         setInterval(function() {  
-            if (!isLampaKeyboard()) return;  
-            if (isInSettingsDialog) return;  
-            if (isKeyboardLanguageSelector()) {  
-                applyHidingToSelector();  
+            if (isLampaKeyboard() && !isInSettingsDialog) {  
+                applyHidingToSelectorFast();  
             }  
-        }, 100);  
+        }, 50);  
         
+        // Швидкий MutationObserver  
         const observer = new MutationObserver(function(mutations) {  
-            if (!isLampaKeyboard()) return;  
-            if (isInSettingsDialog) return;  
+            if (!isLampaKeyboard() || isInSettingsDialog) return;  
             
-            let foundSelectbox = false;  
-            
-            mutations.forEach(function(mutation) {  
-                if (mutation.addedNodes.length && !foundSelectbox) {  
-                    mutation.addedNodes.forEach(function(node) {  
-                        if (node.nodeType === 1 && node.classList) {  
-                            if (node.classList.contains('selectbox')) {  
-                                foundSelectbox = true;  
-                            }  
+            for (var i = 0; i < mutations.length; i++) {  
+                var mutation = mutations[i];  
+                if (mutation.addedNodes.length) {  
+                    for (var j = 0; j < mutation.addedNodes.length; j++) {  
+                        var node = mutation.addedNodes[j];  
+                        if (node.nodeType === 1 && node.classList && node.classList.contains('selectbox')) {  
+                            hidingApplied = false;  
+                            applyHidingToSelectorFast();  
+                            setTimeout(applyHidingToSelectorFast, 5);  
+                            return;  
                         }  
-                    });  
+                    }  
                 }  
-            });  
-            
-            if (foundSelectbox) {  
-                applyHidingToSelector();  
-                setTimeout(applyHidingToSelector, 1);  
             }  
         });  
         
