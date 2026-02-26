@@ -15,6 +15,7 @@
     const TRANSLATIONS = {
         uk: {
             component_name: 'Налаштування клавіатури',
+            keyboard_settings_description: 'Керує розкладками системної клавіатури',
             default_layout: 'Розкладка за замовчуванням',
             default_layout_desc: 'Вибір розкладки за замовчуванням',
             hide_layouts: 'Приховати розкладки',
@@ -23,6 +24,7 @@
         },
         ru: {
             component_name: 'Настройки клавиатуры',
+            keyboard_settings_description: 'Управляет раскладками системной клавиатуры',
             default_layout: 'Раскладка по умолчанию',
             default_layout_desc: 'Выбор раскладки по умолчанию',
             hide_layouts: 'Скрыть раскладки',
@@ -31,6 +33,7 @@
         },
         en: {
             component_name: 'Keyboard Settings',
+            keyboard_settings_description: 'Manages system keyboard layouts',
             default_layout: 'Default Layout',
             default_layout_desc: 'Choose default keyboard layout',
             hide_layouts: 'Hide Layouts',
@@ -100,7 +103,9 @@
         if (title) {
             const titleText = title.textContent.trim();
             const lang = getLang();
-            if (titleText === lang.default_layout || titleText === lang.hide_layouts) {
+            if (titleText === lang.default_layout || 
+                titleText === lang.hide_layouts || 
+                titleText === lang.component_name) {
                 return false;
             }
         }
@@ -137,20 +142,6 @@
                 }
             }
         });
-    }
-
-    function updateDisplays() {
-        setTimeout(function() {
-            const defaultEl = $('.settings-param[data-name="keyboard_default_lang_button"] .settings-param__value');
-            if (defaultEl.length) {
-                defaultEl.text(getDefaultTitle());
-            }
-
-            const hideEl = $('.settings-param[data-name="keyboard_hide_button"] .settings-param__value');
-            if (hideEl.length) {
-                hideEl.text(getHiddenLanguagesText());
-            }
-        }, 100);
     }
 
     function updateCheckboxVisually(item, isChecked) {
@@ -199,7 +190,6 @@
                 }
 
                 isInSettingsDialog = false;
-                updateDisplays();
                 Lampa.Controller.toggle('settings_component');
             },
             onBack: function() {
@@ -290,7 +280,6 @@
                 onBack: function() {
                     saveHiddenLanguages(workingHidden);
                     isInSettingsDialog = false;
-                    updateDisplays();
                     Lampa.Controller.toggle('settings_component');
                 }
             });
@@ -307,12 +296,12 @@
         const items = [
             {
                 title: getLang().default_layout,
-                subtitle: getLang().default_layout_desc,
+                subtitle: getDefaultTitle(),
                 selected: false
             },
             {
                 title: getLang().hide_layouts,
-                subtitle: getLang().hide_layouts_desc,
+                subtitle: getHiddenLanguagesText(),
                 selected: false
             }
         ];
@@ -342,7 +331,7 @@
             },
             field: {
                 name: '<div style="display: flex; align-items: center;"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" style="margin-right:10px;flex-shrink:0;min-width:24px;min-height:24px;max-width:24px;max-height:24px" fill="currentColor"><path d="M459.576,99.307H52.423C23.524,99.307,0,122.837,0,151.736v192.879c0,37.536,30.537,68.078,68.068,68.078h375.862c37.532,0,68.069-30.542,68.069-68.078V151.736C512,122.837,488.475,99.307,459.576,99.307z M485.515,344.615c0,22.934-18.655,41.589-41.584,41.589H68.068c-22.929,0-41.584-18.655-41.584-41.589V151.736c0-14.306,11.638-25.938,25.938-25.938h407.154c14.301,0,25.938,11.633,25.938,25.938V344.615z"/><rect x="189.792" y="233.929" width="44.138" height="44.142"/><rect x="256.002" y="233.929" width="44.134" height="44.142"/><rect x="322.207" y="233.929" width="44.138" height="44.142"/><rect x="410.484" y="300.139" width="44.134" height="44.134"/><rect x="189.792" y="167.729" width="44.138" height="44.134"/><rect x="123.587" y="233.929" width="44.138" height="44.142"/><rect x="123.587" y="167.729" width="44.138" height="44.134"/><rect x="57.382" y="300.139" width="44.134" height="44.134"/><rect x="57.382" y="233.929" width="44.134" height="44.142"/><rect x="57.382" y="167.729" width="44.134" height="44.134"/><rect x="256.002" y="167.729" width="44.134" height="44.134"/><rect x="322.207" y="167.729" width="44.138" height="44.134"/><rect x="123.587" y="300.139" width="264.825" height="44.134"/><rect x="388.412" y="167.729" width="66.205" height="110.343"/></svg>' + getLang().component_name + '</div>',
-                description: 'Керує розкладками системної клавіатури'
+                description: getLang().keyboard_settings_description
             },
             onChange: function() {
                 showKeyboardSettingsDialog();
