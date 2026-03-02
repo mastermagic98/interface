@@ -1,42 +1,39 @@
-(function () {
+function removeCubTab(){
     'use strict';
 
-    if (!window.Lampa) return;
-
-    function removeCUBButton() {
+    function remove(){
         var buttons = document.querySelectorAll('.navigation-tabs__button.selector');
 
-        buttons.forEach(function (btn) {
-            if (btn.textContent.trim() === 'CUB') {
+        buttons.forEach(function(btn){
+            if(btn.textContent.trim().toUpperCase() === 'CUB'){
+                
+                // Видаляємо наступний роздільник, якщо він є
+                var next = btn.nextElementSibling;
+                if(next && next.classList.contains('navigation-tabs__split')){
+                    next.remove();
+                }
+
+                // Якщо роздільник перед кнопкою
+                var prev = btn.previousElementSibling;
+                if(prev && prev.classList.contains('navigation-tabs__split')){
+                    prev.remove();
+                }
+
                 btn.remove();
             }
         });
     }
 
-    function initCUBRemover() {
-        // Первинне видалення
-        removeCUBButton();
+    // первинний запуск
+    remove();
 
-        // Спостерігач за DOM (бо Lampa перемальовує інтерфейс)
-        var observer = new MutationObserver(function () {
-            removeCUBButton();
-        });
+    // слідкуємо за перерендером
+    var observer = new MutationObserver(function(){
+        remove();
+    });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    }
-
-    // Чекаємо повного старту Lampa
-    if (Lampa.Listener) {
-        Lampa.Listener.follow('app', function (e) {
-            if (e.type === 'ready') {
-                initCUBRemover();
-            }
-        });
-    } else {
-        document.addEventListener('DOMContentLoaded', initCUBRemover);
-    }
-
-})();
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
