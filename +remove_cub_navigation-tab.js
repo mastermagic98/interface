@@ -37,3 +37,8 @@ function removeCubTab(){
         subtree: true
     });
 }
+Lampa.Listener.follow('app', function(e){
+    if(e.type === 'ready'){
+        removeCubTab();
+    }
+});
