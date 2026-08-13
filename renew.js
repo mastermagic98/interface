@@ -23,15 +23,9 @@
       }
 
       try {
-          // Очищаємо movie
+          // Очищаємо ТІЛЬКИ об'єкт movie. 
+          // НЕ чіпаємо саму активність, щоб не видалити важливі методи Лампи (render, request, reset)
           act.activity.movie = decycle(act.activity.movie);
-          // Очищаємо саму активність від DOM-елементів (наприклад, render)
-          for (var k in act.activity) {
-              var v = act.activity[k];
-              if (v instanceof Element || typeof v === 'function' || (typeof jQuery !== 'undefined' && v instanceof jQuery)) {
-                  delete act.activity[k];
-              }
-          }
       } catch(e) { }
   }
 
@@ -53,10 +47,10 @@
     // Видаляємо стару кнопку з екрану
     $('.filter--kmm-update').remove();
 
-    // Очищаємо бруд від інших плагінів
+    // Очищаємо бруд від інших плагінів тільки всередині .movie
     sanitizeActivity(act);
 
-    // Викликаємо рідний метод Лампи (тепер він не впаде, бо об'єкт чистий)
+    // Викликаємо рідний метод Лампи
     Lampa.Activity.replace();
   }
   
@@ -100,21 +94,18 @@
       var act = Lampa.Activity.active();
       if (!act || !act.activity) return;
 
-      var comp = act.activity.component || act.component;
-      if (comp !== 'online' && comp !== 'lampac' && comp !== 'bandera_online') return;
-
       var render = act.activity.render ? act.activity.render() : null;
       if (!render) return;
 
-      var torrentFilter = render.find('.torrent-filter');
-      if (!torrentFilter.length) {
-          var searchBtn = render.find('.filter--search');
-          if (searchBtn.length) torrentFilter = searchBtn.parent();
-      }
+      // Шукаємо кнопку "Джерело"
+      var sortBtn = render.find('.filter--sort');
+      if (!sortBtn.length) return; // Це не онлайн-плеєр, якщо немає вибору балансера
+
+      var torrentFilter = sortBtn.parent();
       if (!torrentFilter.length) return;
 
       // Читаємо назву вибраного балансера на екрані
-      var sortText = render.find('.filter--sort').text() || '';
+      var sortText = sortBtn.text() || '';
       var isUakino = sortText.toLowerCase().indexOf('uakino') > -1;
       var hasButton = torrentFilter.find('.filter--kmm-update').length > 0;
 
