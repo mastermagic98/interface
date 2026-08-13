@@ -5,6 +5,30 @@
   
   var Lampa = window.Lampa;  
 
+  // Надійна перевірка: чи активний зараз саме балансер UAkinoTV?
+  function isUakino(act) {
+    if (!act || !act.activity) return false;
+
+    // 1. Перевіряємо URL (якщо джерело вже завантажено)
+    var src = act.activity.source || act.activity.url || '';
+    if (src.indexOf('kmm_uakino') > -1) return true;
+    
+    // 2. Перевіряємо збережений вибір балансера в пам'яті Лампи
+    var movieId = act.activity.movie ? act.activity.movie.id : '';
+    var std_last = Lampa.Storage.cache('online_last_balanser', 3000, {});
+    var std_bal = std_last[movieId] || Lampa.Storage.get('online_balanser', '');
+    if (std_bal === 'kmm_uakino' || std_bal.indexOf('uakino') > -1) return true;
+
+    // 3. Перевіряємо фізичний текст у кнопці "Джерело" на екрані
+    var render = act.activity.render ? act.activity.render() : null;
+    if (render) {
+        var sortText = render.find('.filter--sort').text();
+        if (sortText && sortText.indexOf('UAkinoTV') > -1) return true;
+    }
+
+    return false;
+  }
+
   // Примусове оновлення з 100% захистом від циклічних посилань
   function forceRefresh() {
     var act = Lampa.Activity.active();
@@ -62,8 +86,10 @@
   window.lampac_online_context_menu = {  
     push: function (menu, extra, params) {  
       if (typeof prevPush === 'function') prevPush.apply(this, arguments);  
-      // Прибрано емоджі 🔄
-      menu.push({ title: 'Оновити джерело', kmm_refresh: true });  
+      // Додаємо пункт меню ТІЛЬКИ для UAkinoTV
+      if (isUakino(Lampa.Activity.active())) {
+          menu.push({ title: 'Оновити джерело', kmm_refresh: true });  
+      }
     },  
     onSelect: function (a, params) {  
       if (typeof prevOnSelect === 'function') prevOnSelect.apply(this, arguments);  
@@ -79,6 +105,9 @@
     var act = Lampa.Activity.active();  
     if (!act || !act.activity) return;  
   
+    // ТІЛЬКИ ЯКЩО ЦЕ UAkinoTV
+    if (!isUakino(act)) return;
+
     var render = act.activity.render ? act.activity.render() : null;  
     if (!render) return;  
   
