@@ -5,57 +5,42 @@
   
   var Lampa = window.Lampa;  
 
-  // Створюємо стерильний об'єкт фільму без HTML-елементів і циклічних посилань
-  function getCleanMovie(movie) {
-      if (!movie) return {};
-      var clean = {};
-      // Дозволяємо лише безпечні ключі, які Лампа використовує для запитів
-      var allowedKeys = ['id', 'title', 'name', 'original_title', 'original_name', 'release_date', 'first_air_date', 'imdb_id', 'tmdb_id', 'kinopoisk_id', 'source', 'original_language', 'poster_path', 'backdrop_path', 'vote_average', 'number_of_seasons'];
-      
-      for (var i = 0; i < allowedKeys.length; i++) {
-          var k = allowedKeys[i];
-          if (movie[k] !== undefined && typeof movie[k] !== 'function' && typeof movie[k] !== 'object') {
-              clean[k] = movie[k];
-          }
-      }
-      
-      // Безпечно копіюємо масиви (жанри, ключові слова), якщо вони є
-      if (movie.genres) { try { clean.genres = JSON.parse(JSON.stringify(movie.genres)); } catch(e){} }
-      if (movie.keywords) { try { clean.keywords = JSON.parse(JSON.stringify(movie.keywords)); } catch(e){} }
-      
-      return clean;
-  }
-
-  // Функція для примусового оновлення та скидання кешу сервера
+  // Пряме оновлення компонента БЕЗ перезапису активності (щоб уникнути cyclic object error)
   function forceRefresh() {
     var act = Lampa.Activity.active();
     if (!act || !act.activity) return;
 
-    var url = act.activity.source || act.activity.url || '';
+    // Отримуємо "живий" інстанс компонента (наприклад, плагіна Online)
+    var comp = act.component;
     
-    if (url) {
-      // Відрізаємо старий параметр і додаємо новий з поточним часом
-      url = url.split('&kmm_rand=')[0] + '&kmm_rand=' + Date.now();
+    // Перевіряємо, чи компонент має методи для прямого перезавантаження
+    if (comp && typeof comp.reset === 'function' && typeof comp.request === 'function') {
+        var url = act.activity.source || act.activity.url || '';
+        
+        // Якщо URL немає, формуємо дефолтний
+        if (!url && act.activity.movie) {
+            url = 'http://91.238.104.117:9118/lite/kmm_uakino?id=' + act.activity.movie.id;
+        }
+
+        if (url) {
+            // Додаємо унікальний параметр, щоб збити кеш C# сервера і отримати новий балансер
+            url = url.split('&kmm_rand=')[0] + '&kmm_rand=' + Date.now();
+            
+            // Оновлюємо URL в поточній активності (без клонування)
+            act.activity.url = url;
+            act.activity.source = url;
+            
+            // Видаляємо кнопку, щоб уникнути її дублювання після оновлення
+            $('.filter--kmm-update').remove();
+
+            // МАГІЯ: Прямо наказуємо компоненту очистити екран і завантажити нове посилання
+            comp.reset();
+            comp.request(url);
+        }
+    } else {
+        // Запасний варіант, якщо компонент не стандартний
+        Lampa.Noty.show('Цей компонент не підтримує швидке оновлення');
     }
-
-    // Видаляємо стару кнопку
-    $('.filter--kmm-update').remove();
-
-    // Створюємо 100% чистий об'єкт параметрів, щоб уникнути "cyclic object value"
-    var cleanParams = {
-        component: act.activity.component,
-        url: url,
-        source: url,
-        movie: getCleanMovie(act.activity.movie)
-    };
-
-    // Деякі плагіни покладаються на ці параметри пошуку
-    if (act.activity.search) cleanParams.search = act.activity.search;
-    if (act.activity.search_one) cleanParams.search_one = act.activity.search_one;
-    if (act.activity.search_two) cleanParams.search_two = act.activity.search_two;
-
-    // Перезапускаємо сторінку чистим об'єктом
-    Lampa.Activity.replace(cleanParams);
   }
   
   // 1) Кнопка "ОНОВИТИ" в контекстному меню "Дія"
@@ -87,7 +72,7 @@
     var torrentFilter = render.find('.torrent-filter');  
     if (!torrentFilter.length || torrentFilter.find('.filter--kmm-update').length) return;  
   
-    // Стилізуємо кнопку
+    // Кнопка
     var btn = $('<div class="simple-button selector filter--kmm-update" style="color:#33a3ab; border-color: rgba(51,163,171,0.5); background: rgba(51,163,171,0.1); font-weight:bold;"><span>🔄 ОНОВИТИ</span></div>');  
     
     btn.on('hover:enter click', function (e) {  
