@@ -5,7 +5,7 @@
   
   var Lampa = window.Lampa;  
   
-  // 1) Кнопка "ОНОВИТИ" в контекстному меню "Дія"  
+  // 1) Кнопка "ОНОВИТИ" в контекстному меню "Дія" — через офіційний хук  
   var prevPush = window.lampac_online_context_menu ? window.lampac_online_context_menu.push : null;  
   var prevOnSelect = window.lampac_online_context_menu ? window.lampac_online_context_menu.onSelect : null;  
   
@@ -25,7 +25,7 @@
     }  
   };  
   
-  // 2) Кнопка "ОНОВИТИ" в рядку Джерело/Фільтр (DOM-інʼєкція, без офіційного хука)  
+  // 2) Кнопка "ОНОВИТИ" в рядку Джерело/Фільтр — DOM-інʼєкція в .torrent-filter  
   function injectRefreshButton() {  
     var act = Lampa.Activity.active();  
     if (!act || !act.activity) return;  
